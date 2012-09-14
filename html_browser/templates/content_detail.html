@@ -1,0 +1,27 @@
+{% include "content_header.html" %}
+
+	<table class="FolderContent">
+		<col width="1%" />
+		<col width="20%" />
+		<col width="5%" />
+		<col width="10%" />
+				
+		<tr class="FolderContent">
+			<th class="FolderContent"><input id="checkAll" type="checkbox" onclick="checkAll()" /> </th>
+			<th class="FolderContent">Name</th>
+			<th class="FolderContent">Size</th>
+			<th class="FolderContent">Last Modified</th>
+		</tr>
+		
+		{% for entry in currentDirEntries %}
+		<tr class="FolderContent">
+			<td class="FolderContent"><input id="{{ entry.name }}" name="cb" type="checkbox" /></td>
+			<td class="FolderContent">{% autoescape off %}{{ entry.linkHtml }}{% endautoescape %}</td>
+			<td class="FolderContent">{{ entry.size }}</td>
+			<td class="FolderContent">{{ entry.lastModifyTime }}</td>
+		</tr>			
+		{% endfor %}
+	</table>
+			
+</body>
+</html>

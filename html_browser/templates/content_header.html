@@ -1,0 +1,44 @@
+{% include "header.html" %}
+	<script>		
+		setCurrentFolder('{{ currentFolder }} ')
+		setCurrentPath('{{ currentPath }} ')
+		setUserCanRead({{ userCanRead }} ) 
+		setUserCanWrite({{ userCanWrite }} ) 
+		setUserCanDelete({{ userCanDelete }} ) 
+	</script>
+	
+	<h3>{{ currentFolder }} {{ currentPath }}</h3>
+	<h5>{{ status }}</h5>
+		
+	<div id="header">
+		<div class="left-side">
+			<a href=" {{parentDirLink }}" title="Parent Folder"><img src="images/folder-blue-parent-icon.png"></a>
+
+			<a title="Delete" 
+				href="javascript:del()">
+				<img src="images/Symbols-Delete-icon.png"/></a>
+		
+			<a title="Copy" href="javascript:copy()"><img src="images/Copy-icon.png"/></a>
+			<a title="Cut" href="javascript:cut()"><img src="images/cut-icon.png"/></a>
+			<a title="Paste" href="javascript:paste()"><img src="images/Paste-icon.png"/></a>
+			<a title="New Directory" href="javascript:mkdir()"><img src="images/Add-Folder-icon.png"/></a>
+			<a title="Rename" href="javascript:rename()"><img src="images/Rename.png" height="32" width="32"/></a>
+			<a title="Download Zip" href="javascript:zip()"><img src="images/ZIP-File-icon.png"/></a>
+		</div>
+				
+		
+		<div class="right-side">
+			<select id="viewTypeBox" onchange="viewTypeBoxChanged(this)">
+			
+			{% for view in viewTypes %}
+				{% if view == selectedViewType %}
+					<option selected="selected">{{ view }}</option>
+				{% else %}
+					<option>{{ view }}</option>
+				{% endif %}			
+			{% endfor %}
+			</select>
+
+			<a title="Upload" href="javascript:upload()"><img src="images/up-icon.png"/></a>
+		</div>
+	</div>		

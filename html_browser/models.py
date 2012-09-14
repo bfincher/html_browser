@@ -13,6 +13,7 @@ permChoices = [
 
 class Folder(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    localPath = models.CharField(max_length=100, unique=True)
     
     def __unicode__(self):
         return self.name
@@ -20,16 +21,25 @@ class Folder(models.Model):
     def getNameAsHtml(self):
         return quote_plus(self.name)
     
-    def userCanRead(self, user):
+    def __checkUserPerm__(self, user, desiredPerm):
         if user.is_superuser:
             return True
         else:
             perms = self.userpermission_set.filter(user__username=user.username)
             for perm in perms:
-                if perm.canRead():
+                if perm == desiredPerm:
                     return True
             #TODO handle groups
             return False
+    
+    def userCanRead(self, user):
+        return self.__checkUserPerm__(user, canRead)
+    
+    def userCanWrite(self, user):
+        return self.__checkUserPerm__(user, canWrite)
+    
+    def userCanDelete(self, user):
+        return self.__checkUserPerm__(user, canDelete)                    
     
 class UserPermission(models.Model):
     user = models.ForeignKey(User)
