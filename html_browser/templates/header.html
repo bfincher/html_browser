@@ -1,0 +1,38 @@
+<head>
+	<title>HTML File Explorer</title>
+	<link rel="stylesheet" href="http://www.fincherhome.com/hbstuff/ext-all.css" type="text/css" media="screen" charset="utf-8">
+	<link rel="stylesheet" href="http://www.fincherhome.com/hbstuff/xtheme-gray.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="http://www.fincherhome.com/hbstuff/html_browser.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <script type="text/javascript" src="http://www.fincherhome.com/hbstuff/login.js"></script>
+    <script type="text/javascript" src="http://www.fincherhome.com/hbstuff/html_browser.js"></script>
+</head>
+
+<body>		
+	<div id="header">
+	    <div id="logo" class="left-side">
+	        <font size="4">HTML File Explorer</font>
+	    </div>
+		    
+	    <div class="right-side">
+	    {% if not user.is_authenticated %}
+	    	<a href="/hb/hbLogin/?next=/hb/">Log In</a>
+			<!-- <a href="javascript:showLogin();">Log In</a> -->
+		{% else %}
+			{{ user.username }} <a href="/hb/hbLogout/">Log Out  </a>
+		{% endif %}
+	    	<br>
+	        <a href="/hb/">Home</a>
+		        
+	        {% if user.is_authenticated %}
+	        	{% if user.is_staff %}
+		    		<a href="/admin/">Administration  </a>
+		    	{% else %}
+		    		<a href="/hb/hbChangePassword">Change Passowrd </a>
+		    	{% endif %}
+		    {% endif %}
+	    </div>
+	</div>		
+
+	{% if errorText != None %}
+	<div id="error">" + errorText + "</div><br>
+	{% endif %}

@@ -1,0 +1,35 @@
+<html>
+{% include "header.html" %}
+	
+	<center>
+	<table class="IndexTable">
+		<col width=50% />
+		<col width=50% />
+		{% for folder in folders %}
+		           {% if forloop.counter0|divisibleby:2 %}
+		           	   
+		               <tr class="IndexTable">
+		               {% if forloop.last %}
+		                   <td class="IndexTable" colspan="2">
+								<a href="/hb/content?currentFolder={{ folder.getNameAsHtml }}&currentPath=%2F"/>
+									{{ folder.name }} </a>
+		                   </td>
+		               {% else %}
+		                   <td class="IndexTable">
+		                       <a href="/hb/content?currentFolder={{ folder.getNameAsHtml }}&currentPath=%2F"/>
+									{{ folder.name }} </a>
+						   </td>
+		              {% endif %}
+		           {% else %}
+		               <td class="IndexTable">
+		                   <a href="/hb/content?currentFolder={{ folder.getNameAsHtml }}&currentPath=%2F"/>
+								{{ folder.name }} </a>
+						</td>
+		               </tr>
+		           {% endif %}
+		   {% endfor %}
+	</table>
+	</center>
+</body>
+
+</html>
