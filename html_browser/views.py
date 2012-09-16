@@ -74,6 +74,7 @@ def content(request):
          'status' : status,
          'viewTypes' : const.viewTypes,
          'currentDirEntries' : currentDirEntries,
+         'constants' : const
          })
 
 def hbChangePassword(request):
