@@ -1,13 +1,13 @@
 from urllib import quote_plus
 import os
+import sys
 from genericpath import getsize, getmtime
-from operator import attrgetter
-
-viewTypes = ['details', 'list', 'thumbnails']
+from operator import attrgetter  
+from constants import _constants as const  
 
 def getParentDirLink(path, currentFolder):
     if path == '/':
-        return '/hb/'
+        return const.BASE_URL
     
     if path.endswith('/'):
         path = path[0:-1]
@@ -19,7 +19,7 @@ def getParentDirLink(path, currentFolder):
     if len(path) == 0:
         path = '/'
         
-    link = "/hb/content/?currentFolder=" + quote_plus(currentFolder)
+    link = const.CONTENT_URL + "?currentFolder=" + quote_plus(currentFolder)
     link += "&currentPath=" + quote_plus(path) 
     
     return link
@@ -40,7 +40,7 @@ class DirEntry():
     
         if self.isDir:
             #TODo handlw case where something other than detail is chosen
-            html += "/hb/content?" + currentFolderParam + "&" + currentPathParam
+            html += const.CONTENT_URL + "?" + currentFolderParam + "&" + currentPathParam
             
             if currentPath == '/':
                 html += quote_plus(self.name)
@@ -49,7 +49,7 @@ class DirEntry():
         elif viewType == "thumbnails":
             pass #TODO IMPLEMENT
         else:
-            html += "/hb/download?" + currentFolderParam + "&" + currentPathParam
+            html += const.DOWNLOAD_URL + "?" + currentFolderParam + "&" + currentPathParam
             html += "&" + quote_plus(self.name)
             
         html += '/><img src="'

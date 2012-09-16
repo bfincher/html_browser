@@ -11,18 +11,18 @@
 		               <tr class="IndexTable">
 		               {% if forloop.last %}
 		                   <td class="IndexTable" colspan="2">
-								<a href="/hb/content?currentFolder={{ folder.getNameAsHtml }}&currentPath=%2F"/>
+								<a href="{{ constants.CONTENT_URL }}?currentFolder={{ folder.getNameAsHtml }}&currentPath=%2F"/>
 									{{ folder.name }} </a>
 		                   </td>
 		               {% else %}
 		                   <td class="IndexTable">
-		                       <a href="/hb/content?currentFolder={{ folder.getNameAsHtml }}&currentPath=%2F"/>
+		                       <a href="{{ constants.CONTENT_URL }}?currentFolder={{ folder.getNameAsHtml }}&currentPath=%2F"/>
 									{{ folder.name }} </a>
 						   </td>
 		              {% endif %}
 		           {% else %}
 		               <td class="IndexTable">
-		                   <a href="/hb/content?currentFolder={{ folder.getNameAsHtml }}&currentPath=%2F"/>
+		                   <a href="{{ constants.CONTENT_URL }}?currentFolder={{ folder.getNameAsHtml }}&currentPath=%2F"/>
 								{{ folder.name }} </a>
 						</td>
 		               </tr>

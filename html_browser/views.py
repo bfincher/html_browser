@@ -1,27 +1,53 @@
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from html_browser.models import Folder
-from django.contrib.auth.views import login, logout
-from utils import getParentDirLink, viewTypes
+from django.contrib.auth import login as auth_login, logout as auth_logout
+from utils import getParentDirLink
 from html_browser.utils import getCurrentDirEntries
+from constants import _constants as const
+from django.contrib.auth import authenticate
 
-def index(request):
+def index(request, errorText=None):
     allFolders = Folder.objects.all()
     folders = []
     for folder in allFolders:
         if folder.userCanRead(request.user):
             folders.append(folder)
+            
+    c = RequestContext(request, {'folders' : folders,
+         'user' : request.user,
+         'errorText' : errorText})
     
-    return render_to_response('index.html',
-        {'folders' : folders,
-         'user' : request.user}
-    )
+    return render_to_response('index.html', c)
+    
+#    return render_to_response('index.html',
+#        {'folders' : folders,
+#         'user' : request.user,
+#         'errorText' : errorText}
+#    )
 
 def hbLogin(request):
-    return login(request)
+    userName = request.POST['userName']
+    password = request.POST['password']
+    
+    errorText = None
+    
+    user = authenticate(username=userName, password=password)
+    if user is not None:
+        if user.is_active:
+            auth_login(request, user)
+        else:
+            errorText = 'Account has been disabled'
+    else:
+        errorText = 'Invalid login'
+    
+    return redirect(const.BASE_URL, errorText)
+
+#    return login(request, redirect_field_name='next', current_app='html_browser')
 
 def hbLogout(request):
-    return logout(request, '/hb/')
+    auth_logout(request)
+    return redirect(const.BASE_URL)
 
 def content(request):
     currentFolder = request.GET['currentFolder']
@@ -46,12 +72,12 @@ def content(request):
          'userCanDelete' : userCanDelete,
          'parentDirLink' : parentDirLink,
          'status' : status,
-         'viewTypes' : viewTypes,
+         'viewTypes' : const.viewTypes,
          'currentDirEntries' : currentDirEntries,
          })
 
 def hbChangePassword(request):
-    c = RequestContext(request)
+    c = RequestContext(request, {'constants' : const})
     return render_to_response('registration/change_password.html', c)
 
 def hbChangePasswordResult(request):
@@ -70,8 +96,9 @@ def hbChangePasswordResult(request):
         errorMessage = "Incorrect current password"
         
     if errorMessage == None:
-        c = RequestContext(request)
+        c = RequestContext(request, {'constants' : const})
         return render_to_response('registration/change_password_success.html', c)
     else:
-        c = RequestContext(request, {'errorMessage' : errorMessage})
+        c = RequestContext(request, {'errorMessage' : errorMessage,
+                                     'constants' : const})
         return render_to_response('registration/change_password_fail.html', c)

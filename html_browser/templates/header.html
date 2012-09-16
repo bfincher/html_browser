@@ -9,6 +9,29 @@
 </head>
 
 <body>		
+	<div id="login">
+		<table>
+		<form action="{{ constants.BASE_URL }}hbLogin/" method="post" >  {% csrf_token %}
+			<input name="action" type="hidden" value="login"
+		    <caption>Log In</caption>
+		    <tr>
+		    	<td>User Name:</td>
+		        <td><input type="text" name="userName" /></td>
+		    </tr>
+		
+		    <tr>
+		        <td>Password:</td>
+		        <td><input type="password" name="password" /></td>
+		    </tr>
+		
+		    <tr>
+		        <td><input type="submit" name="submit" value="Log In" onclick="hideLogin();"/></td>
+		        <td><input type="submit" name="submit" value="Cancel" onclick="hideLogin();"/></td>
+		    </tr>
+		</form>
+		</table>
+	</div>
+		
 	<div id="header">
 	    <div id="logo" class="left-side">
 	        <font size="4">HTML File Explorer</font>
@@ -16,24 +39,24 @@
 		    
 	    <div class="right-side">
 	    {% if not user.is_authenticated %}
-	    	<a href="/hb/hbLogin/?next=/hb/">Log In</a>
-			<!-- <a href="javascript:showLogin();">Log In</a> -->
+	    	<!-- <a href="{{ constants.BASE_URL }}hbLogin/?next={{ constants.BASE_URL }}">Log In</a> -->
+			<a href="javascript:showLogin();">Log In</a>
 		{% else %}
-			{{ user.username }} <a href="/hb/hbLogout/">Log Out  </a>
+			{{ user.username }} <a href="{{ constants.BASE_URL }}hbLogout/">Log Out  </a>
 		{% endif %}
 	    	<br>
-	        <a href="/hb/">Home</a>
+	        <a href="{{ constants.BASE_URL }}">Home</a>
 		        
 	        {% if user.is_authenticated %}
 	        	{% if user.is_staff %}
 		    		<a href="/admin/">Administration  </a>
 		    	{% else %}
-		    		<a href="/hb/hbChangePassword">Change Passowrd </a>
+		    		<a href="{{ constants.BASE_URL }}hbChangePassword">Change Passowrd </a>
 		    	{% endif %}
 		    {% endif %}
 	    </div>
 	</div>		
 
 	{% if errorText != None %}
-	<div id="error">" + errorText + "</div><br>
+	<div id="error"> {{ errorText }}</div><br>
 	{% endif %}
