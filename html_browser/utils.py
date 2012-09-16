@@ -50,15 +50,15 @@ class DirEntry():
             pass #TODO IMPLEMENT
         else:
             html += const.DOWNLOAD_URL + "?" + currentFolderParam + "&" + currentPathParam
-            html += "&" + quote_plus(self.name)
+            html += "&fileName=" + quote_plus(self.name)
             
-        html += '/><img src="'
+        html += '"/><img src="'
         
         if viewType == "details" or viewType == "list":
             if self.isDir:
-                html += '/hbstuff/images/folder-blue-icon.png"'
+                html += const.IMAGE_URL + 'folder-blue-icon.png"'
             else:
-                html += '/hbstuff/Document-icon.png"'
+                html += const.IMAGE_URL + 'Document-icon.png"'
         else:
             pass #TODO implement
         

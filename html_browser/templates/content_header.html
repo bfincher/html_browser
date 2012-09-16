@@ -12,18 +12,18 @@
 		
 	<div id="header">
 		<div class="left-side">
-			<a href=" {{parentDirLink }}" title="Parent Folder"><img src="images/folder-blue-parent-icon.png"></a>
+			<a href=" {{parentDirLink }}" title="Parent Folder"><img src="{{ const.IMAGE_URL }}folder-blue-parent-icon.png"></a>
 
 			<a title="Delete" 
 				href="javascript:del()">
-				<img src="images/Symbols-Delete-icon.png"/></a>
+				<img src="{{ const.IMAGE_URL }}Symbols-Delete-icon.png"/></a>
 		
-			<a title="Copy" href="javascript:copy()"><img src="images/Copy-icon.png"/></a>
-			<a title="Cut" href="javascript:cut()"><img src="images/cut-icon.png"/></a>
-			<a title="Paste" href="javascript:paste()"><img src="images/Paste-icon.png"/></a>
-			<a title="New Directory" href="javascript:mkdir()"><img src="images/Add-Folder-icon.png"/></a>
-			<a title="Rename" href="javascript:rename()"><img src="images/Rename.png" height="32" width="32"/></a>
-			<a title="Download Zip" href="javascript:zip()"><img src="images/ZIP-File-icon.png"/></a>
+			<a title="Copy" href="javascript:copy()"><img src="{{ const.IMAGE_URL }}Copy-icon.png"/></a>
+			<a title="Cut" href="javascript:cut()"><img src="{{ const.IMAGE_URL }}cut-icon.png"/></a>
+			<a title="Paste" href="javascript:paste()"><img src="{{ const.IMAGE_URL }}Paste-icon.png"/></a>
+			<a title="New Directory" href="javascript:mkdir()"><img src="{{ const.IMAGE_URL }}Add-Folder-icon.png"/></a>
+			<a title="Rename" href="javascript:rename()"><img src="{{ const.IMAGE_URL }}Rename.png" height="32" width="32"/></a>
+			<a title="Download Zip" href="javascript:zip()"><img src="{{ const.IMAGE_URL }}ZIP-File-icon.png"/></a>
 		</div>
 				
 		
@@ -39,6 +39,6 @@
 			{% endfor %}
 			</select>
 
-			<a title="Upload" href="javascript:upload()"><img src="images/up-icon.png"/></a>
+			<a title="Upload" href="javascript:upload()"><img src="{{ const.IMAGE_URL }}up-icon.png"/></a>
 		</div>
 	</div>		

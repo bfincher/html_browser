@@ -1,5 +1,7 @@
 # Django settings for html_browser_site project.
 
+SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 

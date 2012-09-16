@@ -5,6 +5,7 @@ class _constants():
     BASE_URL = '/hb/'
     CONTENT_URL = BASE_URL + 'content/'
     DOWNLOAD_URL = BASE_URL + "download/"
+    IMAGE_URL = 'http://www.fincherhome.com/hbstuff/images/'
     
     viewTypes = ['details', 'list', 'thumbnails']
     

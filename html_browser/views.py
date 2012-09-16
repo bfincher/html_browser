@@ -6,6 +6,8 @@ from utils import getParentDirLink
 from html_browser.utils import getCurrentDirEntries
 from constants import _constants as const
 from django.contrib.auth import authenticate
+from django.http import HttpResponse
+from sendfile import sendfile
 
 def index(request, errorText=None):
     allFolders = Folder.objects.all()
@@ -16,7 +18,8 @@ def index(request, errorText=None):
             
     c = RequestContext(request, {'folders' : folders,
          'user' : request.user,
-         'errorText' : errorText})
+         'errorText' : errorText,
+         'constants' : const})
     
     return render_to_response('index.html', c)
     
@@ -74,7 +77,7 @@ def content(request):
          'status' : status,
          'viewTypes' : const.viewTypes,
          'currentDirEntries' : currentDirEntries,
-         'constants' : const
+         'const' : const
          })
 
 def hbChangePassword(request):
@@ -103,3 +106,21 @@ def hbChangePasswordResult(request):
         c = RequestContext(request, {'errorMessage' : errorMessage,
                                      'constants' : const})
         return render_to_response('registration/change_password_fail.html', c)
+    
+def download(request):
+    currentFolder = request.GET['currentFolder']
+    currentPath = request.GET['currentPath']
+    fileName = request.GET['fileName']
+    folder = Folder.objects.filter(name=currentFolder)[0]
+    
+    filePath = folder.localPath + currentPath + fileName
+    
+    f = open('/tmp/log.txt', 'w')
+    f.write(filePath + '\n')
+    f.close()
+    
+    return sendfile(request, filePath, attachment=True)
+    
+#    image = file(filePath, "rb")
+#    return HttpResponse(image.read(), mimetype='application/x-gzip')
+
