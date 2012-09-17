@@ -24,7 +24,7 @@
 	<ol>
 		{% if user.is_staff %}
 		<li><a href="{{ const.USER_ADMIN_URL }}">Users</a></li>
-		<li><a href="group_admin.jsp">Groups</a></li>
+		<li><a href="{{ const.GROUP_ADMIN_URL }}">Groups</a></li>
 		<li><a href="folder_admin.jsp">Folders</a></li>
 		{% endif %}
 		<li><a href="javascript:showPasswordDialog();">Change Password</a></li>

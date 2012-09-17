@@ -1,46 +1,22 @@
-<html>
-<head>
-<%@ page language="java" import="com.fincher.html_browser.*" %>
-<jsp:useBean id="browserBean" scope="page" class="com.fincher.html_browser.BrowserBean" />
-<%browserBean.processRequest(request,response);%>
-<%out.print(BrowserBean.getHtmlHead(request)); %>
-</head>
-
-<body>
-	
-	<%
-	for (String str: browserBean.getHeader()) {
-	    out.println(str);
-	}
-	%>	
+{% include "header.html" %}	
 	
 	<center>
-	<h1>Groups</h1>
-	
-	<%if (browserBean.isAdministrator()) {%>
+	<h1>Groups</h1>	
 	
 	<table class=GroupAdminTable>
 		<tr class=GroupAdminTable>
 			<th class=GroupAdminTable> Group Name </th>
 		</tr>
 		
-		<%for (String groupName: GroupUtilities.getGroupNames()) {%>
+		{% for groupName in groupNames %}
 		<tr class=GroupAdminTable>
-			<%if (groupName.equals(Constants.EVERYONE_GROUP_NAME)) { %>
-				<td class=GroupAdminTable> <%out.print(groupName);%></td>
-			<%} else {%>
-				<td class=GroupAdminTable> <a href=edit_group.jsp?groupName=<%out.print(groupName);%>><%out.print(groupName);%></a> </td>
-			<%}%>
+			<td class=GroupAdminTable> <a href={{ const.EDIT_GROUP_URL }}?groupName={{ groupName }}>{{ groupName }}</a> </td>
 		</tr>
-		<%}%>
+		{% endfor %}
 	</table>
 	
 	<br>
-	 <a href="add_group.jsp">Add Group</a>
-	
-	<%} else {%>
-	<div id="error">You are not authorized to view this page</div>
-	<%}%>
+	 <a href="{{ const.ADD_GROUP_URL }}">Add Group</a>	
 	</center>
 </body>
 

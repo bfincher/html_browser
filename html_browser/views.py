@@ -7,7 +7,7 @@ from html_browser.utils import getCurrentDirEntries, getGroupNames, getGroupName
 from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 import re
 
 def index(request, errorText=None):
@@ -174,6 +174,7 @@ def addUserAction(request):
     
     userName = request.POST['userName']
     password = request.POST['password']
+     
     if 'isAdministrator' in request.POST:
         isAdmin = request.POST['isAdministrator']
 #        debugFile.write('isAdmin = ' + isAdmin + "\n")
@@ -187,7 +188,11 @@ def addUserAction(request):
     #TODO handle groups
     
     message = None
-    if not re.match('[A-Za-z]', userName):
+    
+    tempUsers = User.objects.filter(username=userName)
+    if len(tempUsers) > 0:
+        message='The user already exists'    
+    elif not re.match('[A-Za-z]', userName):
         message = 'User names must be alphabetic'
     elif not len(userName) >= 6:
         message = 'User names must be at least 6 characters'
@@ -196,7 +201,7 @@ def addUserAction(request):
         c = RequestContext(request, {
          'message' : message,
          'const' : const})    
-        return render_to_response(const.USER_ADMIN_URL, c)        
+        return render_to_response('admin/add_user_result.html', c)        
         
     newUser = User()
     newUser.username = userName
@@ -211,4 +216,72 @@ def addUserAction(request):
          'const' : const})    
     return render_to_response('admin/add_user_result.html', c)
 
+def groupAdmin(request, errorText=None):
+    user = request.user
+    if user == None or user.is_authenticated == False or user.is_staff == False:
+        return redirect(const.BASE_URL, 'You are not authorized to view this page')
+    
+    groupNames = getGroupNames()        
+    
+    c = RequestContext(request, {'const' : const,
+         'groupNames' : groupNames,
+         'user' : user,
+         'errorText' : errorText,
+          })
+    return render_to_response('admin/group_admin.html', c)
 
+def addGroup(request):
+    user = request.user
+    
+    if user == None or user.is_authenticated == False or user.is_staff == False:
+        return redirect(const.BASE_URL, 'You are not authorized to view this page')        
+        
+    c = RequestContext(request,
+        {'const' : const,
+         'user' : user })
+    return render_to_response('admin/add_group.html', c)   
+
+def addGroupAction(request):
+    user = request.user               
+    
+    if user == None or user.is_authenticated == False or user.is_staff == False:
+        return redirect(const.BASE_URL, 'You are not authorized to view this page')
+    
+    groupName = request.POST['groupName']         
+    
+    message = None
+    
+    tempGroups = Group.objects.filter(name=groupName)
+    if len(tempGroups) > 0:
+        message='The group already exists'    
+    elif not re.match('[A-Za-z]', groupName):
+        message = 'Group names must be alphabetic'
+        
+    if message != None:
+        c = RequestContext(request, {
+         'message' : message,
+         'const' : const})    
+        return render_to_response('admin/add_group_result.html', c)        
+        
+    newGroup = Group()
+    newGroup.name = groupName
+    
+    newGroup.save()
+    message = 'Group ' + groupName + ' added'
+    c = RequestContext(request, {
+         'message' : message,
+         'const' : const})    
+    return render_to_response('admin/add_group_result.html', c)
+
+def editGroup(request):
+    user = request.user               
+    
+    if user == None or user.is_authenticated == False or user.is_staff == False:
+        return redirect(const.BASE_URL, 'You are not authorized to view this page')
+    
+    groupName = request.GET['groupName']
+    
+    c = RequestContext(request, {
+         'groupName' : groupName,
+         'const' : const})    
+    return render_to_response('admin/edit_group.html', c)
