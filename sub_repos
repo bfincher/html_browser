@@ -1,3 +1,3 @@
-mercurial https://bitbucket.org/django/django branch releases/1.4.X
+django https://bitbucket.org/django/django branch releases/1.4.X
 xsendfile-1.0a2
-http://github.com/nmailer/mod_xsendfile tag 0.12
+https://github.com/nmaier/mod_xsendfile.git tag 0.12
