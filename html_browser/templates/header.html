@@ -49,7 +49,7 @@
 		        
 	        {% if user.is_authenticated %}
 	        	{% if user.is_staff %}
-		    		<a href="/admin/">Administration  </a>
+		    		<a href="/hb/admin/">Administration  </a>
 		    	{% else %}
 		    		<a href="{{ constants.BASE_URL }}hbChangePassword">Change Passowrd </a>
 		    	{% endif %}

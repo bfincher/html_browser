@@ -6,7 +6,6 @@ from utils import getParentDirLink
 from html_browser.utils import getCurrentDirEntries
 from constants import _constants as const
 from django.contrib.auth import authenticate
-from django.http import HttpResponse
 from sendfile import sendfile
 
 def index(request, errorText=None):
@@ -53,6 +52,10 @@ def hbLogout(request):
     return redirect(const.BASE_URL)
 
 def content(request):
+    user = request.user
+    if user == None or user.is_authenticated() == False:
+        return redirect(const.BASE_URL)
+    
     currentFolder = request.GET['currentFolder']
     currentPath = request.GET['currentPath']
     
@@ -77,7 +80,8 @@ def content(request):
          'status' : status,
          'viewTypes' : const.viewTypes,
          'currentDirEntries' : currentDirEntries,
-         'const' : const
+         'const' : const,
+         'user' : request.user,
          })
 
 def hbChangePassword(request):
