@@ -1,9 +1,12 @@
 from urllib import quote_plus
 import os
-import sys
 from genericpath import getsize, getmtime
 from operator import attrgetter  
-from constants import _constants as const  
+from constants import _constants as const
+from datetime import datetime
+from django.contrib.auth.models import User, Group
+
+#debugFile = open('/tmp/debug.txt', 'w')
 
 def getParentDirLink(path, currentFolder):
     if path == '/':
@@ -28,13 +31,17 @@ class DirEntry():
     def __init__(self, isDir, name, size, lastModifyTime, currentFolder, currentPath, viewType):
         self.isDir = isDir
         self.name = name
-        self.size = size
-        self.lastModifyTime = lastModifyTime
+        
+        if isDir:
+            self.size = '&nbsp'
+        else:
+            self.size = str(size)
+        self.lastModifyTime = lastModifyTime.strftime('%Y:%m:%d %I:%M:%S %p')
         self.linkHtml = self.buildHtmlEntry(currentFolder, currentPath, viewType)
         
     def buildHtmlEntry(self, currentFolder, currentPath, viewType):
         currentFolderParam = "currentFolder=" + quote_plus(currentFolder)
-        currentPathParam = "currentPath=" + quote_plus(currentPath)
+        currentPathParam = "currentPath=" + quote_plus(currentPath + "/")
     
         html = '<a href="'
     
@@ -83,11 +90,34 @@ def getCurrentDirEntries(folder, path):
     for fileName in os.listdir("."):
         filePath = dirPath + fileName
         if os.path.isdir(fileName):
-            dirEntries.append(DirEntry(True, fileName, getsize(filePath), getmtime(filePath), folder.name, path, 'details'))
+            dirEntries.append(DirEntry(True, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder.name, path, 'details'))
         else:
-            dirEntries.append(DirEntry(False, fileName, getsize(filePath), getmtime(filePath), folder.name, path, 'details'))
+            dirEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder.name, path, 'details'))
             
     dirEntries.sort(key=attrgetter('name'))
     
     return dirEntries
+
+def getUserNames():
+    userNames = []
+    for user in User.objects.all():
+        userNames.append(user.username)
+    
+    return userNames
+
+def getGroupNames():
+    groupNames = []
+    for group in Group.objects.all():
+        groupNames.append(group.name)
+        
+    return groupNames
+
+def getGroupNamesForUser(user):
+    assert(isinstance(user, User))
+    groupNames = []
+    
+    for group in user.groups.all():
+        groupNames.append(group.name)
+        
+    return groupNames
     

@@ -1,0 +1,274 @@
+<html>
+<head>
+<%@ page language="java" import="com.fincher.html_browser.*" %>
+<jsp:useBean id="browserBean" scope="page" class="com.fincher.html_browser.BrowserBean" />
+<%browserBean.processRequest(request,response);%>
+<%out.print(BrowserBean.getHtmlHead(request)); %>
+    
+    <script type="text/javascript">
+	function confirmDelete(folderName) {
+		var r=confirm("Are you sure you want to delete " + folderName);
+		if (r==true) {
+			window.location = "folder_admin.jsp?action=deleteFolder&name=" + folderName;			
+  		}
+	}
+	
+	function writeClicked(writeFieldId, readFieldId) {
+		var writeBox = document.getElementById(writeFieldId);
+		var readBox = document.getElementById(readFieldId);
+		
+		if (writeBox.checked) {
+			readBox.checked = true;
+			readBox.disabled = true;
+		} else {
+			readBox.disabled = false;
+		}
+	}
+	
+	function deleteClicked(deleteFieldId, writeFieldId, readFieldId) {
+		var deleteBox = document.getElementById(deleteFieldId);
+		var writeBox = document.getElementById(writeFieldId);
+		var readBox = document.getElementById(readFieldId);
+		
+		if (deleteBox.checked) {
+			readBox.checked = true;
+			readBox.disabled = true;
+			
+			writeBox.checked = true;
+			writeBox.disabled = true;
+		} else {
+			readBox.disabled = false;
+			writeBox.disabled = false;
+		}
+		
+		writeClicked(writeFieldId, readFieldId);
+	}
+	
+	function addRow(tableID, userOrGroupId, userOrGroup) {
+    	var table = document.getElementById(tableID);
+    	var userOrGroupName = document.getElementById(userOrGroupId).value;
+ 
+        var rowCount = table.rows.length;
+        var row = table.insertRow(rowCount - 2);
+        row.setAttribute("class", "FolderPermissionTable");
+ 
+        var cell1 = row.insertCell(0);
+        cell1.setAttribute("class", "FolderPermissionTable");
+        
+        if (userOrGroup == "group") {        	
+        	cell1.innerHTML = "<img src=\"images/User-Group-icon.png\">" + userOrGroupName;
+        } else {
+        	cell1.innerHTML = "<img src=\"images/Administrator-icon.png\">" + userOrGroupName;
+        }        
+ 
+        var cell2 = row.insertCell(1);
+        cell2.setAttribute("class", "FolderPermissionTable");
+        var element2 = document.createElement("input");
+        element2.type="checkbox";
+        element2.name = userOrGroup + "-" + userOrGroupName + "-read";
+        element2.id = userOrGroup + "-" + userOrGroupName + "-read";
+        cell2.appendChild(element2);
+ 
+        var cell3 = row.insertCell(2);
+        cell3.setAttribute("class", "FolderPermissionTable");
+        var element3 = document.createElement("input");
+        element3.type="checkbox";
+        element3.name="write";
+        element3.name = userOrGroup + "-" + userOrGroupName + "-write";
+        element3.id = userOrGroup + "-" + userOrGroupName + "-write";
+        element3.onclick=function(){writeClicked(element3.id, element2.id);};
+        cell3.appendChild(element3);
+        
+        var cell4 = row.insertCell(3);
+        cell4.setAttribute("class", "FolderPermissionTable");
+        var element4 = document.createElement("input");
+        element4.type="checkbox";
+        element4.name="delete";
+        element4.name = userOrGroup + "-" + userOrGroupName + "-delete";
+        element4.id = userOrGroup + "-" + userOrGroupName + "-delete";
+        element4.onclick=function(){deleteClicked(element4.id, element3.id, element2.id);};
+        cell4.appendChild(element4);        
+    }
+	
+	function showDialog(id) {
+		var el = document.getElementById(id);
+		el.style.visibility = "visible";
+	}
+
+	function hideDialog(id) {
+		var el = document.getElementById(id);
+		el.style.visibility = "hidden";
+	}
+</script>
+	
+</head>
+
+<body>
+	<%
+	for (String str: browserBean.getHeader()) {
+	    out.println(str);
+	}
+	%>
+	
+	<div id="add-user-permission" >
+			<h1>Add User Permission</h1>
+			User:
+			<select name="newUser" id="newUser">
+				<%for (String user: FolderUtilities.getUserNamesNotAssignedToFolder(request.getParameter("name"))) { %>
+				<option value="<%out.print(user);%>"><%out.print(user);%></option>
+				<%}%>				
+			</select>
+			<br>
+			<input class="button" type="submit" name="submit" value="Submit" onclick="addRow('permissionTable', 'newUser', 'user');hideDialog('add-user-permission');"/>
+			<input class="button" type="button" name="submit" value="Cancel" onclick="hideDialog('add-user-permission');"/>										
+	</div>
+	
+	<div id="add-group-permission" >
+			<h1>Add Group Permission</h1>
+			Group:
+			<select name="newGroup" id="newGroup">
+				<%for (String group: FolderUtilities.getGroupNamesNotAssignedToFolder(request.getParameter("name"))) { %>
+				<option value="<%out.print(group);%>"><%out.print(group);%></option>
+				<%}%>				
+			</select>
+			<br>
+			<input class="button" type="submit" name="submit" value="Submit" onclick="addRow('permissionTable', 'newGroup', 'group');hideDialog('add-group-permission');"/>
+			<input class="button" type="button" name="submit" value="Cancel" onclick="hideDialog('add-group-permission');"/>										
+	</div>
+		
+	<center>
+	<h1>Edit Folder <%out.print(request.getParameter("name"));%></h1>
+	<br>
+	
+	<%if (browserBean.isAdministrator()) {%>
+	
+	<%String errorText = request.getParameter("errorText");
+	  if (errorText != null) {
+    %>
+          <div id="error"><p><%out.print(errorText); %></p></div>
+	<%}%>
+	
+	<form id="form" action="folder_admin.jsp" method="post">
+		<input name=action type=hidden value=editFolder />
+		<input name=name type=hidden value="<%out.print(request.getParameter("name"));%>" />
+		<table cellspacing="10">			
+			<tr>
+				<td>Directory</td>
+				<%{
+					Folder folder = FolderUtilities.getFolder(request.getParameter("name"));
+				%>				
+				<td><input name="directory" type="text" value="<%out.print(folder.getDirectory());%>"/></td>
+				<%}%>
+			</tr>
+		</table>
+		
+		<table id="permissionTable" class="FolderPermissionTable">
+			<caption class="FolderPermissionTable">Folder Permissions</caption>
+			<tr class="FolderPermissionTable">
+				<th class="FolderPermissionTable">User/Group</th>
+				<th class="FolderPermissionTable">Read</th>
+				<th class="FolderPermissionTable">Write</th>
+				<th class="FolderPermissionTable">Delete</th>
+			</tr>
+		
+			<%for (FolderPermission perm: FolderUtilities.getGroupPermissionsForFolder(request.getParameter("name"))) {
+				String groupName = GroupUtilities.getGroupName(perm.getUserOrGroupId());
+				String readId = "group-" + groupName + "-read";
+				String writeId = "group-" + groupName + "-write";
+				String deleteId = "group-" + groupName + "-delete";
+				String readChecked = "";
+				String writeChecked = "";
+				String deleteChecked = "";
+				String readDisabled = "";
+				String writeDisabled = "";
+				
+				switch (perm.getPermission()) {
+				case none:
+					break;
+					
+				case readWriteAndDelete:
+					deleteChecked = "checked=checked";
+					writeDisabled = "disabled=disabled";
+					
+				case readAndWrite:
+					writeChecked = "checked=checked";
+					readDisabled = "disabled=disabled";
+					
+				case readOnly:
+					readChecked = "checked=checked";
+																		
+				}
+			%>
+			<tr class="FolderPermissionTable">				
+				<td class="FolderPermissionTable"><img src="images/User-Group-icon.png"> <%out.print(groupName);%></td>
+				<td class="FolderPermissionTable"><input type="checkbox" name="<%out.print(readId);%>" id="<%out.print(readId);%>" <%out.print(readChecked + " " + readDisabled); %>/> </td>
+				<td class="FolderPermissionTable"><input type="checkbox" name="<%out.print(writeId);%>" id="<%out.print(writeId);%>" <%out.print(writeChecked + " " + writeDisabled); %> onclick="writeClicked('<%out.print(writeId);%>', '<%out.print(readId);%>');"/> </td>
+				<td class="FolderPermissionTable"><input type="checkbox" name="<%out.print(deleteId);%>" id="<%out.print(deleteId);%>" <%out.print(deleteChecked);%> onclick="deleteClicked('<%out.print(deleteId);%>', '<%out.print(writeId);%>', '<%out.print(readId);%>');"> </td>				
+			</tr>
+			<%}%>
+			
+			<%for (FolderPermission perm: FolderUtilities.getUserPermissionsForFolder(request.getParameter("name"))) {
+				String userName = UserUtilities.getUserName(perm.getUserOrGroupId());
+				String readId = "user-" + userName + "-read";
+				String writeId = "user-" + userName + "-write";
+				String deleteId = "user-" + userName + "-delete";
+				String readChecked = "";
+				String writeChecked = "";
+				String deleteChecked = "";
+				String readDisabled = "";
+				String writeDisabled = "";
+				
+				switch (perm.getPermission()) {
+				case none:
+					break;
+					
+				case readWriteAndDelete:
+					deleteChecked = "checked=checked";
+					writeDisabled = "disabled=disabled";
+					
+				case readAndWrite:
+					writeChecked = "checked=checked";
+					readDisabled = "disabled=disabled";
+					
+				case readOnly:
+					readChecked = "checked=checked";
+																		
+				}
+			%>
+			<tr class="FolderPermissionTable">				
+				<td class="FolderPermissionTable"><img src="images/Administrator-icon.png"> <%out.print(userName);%></td>
+				<td class="FolderPermissionTable"><input type="checkbox" name="<%out.print(readId);%>" id="<%out.print(readId);%>" <%out.print(readChecked + " " + readDisabled); %>/> </td>
+				<td class="FolderPermissionTable"><input type="checkbox" name="<%out.print(writeId);%>" id="<%out.print(writeId);%>" <%out.print(writeChecked + " " + writeDisabled); %> onclick="writeClicked('<%out.print(writeId);%>', '<%out.print(readId);%>');"/> </td>
+				<td class="FolderPermissionTable"><input type="checkbox" name="<%out.print(deleteId);%>" id="<%out.print(deleteId);%>" <%out.print(deleteChecked);%> onclick="deleteClicked('<%out.print(deleteId);%>', '<%out.print(writeId);%>', '<%out.print(readId);%>');"> </td>				
+			</tr>
+			<%}%>
+			
+			<tr class="FolderPermissionTable">
+				<td class="FolderPermissionTable">
+					<a href="javascript:showDialog('add-group-permission');">Add Group Permission</a>
+				</td>
+			</tr>
+			<tr class="FolderPermissionTable">	
+				<td class="FolderPermissionTable">
+				<a href="javascript:showDialog('add-user-permission');">Add User Permission</a>
+				</td>
+			</tr>
+		</table>
+		<br>
+		
+		<table cellspacing="10">
+			<tr>
+				<td><input name="submit" type="submit" value="Save" /></td>
+				<td><input name="submit" type="submit" value="Cancel" /></td>
+			</tr>
+		</table>
+	</form>
+	<p><input type=submit value="Delete Folder" onclick="confirmDelete(<%out.print("'" + BrowserBean.htmlParamaterize(request.getParameter("name")) + "'");%>)" />
+	
+	<%} else {%>
+	<div id="error">You are not authorized to view this page</div>
+	<%}%>
+	</center>
+</body>
+
+</html>

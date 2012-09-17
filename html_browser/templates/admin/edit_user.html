@@ -1,0 +1,151 @@
+<html>
+<head>
+<%@ page language="java" import="com.fincher.html_browser.*" %>
+<jsp:useBean id="browserBean" scope="page" class="com.fincher.html_browser.BrowserBean" />
+<%browserBean.processRequest(request,response);%>
+<%out.print(BrowserBean.getHtmlHead(request)); %>
+    
+    <script language="javascript" type="text/javascript">            
+    function validatePassword(formName) {
+        form = document.getElementById(formName);
+        var valid = false;
+        
+        if (form.password.value.length == 0) {
+        	valid = false;
+        }
+        else if (form.password.value.length < 6) {
+            document.getElementById('pwErrorText').innerHTML='Passwords must be at least 6 characters';
+            valid = false;
+        } else if (form.password.value == form.verifyPassword.value) {
+            valid = true;
+            document.getElementById('pwErrorText').innerHTML='';
+        } else {
+            document.getElementById('pwErrorText').innerHTML='Passwords do not match';
+            valid = false;
+        }
+        
+        
+        form.Save.disabled = !valid;
+    }
+    
+    function deleteUser(userName) {
+    	if (confirm('Are you sure you want to delete the user ' + userName + '?')) {
+    		var url = "user_admin.jsp?action=deleteUser"
+    			+ "&userToDelete=" + encodeURI(userName);
+    			
+    		window.location = url;
+    	}
+    }
+	</script>
+</head>
+
+<body>
+	
+	<%
+	for (String str: browserBean.getHeader()) {
+	    out.println(str);
+	}
+	%>	
+	
+	<center>
+	<h1>Edit User <%out.print(request.getParameter("userName"));%></h1>
+	
+	<%if (browserBean.isAdministrator()) {%>
+	
+	<form id="form" action="user_admin.jsp" method="post">
+	<table class=UserAdminOuterTable>
+	<tr class=UserAdminOuterTable>
+		<td class=UserAdminOuterTable>
+			<input name=action type=hidden value=editUser />
+			<input name=userName type=hidden value=<%out.print(request.getParameter("userName"));%> />
+		</td>
+	</tr>
+	<tr class=UserAdminOuterTable>
+		<td class=UserAdminOuterTable>	
+			<table cellspacing=10>
+				<tr>
+					<td>Password: </td>
+					<td><input name=password type=password onkeyup="validatePassword('form')" /></td>
+					<td>Verify Password: </td>
+					<td><input name=verifyPassword type=password onkeyup="validatePassword('form')"/></td>
+				</tr>
+				<tr align="center">
+					<td colspan=4><font color="red"><p id="pwErrorText"></p></font></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr class=UserAdminOuterTable>
+		<td colspan=2 class=UserAdminOuterTable>
+			<table cellspacing=10 style="margin-left:auto;margin-right:auto">
+				<tr>
+					<%
+					String checked = "";
+					if (UserUtilities.isAdministrator(request.getParameter("userName"))) {
+						checked="checked=\"checked\"";
+					}
+					
+					String disabled = "";
+					if (request.getParameter("userName").equals("admin")) {
+						disabled = "disabled=\"disabled\"";
+					}
+					%>
+					<td>Is Administrator</td>
+					<td><input name="isAdministrator" type="checkbox" <%out.print(checked);%> <%out.print(disabled);%> /></td>					
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr class=UserAdminOuterTable>
+		<td class=UserAdminOuterTable>	
+			<table class=UserGroupTable>
+				<%for (String groupName: GroupUtilities.getGroupNames()) { %>
+					<%					
+					if (groupName.equals(Constants.EVERYONE_GROUP_NAME)) {
+				          continue;
+				    } 
+					String groupCheckBoxDisabled = "";
+				  	if (request.getParameter("userName").equals("admin")) {
+				  		  groupCheckBoxDisabled = "disabled=\"disabled\"";
+				  	}
+				  	
+				  	String groupCheckBoxChecked = "";
+				  	if (GroupUtilities.userMemberOfGroup(request.getParameter("userName"), groupName)) {
+				  		groupCheckBoxChecked = "checked=\"checked\"";
+				  	}
+					%>
+				
+					<tr class=UserGroupTable>
+						<td class=UserGroupTable><input name=isGroup<%out.print(groupName);%> type=checkbox 
+							<%out.print(groupCheckBoxChecked);%> 
+							<%out.print(groupCheckBoxDisabled);%> />
+						</td>
+						<td class=UserGroupTable><%out.print(groupName);%></td>
+					</tr>
+				<%}%>
+			</table>
+		</td>
+	</tr>
+	<tr class=UserAdminOuterTable>
+		<td class=UserAdminOuterTable>	
+			<table cellspacing=10 style="margin-left:auto;margin-right:auto">
+				<tr>
+					<td><input id=Save name=submit type=submit value="Save"/></td>
+					<td><input name=submit type=submit value="Cancel"/></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	</form>	
+	
+	<br>
+	<input type="submit" value="Delete User" onclick="deleteUser('<%out.print(request.getParameter("userName"));%>')"; />
+	
+	<%} else {%>
+	<div id="error">You are not authorized to view this page</div>
+	<%}%>
+	</center>
+</body>
+
+</html>

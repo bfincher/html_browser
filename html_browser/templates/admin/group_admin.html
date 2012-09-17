@@ -1,0 +1,47 @@
+<html>
+<head>
+<%@ page language="java" import="com.fincher.html_browser.*" %>
+<jsp:useBean id="browserBean" scope="page" class="com.fincher.html_browser.BrowserBean" />
+<%browserBean.processRequest(request,response);%>
+<%out.print(BrowserBean.getHtmlHead(request)); %>
+</head>
+
+<body>
+	
+	<%
+	for (String str: browserBean.getHeader()) {
+	    out.println(str);
+	}
+	%>	
+	
+	<center>
+	<h1>Groups</h1>
+	
+	<%if (browserBean.isAdministrator()) {%>
+	
+	<table class=GroupAdminTable>
+		<tr class=GroupAdminTable>
+			<th class=GroupAdminTable> Group Name </th>
+		</tr>
+		
+		<%for (String groupName: GroupUtilities.getGroupNames()) {%>
+		<tr class=GroupAdminTable>
+			<%if (groupName.equals(Constants.EVERYONE_GROUP_NAME)) { %>
+				<td class=GroupAdminTable> <%out.print(groupName);%></td>
+			<%} else {%>
+				<td class=GroupAdminTable> <a href=edit_group.jsp?groupName=<%out.print(groupName);%>><%out.print(groupName);%></a> </td>
+			<%}%>
+		</tr>
+		<%}%>
+	</table>
+	
+	<br>
+	 <a href="add_group.jsp">Add Group</a>
+	
+	<%} else {%>
+	<div id="error">You are not authorized to view this page</div>
+	<%}%>
+	</center>
+</body>
+
+</html>

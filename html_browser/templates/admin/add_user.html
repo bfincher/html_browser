@@ -1,0 +1,82 @@
+{% include "header.html" %}
+	
+	<center>
+	<h1>Add User</h1>	
+	
+	<form id="form" action="{{ const.ADD_USER_ACTION_URL }}" method="post">{% csrf_token %}
+
+	<table class=UserAdminOuterTable>
+	<tr class=UserAdminOuterTable>
+		<td class=UserAdminOuterTable>
+			<input name=action type=hidden value=addUser />
+			User Name <input id=userName name=userName type=text onkeyup="validateUserName('userName', 'Save')"/>
+
+		</td>
+	</tr>
+	<tr class=UserAdminOuterTable>
+	    <td><font color="red"><p id="userNameErrorText"></p></font></td>
+	</tr>
+	
+	<tr class=UserAdminOuterTable>
+		<td class=UserAdminOuterTable>
+			<table cellspacing=10>
+				<tr>
+
+					<td>Password: </td>
+					<td><input id="password" name=password type=password onkeyup="validatePassword('password', 'verifyPassword', 'Save')"/></td>
+					<td>Verify Password: </td>
+					<td><input id="verifyPassword" name=verifyPassword type=password onkeyup="validatePassword('password', 'verifyPassword', 'Save')"/></td>
+				</tr>
+				<tr align="center">
+					<td colspan=4><font color="red"><p id="pwErrorText"></p></font></td>
+				</tr>
+
+			</table>
+		</td>
+	</tr>
+	<tr class=UserAdminOuterTable>
+		<td colspan=2 class=UserAdminOuterTable>
+			<table cellspacing=10 style="margin-left:auto;margin-right:auto">
+				<tr>
+					<td>Is Administrator</td>
+
+					<td><input name="isAdministrator" type="checkbox" /></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr class=UserAdminOuterTable>
+		<td class=UserAdminOuterTable>
+			<table class=UserGroupTable>
+				<caption>Groups</caption>
+				
+				{% for groupName in groupNames %}
+					<tr class=UserGroupTable>
+						<td class=UserGroupTable><input name="isGroup{{ groupName }}" type=checkbox />
+						</td>
+						<td class=UserGroupTable>{{ groupName }}</td>
+					</tr>
+				{% endfor %}
+			</table>
+		</td>
+	</tr>
+	<tr class=UserAdminOuterTable/>
+
+	<tr class=UserAdminOuterTable>
+		<td class=UserAdminOuterTable>
+			<table cellspacing=10 style="margin-left:auto;margin-right:auto">
+				<tr>
+					<td><input id=Save name=submit type=submit value="Save" disabled="disabled"/></td>
+					<td><input name=submit type=submit value="Cancel"/></td>
+				</tr>
+			</table>
+		</td>
+
+	</tr>
+	</table>
+	</form>
+		
+	</center>
+</body>
+
+</html>

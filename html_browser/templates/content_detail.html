@@ -16,9 +16,11 @@
 		{% for entry in currentDirEntries %}
 		<tr class="FolderContent">
 			<td class="FolderContent"><input id="{{ entry.name }}" name="cb" type="checkbox" /></td>
-			<td class="FolderContent">{% autoescape off %}{{ entry.linkHtml }}{% endautoescape %}</td>
+			{% autoescape off %}
+			<td class="FolderContent">{{ entry.linkHtml }}</td>
 			<td class="FolderContent">{{ entry.size }}</td>
 			<td class="FolderContent">{{ entry.lastModifyTime }}</td>
+			{% endautoescape %}
 		</tr>			
 		{% endfor %}
 	</table>

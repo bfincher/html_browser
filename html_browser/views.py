@@ -3,10 +3,12 @@ from django.template import RequestContext
 from html_browser.models import Folder
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from utils import getParentDirLink
-from html_browser.utils import getCurrentDirEntries
+from html_browser.utils import getCurrentDirEntries, getGroupNames, getGroupNamesForUser    
 from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
+from django.contrib.auth.models import User
+import re
 
 def index(request, errorText=None):
     allFolders = Folder.objects.all()
@@ -18,15 +20,9 @@ def index(request, errorText=None):
     c = RequestContext(request, {'folders' : folders,
          'user' : request.user,
          'errorText' : errorText,
-         'constants' : const})
+         'const' : const})
     
     return render_to_response('index.html', c)
-    
-#    return render_to_response('index.html',
-#        {'folders' : folders,
-#         'user' : request.user,
-#         'errorText' : errorText}
-#    )
 
 def hbLogin(request):
     userName = request.POST['userName']
@@ -45,7 +41,6 @@ def hbLogin(request):
     
     return redirect(const.BASE_URL, errorText)
 
-#    return login(request, redirect_field_name='next', current_app='html_browser')
 
 def hbLogout(request):
     auth_logout(request)
@@ -54,7 +49,7 @@ def hbLogout(request):
 def content(request):
     user = request.user
     if user == None or user.is_authenticated() == False:
-        return redirect(const.BASE_URL)
+        return redirect(const.BASE_URL, 'You are not authorized to view this page')
     
     currentFolder = request.GET['currentFolder']
     currentPath = request.GET['currentPath']
@@ -70,7 +65,7 @@ def content(request):
     
     status = ''
     
-    return render_to_response('content_detail.html',
+    c = RequestContext(request,
         {'currentFolder' : currentFolder,
          'currentPath' : currentPath,
          'userCanRead' : userCanRead,
@@ -83,9 +78,11 @@ def content(request):
          'const' : const,
          'user' : request.user,
          })
+    
+    return render_to_response('content_detail.html', c)
 
 def hbChangePassword(request):
-    c = RequestContext(request, {'constants' : const})
+    c = RequestContext(request, {'const' : const})
     return render_to_response('registration/change_password.html', c)
 
 def hbChangePasswordResult(request):
@@ -104,11 +101,11 @@ def hbChangePasswordResult(request):
         errorMessage = "Incorrect current password"
         
     if errorMessage == None:
-        c = RequestContext(request, {'constants' : const})
+        c = RequestContext(request, {'const' : const})
         return render_to_response('registration/change_password_success.html', c)
     else:
         c = RequestContext(request, {'errorMessage' : errorMessage,
-                                     'constants' : const})
+                                     'const' : const})
         return render_to_response('registration/change_password_fail.html', c)
     
 def download(request):
@@ -125,6 +122,93 @@ def download(request):
     
     return sendfile(request, filePath, attachment=True)
     
-#    image = file(filePath, "rb")
-#    return HttpResponse(image.read(), mimetype='application/x-gzip')
+def admin(request):
+    c = RequestContext(request,
+        {'const' : const,
+         'user' : request.user,
+         })
+    
+    return render_to_response('admin/admin.html', c)
+    
+def userAdmin(request, errorText=None):
+#    debugFile.write('Inside addUserAdmin\n')
+#    debugFile.flush()
+    user = request.user
+    if user == None or user.is_authenticated == False or user.is_staff == False:
+        return redirect(const.BASE_URL, 'You are not authorized to view this page')
+    
+    users = User.objects.all()
+    groupNames = getGroupNamesForUser(user)        
+    
+    c = RequestContext(request, {'const' : const,
+         'users' : users,
+         'groupNames' : groupNames,
+         'user' : user,
+         'errorText' : errorText,
+          })
+    return render_to_response('admin/user_admin.html', c)
+         
+def addUser(request):
+#    debugFile.write('Inside addUser\n')
+#    debugFile.flush()
+    user = request.user
+    
+    if user == None or user.is_authenticated == False or user.is_staff == False:
+        return redirect(const.BASE_URL, 'You are not authorized to view this page')
+        
+    groupNames = getGroupNames()    
+        
+    c = RequestContext(request,
+        {'const' : const,
+         'groupNames' : groupNames,
+         'user' : user })
+    return render_to_response('admin/add_user.html', c)        
+    
+def addUserAction(request):
+#    debugFile.write('Inside addUserAction\n')
+#    debugFile.flush()
+    user = request.user               
+    
+    if user == None or user.is_authenticated == False or user.is_staff == False:
+        return redirect(const.BASE_URL, 'You are not authorized to view this page')
+    
+    userName = request.POST['userName']
+    password = request.POST['password']
+    if 'isAdministrator' in request.POST:
+        isAdmin = request.POST['isAdministrator']
+#        debugFile.write('isAdmin = ' + isAdmin + "\n")
+        isAdminBoolean = isAdmin in ['True', 'true', 'on', 'On']
+    else:
+#        debugFile.write('no isAdmin param\n')
+        isAdminBoolean = False
+        
+#    debugFile.flush()
+    
+    #TODO handle groups
+    
+    message = None
+    if not re.match('[A-Za-z]', userName):
+        message = 'User names must be alphabetic'
+    elif not len(userName) >= 6:
+        message = 'User names must be at least 6 characters'
+        
+    if message != None:
+        c = RequestContext(request, {
+         'message' : message,
+         'const' : const})    
+        return render_to_response(const.USER_ADMIN_URL, c)        
+        
+    newUser = User()
+    newUser.username = userName
+    newUser.set_password(password)
+    newUser.is_staff = isAdminBoolean
+    #TODO handle groups
+    
+    newUser.save()
+    message = 'User ' + userName + ' added'
+    c = RequestContext(request, {
+         'message' : message,
+         'const' : const})    
+    return render_to_response('admin/add_user_result.html', c)
+
 
