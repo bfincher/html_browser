@@ -1,0 +1,13 @@
+<VirtualHost *:80>
+    <Location "/hb" >
+        SetHandler python-program
+	PythonHandler django.core.handlers.modpython
+	SetEnv DJANGO_SETTINGS_MODULE html_browser_site.settings
+	PythonDebug On
+	PythonPath "['/srv/www/hb'] + sys.path"
+	PythonInterpreter html_browser
+	XSendFile On
+	XSendFilePath "/tmp"
+    </Location>
+
+</VirtualHost>
