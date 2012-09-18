@@ -14,7 +14,8 @@ class _constants():
     ADD_GROUP_ACTION_URL = ADD_GROUP_URL + "action/"
     EDIT_GROUP_URL = GROUP_ADMIN_URL + "edit/"
     EDIT_GROUP_ACTION_URL = EDIT_GROUP_URL + "action/"
-    IMAGE_URL = 'http://www.fincherhome.com/hbstuff/images/'
+    MEDIA_URL = '/hbmedia/'
+    IMAGE_URL = MEDIA_URL + 'images/'
     
     viewTypes = ['details', 'list', 'thumbnails']
     

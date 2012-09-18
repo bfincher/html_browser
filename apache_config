@@ -1,5 +1,7 @@
 Alias /static/admin/ /usr/local/lib/python2.7/dist-packages/django/contrib/admin/static/admin/
 
+Alias /hbmedia/ /srv/www/hbmedia/
+
 <VirtualHost *:80>
     <Location "/hb" >
         SetHandler python-program
