@@ -80,7 +80,10 @@ class DirEntry():
         return html
 
 def getCurrentDirEntries(folder, path):
-    dirPath = folder.localPath + path
+    path = path.strip()
+    if path == '/':
+        path = ''
+    dirPath = folder.localPath.strip() + path
     if not dirPath.endswith('/'):
         dirPath += '/'
     
