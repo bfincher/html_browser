@@ -4,14 +4,6 @@ from django.contrib.auth.models import User
 from html_browser.models import UserPermission, Folder
 
 
-class SimpleTest(unittest.TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.assertEqual(1 + 1, 2)
-
-
 class PermissionTest(unittest.TestCase):
     def setUp(self):
         
@@ -23,7 +15,16 @@ class PermissionTest(unittest.TestCase):
         self.user2.username = 'unit test user2'
         self.user2.save()
         
-        self.users = [self.user1, self.user2]
+        self.user3 = User()
+        self.user3.username = 'unit test user3'
+        self.user3.save()
+        
+        self.user4 = User()
+        self.user4.username = 'unit test user4'
+        self.user4.save()
+        
+        
+        self.users = [self.user1, self.user2, self.user3, self.user4]
         
         self.folder1 = Folder()
         self.folder1.name = 'unit test folder1'
@@ -37,7 +38,19 @@ class PermissionTest(unittest.TestCase):
         self.userPerm1.user = self.user1
         self.userPerm1.save()
         
-        self.userperms = [self.userPerm1]
+        self.userPerm2 = UserPermission()
+        self.userPerm2.folder = self.folder1
+        self.userPerm2.permission = 'W'
+        self.userPerm2.user = self.user3
+        self.userPerm2.save()
+        
+        self.userPerm3 = UserPermission()
+        self.userPerm3.folder = self.folder1
+        self.userPerm3.permission = 'D'
+        self.userPerm3.user = self.user4
+        self.userPerm3.save()
+        
+        self.userperms = [self.userPerm1, self.userPerm2, self.userPerm3]
     
     def tearDown(self):
         for user in self.users:
@@ -51,4 +64,8 @@ class PermissionTest(unittest.TestCase):
         
     def testPermissions(self):        
         self.assertTrue(self.folder1.userCanRead(self.user1))
-        self.assertTrue(self.folder1.userCanRead(self.user2))
+        self.assertFalse(self.folder1.userCanRead(self.user2))
+        
+        self.assertTrue(self.folder1.userCanRead(self.user3))
+        self.assertTrue(self.folder1.userCanWrite(self.user3))
+        self.assertFalse(self.folder1.userCanDelete(self.user3))
