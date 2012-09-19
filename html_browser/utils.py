@@ -5,6 +5,8 @@ from operator import attrgetter
 from constants import _constants as const
 from datetime import datetime
 from django.contrib.auth.models import User, Group
+from html_browser.models import Folder
+from shutil import copy2, move, copytree, rmtree
 
 #debugFile = open('/tmp/debug.txt', 'w')
 
@@ -79,13 +81,18 @@ class DirEntry():
         
         return html
 
-def getCurrentDirEntries(folder, path):
+
+def getPath(folderPath, path):
     path = path.strip()
     if path == '/':
         path = ''
-    dirPath = folder.localPath.strip() + path
+    dirPath = folderPath.strip() + path
     if not dirPath.endswith('/'):
         dirPath += '/'
+    return dirPath
+
+def getCurrentDirEntries(folder, path):
+    dirPath = getPath(folder.localPath, path)    
     
     dirEntries = []
     
@@ -123,4 +130,46 @@ def getGroupNamesForUser(user):
         groupNames.append(group.name)
         
     return groupNames
+
+class Clipboard():
+    def __init__(self, currentFolder, currentPath, entries, clipboardType):
+        self.currentFolder = currentFolder
+        self.currentPath = currentPath
+        self.clipboardType = clipboardType
+        self.entries = entries.split(',')    
+        
+class CopyPasteException(Exception):
+    pass
     
+def handlePaste(currentFolder, currentPath, clipboard):
+    
+    folder = Folder.objects.filter(name=currentFolder)[0]
+    clipboardFolder = Folder.objects.filter(name=clipboard.currentFolder)[0]
+    
+    dest = getPath(folder.localPath, currentPath)
+    
+    for entry in clipboard.entries:
+        source = getPath(clipboardFolder.localPath, clipboard.currentPath) + entry        
+        if clipboard.clipboardType == 'COPY':
+            if os.path.isdir(source):
+                copytree(source, dest)
+            else:
+                copy2(source, dest)
+        elif clipboard.clipboardType == 'CUT':
+            move(source, dest)
+        else:
+            raise CopyPasteException()
+        
+def handleDelete(folder, currentPath, entries):
+    currentDirPath = getPath(folder.localPath, currentPath)
+    
+    for entry in entries.split(','):
+        entryPath = currentDirPath + entry
+        
+        if os.path.isdir(entryPath):
+            rmtree(entryPath)
+        else:
+            os.remove(entryPath)
+            
+            
+            

@@ -3,12 +3,10 @@ from django.template import RequestContext
 from html_browser.models import Folder
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from utils import getParentDirLink
-from html_browser.utils import getCurrentDirEntries, getGroupNames, getGroupNamesForUser    
+from html_browser.utils import getCurrentDirEntries, Clipboard, handlePaste, handleDelete
 from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
-from django.contrib.auth.models import User, Group
-import re
 
 def index(request, errorText=None):
     allFolders = Folder.objects.all()
@@ -51,32 +49,60 @@ def content(request):
     if user == None or user.is_authenticated() == False:
         return redirect(const.BASE_URL, 'You are not authorized to view this page')
     
-    currentFolder = request.GET['currentFolder']
-    currentPath = request.GET['currentPath']
+    currentFolder = request.REQUEST['currentFolder']
+    currentPath = request.REQUEST['currentPath']        
     
     folder = Folder.objects.filter(name=currentFolder)[0]
     userCanDelete = folder.userCanDelete(request.user)
     userCanWrite = userCanDelete or folder.userCanWrite(request.user)
-    userCanRead = userCanWrite or folder.userCanRead(request.user)
+    userCanRead = userCanWrite or folder.userCanRead(request.user)    
+    
+    if request.REQUEST.has_key('action'):        
+        action = request.REQUEST['action']
+        if action == 'copyToClipboard':
+            entries = request.REQUEST['entries']
+            request.session['clipboard'] = Clipboard(currentFolder, currentPath, entries, 'COPY')            
+            status='Items copied to clipboard';
+        elif action == 'cutToClipboard':
+            if not userCanDelete:
+                status="You don't have delete permission on this folder"
+            else:
+                entries = request.REQUEST['entries']
+                request.session['clipboard'] = Clipboard(currentFolder, currentPath, entries, 'CUT')            
+                status = 'Items copied to clipboard'
+        elif action == 'pasteFromClipboard':
+            if not userCanWrite:
+                status = "You don't have write permission on this folder"
+            else:
+                handlePaste(currentFolder, currentPath, request.session['clipboard'])
+                status = 'Items pasted'
+        elif action == 'deleteEntry':
+            if not userCanDelete:
+                status = "You don't have delete permission on this folder"
+            else:
+                handleDelete(folder, currentPath, request.REQUEST['entries'])
+                status = 'File(s) deleted'
+        else:
+            raise RuntimeError('Unknown action ' + action)
+        
+        redirectUrl = const.CONTENT_URL + "?currentFolder=" + currentFolder + "&currentPath=" + currentPath + "&status=" + status
+        return redirect(redirectUrl)        
     
     parentDirLink = getParentDirLink(currentPath, currentFolder)
     
     currentDirEntries = getCurrentDirEntries(folder, currentPath)
     
-    if request.GET.key('action'):
-        action = request.GET['action']
-        if action == 'copyToClipboard':
-            entries = request.GET['entries']
-            request.session['clipboard_content'] = entries 
-    
-    status = ''
+    if request.REQUEST.has_key('status'):
+        status = request.REQUEST['status']
+    else:
+        status = ''                        
     
     c = RequestContext(request,
         {'currentFolder' : currentFolder,
          'currentPath' : currentPath,
-         'userCanRead' : userCanRead,
-         'userCanWrite' : userCanWrite,
-         'userCanDelete' : userCanDelete,
+         'userCanRead' : str(userCanRead).lower(),
+         'userCanWrite' : str(userCanWrite).lower(),
+         'userCanDelete' : str(userCanDelete).lower(),
          'parentDirLink' : parentDirLink,
          'status' : status,
          'viewTypes' : const.viewTypes,

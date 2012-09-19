@@ -1,6 +1,8 @@
 #from urllib import quote
 
 import os
+from django.contrib.auth.models import User
+from html_browser.models import Folder
 def main():
 #    print quote('hello world;')
 #    print 'hello'
@@ -21,8 +23,9 @@ def main():
 #    s = s[0:-1]
 #    print s
 
-    files = os.listdir('/temp')
-    print files
+    folder = Folder.objects.filter(name='test folder')[0]
+    print folder
+    print folder.grouppermission_set.all()
 
 if __name__ == '__main__':
     main()
