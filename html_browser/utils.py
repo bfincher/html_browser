@@ -38,7 +38,7 @@ class DirEntry():
             self.size = '&nbsp'
         else:
             self.size = str(size)
-        self.lastModifyTime = lastModifyTime.strftime('%Y:%m:%d %I:%M:%S %p')
+        self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')
         self.linkHtml = self.buildHtmlEntry(currentFolder, currentPath, viewType)
         
     def buildHtmlEntry(self, currentFolder, currentPath, viewType):

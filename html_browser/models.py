@@ -33,24 +33,30 @@ class Folder(models.Model):
         
     def __checkGroupPerm__(self, user, desiredPerm):
         for perm in self.grouppermission_set.all():
-            if perm.group in user.groups:
+            if perm.group in user.groups.all():
                 if perm.permission == desiredPerm:
                     return True
         return False
     
     def userCanRead(self, user):
         canRead = self.__checkUserPerm__(user, CAN_READ)
-        if canRead:
-            return True
-        else:
-            return self.__checkGroupPerm__(user, CAN_READ)
+        if not canRead:
+            canRead = self.__checkGroupPerm__(user, CAN_READ)
+            
+        if not canRead:
+            canRead = self.userCanWrite(user)
+            
+        return canRead
     
     def userCanWrite(self, user):
         canWrite = self.__checkUserPerm__(user, CAN_WRITE)
-        if canWrite:
-            return True
-        else:
-            return self.__checkGroupPerm__(user, CAN_WRITE)
+        if not canWrite:
+            canWrite = self.__checkGroupPerm__(user, CAN_WRITE)
+            
+        if not canWrite:
+            canWrite = self.userCanDelete(user)
+            
+        return canWrite
     
     def userCanDelete(self, user):
         canDelete =self.__checkUserPerm__(user, CAN_DELETE)

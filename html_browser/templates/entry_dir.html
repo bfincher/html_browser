@@ -1,0 +1,6 @@
+{% extends entry_base.html %}
+
+{% block content_url %}{{ const.CONTENT_URL }}{% end block %}
+
+{% if currentPath == '/' %}
+	{% block extra_args %}{{ entry
