@@ -99,11 +99,14 @@ def getCurrentDirEntries(folder, path):
     
     os.chdir(dirPath)
     for fileName in os.listdir("."):
-        filePath = dirPath + fileName
-        if os.path.isdir(fileName):
-            dirEntries.append(DirEntry(True, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder.name, path, 'details'))
-        else:
-            fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder.name, path, 'details'))
+        try:
+            filePath = dirPath + fileName
+            if os.path.isdir(fileName):
+                dirEntries.append(DirEntry(True, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder.name, path, 'details'))
+            else:
+                fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder.name, path, 'details'))
+        except OSError:
+            pass
             
     dirEntries.sort(key=attrgetter('name'))
     fileEntries.sort(key=attrgetter('name'))
@@ -156,7 +159,7 @@ def handlePaste(currentFolder, currentPath, clipboard):
         source = getPath(clipboardFolder.localPath, clipboard.currentPath) + entry        
         if clipboard.clipboardType == 'COPY':
             if os.path.isdir(source):
-                copytree(source, dest)
+                copytree(source, dest + entry)
             else:
                 copy2(source, dest)
         elif clipboard.clipboardType == 'CUT':
@@ -174,6 +177,11 @@ def handleDelete(folder, currentPath, entries):
             rmtree(entryPath)
         else:
             os.remove(entryPath)
+            
+def handleRename(folder, currentPath, fileName, newName):
+    source = getPath(folder.localPath, currentPath) + fileName
+    dest = getPath(folder.localPath, currentPath) + newName
+    move(source, dest)
             
             
             
