@@ -17,7 +17,11 @@ class _constants():
     MEDIA_URL = '/hbmedia/'
     IMAGE_URL = MEDIA_URL + 'images/'
     
-    viewTypes = ['details', 'list', 'thumbnails']
+    detailsViewType = 'details'
+    listViewType = 'list'
+    thumbnailsViewType = 'thumbnails'
+    
+    viewTypes = [detailsViewType, listViewType, thumbnailsViewType]
     
 #    def __setattr__(self,name,value):
 #        if self.__dict__.has_key(name):

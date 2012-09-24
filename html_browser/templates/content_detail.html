@@ -17,7 +17,13 @@
 		<tr class="FolderContent">
 			<td class="FolderContent"><input id="{{ entry.name }}" name="cb" type="checkbox" /></td>
 			{% autoescape off %}
-			<td class="FolderContent">{% block entry %} {% endblock %}</td>
+			<td class="FolderContent">
+				{% if entry.isDir %}
+					{% include "entry_dir.html" %}
+				{% else %}
+					{% include "entry_details.html" %}
+				{% endif %}
+			</td>
 			<td class="FolderContent">{{ entry.size }}</td>
 			<td class="FolderContent">{{ entry.lastModifyTime }}</td>
 			{% endautoescape %}

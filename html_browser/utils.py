@@ -95,6 +95,7 @@ def getCurrentDirEntries(folder, path):
     dirPath = getPath(folder.localPath, path)    
     
     dirEntries = []
+    fileEntries = []
     
     os.chdir(dirPath)
     for fileName in os.listdir("."):
@@ -102,9 +103,12 @@ def getCurrentDirEntries(folder, path):
         if os.path.isdir(fileName):
             dirEntries.append(DirEntry(True, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder.name, path, 'details'))
         else:
-            dirEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder.name, path, 'details'))
+            fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder.name, path, 'details'))
             
     dirEntries.sort(key=attrgetter('name'))
+    fileEntries.sort(key=attrgetter('name'))
+    
+    dirEntries.extend(fileEntries)
     
     return dirEntries
 

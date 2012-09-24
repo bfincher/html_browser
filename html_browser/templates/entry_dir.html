@@ -1,6 +1,5 @@
-{% extends entry_base.html %}
+{% extends "entry_base.html" %}
 
-{% block content_url %}{{ const.CONTENT_URL }}{% end block %}
-
-{% if currentPath == '/' %}
-	{% block extra_args %}{{ entry
+{% block content_url %}{{ const.CONTENT_URL }}{% endblock %}
+{% block extra_args %}/{{ entry.name }}{%endblock %}
+{% block image_url %}{{ const.IMAGE_URL }}folder-blue-icon.png{% endblock %}

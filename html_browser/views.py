@@ -56,6 +56,7 @@ def content(request):
     userCanDelete = folder.userCanDelete(request.user)
     userCanWrite = userCanDelete or folder.userCanWrite(request.user)
     userCanRead = userCanWrite or folder.userCanRead(request.user)    
+    status = ''
     
     if request.REQUEST.has_key('action'):        
         action = request.REQUEST['action']
@@ -82,6 +83,9 @@ def content(request):
             else:
                 handleDelete(folder, currentPath, request.REQUEST['entries'])
                 status = 'File(s) deleted'
+        elif action=='setViewType':
+            viewType = request.REQUEST['viewType']
+            request.session['viewType'] = viewType
         else:
             raise RuntimeError('Unknown action ' + action)
         
@@ -95,7 +99,12 @@ def content(request):
     if request.REQUEST.has_key('status'):
         status = request.REQUEST['status']
     else:
-        status = ''                        
+        status = ''
+        
+    if request.session.has_key('viewType'):
+        viewType = request.session['viewType']
+    else:
+        viewType = const.viewTypes[0]                   
     
     c = RequestContext(request,
         {'currentFolder' : currentFolder,
@@ -106,12 +115,19 @@ def content(request):
          'parentDirLink' : parentDirLink,
          'status' : status,
          'viewTypes' : const.viewTypes,
+         'selectedViewType' : viewType,
          'currentDirEntries' : currentDirEntries,
          'const' : const,
          'user' : request.user,
          })
     
-    return render_to_response('content_detail.html', c)
+    if viewType == const.detailsViewType:
+        template = 'content_detail.html'
+    elif viewType == const.listViewType:
+        template = 'content_list.html'
+    else:
+        template = 'content_thumbnail.html'
+    return render_to_response(template, c)
 
 def hbChangePassword(request):
     c = RequestContext(request, {'const' : const})
@@ -146,11 +162,11 @@ def download(request):
     fileName = request.GET['fileName']
     folder = Folder.objects.filter(name=currentFolder)[0]
     
-    filePath = folder.localPath + currentPath + fileName
+    filePath = folder.localPath + currentPath + '/' + fileName
     
-    f = open('/tmp/log.txt', 'w')
-    f.write(filePath + '\n')
-    f.close()
+#    f = open('/tmp/log.txt', 'w')
+#    f.write(filePath + '\n')
+#    f.close()
     
     return sendfile(request, filePath, attachment=True)
     

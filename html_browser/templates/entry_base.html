@@ -1,1 +1,4 @@
-<a href="{% block content_url %}{%end block%}?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}{% block extra_args %}{% end block %}
+<a href="{% block content_url %}{%endblock%}?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}{% block extra_args %}{% endblock %}">
+<img src="{% block image_url %}{% endblock %}" />
+{{ entry.name }}
+</a>
