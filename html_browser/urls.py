@@ -9,6 +9,7 @@ urlpatterns = patterns('html_browser.views',
     url(r'hbLogout/.*', 'hbLogout'),
     url(r'hbChangePassword/.*', 'hbChangePassword'),
     url(r'hbChangePasswordResult/.*', 'hbChangePasswordResult'),
+    url(r'upload/.*', 'upload')
 #    url(r'admin/user/add/action/.*', 'addUserAction'),
     #url(r'admin/user/add/result/.*', 'addUserResult'),    
 #    url(r'admin/user/add/$', 'addUser'),

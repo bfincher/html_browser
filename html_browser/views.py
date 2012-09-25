@@ -4,13 +4,13 @@ from html_browser.models import Folder
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from utils import getParentDirLink
 from html_browser.utils import getCurrentDirEntries, Clipboard, handlePaste, handleDelete,\
-    getPath, handleRename, handleDownloadZip, deleteOldFiles
+    getPath, handleRename, handleDownloadZip, deleteOldFiles,\
+    handleFileUpload
 from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
 import os
-from tempfile import NamedTemporaryFile
-from zipfile import ZipFile
+from django.http import HttpResponse, HttpRequest
 
 def index(request, errorText=None):
     allFolders = Folder.objects.all()
@@ -178,4 +178,45 @@ def download(request):
     return sendfile(request, filePath, attachment=True)
 
 def downloadZip(request):    
-    return handleDownloadZip(request)    
+    return handleDownloadZip(request)
+
+#def upload_file(request):
+#    if request.method == 'POST':
+#        form = UploadFileForm(request.POST, request.FILES)
+#        if form.is_valid():
+#            return HttpResponse('valid')
+#    else:
+#        form = UploadFileForm()
+#    
+#    return render_to_response('upload.html', {'form': form})
+
+def upload(request):
+    currentFolder = request.REQUEST['currentFolder']
+    currentPath = request.REQUEST['currentPath']
+    
+    folder = Folder.objects.filter(name=currentFolder)[0]
+    userCanWrite = folder.userCanWrite(request.user)
+    
+    if not userCanWrite:
+        return HttpResponse("You don't have write permission on this folder")
+    
+    if request.REQUEST.has_key('action'):
+        action = request.REQUEST['action']
+        if action == 'uploadFile':
+#            return HttpResponse(str(type(request.FILES['upload1'])))
+            handleFileUpload(request.FILES['upload1'], folder, currentPath)
+            redirectUrl = const.CONTENT_URL + "?currentFolder=" + currentFolder + "&currentPath=" + currentPath + "&status=" + 'File uploaded'
+            return redirect(redirectUrl)           
+        elif action == 'uploadZip':
+            pass
+    
+    c = RequestContext(request,
+        {'currentFolder' : currentFolder,
+         'currentPath' : currentPath,
+         'status' : '',
+         'viewTypes' : const.viewTypes,
+         'const' : const,
+         'user' : request.user,
+         })
+    
+    return render_to_response('upload.html', c)

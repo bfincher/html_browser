@@ -1,0 +1,63 @@
+{% include "header.html" %}
+
+    <script language="javascript" type="text/javascript">
+    
+    currentFolder="{{ currentFolder }}";
+    currentPath="{{ currentPath }}";
+    
+    function verifyZip(fieldName) {    	
+    	var field = document.getElementById(fieldName);
+    	if (field.value != "") {
+    		if (field.value.lastIndexOf(".zip") != field.value.length - 4) {
+    			alert("Only zip files are accepted in this field");
+    			field.value = "";
+    		}
+    	}
+    }       
+
+    </script>
+</head>
+	
+	<center>
+	<h3>Upload file to {{ currentFolder }} {{currentPath }}</h3>
+		
+	<table class="UploadOuterTable">
+		<tr>
+			<td>
+				<form ENCTYPE="multipart/form-data" method="POST" 
+				    action="/hb/upload/?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}&action=uploadFile"> {% csrf_token %}
+				<table align="center">				
+					<caption>File upload</caption>					
+					<tr><td align="center"><input type="file" size="30" name="upload1"></td></tr>
+					<!-- 
+					<tr><td align="center"><input type="file" size="30" name="upload2"></td></tr>
+					<tr><td align="center"><input type="file" size="30" name="upload3"></td></tr>
+					<tr><td align="center"><input type="file" size="30" name="upload4"></td></tr>
+					<tr><td align="center"><input type="file" size="30" name="upload5"></td></tr>
+					-->
+					<tr><td align="center"><input type="submit" value="Upload" name="submit" /></td></tr>					 
+				</table>
+				</form>
+			</td>
+			<td>
+				<form ENCTYPE="multipart/form-data" method="POST" 
+				    action="/hb/upload/?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}&action=uploadZip"> {% csrf_token %}			
+				<table align="center">
+					<caption>Zip Upload</caption>
+					<tr><td align="center"><input type="file" size="30" name="zipupload1" id="zipupload1" onchange="verifyZip('zipupload1')"></td></tr>
+					<!--  
+					<tr><td align="center"><input type="file" size="30" id="zipupload2" onchange="verifyZip('zipupload2')"></td></tr>
+					<tr><td align="center"><input type="file" size="30" id="zipupload3" onchange="verifyZip('zipupload3')"></td></tr>
+					<tr><td align="center"><input type="file" size="30" id="zipupload4" onchange="verifyZip('zipupload4')"></td></tr>
+					<tr><td align="center"><input type="file" size="30" id="zipupload5" onchange="verifyZip('zipupload5')"></td></tr>
+					-->
+					<tr><td align="center"><input type="submit" value="Upload" name="submit" /></td></tr>
+				</table>
+				</form>
+			</td>
+		</tr>
+	</table>	
+	</center>
+</body>
+
+</html>

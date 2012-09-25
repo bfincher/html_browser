@@ -12,6 +12,7 @@ import zipfile
 from sendfile import sendfile
 from glob import glob
 from html_browser_site import settings
+from django import forms
 
 filesToDelete = []
 
@@ -241,5 +242,17 @@ def deleteOldFiles():
             os.remove(filesToDelete.pop(0)[0])
         else:
             return
-            
+        
+def handleFileUpload(f, folder, currentPath):
+    dest = open(getPath(folder.localPath, currentPath) + f.name())
+    
+    for chunk in f.chunks():
+        dest.write(chunk)
+        
+    dest.close()
+    
+class UploadFileForm(forms.Form):
+    title = forms.CharField(max_length=50)
+    file  = forms.FileField()
+                    
             
