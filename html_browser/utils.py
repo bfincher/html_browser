@@ -3,10 +3,17 @@ import os
 from genericpath import getsize, getmtime
 from operator import attrgetter  
 from constants import _constants as const
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.contrib.auth.models import User, Group
 from html_browser.models import Folder
 from shutil import copy2, move, copytree, rmtree
+from zipfile import ZipFile
+import zipfile
+from sendfile import sendfile
+from glob import glob
+from html_browser_site import settings
+
+filesToDelete = []
 
 #debugFile = open('/tmp/debug.txt', 'w')
 
@@ -182,6 +189,57 @@ def handleRename(folder, currentPath, fileName, newName):
     source = getPath(folder.localPath, currentPath) + fileName
     dest = getPath(folder.localPath, currentPath) + newName
     move(source, dest)
+    
+def handleDownloadZip(request):
+    currentFolder = request.GET['currentFolder']
+    currentPath = request.GET['currentPath']
+    folder = Folder.objects.filter(name=currentFolder)[0]
+    entries = request.REQUEST['files'] 
+        
+    compression = zipfile.ZIP_DEFLATED
+    
+    fileName = os.tempnam(None, 'download') + '.zip'    
+        
+    zipFile = ZipFile(fileName, mode='w', compression=compression)
+    
+    basePath = getPath(folder.localPath, currentPath)
+    for entry in entries.split(','):
+        path = getPath(folder.localPath, currentPath) + entry
+        if os.path.isfile(path):
+            __addFileToZip__(zipFile, path, basePath)
+        else:
+            addFolderToZip(zipFile, path)
+        
+    zipFile.close()
+    
+    filesToDelete.append((fileName, datetime.now()))
+    
+    return sendfile(request, fileName, attachment=True)
             
+            
+            
+def __addFileToZip__(zipFile, fileToAdd, basePath):
+    arcName = fileToAdd.replace(basePath, '')
+    zipFile.write(fileToAdd, arcName, compress_type=zipfile.ZIP_DEFLATED)
+    
+def addFolderToZip(zipFile, folder):    
+    __addFolderToZip__(zipFile, folder, folder)    
+        
+def __addFolderToZip__(zipFile, folder, basePath):
+    for f in glob(folder + "/*"):
+        if os.path.isfile(f):
+            arcName = f.replace(basePath, '')
+            zipFile.write(f, arcName, compress_type=zipfile.ZIP_DEFLATED)
+        elif os.path.isdir(f):
+            __addFolderToZip__(zipFile, f, basePath)
+            
+def deleteOldFiles():
+    now = datetime.now()
+    while len(filesToDelete) > 0:
+        delta = now - filesToDelete[0][1]
+        if delta > timedelta(minutes=10):
+            os.remove(filesToDelete.pop(0)[0])
+        else:
+            return
             
             

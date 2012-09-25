@@ -64,7 +64,7 @@ class Folder(models.Model):
             if not canRead:
                 canRead = self.userCanWrite(user)
             
-                return canRead
+            return canRead
             
     
     def userCanWrite(self, user):

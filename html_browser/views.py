@@ -4,11 +4,13 @@ from html_browser.models import Folder
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from utils import getParentDirLink
 from html_browser.utils import getCurrentDirEntries, Clipboard, handlePaste, handleDelete,\
-    getPath, handleRename
+    getPath, handleRename, handleDownloadZip, deleteOldFiles
 from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
 import os
+from tempfile import NamedTemporaryFile
+from zipfile import ZipFile
 
 def index(request, errorText=None):
     allFolders = Folder.objects.all()
@@ -47,6 +49,8 @@ def hbLogout(request):
     return redirect(const.BASE_URL)
 
 def content(request):    
+    deleteOldFiles()
+    
     currentFolder = request.REQUEST['currentFolder']
     currentPath = request.REQUEST['currentPath']        
     
@@ -173,5 +177,5 @@ def download(request):
     
     return sendfile(request, filePath, attachment=True)
 
-def downloadZip(request):
-    pass
+def downloadZip(request):    
+    return handleDownloadZip(request)    
