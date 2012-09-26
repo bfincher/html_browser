@@ -6,7 +6,7 @@
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
 		{% endif %}
 		
-		<a href="FolderContentServlet.html?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}><img src="{{ const.IMAGE_URL }}up_arrow.png"></a>"
+		<a href="{{ const.CONTENT_URL }}?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}"><img src="{{ const.IMAGE_URL }}up_arrow.png"></a>
 		
 		{% if nextLink != None %}
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
@@ -15,7 +15,7 @@
 		
 		<br>
 	</center>
-	<img src="{{ const.BASE_URL }}__{{ currentFolder }}__/{{ currentPath }}/{{ fileName }}" />
+	<img src="{{ imageUrl }}" />
 </body>
 </html>
 	

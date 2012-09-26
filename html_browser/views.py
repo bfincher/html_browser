@@ -244,6 +244,9 @@ def imageView(request):
         
     parentDirLink = const.CONTENT_URL + "?currentFolder=" + currentFolder + "&currentPath=" + currentPath
     
+    imageUrl = const.BASE_URL + '__' + currentFolder + '__' + currentPath + '/' + fileName
+    imageUrl = imageUrl.replace('//','/')
+    
     c = RequestContext(request,
         {'currentFolder' : currentFolder,
          'currentPath' : currentPath,
@@ -255,6 +258,7 @@ def imageView(request):
          'parentDirLink' : parentDirLink,
          'prevLink' : prevLink,
          'nextLink' : nextLink,
+         'imageUrl' : imageUrl,
          })
     
     return render_to_response('image_view.html', c)
