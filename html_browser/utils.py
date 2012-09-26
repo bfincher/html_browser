@@ -244,15 +244,26 @@ def deleteOldFiles():
             return
         
 def handleFileUpload(f, folder, currentPath):
-    dest = open(getPath(folder.localPath, currentPath) + f.name())
+    fileName = getPath(folder.localPath, currentPath) + f.name
+    dest = open(fileName, 'w')
     
     for chunk in f.chunks():
         dest.write(chunk)
         
     dest.close()
+    return fileName
     
-class UploadFileForm(forms.Form):
-    title = forms.CharField(max_length=50)
-    file  = forms.FileField()
-                    
+def handleZipUpload(f, folder, currentPath):
+    fileName = handleFileUpload(f, folder, currentPath)  
+    zipFile = ZipFile(fileName, mode='r')
+    entries = zipFile.infolist()
+    
+    localPath = getPath(folder.localPath, currentPath)
+    
+    for entry in entries:
+        zipFile.extract(entry, localPath)
+        
+    zipFile.close()
+    
+    os.remove(fileName)
             

@@ -5,7 +5,7 @@ from django.contrib.auth import login as auth_login, logout as auth_logout
 from utils import getParentDirLink
 from html_browser.utils import getCurrentDirEntries, Clipboard, handlePaste, handleDelete,\
     getPath, handleRename, handleDownloadZip, deleteOldFiles,\
-    handleFileUpload
+    handleFileUpload, handleZipUpload
 from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
@@ -180,16 +180,6 @@ def download(request):
 def downloadZip(request):    
     return handleDownloadZip(request)
 
-#def upload_file(request):
-#    if request.method == 'POST':
-#        form = UploadFileForm(request.POST, request.FILES)
-#        if form.is_valid():
-#            return HttpResponse('valid')
-#    else:
-#        form = UploadFileForm()
-#    
-#    return render_to_response('upload.html', {'form': form})
-
 def upload(request):
     currentFolder = request.REQUEST['currentFolder']
     currentPath = request.REQUEST['currentPath']
@@ -208,7 +198,9 @@ def upload(request):
             redirectUrl = const.CONTENT_URL + "?currentFolder=" + currentFolder + "&currentPath=" + currentPath + "&status=" + 'File uploaded'
             return redirect(redirectUrl)           
         elif action == 'uploadZip':
-            pass
+            handleZipUpload(request.FILES['zipupload1'], folder, currentPath)
+            redirectUrl = const.CONTENT_URL + "?currentFolder=" + currentFolder + "&currentPath=" + currentPath + "&status=" + 'File uploaded and extracted'
+            return redirect(redirectUrl)         
     
     c = RequestContext(request,
         {'currentFolder' : currentFolder,
