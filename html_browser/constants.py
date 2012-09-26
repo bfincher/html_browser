@@ -16,6 +16,7 @@ class _constants():
     EDIT_GROUP_ACTION_URL = EDIT_GROUP_URL + "action/"
     MEDIA_URL = '/hbmedia/'
     IMAGE_URL = MEDIA_URL + 'images/'
+    IMAGE_VIEW_URL = BASE_URL + "image_view/"
     
     detailsViewType = 'details'
     listViewType = 'list'
