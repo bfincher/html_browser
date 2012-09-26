@@ -2,4 +2,4 @@
 
 {% block content_url %}{{ const.IMAGE_VIEW_URL }}{% endblock %}
 {% block extra_args %}&fileName={{ entry.name }}{% endblock %}
-{% block image_url %}{{ const.IMAGE_URL }}Document-icon.png{% endblock %}
+{% block image_url %}{{ entry.thumbnailUrl }}{% endblock %}

@@ -13,6 +13,7 @@ from sendfile import sendfile
 from glob import glob
 from html_browser_site import settings
 from django import forms
+from html_browser_site.settings import THUMBNAIL_DIR
 
 filesToDelete = []
 
@@ -38,7 +39,7 @@ def getParentDirLink(path, currentFolder):
     return link
 
 class DirEntry():
-    def __init__(self, isDir, name, size, lastModifyTime, currentFolder, currentPath, viewType):
+    def __init__(self, isDir, name, size, lastModifyTime, folder, currentPath):
         self.isDir = isDir
         self.name = name
         
@@ -46,48 +47,57 @@ class DirEntry():
             self.size = '&nbsp'
         else:
             self.size = str(size)
-        self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')
-        self.linkHtml = self.buildHtmlEntry(currentFolder, currentPath, viewType)
+        self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')        
         
-    def buildHtmlEntry(self, currentFolder, currentPath, viewType):
-        currentFolderParam = "currentFolder=" + quote_plus(currentFolder)
-        currentPathParam = "currentPath=" + quote_plus(currentPath + "/")
-    
-        html = '<a href="'
-    
-        if self.isDir:
-            #TODo handlw case where something other than detail is chosen
-            html += const.CONTENT_URL + "?" + currentFolderParam + "&" + currentPathParam
-            
-            if currentPath == '/':
-                html += quote_plus(self.name)
-            else:
-                html += quote_plus('/' + self.name)
-        elif viewType == "thumbnails":
-            pass #TODO IMPLEMENT
+        thumbPath = THUMBNAIL_DIR + '/' + folder.name + '/' + currentPath + '/' + name
+        
+        if os.path.exists(thumbPath):
+            self.hasThumbnail = True
+            self.thumbnailUrl = const.THUMBNAIL_URL + folder.name + "/" + currentPath + "/" + name
         else:
-            html += const.DOWNLOAD_URL + "?" + currentFolderParam + "&" + currentPathParam
-            html += "&fileName=" + quote_plus(self.name)
-            
-        html += '"/><img src="'
+            self.hasThumbnail = False
+            self.thumbnailUrl = None
+#        self.linkHtml = self.buildHtmlEntry(currentFolder, currentPath, viewType)
         
-        if viewType == "details" or viewType == "list":
-            if self.isDir:
-                html += const.IMAGE_URL + 'folder-blue-icon.png"'
-            else:
-                html += const.IMAGE_URL + 'Document-icon.png"'
-        else:
-            pass #TODO implement
-        
-        html += "/>"
-        
-        if viewType == "thumbnails" or viewType == "list":
-            html += "<br>"
-            
-        html += self.name
-        html += "</a>"
-        
-        return html
+#    def buildHtmlEntry(self, currentFolder, currentPath, viewType):
+#        currentFolderParam = "currentFolder=" + quote_plus(currentFolder)
+#        currentPathParam = "currentPath=" + quote_plus(currentPath + "/")
+#    
+#        html = '<a href="'
+#    
+#        if self.isDir:
+#            #TODo handlw case where something other than detail is chosen
+#            html += const.CONTENT_URL + "?" + currentFolderParam + "&" + currentPathParam
+#            
+#            if currentPath == '/':
+#                html += quote_plus(self.name)
+#            else:
+#                html += quote_plus('/' + self.name)
+#        elif viewType == "thumbnails":
+#            pass #TODO IMPLEMENT
+#        else:
+#            html += const.DOWNLOAD_URL + "?" + currentFolderParam + "&" + currentPathParam
+#            html += "&fileName=" + quote_plus(self.name)
+#            
+#        html += '"/><img src="'
+#        
+#        if viewType == "details" or viewType == "list":
+#            if self.isDir:
+#                html += const.IMAGE_URL + 'folder-blue-icon.png"'
+#            else:
+#                html += const.IMAGE_URL + 'Document-icon.png"'
+#        else:
+#            pass #TODO implement
+#        
+#        html += "/>"
+#        
+#        if viewType == "thumbnails" or viewType == "list":
+#            html += "<br>"
+#            
+#        html += self.name
+#        html += "</a>"
+#        
+#        return html
 
 
 def getPath(folderPath, path):
@@ -110,9 +120,9 @@ def getCurrentDirEntries(folder, path):
         try:
             filePath = dirPath + fileName
             if os.path.isdir(fileName):
-                dirEntries.append(DirEntry(True, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder.name, path, 'details'))
+                dirEntries.append(DirEntry(True, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
             else:
-                fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder.name, path, 'details'))
+                fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
         except OSError:
             pass
             

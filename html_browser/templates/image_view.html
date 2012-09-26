@@ -1,0 +1,21 @@
+{% include "header.html" %}
+
+	<center>
+		{% if prevLink != None %}
+			<a href="{{ prevLink }}"><img src="{{ const.IMAGE_URL }}left_arrow.png"/></a>
+			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+		{% endif %}
+		
+		<a href="FolderContentServlet.html?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}><img src="{{ const.IMAGE_URL }}up_arrow.png"></a>"
+		
+		{% if nextLink != None %}
+			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+			<a href="{{ nextLink }}"><img src="{{ const.IMAGE_URL }}right_arrow.png"/></a>
+		{% endif %}
+		
+		<br>
+	</center>
+	<img src="{{ const.BASE_URL }}__{{ currentFolder }}__/{{ currentPath }}/{{ fileName }}" />
+</body>
+</html>
+	

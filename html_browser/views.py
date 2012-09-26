@@ -212,3 +212,52 @@ def upload(request):
          })
     
     return render_to_response('upload.html', c)
+
+def imageView(request):
+    currentFolder = request.REQUEST['currentFolder']
+    currentPath = request.REQUEST['currentPath']
+    
+    folder = Folder.objects.filter(name=currentFolder)[0]
+    userCanRead = folder.userCanRead(request.user)
+    
+    if not userCanRead:
+        return HttpResponse("You don't have read permission on this folder")
+    
+    fileName = request.REQUEST['fileName']
+    
+    currentDirEntries = getCurrentDirEntries(folder, currentPath)
+    
+    for i in range(len(currentDirEntries)):
+        if currentDirEntries[i].name == fileName:
+            index = i
+            break
+        
+    if i == 0:
+        prevLink = None
+    else:
+        prevLink = const.IMAGE_VIEW_URL + "?currentFolder=" + currentFolder + "&currentPath=" + currentPath + "&fileName=" + currentDirEntries[i-1].name
+        
+    if i == len(currentDirEntries) - 1:
+        nextLink = None
+    else:
+        nextLink = const.IMAGE_VIEW_URL + "?currentFolder=" + currentFolder + "&currentPath=" + currentPath + "&fileName=" + currentDirEntries[i+1].name
+        
+    parentDirLink = const.CONTENT_URL + "?currentFolder=" + currentFolder + "&currentPath=" + currentPath
+    
+    c = RequestContext(request,
+        {'currentFolder' : currentFolder,
+         'currentPath' : currentPath,
+         'status' : '',
+         'viewTypes' : const.viewTypes,
+         'const' : const,
+         'user' : request.user,
+         'fileName' : fileName,
+         'parentDirLink' : parentDirLink,
+         'prevLink' : prevLink,
+         'nextLink' : nextLink,
+         })
+    
+    return render_to_response('image_view.html', c)
+        
+def thumb(request):
+    return render_to_response('test_image.html')

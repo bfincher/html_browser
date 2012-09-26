@@ -1,6 +1,7 @@
 {% extends "content_list.html" %}
 
 {% block list_entry %}
+	{{ entry.hasThumbnail }}
 	{% if entry.isDir %}
 		{% include "entry_dir.html" %}
 	{% elif entry.hasThumbnail %}
