@@ -11,8 +11,6 @@ from zipfile import ZipFile
 import zipfile
 from sendfile import sendfile
 from glob import glob
-from html_browser_site import settings
-from django import forms
 from html_browser_site.settings import THUMBNAIL_DIR
 
 filesToDelete = []

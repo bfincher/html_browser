@@ -10,7 +10,7 @@ from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
 import os
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse
 
 def index(request, errorText=None):
     allFolders = Folder.objects.all()
