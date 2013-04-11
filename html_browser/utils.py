@@ -40,6 +40,10 @@ class DirEntry():
     def __init__(self, isDir, name, size, lastModifyTime, folder, currentPath):
         self.isDir = isDir
         self.name = name
+        self.nameUrl = name.replace('&', '&amp;')
+        self.nameUrl = quote_plus(self.name)
+
+	self.currentPath = quote_plus(currentPath)
         
         if isDir:
             self.size = '&nbsp'
