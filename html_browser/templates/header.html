@@ -1,61 +1,66 @@
 <head>
 	<title>HTML File Explorer</title>
-	<link rel="stylesheet" href="{{ const.MEDIA_URL }}ext-all.css" type="text/css" media="screen" charset="utf-8">
-	<link rel="stylesheet" href="{{ const.MEDIA_URL }}xtheme-gray.css" type="text/css" media="screen" charset="utf-8">
-    <link rel="stylesheet" href="{{ const.MEDIA_URL }}html_browser.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap.css" ">
+	<style type="text/css">
+      		body {
+		        padding-top: 60px;
+			padding-bottom: 40px;
+      		}
+	</style>
+	<link href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+	<!--[if lt IE 9]>
+		<script src="{{ const.MEDIA_URL }}bootstrap/js/html5shiv.js"></script>
+	<![endif]-->
+
     <script type="text/javascript" src="{{ const.MEDIA_URL }}login.js"></script>
     <script type="text/javascript" src="{{ const.MEDIA_URL }}html_browser.js"></script>
     <script type="text/javascript" src="{{ const.MEDIA_URL }}folder_content.js"></script>
 </head>
 
 <body>		
-	<div id="login">
-		<table>
-		<form action="{{ const.BASE_URL }}hbLogin/" method="post" >  {% csrf_token %}
-			<input name="action" type="hidden" value="login"
-		    <caption>Log In</caption>
-		    <tr>
-		    	<td>User Name:</td>
-		        <td><input type="text" name="userName" /></td>
-		    </tr>
-		
-		    <tr>
-		        <td>Password:</td>
-		        <td><input type="password" name="password" /></td>
-		    </tr>
-		
-		    <tr>
-		        <td><input type="submit" name="submit" value="Log In" onclick="hideLogin();"/></td>
-		        <td><input type="submit" name="submit" value="Cancel" onclick="hideLogin();"/></td>
-		    </tr>
-		</form>
-		</table>
+	<div class="navbar navbar-inverse navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="brand" href="{{ const.BASE_URL }}">HTML File Explorer</a>
+				<div class="nav-collapse collapse">
+					<ul class="nav">
+						 <li class="active"><a href="{{ const.BASE_URL }}">Home</a></li>
+						{% if user.is_authenticated %}
+							{% if user.is_staff %}
+								<li class="active"><a href="/hb/admin/">Administration  </a></li>
+							{% endif %}
+						{% endif %}
+					</ul>
+
+					{% if user.is_authenticated %}
+						<ul class="nav pull-right">
+<!--						<p class="navbar-text pull-right">  -->
+							<li class="active"><a href="#"> {{ user.username }} </a> </li>
+							<li class="active"><a href="{{ const.BASE_URL }}hbChangePassword">Change Password </a></li>
+							<li class="active"><a href="{{ const.BASE_URL }}hbLogout/">Log Out  </a></li>
+<!--						</p> -->
+						</ul>
+					{% else %}
+						<form class="navbar-form pull-right" action="{{ const.BASE_URL }}hbLogin/" method="post" > {% csrf_token %}
+							<input class="span2" name="userName" type="text" placeholder="User Name">
+							<input class="span2" name="password" type="password" placeholder="Password">
+							<button type="submit" class="btn">Sign in</button>
+							<input class="span1" name="action" type="hidden" value="login" >
+						</form>
+					{% endif %}
+				</div>
+			</div>
+		</div>
 	</div>
-		
-	<div id="header">
-	    <div id="logo" class="left-side">
-	        <font size="4">HTML File Explorer</font>
-	    </div>
-		    
-	    <div class="right-side">
-	    {% if not user.is_authenticated %}
-	    	<!-- <a href="{{ const.BASE_URL }}hbLogin/?next={{ const.BASE_URL }}">Log In</a> -->
-			<a href="javascript:showLogin();">Log In</a>
-		{% else %}
-			{{ user.username }} <a href="{{ const.BASE_URL }}hbLogout/">Log Out  </a>
-		{% endif %}
-	    	<br>
-	        <a href="{{ const.BASE_URL }}">Home</a>
-		        
-	        {% if user.is_authenticated %}
-	        	{% if user.is_staff %}
-		    		<a href="/hb/admin/">Administration  </a>
-		    	{% else %}
-		    		<a href="{{ const.BASE_URL }}hbChangePassword">Change Passowrd </a>
-		    	{% endif %}
-		    {% endif %}
-	    </div>
-	</div>		
+
+
 
 	{% if errorText != None %}
 	<div id="error"> {{ errorText }}</div><br>
