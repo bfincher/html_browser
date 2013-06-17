@@ -1,31 +1,31 @@
 {% include "content_header.html" %}
 
-	<table class="FolderContent">
+	<table class="table table-striped table-bordered table-hover table-condensed"> 
 		<col width="1%" />
 		<col width="20%" />
-		<col width="5%" />
-		<col width="10%" />
+		<col class="hidden-phone" width="5%" />
+		<col class="hidden-phone" width="10%" />
 				
-		<tr class="FolderContent">
-			<th class="FolderContent"><input id="checkAll" type="checkbox" onclick="checkAll()" /> </th>
-			<th class="FolderContent">Name</th>
-			<th class="FolderContent">Size</th>
-			<th class="FolderContent">Last Modified</th>
+		<tr>
+			<th><input id="checkAll" type="checkbox" onclick="checkAll()" /> </th>
+			<th>Name</th>
+			<th class="hidden-phone">Size</th>
+			<th class="hidden-phone">Last Modified</th>
 		</tr>
 		
 		{% for entry in currentDirEntries %}
-		<tr class="FolderContent">
-			<td class="FolderContent"><input id="{{ entry.name }}" name="cb" type="checkbox" /></td>
+		<tr>
+			<td><input id="{{ entry.name }}" name="cb" type="checkbox" /></td>
 			{% autoescape off %}
-			<td class="FolderContent">
+			<td>
 				{% if entry.isDir %}
 					{% include "entry_dir.html" %}
 				{% else %}
 					{% include "entry_details.html" %}
 				{% endif %}
 			</td>
-			<td class="FolderContent">{{ entry.size }}</td>
-			<td class="FolderContent">{{ entry.lastModifyTime }}</td>
+			<td class="hidden-phone">{{ entry.size }}</td>
+			<td class="hidden-phone">{{ entry.lastModifyTime }}</td>
 			{% endautoescape %}
 		</tr>			
 		{% endfor %}

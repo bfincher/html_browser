@@ -1,20 +1,19 @@
 {% include "content_header.html" %}
 
-	<table class="ListFolderContent">
-		<tr class="ListFolderContent">
+	<table class="table table-condensed">
+		<tr>
 		
-			<col width="20%" />
-			<col width="20%" />
-			<col width="20%" />
-			<col width="20%" />
-			<col width="20%" />
+			<col width="25%" />
+			<col width="25%" />
+			<col width="25%" />
+			<col width="25%" />
 		
 		{% for entry in currentDirEntries %}
-			{% if forloop.counter0 > 0 and forloop.counter0|divisibleby:"5" %}
+			{% if forloop.counter0 > 0 and forloop.counter0|divisibleby:"4" %}
 		</tr>
-		<tr class="ListFolderContent">
+		<tr>
 			{% endif %}
-			<td class="ListFolderContent">
+			<td>
 				<input id="{{ entry.name }}" name="cb" type="checkbox" />
 				{% block list_entry %}
 				{% if entry.isDir %}
