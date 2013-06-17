@@ -55,7 +55,7 @@
     	var newName = prompt("Please enter new file name for " + checkedBoxes[0].id, "");
     	
     	if (newName != null) {    	
-	    	var url = "FolderContentServlet.html?action=rename"
+	    	var url = "/hb/content/?action=rename"
 				+ "&file=" + encodeURI(checkedBoxes[0].id)
 				+ "&newName=" + encodeURI(newName)
 				+ "&currentFolder=" + encodeURI(currentFolder)
@@ -161,7 +161,7 @@
     	var dir = prompt("Please enter the directory to create:", "");
     	
     	if (dir != null) {    	
-	    	var url = "FolderContentServlet.html?action=mkDir"
+	    	var url = "/hb/content/?action=mkDir"
 				+ "&dir=" + encodeURI(dir)
 				+ "&currentFolder=" + encodeURI(currentFolder)
 				+ "&currentPath=" + encodeURI(currentPath);
