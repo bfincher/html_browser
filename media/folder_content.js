@@ -1,4 +1,8 @@
 
+    function myEscape(str) {
+        str = str.replace(",", "(comma)");
+        return encodeURI(str);
+    }
     function setCurrentFolder(_currentFolder) {
     	currentFolder = _currentFolder;
     }
@@ -29,9 +33,9 @@
     	
     	var checkedContent = getCheckedBoxContent();
     	var url = "/hb/content/?action=copyToClipboard&entries="
-			+ encodeURI(checkedContent)
-			+ "&currentFolder=" + encodeURI(currentFolder)
-			+ "&currentPath=" + encodeURI(currentPath);
+			+ checkedContent
+			+ "&currentFolder=" + myEscape(currentFolder)
+			+ "&currentPath=" + myEscape(currentPath);
 			
 		window.location = url;
     }
@@ -56,10 +60,10 @@
     	
     	if (newName != null) {    	
 	    	var url = "/hb/content/?action=rename"
-				+ "&file=" + encodeURI(checkedBoxes[0].id)
-				+ "&newName=" + encodeURI(newName)
-				+ "&currentFolder=" + encodeURI(currentFolder)
-				+ "&currentPath=" + encodeURI(currentPath);
+				+ "&file=" + myEscape(checkedBoxes[0].id)
+				+ "&newName=" + myEscape(newName)
+				+ "&currentFolder=" + myEscape(currentFolder)
+				+ "&currentPath=" + myEscape(currentPath);
     	
     		window.location = url;
     	}
@@ -83,9 +87,9 @@
     	
     	var checkedContent = getCheckedBoxContent();
     	var url = "/hb/content/?action=cutToClipboard&entries="
-			+ encodeURI(checkedContent)
-			+ "&currentFolder=" + encodeURI(currentFolder)
-			+ "&currentPath=" + encodeURI(currentPath);
+			+ checkedContent
+			+ "&currentFolder=" + myEscape(currentFolder)
+			+ "&currentPath=" + myEscape(currentPath);
 			
 		window.location = url;
     }
@@ -97,8 +101,8 @@
     	}
     	
     	var url = "/hb/content/?action=pasteFromClipboard"
-			+ "&currentFolder=" + encodeURI(currentFolder)
-			+ "&currentPath=" + encodeURI(currentPath);
+			+ "&currentFolder=" + myEscape(currentFolder)
+			+ "&currentPath=" + myEscape(currentPath);
     	
     	window.location = url;
     }
@@ -110,16 +114,16 @@
     	    alert("No entries selected");
     	} else {
     	    window.location="/hb/download_zip?currentFolder="
-    	    + encodeURI(currentFolder)
-    	    + "&currentPath=" + encodeURI(currentPath)
-    	    + "&files=" + encodeURI(getCheckedBoxContent());
+    	    + myEscape(currentFolder)
+    	    + "&currentPath=" + myEscape(currentPath)
+    	    + "&files=" + getCheckedBoxContent();
     	}
     }
     
     function upload() {
     	window.location="/hb/upload/?currentFolder="
-    		+ encodeURI(currentFolder)
-    	    + "&currentPath=" + encodeURI(currentPath);
+    		+ myEscape(currentFolder)
+    	    + "&currentPath=" + myEscape(currentPath);
     }
     
     function del() {    	
@@ -143,9 +147,9 @@
     			
     		if (confirm(confirmMessage)) {
     			var url = "/hb/content/?action=deleteEntry&entries="
-    				+ encodeURI(checkedContent)
-    				+ "&currentFolder=" + encodeURI(currentFolder)
-    				+ "&currentPath=" + encodeURI(currentPath);
+    				+ checkedContent
+    				+ "&currentFolder=" + myEscape(currentFolder)
+    				+ "&currentPath=" + myEscape(currentPath);
     				
     			window.location = url;
     		}
@@ -162,9 +166,9 @@
     	
     	if (dir != null) {    	
 	    	var url = "/hb/content/?action=mkDir"
-				+ "&dir=" + encodeURI(dir)
-				+ "&currentFolder=" + encodeURI(currentFolder)
-				+ "&currentPath=" + encodeURI(currentPath);
+				+ "&dir=" + myEscape(dir)
+				+ "&currentFolder=" + myEscape(currentFolder)
+				+ "&currentPath=" + myEscape(currentPath);
     	
     		window.location = url;
     	}
@@ -175,7 +179,7 @@
     	var checkedContent = "";
     	
     	for (i = 0; i < checkedBoxes.length; i++) {
-    		checkedContent = checkedContent + checkedBoxes[i].id;
+    		checkedContent = checkedContent + myEscape(checkedBoxes[i].id);
     				
     		if (i != checkedBoxes.length - 1) {
     			checkedContent = checkedContent + ",";
@@ -213,8 +217,8 @@
     	if (selectedIndex != -1) {
     		var url = "/hb/content/?action=setViewType"
     			+ "&viewType=" + box.options[selectedIndex].text
-				+ "&currentFolder=" + encodeURI(currentFolder)
-				+ "&currentPath=" + encodeURI(currentPath);
+				+ "&currentFolder=" + myEscape(currentFolder)
+				+ "&currentPath=" + myEscape(currentPath);
     		window.location = url;
     	}
     }

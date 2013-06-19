@@ -167,6 +167,9 @@ class Clipboard():
         
 class CopyPasteException(Exception):
     pass
+
+def replaceEscapedUrl(url):
+    return url.replace("(comma)", ",")
     
 def handlePaste(currentFolder, currentPath, clipboard):
     
@@ -176,7 +179,7 @@ def handlePaste(currentFolder, currentPath, clipboard):
     dest = getPath(folder.localPath, currentPath)
     
     for entry in clipboard.entries:
-        source = getPath(clipboardFolder.localPath, clipboard.currentPath) + entry        
+        source = getPath(clipboardFolder.localPath, clipboard.currentPath) + replaceEscapedUrl(entry)
         if clipboard.clipboardType == 'COPY':
             if os.path.isdir(source):
                 copytree(source, dest + entry)
@@ -191,7 +194,7 @@ def handleDelete(folder, currentPath, entries):
     currentDirPath = getPath(folder.localPath, currentPath)
     
     for entry in entries.split(','):
-        entryPath = currentDirPath + entry
+        entryPath = currentDirPath + replaceEscapedUrl(entry)
         
         if os.path.isdir(entryPath):
             rmtree(entryPath)
@@ -199,8 +202,8 @@ def handleDelete(folder, currentPath, entries):
             os.remove(entryPath)
             
 def handleRename(folder, currentPath, fileName, newName):
-    source = getPath(folder.localPath, currentPath) + fileName
-    dest = getPath(folder.localPath, currentPath) + newName
+    source = getPath(folder.localPath, currentPath) + replaceEscapedUrl(fileName)
+    dest = getPath(folder.localPath, currentPath) + replaceEscapedUrl(newName)
     move(source, dest)
     
 def handleDownloadZip(request):
@@ -217,7 +220,7 @@ def handleDownloadZip(request):
     
     basePath = getPath(folder.localPath, currentPath)
     for entry in entries.split(','):
-        path = getPath(folder.localPath, currentPath) + entry
+        path = getPath(folder.localPath, currentPath) + replaceEscapedUrl(entry)
         if os.path.isfile(path):
             __addFileToZip__(zipFile, path, basePath)
         else:
