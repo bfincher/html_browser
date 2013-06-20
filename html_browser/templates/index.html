@@ -16,7 +16,7 @@
 					<td> <a href="{{ const.CONTENT_URL }}?currentFolder={{ folder.getNameAsHtml }}&currentPath="/> {{ folder.name }} </a></td>
 				{% endif %}
 		{% else %}
-			<td> <a href="{{ const.CONTENT_URL }}?currentFolder={{ folder.getNameAsHtml }}&currentPath=%2F"/> {{ folder.name }} </a></td>
+			<td> <a href="{{ const.CONTENT_URL }}?currentFolder={{ folder.getNameAsHtml }}&currentPath="/> {{ folder.name }} </a></td>
 			</tr>
 		{% endif %}
 	{% endfor %}

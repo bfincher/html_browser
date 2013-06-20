@@ -7,19 +7,12 @@
 		setUserCanDelete({{ userCanDelete }}) 
 	</script>
 	
-	<center>
-	<h3>{{ currentFolder }}{{ currentPath }}</h3>
-	<h5>{{ status }}</h5>
-	</center>
-		
-	<div id="header">
-		<div class="left-side">
+        <div class="row">
+	<!-- <div id="header"> -->
+		<div class="span5">
 			<a href=" {{parentDirLink }}" title="Parent Folder"><img src="{{ const.IMAGE_URL }}folder-blue-parent-icon.png"></a>
 
-			<a title="Delete" 
-				href="javascript:del()">
-				<img src="{{ const.IMAGE_URL }}Symbols-Delete-icon.png"/></a>
-		
+			<a title="Delete" href="javascript:del()"> <img src="{{ const.IMAGE_URL }}Symbols-Delete-icon.png"/></a>
 			<a title="Copy" href="javascript:copy()"><img src="{{ const.IMAGE_URL }}Copy-icon.png"/></a>
 			<a title="Cut" href="javascript:cut()"><img src="{{ const.IMAGE_URL }}cut-icon.png"/></a>
 			<a title="Paste" href="javascript:paste()"><img src="{{ const.IMAGE_URL }}Paste-icon.png"/></a>
@@ -28,8 +21,12 @@
 			<a title="Download Zip" href="javascript:zip()"><img src="{{ const.IMAGE_URL }}ZIP-File-icon.png"/></a>
 		</div>
 				
-		
-		<div class="right-side">
+		<div class="span4">
+			<h5>{{ currentFolder }}{{ currentPath }}</h5>
+		        <h5>{{ status }}</h5>
+		</div>
+
+		<div class="span3">
 			<select id="viewTypeBox" onchange="viewTypeBoxChanged(this)">
 			
 			{% for view in viewTypes %}
