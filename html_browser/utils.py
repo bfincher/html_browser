@@ -12,6 +12,8 @@ import zipfile
 from sendfile import sendfile
 from glob import glob
 from html_browser_site.settings import THUMBNAIL_DIR
+from math import floor
+import collections
 
 filesToDelete = []
 
@@ -281,4 +283,40 @@ def handleZipUpload(f, folder, currentPath):
     zipFile.close()
     
     os.remove(fileName)
-            
+
+def getDiskPercentFree(path):
+    du = getDiskUsage(path)
+    free = du.free / 1.0
+    total = du.total / 1.0
+    pct = free / total;
+    pct = pct * 100.0;
+    return str(int(floor(pct))) + "%"
+
+def getDiskUsage(path):
+    _ntuple_diskusage = collections.namedtuple('usage', 'total used free')
+
+    if hasattr(os, 'statvfs'):  # POSIX
+        st = os.statvfs(path)
+        free = st.f_bavail * st.f_frsize
+        total = st.f_blocks * st.f_frsize
+        used = (st.f_blocks - st.f_bfree) * st.f_frsize
+        return _ntuple_diskusage(total, used, free)
+
+    elif os.name == 'nt':       # Windows
+        import ctypes
+        import sys
+
+        _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), \
+                       ctypes.c_ulonglong()
+        if sys.version_info >= (3,) or isinstance(path, unicode):
+            fun = ctypes.windll.kernel32.GetDiskFreeSpaceExW
+        else:
+            fun = ctypes.windll.kernel32.GetDiskFreeSpaceExA
+        ret = fun(path, ctypes.byref(_), ctypes.byref(total), ctypes.byref(free))
+        if ret == 0:
+            raise ctypes.WinError()
+        used = total.value - free.value
+        return _ntuple_diskusage(total.value, used, free.value)
+    else:
+        raise NotImplementedError("platform not supported")
+

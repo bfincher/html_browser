@@ -5,7 +5,7 @@ from django.contrib.auth import login as auth_login, logout as auth_logout
 from utils import getParentDirLink
 from html_browser.utils import getCurrentDirEntries, Clipboard, handlePaste, handleDelete,\
     getPath, handleRename, handleDownloadZip, deleteOldFiles,\
-    handleFileUpload, handleZipUpload
+    handleFileUpload, handleZipUpload, getDiskPercentFree, getPath
 from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
@@ -116,6 +116,8 @@ def content(request):
         viewType = request.session['viewType']
     else:
         viewType = const.viewTypes[0]                   
+
+    diskFree = getDiskPercentFree(getPath(folder.localPath, currentPath))
     
     c = RequestContext(request,
         {'currentFolder' : currentFolder,
@@ -130,6 +132,7 @@ def content(request):
          'currentDirEntries' : currentDirEntries,
          'const' : const,
          'user' : request.user,
+	 'disk_free' : diskFree,
          })
     
     if viewType == const.detailsViewType:
