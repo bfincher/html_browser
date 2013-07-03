@@ -1,0 +1,35 @@
+        <div class="row-fluid">
+		<div class="span5">
+			<a href=" {{parentDirLink }}" title="Parent Folder"><img src="{{ const.IMAGE_URL }}folder-blue-parent-icon.png"></a>
+
+			<a title="Delete" href="javascript:del()"> <img src="{{ const.IMAGE_URL }}Symbols-Delete-icon.png"/></a>
+			<a title="Copy" href="javascript:copy()"><img src="{{ const.IMAGE_URL }}Copy-icon.png"/></a>
+			<a title="Cut" href="javascript:cut()"><img src="{{ const.IMAGE_URL }}cut-icon.png"/></a>
+			<a title="Paste" href="javascript:paste()"><img src="{{ const.IMAGE_URL }}Paste-icon.png"/></a>
+			<a title="New Directory" href="javascript:mkdir()"><img src="{{ const.IMAGE_URL }}Add-Folder-icon.png"/></a>
+			<a title="Rename" href="javascript:rename()"><img src="{{ const.IMAGE_URL }}Rename.png" height="32" width="32"/></a>
+			<a title="Download Zip" href="javascript:zip()"><img src="{{ const.IMAGE_URL }}ZIP-File-icon.png"/></a>
+		</div>
+				
+		<div class="span4">
+			<h5>
+				{{ currentFolder }}{{ currentPath }} &nbsp;&nbsp;&nbsp {{ disk_free }} free
+			</h5>
+		        <h5>{{ status }}</h5>
+		</div>
+
+		<div class="span3">
+			<select id="viewTypeBox" onchange="viewTypeBoxChanged(this)">
+			
+			{% for view in viewTypes %}
+				{% if view == selectedViewType %}
+					<option selected="selected">{{ view }}</option>
+				{% else %}
+					<option>{{ view }}</option>
+				{% endif %}			
+			{% endfor %}
+			</select>
+
+			<a title="Upload" href="javascript:upload()"><img src="{{ const.IMAGE_URL }}up-icon.png"/></a>
+		</div>
+	</div>		
