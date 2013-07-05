@@ -222,3 +222,14 @@
     		window.location = url;
     	}
     }
+
+    function diskUsageShowPopup() {
+        var el = document.getElementById("disk_usage");
+        el.style.visibility = "visible";
+    }
+
+    function diskUsageHidePopup() {
+        var el = document.getElementById("disk_usage");
+        el.style.visibility = "hidden";
+    }
+

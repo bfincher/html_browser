@@ -13,7 +13,8 @@
 				
 		<div class="span4">
 			<h5>
-				{{ currentFolder }}{{ currentPath }} &nbsp;&nbsp;&nbsp {{ disk_free }} free
+				{{ currentFolder }}{{ currentPath }} &nbsp;&nbsp;&nbsp; 
+                                <a href="javascript:diskUsageShowPopup()">{{ diskFreePct }} free</a>
 			</h5>
 		        <h5>{{ status }}</h5>
 		</div>
@@ -33,3 +34,4 @@
 			<a title="Upload" href="javascript:upload()"><img src="{{ const.IMAGE_URL }}up-icon.png"/></a>
 		</div>
 	</div>		
+

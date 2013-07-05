@@ -19,6 +19,10 @@ filesToDelete = []
 
 #debugFile = open('/tmp/debug.txt', 'w')
 
+KILOBYTE = 1024.0
+MEGABYTE = KILOBYTE * KILOBYTE
+GIGABYTE = MEGABYTE * KILOBYTE
+
 def getParentDirLink(path, currentFolder):
     if path == '/':
         return const.BASE_URL
@@ -291,6 +295,34 @@ def getDiskPercentFree(path):
     pct = free / total;
     pct = pct * 100.0;
     return str(int(floor(pct))) + "%"
+
+def getDiskUsageFormatted(path):
+    du = getDiskUsage(path)
+
+    _ntuple_diskusage_formatted = collections.namedtuple('usage', 'total totalformatted used usedformatted free freeformatted unit')
+
+    if du.total / GIGABYTE > 1:
+        total = "%.2f" % (du.total / GIGABYTE)
+	used = "%.2f" % (du.used / GIGABYTE)
+	free = "%.2f" % (du.free / GIGABYTE)
+	unit = "GB"
+    elif du.total / MEGABYTE > 1:
+        total = "%.2f" % (du.total / MEGABYTE)
+	used = "%.2f" % (du.used / MEGABYTE)
+	free = "%.2f" % (du.free / MEGABYTE)
+	unit = "MB"
+    elif du.total / KILOBYTE > 1:
+        total = "%.2f" % (du.total / KILOBYTE)
+	used = "%.2f" % (du.used / KILOBYTE)
+	free = "%.2f" % (du.free / KILOBYTE)
+	unit = "KB"
+    else:
+        total = du.total
+	used = du.used
+	free = du.free
+	unit = "Bytes"
+
+    return _ntuple_diskusage_formatted(du.total, total, du.used, used, du.free, free, unit)
 
 def getDiskUsage(path):
     _ntuple_diskusage = collections.namedtuple('usage', 'total used free')
