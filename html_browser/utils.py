@@ -14,6 +14,7 @@ from glob import glob
 from html_browser_site.settings import THUMBNAIL_DIR
 from math import floor
 import collections
+import re
 
 filesToDelete = []
 
@@ -117,7 +118,7 @@ def getPath(folderPath, path):
         dirPath += '/'
     return dirPath
 
-def getCurrentDirEntries(folder, path):
+def getCurrentDirEntries(folder, path, filter=None):
     dirPath = getPath(folder.localPath, path)    
     
     dirEntries = []
@@ -130,7 +131,17 @@ def getCurrentDirEntries(folder, path):
             if os.path.isdir(fileName):
                 dirEntries.append(DirEntry(True, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
             else:
-                fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
+                include = False
+                if filter != None:
+                    tempFilter = filter.replace('.', '\.')
+                    tempFilter = tempFilter.replace('*', '.*')
+                    if re.match(tempFilter, fileName):
+                        include = True 
+                else:
+                    include = True
+
+                if include:
+                    fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
         except OSError:
             pass
             

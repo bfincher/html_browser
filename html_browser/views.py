@@ -64,7 +64,7 @@ def content(request):
         return redirect(const.BASE_URL, 'You are not authorized to view this page')
     
     status = ''
-    
+
     if request.REQUEST.has_key('action'):        
         action = request.REQUEST['action']
         if action == 'copyToClipboard':
@@ -106,13 +106,18 @@ def content(request):
     
     parentDirLink = getParentDirLink(currentPath, currentFolder)
     
-    currentDirEntries = getCurrentDirEntries(folder, currentPath)
-    
     if request.REQUEST.has_key('status'):
         status = request.REQUEST['status']
     else:
         status = ''
-        
+
+    filter = None
+    if request.REQUEST.has_key('filter'):
+        filter = request.REQUEST['filter']
+        status = status + ' Filtered on ' + request.REQUEST['filter']
+
+    currentDirEntries = getCurrentDirEntries(folder, currentPath, filter)
+    
     if request.session.has_key('viewType'):
         viewType = request.session['viewType']
     else:
