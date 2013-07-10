@@ -144,6 +144,7 @@ def content(request):
 	 'diskUsed' : diskUsage.usedformatted,
 	 'diskTotal' : diskUsage.totalformatted,
          'diskUnit' : diskUsage.unit,
+	 'showContent' : True,
          })
     
     if viewType == const.detailsViewType:

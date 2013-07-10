@@ -1,5 +1,5 @@
         <div class="row-fluid">
-		<div class="span3">
+		<div class="span5">
 			<a href=" {{parentDirLink }}" title="Parent Folder"><img src="{{ const.IMAGE_URL }}folder-blue-parent-icon.png"></a>
 
 			<a title="Delete" href="javascript:del()"> <img src="{{ const.IMAGE_URL }}Symbols-Delete-icon.png"/></a>
@@ -11,21 +11,12 @@
 			<a title="Download Zip" href="javascript:zip()"><img src="{{ const.IMAGE_URL }}ZIP-File-icon.png"/></a>
 		</div>
 				
-		<div class="span3">
+		<div class="span4">
 			<h5>
 				{{ currentFolder }}{{ currentPath }} &nbsp;&nbsp;&nbsp; 
                                 <a href="javascript:diskUsageShowPopup()">{{ diskFreePct }} free</a>
 			</h5>
 		        <h5>{{ status }}</h5>
-		</div>
-
-		<div class="span3">
-			<form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
-				<input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
-				<input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
-				<input type="hidden" name="currentPath" value="{{ currentPath }}" />
-				<input type="submit" value="Filter" name="Filter" />
-			</form>
 		</div>
 
 		<div class="span3">

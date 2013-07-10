@@ -3,7 +3,7 @@
         <link rel="stylesheet" href="{{ const.MEDIA_URL }}/html_browser.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	<link rel="stylesheet" href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap.css">
 	<link href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
-	<link href="{{ const.MEDIA_URL }}bootstrap/css/docs.css" rel="stylesheet">
+	<!-- <link href="{{ const.MEDIA_URL }}bootstrap/css/docs.css" rel="stylesheet"> -->
 	<link href="{{ const.MEDIA_URL }}pretify.css" rel="stylesheet">
 	<style type="text/css">
       		body {
@@ -39,15 +39,29 @@
 								<li class="active"><a href="/hb/admin/">Administration  </a></li>
 							{% endif %}
 						{% endif %}
+
 					</ul>
+					{% if showContent %}
+					    <ul class="nav">
+						<li class="dropdown" data-dropdown="dropdown">
+					        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Filter <b class="caret"></b></a>
+						<div class="dropdown-menu" >
+						        <form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
+			                                <input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
+			                                <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
+			                                <input type="hidden" name="currentPath" value="{{ currentPath }}" />
+			                                <input class="btn btn-primary" type="submit" value="Filter" name="Filter" />
+				                        </form>
+						</div>
+					        </li>
+					    </ul>
+					{% endif %}
 
 					{% if user.is_authenticated %}
 						<ul class="nav pull-right">
-<!--						<p class="navbar-text pull-right">  -->
 							<li class="active"><a href="#"> {{ user.username }} </a> </li>
 							<li class="active"><a href="{{ const.BASE_URL }}hbChangePassword">Change Password </a></li>
 							<li class="active"><a href="{{ const.BASE_URL }}hbLogout/">Log Out  </a></li>
-<!--						</p> -->
 						</ul>
 					{% else %}
 						<form class="navbar-form pull-right" action="{{ const.BASE_URL }}hbLogin/" method="post" > {% csrf_token %}
