@@ -118,7 +118,7 @@ def content(request):
 
     if request.REQUEST.has_key('search'):
         search = request.REQUEST['search']
-        currentDirEntriesSearch = getCurrentDirEntriesSearch(folder, currentPath, search)
+        currentDirEntries= getCurrentDirEntriesSearch(folder, currentPath, search)
 
         c = RequestContext(request,
             {'currentFolder' : currentFolder,
