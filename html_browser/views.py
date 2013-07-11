@@ -116,6 +116,23 @@ def content(request):
         filter = request.REQUEST['filter']
         status = status + ' Filtered on ' + request.REQUEST['filter']
 
+    if request.REQUEST.has_key('search'):
+        search = request.REQUEST['search']
+        currentDirEntriesSearch = getCurrentDirEntries(folder, currentPath, search)
+
+        c = RequestContext(request,
+            {'currentFolder' : currentFolder,
+             'currentPath' : currentPath,
+             'userCanRead' : str(userCanRead).lower(),
+             'userCanWrite' : str(userCanWrite).lower(),
+             'userCanDelete' : str(userCanDelete).lower(),
+             'status' : status,
+             'currentDirEntries' : currentDirEntries,
+             'const' : const,
+             'user' : request.user,
+         })
+        return render_to_response("content_search.html", c)
+
     currentDirEntries = getCurrentDirEntries(folder, currentPath, filter)
     
     if request.session.has_key('viewType'):

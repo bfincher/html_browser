@@ -66,48 +66,6 @@ class DirEntry():
         else:
             self.hasThumbnail = False
             self.thumbnailUrl = None
-#        self.linkHtml = self.buildHtmlEntry(currentFolder, currentPath, viewType)
-        
-#    def buildHtmlEntry(self, currentFolder, currentPath, viewType):
-#        currentFolderParam = "currentFolder=" + quote_plus(currentFolder)
-#        currentPathParam = "currentPath=" + quote_plus(currentPath + "/")
-#    
-#        html = '<a href="'
-#    
-#        if self.isDir:
-#            #TODo handlw case where something other than detail is chosen
-#            html += const.CONTENT_URL + "?" + currentFolderParam + "&" + currentPathParam
-#            
-#            if currentPath == '/':
-#                html += quote_plus(self.name)
-#            else:
-#                html += quote_plus('/' + self.name)
-#        elif viewType == "thumbnails":
-#            pass #TODO IMPLEMENT
-#        else:
-#            html += const.DOWNLOAD_URL + "?" + currentFolderParam + "&" + currentPathParam
-#            html += "&fileName=" + quote_plus(self.name)
-#            
-#        html += '"/><img src="'
-#        
-#        if viewType == "details" or viewType == "list":
-#            if self.isDir:
-#                html += const.IMAGE_URL + 'folder-blue-icon.png"'
-#            else:
-#                html += const.IMAGE_URL + 'Document-icon.png"'
-#        else:
-#            pass #TODO implement
-#        
-#        html += "/>"
-#        
-#        if viewType == "thumbnails" or viewType == "list":
-#            html += "<br>"
-#            
-#        html += self.name
-#        html += "</a>"
-#        
-#        return html
-
 
 def getPath(folderPath, path):
     path = path.strip()
@@ -119,8 +77,28 @@ def getPath(folderPath, path):
     return dirPath
 
 def getCurrentDirEntries(folder, path, filter=None):
-    dirPath = getPath(folder.localPath, path)    
+    return __getCurrentDirEntries(getPath(folder.localPath, path), filter)
+
+def getCurrentDirEntriesSearch(folder, path, search):
+    returnList = []
+    return __getCurrentDirEntriesSearch(folder, path, search, returnList)
+
+def __getCurrentDirEntriesSearch(folder, path, search, returnList):
+    entries = getCurrentDirEntries(folder, path)
+
+    includeThisDir = False
+
+    for entry in entries:
+        if entry.isDir:
+	    __getCurrentDirEntriesSearch(folder, path + "/" + entry.name, search, returnList)
+        else:
+	    if entry.name.find(search) != -1:
+	        includeThisDir = True
     
+    if includeThisDir:
+        returnList.append(DirEntry(True, folder.name + "/" +  bookmark
+
+def __getCurrentDirEntries(dirPath, filter=None):
     dirEntries = []
     fileEntries = []
     
