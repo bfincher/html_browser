@@ -121,6 +121,9 @@ def getCurrentDirEntries(folder, path, filter=None):
                     fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
         except OSError:
             pass
+
+        except UnicodeDecodeError:
+	    pass
             
     dirEntries.sort(key=attrgetter('name'))
     fileEntries.sort(key=attrgetter('name'))
