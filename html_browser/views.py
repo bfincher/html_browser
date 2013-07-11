@@ -3,7 +3,7 @@ from django.template import RequestContext
 from html_browser.models import Folder
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from utils import getParentDirLink
-from html_browser.utils import getCurrentDirEntries, Clipboard, handlePaste, handleDelete,\
+from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch, Clipboard, handlePaste, handleDelete,\
     getPath, handleRename, handleDownloadZip, deleteOldFiles,\
     handleFileUpload, handleZipUpload, getDiskPercentFree, getPath,\
     getDiskUsageFormatted
@@ -118,7 +118,7 @@ def content(request):
 
     if request.REQUEST.has_key('search'):
         search = request.REQUEST['search']
-        currentDirEntriesSearch = getCurrentDirEntries(folder, currentPath, search)
+        currentDirEntriesSearch = getCurrentDirEntriesSearch(folder, currentPath, search)
 
         c = RequestContext(request,
             {'currentFolder' : currentFolder,

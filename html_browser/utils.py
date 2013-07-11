@@ -76,29 +76,28 @@ def getPath(folderPath, path):
         dirPath += '/'
     return dirPath
 
-def getCurrentDirEntries(folder, path, filter=None):
-    return __getCurrentDirEntries(getPath(folder.localPath, path), filter)
-
 def getCurrentDirEntriesSearch(folder, path, search):
     returnList = []
-    return __getCurrentDirEntriesSearch(folder, path, search, returnList)
+    thisEntry = DirEntry(True, path, 0, datetime.fromtimestamp(getmtime(getPath(folder.localPath, path))), folder, path)
+    return __getCurrentDirEntriesSearch(folder, path, search, thisEntry, returnList)
 
-def __getCurrentDirEntriesSearch(folder, path, search, returnList):
+def __getCurrentDirEntriesSearch(folder, path, search, thisEntry, returnList):
     entries = getCurrentDirEntries(folder, path)
 
     includeThisDir = False
 
     for entry in entries:
         if entry.isDir:
-	    __getCurrentDirEntriesSearch(folder, path + "/" + entry.name, search, returnList)
+	    __getCurrentDirEntriesSearch(folder, path + "/" + entry.name, search, entry, returnList)
         else:
 	    if entry.name.find(search) != -1:
 	        includeThisDir = True
     
     if includeThisDir:
-        returnList.append(DirEntry(True, folder.name + "/" +  bookmark
+        returnList.append(thisEntry)
 
-def __getCurrentDirEntries(dirPath, filter=None):
+def getCurrentDirEntries(folder, path, filter=None):
+    dirPath = getPath(folder.localPath, path)
     dirEntries = []
     fileEntries = []
     
