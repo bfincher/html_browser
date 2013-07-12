@@ -121,7 +121,6 @@ def getCurrentDirEntries(folder, path, filter=None):
 
                 if include:
                     fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
-<<<<<<< HEAD
         except OSError, ose:
 	    logger.error(ose)
             pass
