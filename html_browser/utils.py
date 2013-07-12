@@ -20,8 +20,6 @@ import logging
 logger = logging.getLogger('html_browser.utils')
 filesToDelete = []
 
-#debugFile = open('/tmp/debug.txt', 'w')
-
 KILOBYTE = 1024.0
 MEGABYTE = KILOBYTE * KILOBYTE
 GIGABYTE = MEGABYTE * KILOBYTE
@@ -52,6 +50,7 @@ class DirEntry():
         self.nameUrl = name.replace('&', '&amp;')
         self.nameUrl = quote_plus(self.name)
 
+        self.currentPathOrig = currentPath
 	self.currentPath = quote_plus(currentPath)
         
         if isDir:
@@ -68,48 +67,10 @@ class DirEntry():
         else:
             self.hasThumbnail = False
             self.thumbnailUrl = None
-#        self.linkHtml = self.buildHtmlEntry(currentFolder, currentPath, viewType)
-        
-#    def buildHtmlEntry(self, currentFolder, currentPath, viewType):
-#        currentFolderParam = "currentFolder=" + quote_plus(currentFolder)
-#        currentPathParam = "currentPath=" + quote_plus(currentPath + "/")
-#    
-#        html = '<a href="'
-#    
-#        if self.isDir:
-#            #TODo handlw case where something other than detail is chosen
-#            html += const.CONTENT_URL + "?" + currentFolderParam + "&" + currentPathParam
-#            
-#            if currentPath == '/':
-#                html += quote_plus(self.name)
-#            else:
-#                html += quote_plus('/' + self.name)
-#        elif viewType == "thumbnails":
-#            pass #TODO IMPLEMENT
-#        else:
-#            html += const.DOWNLOAD_URL + "?" + currentFolderParam + "&" + currentPathParam
-#            html += "&fileName=" + quote_plus(self.name)
-#            
-#        html += '"/><img src="'
-#        
-#        if viewType == "details" or viewType == "list":
-#            if self.isDir:
-#                html += const.IMAGE_URL + 'folder-blue-icon.png"'
-#            else:
-#                html += const.IMAGE_URL + 'Document-icon.png"'
-#        else:
-#            pass #TODO implement
-#        
-#        html += "/>"
-#        
-#        if viewType == "thumbnails" or viewType == "list":
-#            html += "<br>"
-#            
-#        html += self.name
-#        html += "</a>"
-#        
-#        return html
 
+    def __str__(self):
+        return "DirEntry:  isDir = %s name = %s nameUrl = %s currentPath = %s currentPathOrig = %s size = %s lastModifyTime = %s hasThumbnail = %s thumbnailUrl = %s" % \
+	    (str(self.isDir), self.name, self.nameUrl, self.currentPath, self.currentPathOrig, self.size, self.lastModifyTime, self.hasThumbnail, self.thumbnailUrl)
 
 def getPath(folderPath, path):
     path = path.strip()
@@ -120,9 +81,36 @@ def getPath(folderPath, path):
         dirPath += '/'
     return dirPath
 
-def getCurrentDirEntries(folder, path, filter=None):
-    dirPath = getPath(folder.localPath, path)    
+def getCurrentDirEntriesSearch(folder, path, search):
+    logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s search = %s", folder, path, search)
+    returnList = []
+    thisEntry = DirEntry(True, path, 0, datetime.fromtimestamp(getmtime(getPath(folder.localPath, path))), folder, path)
+    __getCurrentDirEntriesSearch(folder, path, search, thisEntry, returnList)
+
+    for entry in returnList:
+        entry.name = entry.currentPathOrig + "/" + entry.name
+
+    return returnList
+
+def __getCurrentDirEntriesSearch(folder, path, search, thisEntry, returnList):
+    logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s search = %s thisEntry = %s", folder, path, search, thisEntry)
+    entries = getCurrentDirEntries(folder, path)
+
+    includeThisDir = False
+
+    for entry in entries:
+        if entry.isDir:
+	    __getCurrentDirEntriesSearch(folder, path + "/" + entry.name, search, entry, returnList)
+        else:
+	    if entry.name.find(search) != -1:
+                logger.debug("including this dir")
+	        includeThisDir = True
     
+    if includeThisDir:
+        returnList.append(thisEntry)
+
+def getCurrentDirEntries(folder, path, filter=None):
+    dirPath = getPath(folder.localPath, path)
     dirEntries = []
     fileEntries = []
     
