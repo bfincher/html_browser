@@ -12,8 +12,13 @@ from django.contrib.auth import authenticate
 from sendfile import sendfile
 import os
 from django.http import HttpResponse
+import logging
+
+reqLogger = logging.getLogger('django.request')
 
 def index(request, errorText=None):
+    reqLogger.info('index ')
+    reqLogger.debug(str(request))
     allFolders = Folder.objects.all()
     folders = []
     for folder in allFolders:
@@ -30,6 +35,10 @@ def index(request, errorText=None):
 def hbLogin(request):
     userName = request.POST['userName']
     password = request.POST['password']
+
+    reqLogger.info("hbLogin")
+    if userName is not None:
+        reqLogger.info("userName = " + userName)
     
     errorText = None
     
@@ -37,19 +46,25 @@ def hbLogin(request):
     if user is not None:
         if user.is_active:
             auth_login(request, user)
+            reqLogger.debug("%s authenticated", user)
         else:
+            reqLogger.warn("%s attempted to log in to a disabled account", user)
             errorText = 'Account has been disabled'
     else:
         errorText = 'Invalid login'
+        reqLogger.error("empty userName")
     
     return redirect(const.BASE_URL, errorText)
 
 
 def hbLogout(request):
+    reqLogger.info("user %s logged out", request.user)
     auth_logout(request)
     return redirect(const.BASE_URL)
 
 def content(request):    
+    reqLogger.info("content")
+    reqLogger.debug(str(request))
     deleteOldFiles()
     
     currentFolder = request.REQUEST['currentFolder']
@@ -61,6 +76,7 @@ def content(request):
     userCanRead = userCanWrite or folder.userCanRead(request.user)    
     
     if userCanRead == False:
+        reqLogger.warn("%s not allowed to read %s", request.user, currentFolder)
         return redirect(const.BASE_URL, 'You are not authorized to view this page')
     
     status = ''
@@ -173,11 +189,13 @@ def content(request):
     return render_to_response(template, c)
 
 def hbChangePassword(request):
+    reqLogger.info("hbChangePassword")
     c = RequestContext(request, {'const' : const})
     return render_to_response('registration/change_password.html', c)
 
 def hbChangePasswordResult(request):
     user = request.user
+    reqLogger.info("hbChangePasswordResult: user = %s", user)
     errorMessage = None
     if user.check_password(request.POST['password']):
         newPw = request.POST['newPassword']
@@ -193,13 +211,18 @@ def hbChangePasswordResult(request):
         
     if errorMessage == None:
         c = RequestContext(request, {'const' : const})
+	reqLogger.info("success")
         return render_to_response('registration/change_password_success.html', c)
     else:
+        reqLogger.warn(errorMessage)
         c = RequestContext(request, {'errorMessage' : errorMessage,
                                      'const' : const})
         return render_to_response('registration/change_password_fail.html', c)
     
 def download(request):
+    reqLogger.info("download")
+    reqLogger.debug(str(request))
+
     currentFolder = request.GET['currentFolder']
     currentPath = request.GET['currentPath']
     fileName = request.GET['fileName']
@@ -210,9 +233,13 @@ def download(request):
     return sendfile(request, filePath, attachment=True)
 
 def downloadZip(request):    
+    reqLogger.info("downloadZip")
+    reqLogger.debug(str(request))
     return handleDownloadZip(request)
 
 def upload(request):
+    reqLogger.info("upload")
+    reqLogger.debug(str(request))
     currentFolder = request.REQUEST['currentFolder']
     currentPath = request.REQUEST['currentPath']
     
@@ -246,6 +273,9 @@ def upload(request):
     return render_to_response('upload.html', c)
 
 def imageView(request):
+    reqLogger.info("imageView")
+    reqLogger.debug(str(request))
+
     currentFolder = request.REQUEST['currentFolder']
     currentPath = request.REQUEST['currentPath']
     
@@ -296,4 +326,7 @@ def imageView(request):
     return render_to_response('image_view.html', c)
         
 def thumb(request):
+    reqLogger.info("thumb")
+    reqLogger.debug(str(request))
+    
     return render_to_response('test_image.html')
