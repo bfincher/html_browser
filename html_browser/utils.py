@@ -15,7 +15,9 @@ from html_browser_site.settings import THUMBNAIL_DIR
 from math import floor
 import collections
 import re
+import logging
 
+logger = logging.getLogger('html_browser.utils')
 filesToDelete = []
 
 #debugFile = open('/tmp/debug.txt', 'w')
@@ -142,11 +144,11 @@ def getCurrentDirEntries(folder, path, filter=None):
 
                 if include:
                     fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
-        except OSError:
-            pass
+        except OSError, ose:
+	    logger.error(ose)
 
-        except UnicodeDecodeError:
-	    pass
+        except UnicodeDecodeError, de:
+	    logger.error(de)
             
     dirEntries.sort(key=attrgetter('name'))
     fileEntries.sort(key=attrgetter('name'))
