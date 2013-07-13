@@ -47,8 +47,7 @@
 					            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Filter <b class="caret"></b></a>
 						    <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
 						        <center>
-							    <h3>Add a filter</h3>
-							    <h4>(*.avi to show only avi files)</h4>
+							    <h3>Apply a filter</h3>
 						            <form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
 			                                        <input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
 			                                        <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />

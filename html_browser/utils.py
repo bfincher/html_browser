@@ -125,7 +125,7 @@ def getCurrentDirEntries(folder, path, filter=None):
                 if filter != None:
                     tempFilter = filter.replace('.', '\.')
                     tempFilter = tempFilter.replace('*', '.*')
-                    if re.match(tempFilter, fileName):
+                    if re.search(tempFilter, fileName):
                         include = True 
                 else:
                     include = True
