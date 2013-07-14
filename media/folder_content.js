@@ -140,9 +140,9 @@
     	    var checkedContent = getCheckedBoxContent();
     	    
     		if (checkedBoxes.length == 1) {
-    			var confirmMessage = "Are you sure you want to delete " + checkedBoxes[0].id;
+    			var confirmMessage = "Are you sure you want to delete the selected entry?";
     		} else {
-    			var confirmMessage = "Are you sure you want to delete the following entries: \n" + checkedContent;
+    			var confirmMessage = "Are you sure you want to delete the " + checkedBoxes.length + " selected entries?";
     		}
     			
     		if (confirm(confirmMessage)) {
