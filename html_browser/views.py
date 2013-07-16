@@ -16,9 +16,14 @@ import logging
 
 reqLogger = logging.getLogger('django.request')
 
-def index(request, errorText=None):
+def index(request):
     reqLogger.info('index ')
     reqLogger.debug(str(request))
+
+    errorText = None
+    if request.REQUEST.has_key('errorText'):
+        errorText = request.REQUEST['errorText']
+
     allFolders = Folder.objects.all()
     folders = []
     for folder in allFolders:
@@ -54,7 +59,11 @@ def hbLogin(request):
         errorText = 'Invalid login'
         reqLogger.error("empty userName")
     
-    return redirect(const.BASE_URL, errorText)
+    redirectUrl = const.BASE_URL
+
+    if errorText != None:
+        redirectUrl = redirectUrl + "?errorText=" + errorText
+    return redirect(redirectUrl)
 
 
 def hbLogout(request):
