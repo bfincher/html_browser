@@ -199,7 +199,10 @@ def content(request):
 
 def hbChangePassword(request):
     reqLogger.info("hbChangePassword")
-    c = RequestContext(request, {'const' : const})
+    c = RequestContext(request, 
+        {'const' : const,
+         'user' : request.user
+        })
     return render_to_response('registration/change_password.html', c)
 
 def hbChangePasswordResult(request):
@@ -219,13 +222,17 @@ def hbChangePasswordResult(request):
         errorMessage = "Incorrect current password"
         
     if errorMessage == None:
-        c = RequestContext(request, {'const' : const})
+        c = RequestContext(request, 
+	    {'const' : const,
+	     'user' : request.user,
+	    })
 	reqLogger.info("success")
         return render_to_response('registration/change_password_success.html', c)
     else:
         reqLogger.warn(errorMessage)
         c = RequestContext(request, {'errorMessage' : errorMessage,
-                                     'const' : const})
+                                     'const' : const,
+				     'user' : request.user})
         return render_to_response('registration/change_password_fail.html', c)
     
 def download(request):
