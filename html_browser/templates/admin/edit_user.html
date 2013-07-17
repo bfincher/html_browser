@@ -1,0 +1,83 @@
+<html>
+{% include "header.html" %}^
+    
+	<center>
+	<h1>Edit User {{ user.username }}</h1>
+	
+	<form id="form" action="{{ const.BASE_URL }}userAdmin" method="post">
+	<table class="UserAdminOuterTable">
+	<tr class="UserAdminOuterTable">
+		<td class="UserAdminOuterTable">
+			<input name=action type=hidden value=editUser />
+			<input name=userName type=hidden value="{{ user.username }}" />
+		</td>
+	</tr>
+	<tr class="UserAdminOuterTable">
+		<td class="UserAdminOuterTable">	
+			<table cellspacing=10>
+				<tr>
+					<td>Password: </td>
+					<td><input name=password type=password onkeyup="validatePassword('form')" /></td>
+					<td>Verify Password: </td>
+					<td><input name=verifyPassword type=password onkeyup="validatePassword('form')"/></td>
+				</tr>
+				<tr align="center">
+					<td colspan=4><font color="red"><p id="pwErrorText"></p></font></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr class="UserAdminOuterTable">
+		<td class="UserAdminOuterTable" colspan=2>
+			<table cellspacing=10 style="margin-left:auto;margin-right:auto">
+				<tr>
+					<td>Is Administrator</td>
+					<td>
+					    <input name="isAdministrator" type="checkbox" 
+						{% if user.is_staff %} checked="checked" {% endif %} 
+					    />
+					</td>					
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr class="UserAdminOuterTable">
+		<td class="UserAdminOuterTable" colspan=2>	
+			<table class="UserGroupTable">
+				{% for groupName in activeGroupNames %}
+					<tr class="UserGroupTable">
+						<td class="UserGroupTable"><input name="isGroup{{ groupName }}" type="checkbox" checked="checked" /> </td>
+						<td class="UserGroupTable">{{ groupName }}</td>
+					</tr>
+				{% endfor %}
+				{% for groupName in groupNames %}
+					<tr class="UserGroupTable">
+						<td class="UserGroupTable"><input name="isGroup{{ groupName }}" type="checkbox" checked="checked" /> </td>
+						<td class="UserGroupTable">{{ groupName }}</td>
+					</tr>
+				{% endfor %}
+			</table>
+		</td>
+	</tr>
+	<tr class="UserAdminOuterTable">
+		<td class="UserAdminOuterTable">	
+			<table cellspacing=10 style="margin-left:auto;margin-right:auto">
+				<tr>
+					<td><input id=Save name=submit type=submit value="Save"/></td>
+					<td><input name=submit type=submit value="Cancel"/></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	</form>	
+	
+	<br>
+	<input type="submit" value="Delete User" onclick="deleteUser('{{ user.username }}')"; />
+	
+	</center>
+
+<script src="{{ const.MEDIA_URL }}edit_user.js"></script>
+
+{% include "footer.html" %}
+

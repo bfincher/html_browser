@@ -36,7 +36,7 @@
 						 <li class="active"><a href="{{ const.BASE_URL }}">Home</a></li>
 						{% if user.is_authenticated %}
 							{% if user.is_staff %}
-								<li class="active"><a href="/hb/admin/">Administration  </a></li>
+								<li class="active"><a href="{{ const.BASE_URL }}hbAdmin">Administration  </a></li>
 							{% endif %}
 						{% endif %}
 

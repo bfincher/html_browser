@@ -13,6 +13,7 @@ from sendfile import sendfile
 import os
 from django.http import HttpResponse
 import logging
+from django.contrib.auth.models import User, Group
 
 reqLogger = logging.getLogger('django.request')
 
@@ -197,13 +198,54 @@ def content(request):
         template = 'content_thumbnail.html'
     return render_to_response(template, c)
 
+def hbAdmin(request):
+    reqLogger.info("admin")
+
+    c = RequestContext(request, 
+        {'const' : const,
+         'user' : request.user
+        })
+    return render_to_response('admin/admin.html', c)
+
+def userAdmin(request):
+    reqLogger.info("userAdmin")
+
+    c = RequestContext(request, 
+        {'const' : const,
+         'users' : User.objects.all(),
+        })
+    return render_to_response('admin/user_admin.html', c)
+
+def editUser(request):
+    userName = request.REQUEST['userName']
+    reqLogger.info("editUser: user = %s", userName)
+
+    user = User.objects.filter(username=userName)[0]
+
+    activeGroupNames = []
+    groupNames = []
+
+    for group in user.groups.all():
+        activeGroupNames.append(group.name)
+
+    for group in Group.objects.exclude(id__in = user.groups.all().values_list('id', flat=True)):
+        groupNames.append(group.name)
+
+    c = RequestContext(request, 
+        {'const' : const,
+         'user' : user,
+         'activeGroupNames' : activeGroupNames,
+         'groupNames' : groupNames,
+        })
+    return render_to_response('admin/edit_user.html', c)
+
 def hbChangePassword(request):
     reqLogger.info("hbChangePassword")
     c = RequestContext(request, 
         {'const' : const,
          'user' : request.user
         })
-    return render_to_response('registration/change_password.html', c)
+    return render_to_response('admin/change_password.html', c)
 
 def hbChangePasswordResult(request):
     user = request.user
@@ -227,13 +269,13 @@ def hbChangePasswordResult(request):
 	     'user' : request.user,
 	    })
 	reqLogger.info("success")
-        return render_to_response('registration/change_password_success.html', c)
+        return render_to_response('admin/change_password_success.html', c)
     else:
         reqLogger.warn(errorMessage)
         c = RequestContext(request, {'errorMessage' : errorMessage,
                                      'const' : const,
 				     'user' : request.user})
-        return render_to_response('registration/change_password_fail.html', c)
+        return render_to_response('admin/change_password_fail.html', c)
     
 def download(request):
     reqLogger.info("download")

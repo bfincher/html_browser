@@ -1,0 +1,40 @@
+<html>
+{% include "header.html" %}
+
+	<center>
+	<h1>Users</h1>
+	
+	<table class="table">
+		<tr>
+			<th> User Name </th>
+			<th> Groups </th>
+			<th> Is Administrator </th>
+		</tr>
+		
+		{% for user in users %}
+		<tr>
+			<td> <a href="{{ const.BASE_URL }}editUser?userName={{ user.username }}">{{ user.username }}</a> </td>
+			<td>
+				<ul>
+				{% for group in user.groups.add %}
+					<li>{{ group.name }}</li>
+				{% endfor %}
+				</ul>
+			</td>
+			<td>
+				{% if user.is_staff %}
+				Yes
+				{% else %}
+				No
+				{% endif %}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+	
+	<a href="add_user.jsp">Add User</a>
+	
+	</center>
+</body>
+
+</html>

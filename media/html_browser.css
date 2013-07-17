@@ -61,3 +61,26 @@ TH.UploadOuterTable
      border:5px solid #000;
      padding:15px;
 }
+
+TABLE.UserAdminOuterTable
+  {
+     width:500px;
+     text-align:center;
+  }
+
+TH.UserAdminOuterTable
+  {
+     text-align:center;
+     font-weight: bold;
+  }
+
+TR.UserAdminOuterTable
+  {
+     text-align:center;
+  }
+
+
+TD.UserAdminOuterTable
+  {
+     text-align:center;
+  }
