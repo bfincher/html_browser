@@ -62,25 +62,13 @@ TH.UploadOuterTable
      padding:15px;
 }
 
-TABLE.UserAdminOuterTable
-  {
-     width:500px;
-     text-align:center;
-  }
+/*
+table-noborder td {
+     border-top: none; 
+}
 
-TH.UserAdminOuterTable
-  {
-     text-align:center;
-     font-weight: bold;
-  }
-
-TR.UserAdminOuterTable
-  {
-     text-align:center;
-  }
-
-
-TD.UserAdminOuterTable
-  {
-     text-align:center;
-  }
+.table-noborder td,
+.table-noborder th {
+    border: 0;
+}
+*/

@@ -1,82 +1,93 @@
 {% extends "page.html" %}^
+
+{% block additional_header %}
+<style type="text/css">
+	body {
+		padding-top: 20px;
+		padding-bottom: 40px;
+	}
+
+	.container-narrow {
+		margin: 0 auto;
+		max-width: 700px;
+	}
+
+	.settings {
+		margin: 60px 0;
+	}
+
+
+</style>
+{% endblock %}
+
 {% block body %}
-    
-	<center>
-	<h1>Edit User {{ user.username }}</h1>
+<div class="container-narrow">    
+	<h1 style="margin-top: 50px;">Edit User</h1>
+	<h2>{{ user.username }}</h2>
+ 	<font color="red"><p id="pwErrorText"></p></font>
 	
 	<form id="form" action="{{ const.BASE_URL }}userAdmin" method="post">
-	<table class="UserAdminOuterTable">
-	<tr class="UserAdminOuterTable">
-		<td class="UserAdminOuterTable">
-			<input name=action type=hidden value=editUser />
-			<input name=userName type=hidden value="{{ user.username }}" />
-		</td>
-	</tr>
-	<tr class="UserAdminOuterTable">
-		<td class="UserAdminOuterTable">	
-			<table cellspacing=10>
-				<tr>
-					<td>Password: </td>
-					<td><input name=password type=password onkeyup="validatePassword('form')" /></td>
-					<td>Verify Password: </td>
-					<td><input name=verifyPassword type=password onkeyup="validatePassword('form')"/></td>
-				</tr>
-				<tr align="center">
-					<td colspan=4><font color="red"><p id="pwErrorText"></p></font></td>
-				</tr>
-			</table>
-		</td>
-	</tr>
-	<tr class="UserAdminOuterTable">
-		<td class="UserAdminOuterTable" colspan=2>
-			<table cellspacing=10 style="margin-left:auto;margin-right:auto">
-				<tr>
-					<td>Is Administrator</td>
-					<td>
-					    <input name="isAdministrator" type="checkbox" 
-						{% if user.is_staff %} checked="checked" {% endif %} 
-					    />
-					</td>					
-				</tr>
-			</table>
-		</td>
-	</tr>
-	<tr class="UserAdminOuterTable">
-		<td class="UserAdminOuterTable" colspan=2>	
-			<table class="UserGroupTable">
-				{% for groupName in activeGroupNames %}
-					<tr class="UserGroupTable">
-						<td class="UserGroupTable"><input name="isGroup{{ groupName }}" type="checkbox" checked="checked" /> </td>
-						<td class="UserGroupTable">{{ groupName }}</td>
-					</tr>
-				{% endfor %}
-				{% for groupName in groupNames %}
-					<tr class="UserGroupTable">
-						<td class="UserGroupTable"><input name="isGroup{{ groupName }}" type="checkbox" checked="checked" /> </td>
-						<td class="UserGroupTable">{{ groupName }}</td>
-					</tr>
-				{% endfor %}
-			</table>
-		</td>
-	</tr>
-	<tr class="UserAdminOuterTable">
-		<td class="UserAdminOuterTable">	
-			<table cellspacing=10 style="margin-left:auto;margin-right:auto">
-				<tr>
-					<td><input id=Save name=submit type=submit value="Save"/></td>
-					<td><input name=submit type=submit value="Cancel"/></td>
-				</tr>
-			</table>
-		</td>
-	</tr>
-	</table>
-	</form>	
-	
-	<br>
-	<input type="submit" value="Delete User" onclick="deleteUser('{{ user.username }}')"; />
-	
-	</center>
+		<input name=action type=hidden value=editUser />
+		<input name=userName type=hidden value="{{ user.username }}" />
+	<div class="row-fluid settings">
+	    <div class="span6">
+		Password:
+		<input name=password type=password onkeyup="validatePassword('form')" />
+	    </div>
+	    <div class="span6">
+		Verify Password:
+		<input name=verifyPassword type=password onkeyup="validatePassword('form')"/>
+	    </div>
+	</div>
 
+	<div class="row-fluid settings">
+	   <div class="span3">
+	       Is Administrator
+	   </div>
+	   <div class="span1">
+	       <input name="isAdministrator" type="checkbox" 
+		{% if user.is_staff %} checked="checked" {% endif %} 
+	       />
+	   </div>
+	</div>
+
+	{% for groupName in activeGroupNames %}
+	    <div class="row-fluid settings">
+		<div class="span1">
+		    <input name="isGroup{{ groupName }}" type="checkbox" checked="checked" />
+		</div>
+		<div class="span3">
+		    {{ groupName }}
+		</div>
+	    </div>
+	{% endfor %}
+
+	{% for groupName in groupNames %}
+	    <div class="row-fluid">
+		<div class="span1">
+		    <input name="isGroup{{ groupName }}" type="checkbox" checked="checked" /> 
+		</div>
+		<div class="span3">
+		    {{ groupName }}
+		</div>
+	    </div>
+	{% endfor %}
+	<div class="row-fluid settings">
+	    <div class="span3">
+	        <input class="btn" id=Save name=submit type=submit value="Save"/>
+	    </div>
+	    <div class="span3">
+	        <input class="btn" name=submit type=submit value="Cancel"/>
+	    </div>
+	</div>
+	<div class="row-fluid settings">
+	    <div class="span12">
+	        <input class="btn" type="submit" value="Delete User" onclick="deleteUser('{{ user.username }}')"; />
+	    </div>
+	</div>
+
+
+</div>
 <script src="{{ const.MEDIA_URL }}edit_user.js"></script>
 
 {% endblock %}
