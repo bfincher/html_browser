@@ -1,5 +1,5 @@
-<html>
-{% include "header.html" %}^
+{% extends "page.html" %}^
+{% block body %}
     
 	<center>
 	<h1>Edit User {{ user.username }}</h1>
@@ -79,5 +79,5 @@
 
 <script src="{{ const.MEDIA_URL }}edit_user.js"></script>
 
-{% include "footer.html" %}
+{% endblock %}
 
