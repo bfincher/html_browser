@@ -1,5 +1,5 @@
-{% include "content_header.html" %}
-
+{% extends "content_page.html" %}
+{% block body %}
 	<table class="table table-striped table-bordered table-hover table-condensed"> 
 		<col width="1%" />
 		<col width="20%" />
@@ -31,5 +31,4 @@
 		{% endfor %}
 	</table>
 			
-{% include "content_footer.html" %}
-{% include "footer.html" %}
+{% endblock %}

@@ -1,5 +1,6 @@
-{% include "header.html" %}
+{% extends "page.html" %}
 
+{% block additional_header %}
     <script language="javascript" type="text/javascript">
     
     currentFolder="{{ currentFolder }}";
@@ -16,7 +17,9 @@
     }       
 
     </script>
-</head>
+{% endblock %}
+
+{% block body %}
 	
 	<center>
 	<h3>Upload file to {{ currentFolder }} {{currentPath }}</h3>
@@ -58,4 +61,4 @@
 		</tr>
 	</table>	
 	</center>
-{% include "footer.html" %}
+{% endblock %}

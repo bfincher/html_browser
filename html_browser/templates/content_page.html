@@ -1,0 +1,45 @@
+{% extends "page.html" %}
+
+{% block additional_header %} 
+        <script>
+                setCurrentFolder('{{ currentFolder }}')
+                setCurrentPath('{{ currentPath }}')
+                setUserCanRead({{ userCanRead }})
+                setUserCanWrite({{ userCanWrite }})
+                setUserCanDelete({{ userCanDelete }})
+        </script>
+
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script type="text/javascript">
+          google.load("visualization", "1", {packages:["corechart"]});
+          google.setOnLoadCallback(drawChart);
+          function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+              ['Category', 'Percentage'],
+              ['Used',     {{ diskUsed }}],
+              ['Free',     {{ diskFree }}]
+            ]);
+
+            var options = {
+              title: 'Disk Usage for {{ currentFolder }} in {{ diskUnit }}'
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('disk_usage_content'));
+            chart.draw(data, options);
+          }
+        </script>
+
+<div id="disk_usage">
+    <div id="disk_usage_content"></div>
+    <a href="javascript:diskUsageHidePopup()">hide</a>
+</div>
+{% include "content_bar.html" %}
+{% endblock %}
+
+
+{% block body2 %} 
+    {% if currentDirEntries|length > 20 %}
+        {% include "content_bar.html" %}
+    {% endif %}
+{% endblock %}
+
