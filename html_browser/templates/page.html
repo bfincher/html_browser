@@ -1,25 +1,29 @@
+<html>
+{% block header %} 
 <head>
-	<title>HTML File Explorer</title>
+        <title>HTML File Explorer</title>
         <link rel="stylesheet" href="{{ const.MEDIA_URL }}/html_browser.css" type="text/css" media="screen" title="no title" charset="utf-8">
-	<link rel="stylesheet" href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap.css">
-	<link href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
-	<!-- <link href="{{ const.MEDIA_URL }}bootstrap/css/docs.css" rel="stylesheet"> -->
-	<link href="{{ const.MEDIA_URL }}pretify.css" rel="stylesheet">
-	<style type="text/css">
-      		body {
-		        padding-top: 60px;
-			padding-bottom: 40px;
-      		}
-	</style>
-	<link href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+        <link rel="stylesheet" href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap.css">
+        <link href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+        <!-- <link href="{{ const.MEDIA_URL }}bootstrap/css/docs.css" rel="stylesheet"> -->
+        <link href="{{ const.MEDIA_URL }}pretify.css" rel="stylesheet">
+        <style type="text/css">
+                body {
+                        padding-top: 60px;
+                        padding-bottom: 40px;
+                }
+        </style>
+        <link href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 
-	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-	<!--[if lt IE 9]>
-		<script src="{{ const.MEDIA_URL }}bootstrap/js/html5shiv.js"></script>
-	<![endif]-->
+        <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+                <script src="{{ const.MEDIA_URL }}bootstrap/js/html5shiv.js"></script>
+        <![endif]-->
 
     <script type="text/javascript" src="{{ const.MEDIA_URL }}folder_content.js"></script>
 </head>
+{% endblock %} 
+{% block additional_header %} {% endblock %}
 
 <body>		
 	<div class="navbar navbar-inverse navbar-fixed-top">
@@ -98,3 +102,24 @@
 	{% if errorText != None %}
 	<div id="error"> {{ errorText }}</div><br>
 	{% endif %}
+
+{% block body %} {% endblock %}
+
+{% block body2 %} {% endblock %}
+
+ <!-- Placed at the end of the document so the pages load faster -->
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/jquery.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-transition.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-alert.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-modal.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-dropdown.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-scrollspy.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-tab.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-tooltip.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-popover.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-button.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-collapse.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-carousel.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-typeahead.js"></script>
+</body>
+</html>
