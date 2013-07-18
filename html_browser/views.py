@@ -239,6 +239,21 @@ def editUser(request):
         })
     return render_to_response('admin/edit_user.html', c)
 
+def addUser(request):
+    reqLogger.info("addUser")
+
+    groupNames = []
+
+    for group in Group.objects.all():
+        groupNames.append(group.name)
+
+    c = RequestContext(request, 
+        {'const' : const,
+         'groupNames' : groupNames,
+        })
+
+    return render_to_response('admin/add_user.html', c)
+
 def hbChangePassword(request):
     reqLogger.info("hbChangePassword")
     c = RequestContext(request, 

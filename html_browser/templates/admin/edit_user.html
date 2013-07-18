@@ -1,4 +1,4 @@
-{% extends "page.html" %}^
+{% extends "page.html" %}
 
 {% block additional_header %}
 <style type="text/css">
@@ -72,6 +72,7 @@
 		</div>
 	    </div>
 	{% endfor %}
+
 	<div class="row-fluid settings">
 	    <div class="span3">
 	        <input class="btn" id=Save name=submit type=submit value="Save"/>
@@ -88,7 +89,7 @@
 
 
 </div>
-<script src="{{ const.MEDIA_URL }}edit_user.js"></script>
+<script src="{{ const.MEDIA_URL }}addUser"></script>
 
 {% endblock %}
 

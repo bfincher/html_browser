@@ -16,7 +16,7 @@
 			<td> <a href="{{ const.BASE_URL }}editUser?userName={{ user.username }}">{{ user.username }}</a> </td>
 			<td>
 				<ul>
-				{% for group in user.groups.add %}
+				{% for group in user.groups.all %}
 					<li>{{ group.name }}</li>
 				{% endfor %}
 				</ul>
@@ -32,7 +32,7 @@
 		{% endfor %}
 	</table>
 	
-	<a href="add_user.jsp">Add User</a>
+	<a href="{{ const.BASE_URL }}addUser">Add User</a>
 	
 	</center>
 {% endblock %}
