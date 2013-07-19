@@ -1,0 +1,82 @@
+{% extends "page.html" %}
+{% block additional_header %}
+<style type="text/css">
+        body {
+                padding-top: 20px;
+                padding-bottom: 40px;
+        }
+
+        .container-narrow {
+                margin: 0 auto;
+                max-width: 700px;
+        }
+
+        .settings {
+                margin: 60px 0;
+        }
+
+
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-narrow">
+	<h1 style="margin-top: 50px;">Add User</h1>
+	<font color="red"><p id="userNameErrorText"></p></font>
+	<font color="red"><p id="pwErrorText"></p></font>
+	
+	<form id="form" action="{{ const.BASE_URL }}addUserAction/" method="post"> {% csrf_token %}
+		<input name=action type=hidden value=addUser />
+
+	<div class="row-fluid settings">
+		<div class="span6">
+		    User Name <input id=userName name=userName type=text onkeyup="validateUserName('userName', 'Save')"/>
+		</div>
+	</div>
+	
+	<div class="row-fluid settings">
+	    <div class="span6">
+	        <td>Password: </td>
+	        <input id="password" name=password type=password onkeyup="validatePassword('password', 'verifyPassword', 'Save')"/></td>
+	    </div>
+	    <div class="span6">
+	        Verify Password:
+		<input id="verifyPassword" name=verifyPassword type=password onkeyup="validatePassword('password', 'verifyPassword', 'Save')"/>
+	    </div>
+	</div>
+
+	<div class="row-fluid settings">
+	     <div class="span3">
+                 Is Administrator
+             </div>
+             <div class="span1">
+                 <input name="isAdministrator" type="checkbox" />
+             </div>
+       </div>
+
+
+	{% for groupName in groupNames %}
+            <div class="row-fluid">
+                <div class="span1">
+                    <input name="isGroup{{ groupName }}" type="checkbox"  />
+                </div>
+                <div class="span3">
+                    {{ groupName }}
+	        </div>
+            </div>
+        {% endfor %}
+
+	<div class="row-fluid settings">
+            <div class="span3">
+                <input class="btn" id=Save name=submit type=submit value="Save" disabled/>
+            </div>
+            <div class="span3">
+                <input class="btn" name=submit type=submit value="Cancel"/>
+            </div>
+        </div>
+
+	</form>
+</div>
+
+<script src="{{ const.MEDIA_URL }}add_user.js"></script>
+{% endblock %}

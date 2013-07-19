@@ -220,20 +220,20 @@ def editUser(request):
     userName = request.REQUEST['userName']
     reqLogger.info("editUser: user = %s", userName)
 
-    user = User.objects.filter(username=userName)[0]
+    editUser = User.objects.get(username=userName)
 
     activeGroupNames = []
     groupNames = []
 
-    for group in user.groups.all():
+    for group in editUser.groups.all():
         activeGroupNames.append(group.name)
 
-    for group in Group.objects.exclude(id__in = user.groups.all().values_list('id', flat=True)):
+    for group in Group.objects.exclude(id__in = editUser.groups.all().values_list('id', flat=True)):
         groupNames.append(group.name)
 
     c = RequestContext(request, 
         {'const' : const,
-         'user' : user,
+         'editUser' : editUser,
          'activeGroupNames' : activeGroupNames,
          'groupNames' : groupNames,
         })
@@ -253,6 +253,36 @@ def addUser(request):
         })
 
     return render_to_response('admin/add_user.html', c)
+
+def addUserAction(request):
+    reqLogger.info("addUserAction")
+
+    error = None
+    userName = request.REQUEST['userName']
+    password = request.REQUEST['password']
+
+    isAdmin = request.REQUEST.has_key('isAdministrator')
+
+    user = User()
+    user.username = userName;
+    user.set_password(password)
+    user.is_staff = isAdmin
+    user.is_superuser = isAdmin
+    user.is_active = True
+    user.save()
+
+    userGroups = user.groups.all()
+
+    for key in request.REQUEST:
+        if key.startswith("isGroup"):
+	    groupName = key[7:]
+	    group = Group.objects.get(name=groupName)
+	    userGroups.append(group) 
+
+    user.save()
+
+    redirectUrl = const.BASE_URL + "userAdmin/?status=User Added"
+    return redirect(redirectUrl)           
 
 def hbChangePassword(request):
     reqLogger.info("hbChangePassword")

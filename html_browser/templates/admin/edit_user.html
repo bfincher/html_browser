@@ -23,12 +23,12 @@
 {% block body %}
 <div class="container-narrow">    
 	<h1 style="margin-top: 50px;">Edit User</h1>
-	<h2>{{ user.username }}</h2>
+	<h2>{{ editUser.username }}</h2>
  	<font color="red"><p id="pwErrorText"></p></font>
 	
-	<form id="form" action="{{ const.BASE_URL }}userAdmin" method="post">
+	<form id="form" action="{{ const.BASE_URL }}userAdmin" method="post"> {% csrf_token %}
 		<input name=action type=hidden value=editUser />
-		<input name=userName type=hidden value="{{ user.username }}" />
+		<input name=userName type=hidden value="{{ editUser.username }}" />
 	<div class="row-fluid settings">
 	    <div class="span6">
 		Password:
@@ -46,7 +46,7 @@
 	   </div>
 	   <div class="span1">
 	       <input name="isAdministrator" type="checkbox" 
-		{% if user.is_staff %} checked="checked" {% endif %} 
+		{% if editUser.is_staff %} checked="checked" {% endif %} 
 	       />
 	   </div>
 	</div>
@@ -65,7 +65,7 @@
 	{% for groupName in groupNames %}
 	    <div class="row-fluid">
 		<div class="span1">
-		    <input name="isGroup{{ groupName }}" type="checkbox" checked="checked" /> 
+		    <input name="isGroup{{ groupName }}" type="checkbox"  /> 
 		</div>
 		<div class="span3">
 		    {{ groupName }}
@@ -83,7 +83,7 @@
 	</div>
 	<div class="row-fluid settings">
 	    <div class="span12">
-	        <input class="btn" type="submit" value="Delete User" onclick="deleteUser('{{ user.username }}')"; />
+	        <input class="btn" type="submit" value="Delete User" onclick="deleteUser('{{ editUser.username }}')"; />
 	    </div>
 	</div>
 
