@@ -3,10 +3,11 @@ from django.template import RequestContext
 from html_browser.models import Folder
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from utils import getParentDirLink
+import html_browser.utils
 from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch, Clipboard, handlePaste, handleDelete,\
     getPath, handleRename, handleDownloadZip, deleteOldFiles,\
     handleFileUpload, handleZipUpload, getDiskPercentFree, getPath,\
-    getDiskUsageFormatted
+    getDiskUsageFormatted, handleAddUser, handleEditUser, handleDeleteUser
 from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
@@ -207,8 +208,29 @@ def hbAdmin(request):
         })
     return render_to_response('admin/admin.html', c)
 
+def userAdminAction(request):
+    reqLogger.info("userAdminAction %s", request)
+
+    errorText = ""
+
+    action = request.REQUEST['action']
+    if action == 'editUser':
+        handleEditUser(request.POST)
+    elif action == 'addUser':
+        errorText = handleAddUser(request.POST)
+    elif action == 'deleteUser':
+        handleDeleteUser(request)
+    else:
+        raise RuntimeError('Unknown action ' + action)
+
+    redirectUrl = const.BASE_URL + "userAdmin/"
+    if errorText != None:
+        redirectUrl = redirectUrl + "?errorText=" + errorText
+
+    return redirect(redirectUrl)           
+
 def userAdmin(request):
-    reqLogger.info("userAdmin")
+    reqLogger.info("userAdmins")
 
     c = RequestContext(request, 
         {'const' : const,
@@ -253,36 +275,6 @@ def addUser(request):
         })
 
     return render_to_response('admin/add_user.html', c)
-
-def addUserAction(request):
-    reqLogger.info("addUserAction")
-
-    error = None
-    userName = request.REQUEST['userName']
-    password = request.REQUEST['password']
-
-    isAdmin = request.REQUEST.has_key('isAdministrator')
-
-    user = User()
-    user.username = userName;
-    user.set_password(password)
-    user.is_staff = isAdmin
-    user.is_superuser = isAdmin
-    user.is_active = True
-    user.save()
-
-    userGroups = user.groups.all()
-
-    for key in request.REQUEST:
-        if key.startswith("isGroup"):
-	    groupName = key[7:]
-	    group = Group.objects.get(name=groupName)
-	    userGroups.append(group) 
-
-    user.save()
-
-    redirectUrl = const.BASE_URL + "userAdmin/?status=User Added"
-    return redirect(redirectUrl)           
 
 def hbChangePassword(request):
     reqLogger.info("hbChangePassword")

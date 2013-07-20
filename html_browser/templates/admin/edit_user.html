@@ -13,7 +13,7 @@
 	}
 
 	.settings {
-		margin: 60px 0;
+		margin: 40px 0;
 	}
 
 
@@ -26,17 +26,17 @@
 	<h2>{{ editUser.username }}</h2>
  	<font color="red"><p id="pwErrorText"></p></font>
 	
-	<form id="form" action="{{ const.BASE_URL }}userAdmin" method="post"> {% csrf_token %}
+	<form id="form" action="{{ const.BASE_URL }}userAdminAction/" method="post"> {% csrf_token %}
 		<input name=action type=hidden value=editUser />
 		<input name=userName type=hidden value="{{ editUser.username }}" />
 	<div class="row-fluid settings">
 	    <div class="span6">
 		Password:
-		<input name=password type=password onkeyup="validatePassword('form')" />
+		<input id="password" name=password type=password onkeyup="validatePassword('password', 'verifyPassword', 'Save')"/></td>
 	    </div>
 	    <div class="span6">
 		Verify Password:
-		<input name=verifyPassword type=password onkeyup="validatePassword('form')"/>
+		<input id="verifyPassword" name=verifyPassword type=password onkeyup="validatePassword('password', 'verifyPassword', 'Save')"/>
 	    </div>
 	</div>
 
@@ -81,6 +81,7 @@
 	        <input class="btn" name=submit type=submit value="Cancel"/>
 	    </div>
 	</div>
+        </form>
 	<div class="row-fluid settings">
 	    <div class="span12">
 	        <input class="btn" type="submit" value="Delete User" onclick="deleteUser('{{ editUser.username }}')"; />
@@ -89,7 +90,7 @@
 
 
 </div>
-<script src="{{ const.MEDIA_URL }}addUser"></script>
+<script src="{{ const.MEDIA_URL }}edit_user.js"></script>
 
 {% endblock %}
 

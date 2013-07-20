@@ -22,7 +22,7 @@
 
     function deleteUser(userName) {
         if (confirm('Are you sure you want to delete the user ' + userName + '?')) {
-                var url = "user_admin.jsp?action=deleteUser"
+                var url = "/hb/userAdminAction/?action=deleteUser"
                         + "&userToDelete=" + encodeURI(userName);
 
                 window.location = url;

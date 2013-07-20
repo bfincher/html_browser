@@ -16,6 +16,7 @@ from math import floor
 import collections
 import re
 import logging
+from annoying.functions import get_object_or_None
 
 logger = logging.getLogger('html_browser.utils')
 filesToDelete = []
@@ -356,3 +357,64 @@ def getDiskUsage(path):
     else:
         raise NotImplementedError("platform not supported")
 
+def __assignGroupsToUser(user,request):
+
+    user.groups.clear()
+
+    for key in request:
+        if key.startswith("isGroup"):
+            logger.info("processing key %s", key)
+            groupName = key[7:]
+            logger.info("groupName = %s", groupName)
+            group = Group.objects.get(name=groupName)
+            user.groups.add(group)
+
+def handleEditUser(request):
+    userName = request['userName']
+
+    if request.has_key('password'):
+        password = request['password']
+
+    isAdmin = request.has_key('isAdministrator')
+
+    user = User.objects.get(username=userName)
+    if password:
+        user.set_password(password)
+    user.is_staff = isAdmin
+    user.is_superuser = isAdmin
+    user.is_active = True
+    user.save()
+
+    __assignGroupsToUser(user, request)
+    userGroups = user.groups.all()
+
+    user.save()
+
+def handleAddUser(request):
+    userName = request['userName']
+
+    user = get_object_or_None(User, username=userName)
+    if user != None:
+        return "User %s already exists" % userName
+
+    password = request['password']
+
+    isAdmin = request.has_key('isAdministrator')
+
+    user = User()
+    user.username = userName;
+    user.set_password(password)
+    user.is_staff = isAdmin
+    user.is_superuser = isAdmin
+    user.is_active = True
+    user.save()
+
+    __assignGroupsToUser(user, request)
+
+    user.save()
+
+def handleDeleteUser(request):
+
+    user = User.objects.get(username=request.REQUEST['userToDelete'])
+    logger.info("Deleting user %s", user)
+    user.delete()
