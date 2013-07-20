@@ -7,7 +7,8 @@ import html_browser.utils
 from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch, Clipboard, handlePaste, handleDelete,\
     getPath, handleRename, handleDownloadZip, deleteOldFiles,\
     handleFileUpload, handleZipUpload, getDiskPercentFree, getPath,\
-    getDiskUsageFormatted, handleAddUser, handleEditUser, handleDeleteUser
+    getDiskUsageFormatted, handleAddUser, handleEditUser, handleDeleteUser,\
+    handleAddGroup, handleDeleteGroup
 from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
@@ -214,10 +215,8 @@ def groupAdminAction(request):
     errorText = ""
 
     action = request.REQUEST['action']
-    if action == 'editGroup':
-        handleEditGroup(request.POST)
-    elif action == 'addGroup':
-        errorText = handleAddGroup(request.POST)
+    if action == 'addGroup':
+        errorText = handleAddGroup(request)
     elif action == 'deleteGroup':
         handleDeleteGroup(request)
     else:
@@ -231,19 +230,17 @@ def groupAdminAction(request):
     pass
 
 def groupAdmin(request):
-    reqLogger.info("groupAdmins")
+    reqLogger.info("groupAdmin")
+
+    groups = []
+    for group in Group.objects.all():
+        groups.append(group.name)
 
     c = RequestContext(request, 
         {'const' : const,
-         'users' : User.objects.all(),
+         'groups' : groups,
         })
-    return render_to_response('admin/user_admin.html', c)
-
-def editGroup(request):
-    pass
-
-def addGroup(request):
-    pass
+    return render_to_response('admin/group_admin.html', c)
 
 def userAdminAction(request):
     reqLogger.info("userAdminAction %s", request)

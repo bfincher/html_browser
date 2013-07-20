@@ -414,7 +414,24 @@ def handleAddUser(request):
     user.save()
 
 def handleDeleteUser(request):
-
     user = User.objects.get(username=request.REQUEST['userToDelete'])
     logger.info("Deleting user %s", user)
     user.delete()
+
+def handleAddGroup(request):
+    groupName = request.REQUEST['groupName']
+
+    group = get_object_or_None(Group, name=groupName)
+
+    if group != None:
+        return "Group %s already exists" % groupName
+
+    group = Group()
+    group.name = groupName
+    group.save()
+
+def handleDeleteGroup(request):
+    groupName = request.REQUEST['groupToDelete']
+
+    group = Group.objects.get(name=groupName)
+    group.delete()
