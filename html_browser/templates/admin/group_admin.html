@@ -1,0 +1,25 @@
+{% extends "page.html" %}
+{% block body %}
+
+	<center>
+	<h1>Groups</h1>
+	
+	<table class="table">
+		<tr>
+			<th> Group Name </th>
+		</tr>
+		
+                {% for group in groups %}
+		<tr>
+			<td> <a href="{{ const.BASE_URL }}editGroup?groupName={{ group }}">{{ group }} </a></td>
+		</tr>
+		{% endfor %}
+	</table>
+	
+	<br>
+	<a href="{{ const.BASE_URL }}addGroup">Add Group</a>
+	
+	</center>
+</body>
+
+</html>

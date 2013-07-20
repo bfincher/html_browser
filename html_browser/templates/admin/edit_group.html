@@ -1,0 +1,33 @@
+<html>
+<head>
+<%@ page language="java" import="com.fincher.html_browser.*" %>
+<jsp:useBean id="browserBean" scope="page" class="com.fincher.html_browser.BrowserBean" />
+<%browserBean.processRequest(request,response);%>
+<%out.print(BrowserBean.getHtmlHead(request)); %>
+</head>
+
+<body>
+	<%
+	for (String str: browserBean.getHeader()) {
+	    out.println(str);
+	}
+	%>	
+	
+	<center>
+	<h1>Group <%request.getParameter("groupName");%></h1>
+	
+	<%if (browserBean.isAdministrator()) {%>
+	
+	<form method="post" action="group_admin.jsp">
+		<input name=action type=hidden value="deleteGroup" />
+		<input name=submit type=submit value="Delete Group" />
+		<br><input name=submit type=submit value="Cancel" />
+	</form>		
+	
+	<%} else {%>
+	<div id="error">You are not authorized to view this page</div>
+	<%}%>
+	</center>
+</body>
+
+</html>

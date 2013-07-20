@@ -208,6 +208,43 @@ def hbAdmin(request):
         })
     return render_to_response('admin/admin.html', c)
 
+def groupAdminAction(request):
+    reqLogger.info("groupAdminAction %s", request)
+
+    errorText = ""
+
+    action = request.REQUEST['action']
+    if action == 'editGroup':
+        handleEditGroup(request.POST)
+    elif action == 'addGroup':
+        errorText = handleAddGroup(request.POST)
+    elif action == 'deleteGroup':
+        handleDeleteGroup(request)
+    else:
+        raise RuntimeError('Unknown action ' + action)
+
+    redirectUrl = const.BASE_URL + "groupAdmin/"
+    if errorText != None:
+        redirectUrl = redirectUrl + "?errorText=" + errorText
+
+    return redirect(redirectUrl)           
+    pass
+
+def groupAdmin(request):
+    reqLogger.info("groupAdmins")
+
+    c = RequestContext(request, 
+        {'const' : const,
+         'users' : User.objects.all(),
+        })
+    return render_to_response('admin/user_admin.html', c)
+
+def editGroup(request):
+    pass
+
+def addGroup(request):
+    pass
+
 def userAdminAction(request):
     reqLogger.info("userAdminAction %s", request)
 
