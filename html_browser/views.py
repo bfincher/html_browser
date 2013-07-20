@@ -245,6 +245,9 @@ def groupAdmin(request):
 def userAdminAction(request):
     reqLogger.info("userAdminAction %s", request)
 
+    if not request.user.is_staff:
+        raise RuntimeError("User is not an admin")
+
     errorText = ""
 
     action = request.REQUEST['action']
@@ -266,6 +269,9 @@ def userAdminAction(request):
 def userAdmin(request):
     reqLogger.info("userAdmins")
 
+    if not request.user.is_staff:
+        raise RuntimeError("User is not an admin")
+
     c = RequestContext(request, 
         {'const' : const,
          'users' : User.objects.all(),
@@ -273,6 +279,9 @@ def userAdmin(request):
     return render_to_response('admin/user_admin.html', c)
 
 def editUser(request):
+    if not request.user.is_staff:
+        raise RuntimeError("User is not an admin")
+
     userName = request.REQUEST['userName']
     reqLogger.info("editUser: user = %s", userName)
 
@@ -297,6 +306,9 @@ def editUser(request):
 
 def addUser(request):
     reqLogger.info("addUser")
+
+    if not request.user.is_staff:
+        raise RuntimeError("User is not an admin")
 
     groupNames = []
 
