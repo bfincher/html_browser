@@ -1,6 +1,9 @@
+from django import template
 from django.db import models
 from django.contrib.auth.models import User, Group  
 from urllib import quote_plus
+
+register = template.Library()
 
 CAN_READ = 'R'
 CAN_WRITE = 'W'

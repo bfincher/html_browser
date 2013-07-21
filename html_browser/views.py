@@ -225,8 +225,34 @@ def addFolder(request):
     pass
 
 def editFolder(request):
-    pass
+    reqLogger.info("editFolder: %s", request)
 
+    folderName = request.REQUEST['name']
+    folder = Folder.objects.get(name = folderName)
+
+    userIds = []
+    userPerms = UserPermission.objects.filter(folder.name = folderName)
+    for perm in userPerms:
+        userIds.append(perm.user.id)
+
+    usersNotInFolder = User.objects.exclude(id__in = userIds)
+
+    groupIds = []
+    groupPerms = GroupPermission.objects.filter(folder.name = foldername)
+    for perm un groupPerms:
+        groupIds.append(perm.group.id)
+
+    groupsNotInFolder = Group.objects.exclude(id__in = groupIds)
+
+    c = RequestContext(request,
+        {'const' : const,
+	 'folder' : folder,
+         'usersNotAssignedToFolder' : usersNotInFolder,
+         'groupsNotAssignedToFolder' : groupsNotInFolder,
+	 'groupPermissions' : groupPerms,
+	 'userPermissions' : userPerms,
+        })
+    return render_to_response('admin/folder_admin.html', c)
 def groupAdminAction(request):
     reqLogger.info("groupAdminAction %s", request)
 
