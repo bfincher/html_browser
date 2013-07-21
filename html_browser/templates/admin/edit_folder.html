@@ -1,0 +1,128 @@
+{% extends "page.html" %}
+{% block body %}
+    
+	<div id="add-user-permission" >
+		<h1>Add User Permission</h1>
+		User:
+		<select name="newUser" id="newUser">
+			{% for user in usersNotAssignedToFolder %}
+			<option value="{{ user.username }}">{{ user.username }}</option>
+			{% endfor %}
+		</select>
+		<br>
+		<input class="btn" type="submit" name="submit" value="Submit" onclick="addRow('permissionTable', 'newUser', 'user');hideDialog('add-user-permission');"/>
+		<input class="btn" type="button" name="submit" value="Cancel" onclick="hideDialog('add-user-permission');"/>										
+	</div>
+	
+	<div id="add-group-permission" >
+		<h1>Add Group Permission</h1>
+		Group:
+		<select name="newGroup" id="newGroup">
+			{% for group in groupsNotAssignedToFolder %}
+			<option value="{{ group.name }}">{{ group.name }}</option>
+			{% endfor %}
+		</select>
+		<br>
+		<input class="btn" type="submit" name="submit" value="Submit" onclick="addRow('permissionTable', 'newGroup', 'group');hideDialog('add-group-permission');"/>
+		<input class="btn" type="button" name="submit" value="Cancel" onclick="hideDialog('add-group-permission');"/>										
+	</div>
+		
+	<center>
+	<h1>Edit Folder {{ folder.name }}</h1>
+	<br>
+	
+	
+       {% if erorText %}
+           <div id="error"><p>{{ errorText }}</p></div>
+       {% endif %}
+	
+	<form id="form" action="{{ const.MEDIA_URL }}folderAdmin/" method="post">
+		<input name=action type=hidden value=editFolder />
+		<input name=name type=hidden value="{{ folder.name }}" />
+		<table cellspacing="10">			
+			<tr>
+				<td>Directory</td>
+				<td><input name="directory" type="text" value="{{ folder.localPath }}"/></td>
+			</tr>
+		</table>
+		
+		<table id="permissionTable">
+			<caption>Folder Permissions</caption>
+			<tr>
+				<th>User/Group</th>
+				<th>Read</th>
+				<th>Write</th>
+				<th>Delete</th>
+			</tr>
+		
+			{% for groupPerm in groupPermissions %}
+			<tr>				
+				<td><img src="{{ const.MEDIA_URL }}User-Group-icon.png">{{ groupPerm.group.name }}</td>
+				<td><input type="checkbox" name="{{ groupPerm|readId }}" id="{{ groupPerm|readId }}" checked=checked {{ groupPermission|readDisabled }}/> </td>
+				<td><input type="checkbox" name="{{ groupPerm|writeId }}" id="{{ groupPerm|writeId }}" {{ groupPerm|writeChecked }} {{ groupPerm|writeDisabled }} onclick="writeClicked('{{ groupPerm|writeId }}', '{{ groupPerm|readId }}');"/> </td>
+				<td><input type="checkbox" name="{{ groupPerm|deleteId }}" id="{{ groupPerm|deleteId }}" {{ groupPerm|deleteChecked }} onclick="deleteClicked('{{ groupPerm|deleteId }}', '{{ groupPerm|writeId }}', '{{ groupPerm|readId }}');"> </td>				
+			</tr>
+			{% endfor %}
+			
+			{% for userPerm in userPermissions %}
+				String userName = UserUtilities.getUserName(perm.getUserOrGroupId());
+				String readId = "user-" + userName + "-read";
+				String writeId = "user-" + userName + "-write";
+				String deleteId = "user-" + userName + "-delete";
+				String readChecked = "";
+				String writeChecked = "";
+				String deleteChecked = "";
+				String readDisabled = "";
+				String writeDisabled = "";
+				
+				switch (perm.getPermission()) {
+				case none:
+					break;
+					
+				case readWriteAndDelete:
+					deleteChecked = "checked=checked";
+					writeDisabled = "disabled=disabled";
+					
+				case readAndWrite:
+					writeChecked = "checked=checked";
+					readDisabled = "disabled=disabled";
+					
+				case readOnly:
+					readChecked = "checked=checked";
+																		
+				}
+			%>
+			<tr>				
+				<td><img src="{{ const.MEDIA_URL }}Administrator-icon.png"> {{ userPerm.user.username }}</td>
+				<td><input type="checkbox" name="{{ userPerm|readId }}" id="{{ userPerm|readId }}" checked=checked {{ userPerm|readDisabled }}/> </td>
+				<td><input type="checkbox" name="{{ userPerm|writeId }}" id="{{ userPerm|writeId }}" {{ userPerm|writeChecked }} {{ userPerm|writeDisabled }} onclick="writeClicked('{{ userPerm|writeId }}', '{{ userPerm|readId }}');"/> </td>
+				<td><input type="checkbox" name="{{ userPerm|deleteId }}" id="{{ userPerm|deleteId }}" {{ userPerm|deleteChecked }} onclick="deleteClicked('{{ userPerm|deleteId }}', '{{ userPerm|writeId }}', '{{ userPerm|readId }}');"> </td>				
+			</tr>
+			{% endfor %}
+			
+			<tr>
+				<td>
+					<a href="javascript:showDialog('add-group-permission');">Add Group Permission</a>
+				</td>
+			</tr>
+			<tr>	
+				<td>
+				<a href="javascript:showDialog('add-user-permission');">Add User Permission</a>
+				</td>
+			</tr>
+		</table>
+		<br>
+		
+		<table cellspacing="10">
+			<tr>
+				<td><input name="submit" type="submit" value="Save" /></td>
+				<td><input name="submit" type="submit" value="Cancel" /></td>
+			</tr>
+		</table>
+	</form>
+	bookmark
+	<p><input type=submit value="Delete Folder" onclick="confirmDelete('{{ folder.name }}');" />
+	
+	</center>
+
+{% endblock %}

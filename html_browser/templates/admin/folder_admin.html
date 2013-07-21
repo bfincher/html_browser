@@ -1,0 +1,40 @@
+{% extends "page.html" %}
+{% block additional_header %}
+<style type="text/css">
+    .center-table
+    {
+        margin: 0 auto !important;
+        float: none !important;
+    }
+
+    .center-table td
+    {
+        text-align: center;
+    }
+</style>
+{% endblock %}
+{% block body %}
+	
+	<center>
+	<h1>Folders</h1>
+	
+	<table class="span5 center-table">
+		<tr>
+			<th>Name</th>
+			<th>Directory</th>
+		</tr>
+		
+		{% for folder in folders %}
+		<tr>
+			<td><a href="{{ const.BASE_URL }}editFolder/?name={{ folder.name }}">{{ folder.name }}</a></td>
+			<td>{{ folder.localPath }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+	
+	<br>
+	<a href="{{ const.BASE_URL }}addFolder/">Add Folder</a>
+	
+	
+	</center>
+{% endblock %}
