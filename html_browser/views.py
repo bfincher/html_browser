@@ -209,6 +209,24 @@ def hbAdmin(request):
         })
     return render_to_response('admin/admin.html', c)
 
+def folderAdminAction(request):
+    pass
+
+def folderAdmin(request):
+    reqLogger.info("folderAdmin")
+
+    c = RequestContext(request,
+        {'const' : const,
+         'folders' : Folder.objects.all(),
+        })
+    return render_to_response('admin/folder_admin.html', c)
+
+def addFolder(request):
+    pass
+
+def editFolder(request):
+    pass
+
 def groupAdminAction(request):
     reqLogger.info("groupAdminAction %s", request)
 

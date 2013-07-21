@@ -84,25 +84,91 @@ class Folder(models.Model):
         else:
             return self.__checkGroupPerm__(user, CAN_DELETE)                    
     
-class UserPermission(models.Model):
-    user = models.ForeignKey(User)
+class Permission(models.Model):
     folder = models.ForeignKey(Folder)
     permission = models.CharField(max_length = 1,
                                  choices = permChoices,
                                  default = CAN_READ)    
+
+    class Meta:
+        abstract = True
+
+    @register.filter
+    def readId(self):
+        return "group-" + self.group.name + "-read"
+
+    @register.filter
+    def writeId(self):
+        return "group-" + self.group.name + "-write"
+
+    @register.filter
+    def deleteId(self):
+        return "group-" + self.group.name + "-ddelete"
+
+    @register.filter
+    def readDisabled(self):
+        if self.permission == 'R':
+	    return ""
+	else:
+	    return "disabled=disabled"
+
+    @register.filter
+    def writeChecked(self):
+        if self.permission == 'R':
+	    return ""
+	else:
+	    return "checked=checked"
+
+    @register.filter
+    def writeDisabled(self):
+        if self.permission == 'D':
+	    return "disabled=disabled"
+	else:
+	    return ""
+
+    @register.filter
+    def deleteChecked(self):
+        if self.permission == 'D':
+	    return "checked=checked"
+	else:
+	    return ""
+
+class UserPermission(Permission):
+    user = models.ForeignKey(User)
     
     def __str__(self):
         return self.folder.name + " " + self.user.username + " " + str(self.permission)
     
     def canRead(self):
         return self.permission == CAN_READ
+
+    @register.filter
+    def readId(self):
+        return "user-" + self.user.name + "-read"
+
+    @register.filter
+    def writeId(self):
+        return "user-" + self.user.name + "-write"
+
+    @register.filter
+    def deleteId(self):
+        return "user-" + self.user.name + "-ddelete"
     
-class GroupPermission(models.Model):
+class GroupPermission(Permission):
     group = models.ForeignKey(Group)
-    folder = models.ForeignKey(Folder)
-    permission = models.CharField(max_length = 1,
-                                 choices = permChoices,
-                                 default = CAN_READ)
     
     def __str__(self):
         return self.folder.name + " " + self.group.name + " " + str(self.permission)    
+
+    @register.filter
+    def readId(self):
+        return "group-" + self.group.name + "-read"
+
+    @register.filter
+    def writeId(self):
+        return "group-" + self.group.name + "-write"
+
+    @register.filter
+    def deleteId(self):
+        return "group-" + self.group.name + "-ddelete"
+
