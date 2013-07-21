@@ -1,6 +1,6 @@
 # Django settings for html_browser_site project.
 
-URL_PREFIX = r'^hb(test)?/'
+URL_PREFIX = r''
 SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
 
 DEBUG = True
