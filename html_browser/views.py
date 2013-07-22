@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from html_browser.models import Folder
+from html_browser.models import Folder, UserPermission, GroupPermission
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from utils import getParentDirLink
 import html_browser.utils
@@ -231,15 +231,15 @@ def editFolder(request):
     folder = Folder.objects.get(name = folderName)
 
     userIds = []
-    userPerms = UserPermission.objects.filter(folder.name = folderName)
+    userPerms = UserPermission.objects.filter(folder=folder)
     for perm in userPerms:
         userIds.append(perm.user.id)
 
     usersNotInFolder = User.objects.exclude(id__in = userIds)
 
     groupIds = []
-    groupPerms = GroupPermission.objects.filter(folder.name = foldername)
-    for perm un groupPerms:
+    groupPerms = GroupPermission.objects.filter(folder=folder)
+    for perm in groupPerms:
         groupIds.append(perm.group.id)
 
     groupsNotInFolder = Group.objects.exclude(id__in = groupIds)
@@ -252,7 +252,7 @@ def editFolder(request):
 	 'groupPermissions' : groupPerms,
 	 'userPermissions' : userPerms,
         })
-    return render_to_response('admin/folder_admin.html', c)
+    return render_to_response('admin/edit_folder.html', c)
 def groupAdminAction(request):
     reqLogger.info("groupAdminAction %s", request)
 
@@ -271,7 +271,6 @@ def groupAdminAction(request):
         redirectUrl = redirectUrl + "?errorText=" + errorText
 
     return redirect(redirectUrl)           
-    pass
 
 def groupAdmin(request):
     reqLogger.info("groupAdmin")
