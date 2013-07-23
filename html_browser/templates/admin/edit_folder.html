@@ -58,16 +58,16 @@
 {% if errorText %}
     <div id="error"><p>{{ errorText }}</p></div>
 {% endif %}
+</center>
 	
 <form id="form" action="{{ const.MEDIA_URL }}folderAdmin/" method="post">
     <input name=action type=hidden value=editFolder />
     <input name=name type=hidden value="{{ folder.name }}" />
-    <table class="span4 center-table">			
-        <tr>
-	    <td>Directory</td>
-	    <td><input name="directory" type="text" value="{{ folder.localPath }}"/></td>
-	</tr>
-    </table>
+    <div class="row-fluid">
+	    <div class="span5"></div>
+	    <div class="span3">Directory&nbsp;&nbsp;<input name="directory" type="text" value="{{ folder.localPath }}"/></div>
+	    <div class="span5"></div>
+    </div>
 
     <br>
 		
@@ -123,32 +123,25 @@
 	</tr>
 	{% endfor %}
 			
-	<tr><td>&nbsp;</td></tr>
-	<tr>
-   	    <td>
-	        <a href="#" onclick="Popup.show('add-group-permission');return false;">Add Group Permission</a>
-	    </td>
-	</tr>
-	<tr>	
-	    <td>
-	        <a href="#" onclick="Popup.show('add-user-permission');return false;">Add User Permission</a>
-	    </td>
-	</tr>
     </table>
     <br>
+    <center>
+        <a href="#" onclick="Popup.show('add-group-permission');return false;">Add Group Permission</a>
+	<br>
+        <a href="#" onclick="Popup.show('add-user-permission');return false;">Add User Permission</a>
+    </center>
+    <br>
 
-    <table class="span6 center-table" cellspacing="10">
-	<tr>
-	    <td><input name="submit" type="submit" value="Save" /></td>
-	    <td><input name="submit" type="submit" value="Cancel" /></td>
-	</tr>
-    </table>
+    <div class="row-fluid">
+        <div class="span5"></div>
+	<div class="span1"><input name="submit" type="submit" value="Save" /></div>
+	<div class="span1"><input name="submit" type="submit" value="Cancel" /></div>
+        <div class="span5"></div>
+    </div>
 </form>
 
-<p><input type=submit value="Delete Folder" onclick="confirmDelete('{{ folder.name }}');" />
-	
-</center>
-	
+<center><input type=submit value="Delete Folder" onclick="confirmDelete('{{ folder.name }}');" /></center>
+
 <script src="{{ const.MEDIA_URL }}folder_admin.js"></script>
 <script type="text/javascript" src="{{ const.MEDIA_URL }}popup.js"></script>
 

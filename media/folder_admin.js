@@ -41,7 +41,7 @@
         var userOrGroupName = document.getElementById(userOrGroupId).value;
 
         var rowCount = table.rows.length;
-        var row = table.insertRow(rowCount - 2);
+        var row = table.insertRow(rowCount);
 
         var cell1 = row.insertCell(0);
 
