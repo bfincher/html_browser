@@ -1,7 +1,7 @@
 	function confirmDelete(folderName) {
                 var r=confirm("Are you sure you want to delete " + folderName);
                 if (r==true) {
-                        window.location = "{{ const.BASE_URL }}folderAdminAction/?action=deleteFolder&name=" + folderName;
+                        window.location = baseUrl + "folderAdminAction/?action=deleteFolder&name=" + folderName;
                 }
         }
 
@@ -46,9 +46,9 @@
         var cell1 = row.insertCell(0);
 
         if (userOrGroup == "group") {
-                cell1.innerHTML = "<img src=\"{{ const.MEDIA_URL }}User-Group-icon.png\">" + userOrGroupName;
+                cell1.innerHTML = "<img src=\"" + mediaUrl + "User-Group-icon.png\"> " + userOrGroupName;
         } else {
-                cell1.innerHTML = "<img src=\"{{ const.MEDIA_URL }}Administrator-icon.png\">" + userOrGroupName;
+                cell1.innerHTML = "<img src=\"" + mediaUrl + "Administrator-icon.png\"> " + userOrGroupName;
         }
 
         var cell2 = row.insertCell(1);
