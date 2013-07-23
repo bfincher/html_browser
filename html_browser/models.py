@@ -104,7 +104,7 @@ class UserPermission(Permission):
         return "user"
 
     def getUserOrGroupName(self):
-        return user.username
+        return self.user.username
 
     def canRead(self):
         return self.permission == CAN_READ

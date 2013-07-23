@@ -5,15 +5,15 @@ register = template.Library()
 
 @register.filter
 def readId(perm):
-    return str(perm.getUserOrGroup()) + "-" + str(perm.getUserOrGroupName) + "-read"
+    return str(perm.getUserOrGroup()) + "-" + str(perm.getUserOrGroupName()) + "-read"
 
 @register.filter
 def writeId(perm):
-    return str(perm.getUserOrGroup()) + "-" + str(perm.getUserOrGroupName) + "-write"
+    return str(perm.getUserOrGroup()) + "-" + str(perm.getUserOrGroupName()) + "-write"
 
 @register.filter
 def deleteId(perm):
-    return str(perm.getUserOrGroup()) + "-" + str(perm.getUserOrGroupName) + "-delete"
+    return str(perm.getUserOrGroup()) + "-" + str(perm.getUserOrGroupName()) + "-delete"
 
 @register.filter
 def readDisabled(perm):
