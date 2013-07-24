@@ -1,7 +1,7 @@
 import os
 import sys
  
-path = '/srv/www'
+path = '/srv/www/hbtest'
 if path not in sys.path:
     sys.path.insert(0, '/srv/www/hbtest')
  
