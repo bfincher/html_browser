@@ -119,5 +119,5 @@ class GroupPermission(Permission):
         return "group"
 
     def getUserOrGroupName(self):
-        return group.name
+        return self.group.name
 

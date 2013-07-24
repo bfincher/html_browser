@@ -8,7 +8,8 @@ from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch,
     getPath, handleRename, handleDownloadZip, deleteOldFiles,\
     handleFileUpload, handleZipUpload, getDiskPercentFree, getPath,\
     getDiskUsageFormatted, handleAddUser, handleEditUser, handleDeleteUser,\
-    handleAddGroup, handleDeleteGroup
+    handleAddGroup, handleDeleteGroup, \
+    handleEditFolder, handleAddFolder, handleDeleteFolder
 from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
@@ -210,6 +211,26 @@ def hbAdmin(request):
     return render_to_response('admin/admin.html', c)
 
 def folderAdminAction(request):
+    reqLogger.info("folderAdminAction %s", request)
+
+    errorText = None
+
+    if request.REQUEST['submit'] == "Save":
+        action = request.REQUEST['action']
+        if action == 'addFolder':
+            errorText = handleAddFolder(request)
+        elif action == 'editFolder':
+            handleEditFolder(request)
+        elif action == 'deleteFolder':
+            handleDeleteFolder(request)
+        else:
+            raise RuntimeError('Unknown action ' + action)
+
+    redirectUrl = const.BASE_URL + "folderAdmin/"
+    if errorText != None:
+        redirectUrl = redirectUrl + "?errorText=" + errorText
+
+    return redirect(redirectUrl)           
     pass
 
 def folderAdmin(request):
@@ -253,18 +274,20 @@ def editFolder(request):
 	 'userPermissions' : userPerms,
         })
     return render_to_response('admin/edit_folder.html', c)
+
 def groupAdminAction(request):
     reqLogger.info("groupAdminAction %s", request)
 
-    errorText = ""
+    errorText = None
 
-    action = request.REQUEST['action']
-    if action == 'addGroup':
-        errorText = handleAddGroup(request)
-    elif action == 'deleteGroup':
-        handleDeleteGroup(request)
-    else:
-        raise RuntimeError('Unknown action ' + action)
+    if request.REQUEST['submit'] == "Save":
+        action = request.REQUEST['action']
+        if action == 'addGroup':
+            errorText = handleAddGroup(request)
+        elif action == 'deleteGroup':
+            handleDeleteGroup(request)
+        else:
+            raise RuntimeError('Unknown action ' + action)
 
     redirectUrl = const.BASE_URL + "groupAdmin/"
     if errorText != None:
@@ -287,21 +310,21 @@ def groupAdmin(request):
 
 def userAdminAction(request):
     reqLogger.info("userAdminAction %s", request)
+    errorText = None
 
-    if not request.user.is_staff:
-        raise RuntimeError("User is not an admin")
+    if request.REQUEST['submit'] == "Save":
+        if not request.user.is_staff:
+            raise RuntimeError("User is not an admin")
 
-    errorText = ""
-
-    action = request.REQUEST['action']
-    if action == 'editUser':
-        handleEditUser(request.POST)
-    elif action == 'addUser':
-        errorText = handleAddUser(request.POST)
-    elif action == 'deleteUser':
-        handleDeleteUser(request)
-    else:
-        raise RuntimeError('Unknown action ' + action)
+        action = request.REQUEST['action']
+        if action == 'editUser':
+            handleEditUser(request.POST)
+        elif action == 'addUser':
+            errorText = handleAddUser(request.POST)
+        elif action == 'deleteUser':
+            handleDeleteUser(request)
+        else:
+            raise RuntimeError('Unknown action ' + action)
 
     redirectUrl = const.BASE_URL + "userAdmin/"
     if errorText != None:

@@ -60,8 +60,8 @@
 {% endif %}
 </center>
 	
-<form id="form" action="{{ const.MEDIA_URL }}folderAdmin/" method="post">
-    <input name=action type=hidden value=editFolder />
+<form id="form" action="{{ const.BASE_URL }}folderAdminAction/" method="post">
+    <input name=action type=hidden value=editFolder /> {% csrf_token %}
     <input name=name type=hidden value="{{ folder.name }}" />
     <div class="row-fluid">
 	    <div class="span5"></div>
@@ -87,7 +87,7 @@
             </td>
 	    <td>
                 <input type="checkbox" name="{{ groupPerm|readId }}" 
-                id="{{ groupPerm|readId }}" checked=checked {{ groupPermission|readDisabled }}/> 
+                id="{{ groupPerm|readId }}" checked=checked {{ groupPerm|readDisabled }}/> 
             </td>
 	    <td>
                 <input type="checkbox" name="{{ groupPerm|writeId }}" 

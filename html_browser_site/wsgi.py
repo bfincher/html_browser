@@ -26,6 +26,3 @@ application = get_wsgi_application()
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)
-
-import html_browser_site.monitor
-html_browser.monitor.start(interval=1.0)

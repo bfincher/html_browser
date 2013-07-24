@@ -5,7 +5,7 @@ from operator import attrgetter
 from constants import _constants as const
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User, Group
-from html_browser.models import Folder
+from html_browser.models import Folder, UserPermission, GroupPermission
 from shutil import copy2, move, copytree, rmtree
 from zipfile import ZipFile
 import zipfile
@@ -369,7 +369,84 @@ def __assignGroupsToUser(user,request):
             group = Group.objects.get(name=groupName)
             user.groups.add(group)
 
+def handleEditFolder(request):
+    folderName = request.REQUEST['name']
+    folder = Folder.objects.get(name=folderName)
+
+    folder.localPath = request.REQUEST['directory']
+
+    newUsers = {}
+    newGroups = {}
+    for key in request.REQUEST:
+        if key.startswith('user-'):
+	    tokens = key.split('-')
+	    newUsers[tokens[1]] = tokens[2]
+        elif key.startswith('group-'):
+	    tokens = key.split('-')
+	    newGroups[tokens[1]] = tokens[2]
+
+    for userPerm in UserPermission.objects.filter(folder = folder):
+        if newUsers.has_key(userPerm.user.username):
+            if newUsers[userPerm.user.username] == "delete":
+	        perm = 'D'
+            elif newUsers[userPerm.user.username] == "write": 
+	        perm = 'W'
+            elif newUsers[userPerm.user.username] == "read": 
+	        perm = 'R'
+	    else:
+	        raise RuntimeError("Unknown permission: %s" % newUsers[userPerm.user.username])
+
+            userPerm.permission = perm
+	    userPerm.save()
+
+	    del newUsers[userPerm.user.username]
+
+        else:
+	    userPerm.delete()
+
+    for key in newUsers:
+        perm = UserPermission()
+	perm.folder = folder
+	perm.permission = newUsers[key]
+	perm.user = User.objects.get(username = key)
+	perm.save()
+    
+    for groupPerm in GroupPermission.objects.filter(folder = folder):
+        if newGroups.has_key(groupPerm.group.name):
+            if newGroups[groupPerm.group.name] == "delete":
+	        perm = 'D'
+            elif newGroups[groupPerm.group.name] == "write": 
+	        perm = 'W'
+            elif newGroups[groupPerm.group.name] == "read": 
+	        perm = 'R'
+	    else:
+	        raise RuntimeError("Unknown permission: %s" % newGroups[groupPerm.group.name])
+
+            groupPerm.permission = perm
+	    groupPerm.save()
+
+	    del newGroups[groupPerm.group.name]
+
+        else:
+	    groupPerm.delete()
+
+    for key in newGroups:
+        perm = GroupPermission()
+	perm.folder = folder
+	perm.permission = newGroups[key]
+	perm.group = Group.objects.get(name = key)
+	perm.save()
+
+#bookmark
+
+def handleAddFolder(request):
+    pass
+
+def handleDeleteFolder(request):
+    pass
+
 def handleEditUser(request):
+
     userName = request['userName']
 
     if request.has_key('password'):
