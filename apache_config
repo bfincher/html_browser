@@ -16,4 +16,7 @@ Alias /static/admin/ /usr/local/lib/python2.7/dist-packages/django/contrib/admin
     <Directory /srv/www/hb/apache>
         Order deny,allow
         Allow from all
+        XSendFile On
+        XSendFilePath "/tmp"
+        XSendFilePath "/"
     </Directory>
