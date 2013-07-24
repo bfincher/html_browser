@@ -129,6 +129,12 @@
         <a href="#" onclick="Popup.show('add-group-permission');return false;">Add Group Permission</a>
 	<br>
         <a href="#" onclick="Popup.show('add-user-permission');return false;">Add User Permission</a>
+	<br><br>
+	<select name="viewOption" required="true" style="width: 400px;">
+	    {% for option in viewOptions %}
+	    <option value="{{ option.value }}" {% if option.value == folder.viewOption %}selected="true" {% endif %}>{{ option.display }}</option>
+            {% endfor %}
+	</select>
     </center>
     <br>
 

@@ -25,6 +25,8 @@ KILOBYTE = 1024.0
 MEGABYTE = KILOBYTE * KILOBYTE
 GIGABYTE = MEGABYTE * KILOBYTE
 
+_permMap = {'read' : 'R', 'write' : 'W', 'delete' : 'D'}
+
 def getParentDirLink(path, currentFolder):
     if path == '/':
         return const.BASE_URL
@@ -374,6 +376,8 @@ def handleEditFolder(request):
     folder = Folder.objects.get(name=folderName)
 
     folder.localPath = request.REQUEST['directory']
+    folder.viewOption = request.REQUEST['viewOption']
+    folder.save()
 
     newUsers = {}
     newGroups = {}
@@ -387,16 +391,7 @@ def handleEditFolder(request):
 
     for userPerm in UserPermission.objects.filter(folder = folder):
         if newUsers.has_key(userPerm.user.username):
-            if newUsers[userPerm.user.username] == "delete":
-	        perm = 'D'
-            elif newUsers[userPerm.user.username] == "write": 
-	        perm = 'W'
-            elif newUsers[userPerm.user.username] == "read": 
-	        perm = 'R'
-	    else:
-	        raise RuntimeError("Unknown permission: %s" % newUsers[userPerm.user.username])
-
-            userPerm.permission = perm
+            userPerm.permission = _permMap[newUsers[userPerm.user.username]]
 	    userPerm.save()
 
 	    del newUsers[userPerm.user.username]
@@ -407,22 +402,13 @@ def handleEditFolder(request):
     for key in newUsers:
         perm = UserPermission()
 	perm.folder = folder
-	perm.permission = newUsers[key]
+	perm.permission = _permMap[newUsers[key]]
 	perm.user = User.objects.get(username = key)
 	perm.save()
     
     for groupPerm in GroupPermission.objects.filter(folder = folder):
         if newGroups.has_key(groupPerm.group.name):
-            if newGroups[groupPerm.group.name] == "delete":
-	        perm = 'D'
-            elif newGroups[groupPerm.group.name] == "write": 
-	        perm = 'W'
-            elif newGroups[groupPerm.group.name] == "read": 
-	        perm = 'R'
-	    else:
-	        raise RuntimeError("Unknown permission: %s" % newGroups[groupPerm.group.name])
-
-            groupPerm.permission = perm
+            groupPerm.permission = _permMap[newGroups[groupPerm.group.name]]
 	    groupPerm.save()
 
 	    del newGroups[groupPerm.group.name]
@@ -433,7 +419,7 @@ def handleEditFolder(request):
     for key in newGroups:
         perm = GroupPermission()
 	perm.folder = folder
-	perm.permission = newGroups[key]
+	perm.permission = _permMap[newGroups[key]]
 	perm.group = Group.objects.get(name = key)
 	perm.save()
 

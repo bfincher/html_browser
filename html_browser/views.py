@@ -20,6 +20,17 @@ from django.contrib.auth.models import User, Group
 
 reqLogger = logging.getLogger('django.request')
 
+class FolderViewOption():
+    def __init__(self, value, display):
+        self.value = value
+        self.display = display
+
+folderViewOptions = []
+
+for choice in html_browser.models.viewableChoices:
+   option = FolderViewOption(choice[0], choice[1]) 
+   folderViewOptions.append(option)
+
 def index(request):
     reqLogger.info('index ')
     reqLogger.debug(str(request))
@@ -272,6 +283,7 @@ def editFolder(request):
          'groupsNotAssignedToFolder' : groupsNotInFolder,
 	 'groupPermissions' : groupPerms,
 	 'userPermissions' : userPerms,
+	 'viewOptions' : folderViewOptions,
         })
     return render_to_response('admin/edit_folder.html', c)
 
