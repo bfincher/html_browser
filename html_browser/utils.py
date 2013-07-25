@@ -371,9 +371,10 @@ def __assignGroupsToUser(user,request):
             group = Group.objects.get(name=groupName)
             user.groups.add(group)
 
-def handleEditFolder(request):
-    folderName = request.REQUEST['name']
-    folder = Folder.objects.get(name=folderName)
+def handleEditFolder(request, folder=None):
+    if folder == None:
+        folderName = request.REQUEST['name']
+        folder = Folder.objects.get(name=folderName)
 
     folder.localPath = request.REQUEST['directory']
     folder.viewOption = request.REQUEST['viewOption']
@@ -423,13 +424,17 @@ def handleEditFolder(request):
 	perm.group = Group.objects.get(name = key)
 	perm.save()
 
-#bookmark
 
 def handleAddFolder(request):
-    pass
+    folderName = request.REQUEST['name']
+    folder = Folder()
+    folder.name = folderName
+    handleEditFolder(request, folder)
 
 def handleDeleteFolder(request):
-    pass
+    folderName = request.REQUEST['name']
+    folder = Folder.objects.get(name=folderName)
+    folder.delete()
 
 def handleEditUser(request):
 

@@ -254,7 +254,13 @@ def folderAdmin(request):
     return render_to_response('admin/folder_admin.html', c)
 
 def addFolder(request):
-    pass
+    c = RequestContext(request,
+        {'const' : const,
+	 'viewOptions' : folderViewOptions,
+         'usersNotAssignedToFolder' : User.objects.all(),
+         'groupsNotAssignedToFolder' : Group.objects.all(),
+        })
+    return render_to_response('admin/add_folder.html', c)
 
 def editFolder(request):
     reqLogger.info("editFolder: %s", request)
