@@ -1,7 +1,7 @@
 class _constants():
 #    class ConstError(TypeError): pass
     
-    BASE_URL = '/hbtest/'
+    BASE_URL = '/hb/'
     CONTENT_URL = BASE_URL + 'content/'
     DOWNLOAD_URL = BASE_URL + "download/"
     ADMIN_URL = BASE_URL + "admin/"
