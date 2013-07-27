@@ -23,7 +23,8 @@
     function deleteUser(userName) {
         if (confirm('Are you sure you want to delete the user ' + userName + '?')) {
                 var url = "/hb/userAdminAction/?action=deleteUser"
-                        + "&userToDelete=" + encodeURI(userName);
+                        + "&userToDelete=" + encodeURI(userName)
+                        + "&submit=Save";
 
                 window.location = url;
         }
