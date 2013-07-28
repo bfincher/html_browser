@@ -371,6 +371,27 @@ def __assignGroupsToUser(user,request):
             group = Group.objects.get(name=groupName)
             user.groups.add(group)
 
+def __assignUsersToGroup(group, request):
+    userIdsInGroup = []
+    for key in request.REQUEST:
+        if key.startswith("isUser"):
+	    logger.info("processing key $s", key)
+	    userName = key[6:]
+	    user = User.objects.get(username=userName)
+	    try:
+	        user.groups.remove(group)
+	    except ValueError:
+	        pass
+	    
+	    user.groups.add(group)
+	    user.save()
+	    userIdsInGroup.append(user.id)
+
+    users = User.objects.filter(groups__id=group.id).exclude(id__in=userIdsInGroup)
+    for user in users:
+        user.groups.remove(group)
+	user.save()
+
 def handleEditFolder(request, folder=None):
     if folder == None:
         folderName = request.REQUEST['name']
@@ -485,6 +506,10 @@ def handleDeleteUser(request):
     user = User.objects.get(username=request.REQUEST['userToDelete'])
     logger.info("Deleting user %s", user)
     user.delete()
+
+def handleEditGroup(request):
+    group = Group.objects.get(name = request.REQUEST['groupName'])
+    __assignUsersToGroup(group, request)
 
 def handleAddGroup(request):
     groupName = request.REQUEST['groupName']

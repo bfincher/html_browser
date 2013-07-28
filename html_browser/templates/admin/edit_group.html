@@ -1,0 +1,73 @@
+{% extends "page.html" %}
+
+{% block additional_header %}
+<style type="text/css">
+	body {
+		padding-top: 20px;
+		padding-bottom: 20px;
+	}
+
+	.container-narrow {
+		margin: 0 auto;
+		max-width: 700px;
+	}
+
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-narrow">    
+	<h1 style="margin-top: 50px;">Edit Group</h1>
+	<h2>{{ groupName }}</h2>
+	
+	<form id="form" action="{{ const.BASE_URL }}groupAdminAction/" method="post"> {% csrf_token %}
+		<input name=action type=hidden value=editGroup />
+		<input name=groupName type=hidden value="{{ groupName}}" />
+
+	<p>Users Assigned To Group</p>
+	<div class="scroll-pane" style="height: 200px; width: 200px; overflow: auto; border: 1px solid black;" >
+	{% for userName in activeUserNames %}
+	    <div class="row-fluid settings">
+		<div class="span1">
+		    <input name="isUser{{ userName }}" type="checkbox" checked="checked" />
+		</div>
+		<div class="span3">
+		    {{ userName }}
+		</div>
+	    </div>
+	{% endfor %}
+
+	{% for userName in userNames %}
+	    <div class="row-fluid settings">
+		<div class="span1">
+		    <input name="isUser{{ userName }}" type="checkbox" />
+		</div>
+		<div class="span3">
+		    {{ userName }}
+		</div>
+	    </div>
+	{% endfor %}
+	</div>
+
+	<br>
+	<div class="row-fluid settings">
+	    <div class="span2">
+	        <input class="btn" id=Save name=submit type=submit value="Save"/>
+	    </div>
+	    <div class="span2">
+	        <input class="btn" name=submit type=submit value="Cancel"/>
+	    </div>
+	</div>
+        </form>
+	<div class="row-fluid settings">
+	    <div class="span12">
+	        <input class="btn" type="submit" value="Delete Group" onclick="deleteGroup('{{ groupName}}')"; />
+	    </div>
+	</div>
+
+
+</div>
+<script src="{{ const.MEDIA_URL }}edit_group.js"></script>
+
+{% endblock %}
+

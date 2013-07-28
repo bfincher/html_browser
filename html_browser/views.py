@@ -8,7 +8,7 @@ from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch,
     getPath, handleRename, handleDownloadZip, deleteOldFiles,\
     handleFileUpload, handleZipUpload, getDiskPercentFree, getPath,\
     getDiskUsageFormatted, handleAddUser, handleEditUser, handleDeleteUser,\
-    handleAddGroup, handleDeleteGroup, \
+    handleAddGroup, handleEditGroup, handleDeleteGroup, \
     handleEditFolder, handleAddFolder, handleDeleteFolder
 from constants import _constants as const
 from django.contrib.auth import authenticate
@@ -302,6 +302,8 @@ def groupAdminAction(request):
         action = request.REQUEST['action']
         if action == 'addGroup':
             errorText = handleAddGroup(request)
+        elif action == 'editGroup':
+            handleEditGroup(request)
         elif action == 'deleteGroup':
             handleDeleteGroup(request)
         else:
@@ -312,6 +314,31 @@ def groupAdminAction(request):
         redirectUrl = redirectUrl + "?errorText=" + errorText
 
     return redirect(redirectUrl)           
+
+def editGroup(request):
+    reqLogger.info("editGroup")
+
+    groupName = request.REQUEST['groupName']
+    group = Group.objects.get(name = groupName)
+
+    usersInGroup = User.objects.filter(groups__id=group.id)
+    otherUsers = User.objects.exclude(groups__id=group.id)
+
+    activeUserNames = []
+    for user in usersInGroup:
+        activeUserNames.append(user.username)
+
+    userNames = []
+    for user in otherUsers:
+        userNames.append(user.username)
+
+    c = RequestContext(request, 
+        {'const' : const,
+         'groupName' : groupName,
+	 'activeUserNames' : activeUserNames,
+	 'userNames' : userNames,
+        })
+    return render_to_response('admin/edit_group.html', c)
 
 def groupAdmin(request):
     reqLogger.info("groupAdmin")
