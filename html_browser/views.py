@@ -151,6 +151,18 @@ def content(request):
     else:
         status = ''
 
+    breadcrumbs = None
+    crumbs = currentPath.split("/")
+    if len(crumbs) > 1:
+        breadcrumbs = "<a href=\"%s\">Home</a> " % const.BASE_URL
+        breadcrumbs = breadcrumbs + "&rsaquo; <a href=\"%scontent/?currentFolder=%s&currentPath=\">%s</a> " % (const.BASE_URL, currentFolder, currentFolder)
+        crumbs = currentPath.split("/")
+        accumulated = ""
+        for crumb in crumbs:
+            if crumb:
+                accumulated = accumulated + "/" + crumb
+                breadcrumbs = breadcrumbs + "&rsaquo; <a href=\"%scontent/?currentFolder=%s&currentPath=%s\">%s</a> " % (const.BASE_URL, currentFolder, accumulated, crumb)
+
     filter = None
     if request.REQUEST.has_key('filter'):
         filter = request.REQUEST['filter']
@@ -170,6 +182,7 @@ def content(request):
              'currentDirEntries' : currentDirEntries,
              'const' : const,
              'user' : request.user,
+	     'breadcrumbs' : breadcrumbs,
          })
         return render_to_response("content_search.html", c)
 
@@ -202,6 +215,7 @@ def content(request):
 	 'diskTotal' : diskUsage.totalformatted,
          'diskUnit' : diskUsage.unit,
 	 'showContent' : True,
+	 'breadcrumbs' : breadcrumbs,
          })
     
     if viewType == const.detailsViewType:

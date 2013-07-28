@@ -62,6 +62,16 @@ TH.UploadOuterTable
      padding:15px;
 }
 
+div.breadcrumbs {
+    background: white url(../img/nav-bg-reverse.gif) 0 -10px repeat-x;
+    padding: 2px 8px 3px 8px;
+    font-size: 11px;
+    color: #999;
+    border-top: 1px solid white;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+}
+
 /*
 table-noborder td {
      border-top: none; 
