@@ -88,7 +88,7 @@ def hbLogout(request):
 
 def content(request):    
     reqLogger.info("content")
-    reqLogger.debug(str(request))
+    reqLogger.debug("request = %s", request)
     deleteOldFiles()
     
     currentFolder = request.REQUEST['currentFolder']
@@ -222,7 +222,8 @@ def hbAdmin(request):
     return render_to_response('admin/admin.html', c)
 
 def folderAdminAction(request):
-    reqLogger.info("folderAdminAction %s", request)
+    reqLogger.info("folderAdminAction")
+    reqLogger.debug("request = %s", request)
 
     errorText = None
 
@@ -263,7 +264,8 @@ def addFolder(request):
     return render_to_response('admin/add_folder.html', c)
 
 def editFolder(request):
-    reqLogger.info("editFolder: %s", request)
+    reqLogger.info("editFolder")
+    reqLogger.debug("request = %s", request)
 
     folderName = request.REQUEST['name']
     folder = Folder.objects.get(name = folderName)
@@ -294,7 +296,8 @@ def editFolder(request):
     return render_to_response('admin/edit_folder.html', c)
 
 def groupAdminAction(request):
-    reqLogger.info("groupAdminAction %s", request)
+    reqLogger.info("groupAdminAction")
+    reqLogger.debug("request = %s", request)
 
     errorText = None
 
@@ -354,7 +357,8 @@ def groupAdmin(request):
     return render_to_response('admin/group_admin.html', c)
 
 def userAdminAction(request):
-    reqLogger.info("userAdminAction %s", request)
+    reqLogger.info("userAdminAction")
+    reqLogger.debug("request = %s", request)
     errorText = None
 
     if request.REQUEST['submit'] == "Save":
@@ -462,7 +466,6 @@ def hbChangePasswordResult(request):
 	    {'const' : const,
 	     'user' : request.user,
 	    })
-	reqLogger.info("success")
         return render_to_response('admin/change_password_success.html', c)
     else:
         reqLogger.warn(errorMessage)
@@ -473,7 +476,7 @@ def hbChangePasswordResult(request):
     
 def download(request):
     reqLogger.info("download")
-    reqLogger.debug(str(request))
+    reqLogger.debug("request = %s", request)
 
     currentFolder = request.GET['currentFolder']
     currentPath = request.GET['currentPath']
@@ -486,12 +489,12 @@ def download(request):
 
 def downloadZip(request):    
     reqLogger.info("downloadZip")
-    reqLogger.debug(str(request))
+    reqLogger.debug("request = %s", request)
     return handleDownloadZip(request)
 
 def upload(request):
     reqLogger.info("upload")
-    reqLogger.debug(str(request))
+    reqLogger.debug("request = %s", request)
     currentFolder = request.REQUEST['currentFolder']
     currentPath = request.REQUEST['currentPath']
     
@@ -526,7 +529,7 @@ def upload(request):
 
 def imageView(request):
     reqLogger.info("imageView")
-    reqLogger.debug(str(request))
+    reqLogger.debug("request = %s", request)
 
     currentFolder = request.REQUEST['currentFolder']
     currentPath = request.REQUEST['currentPath']
@@ -579,6 +582,6 @@ def imageView(request):
         
 def thumb(request):
     reqLogger.info("thumb")
-    reqLogger.debug(str(request))
+    reqLogger.debug("request = %s", request)
     
     return render_to_response('test_image.html')

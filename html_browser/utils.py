@@ -365,9 +365,9 @@ def __assignGroupsToUser(user,request):
 
     for key in request:
         if key.startswith("isGroup"):
-            logger.info("processing key %s", key)
+            logger.debug("processing key %s", key)
             groupName = key[7:]
-            logger.info("groupName = %s", groupName)
+            logger.debug("groupName = %s", groupName)
             group = Group.objects.get(name=groupName)
             user.groups.add(group)
 
@@ -375,7 +375,7 @@ def __assignUsersToGroup(group, request):
     userIdsInGroup = []
     for key in request.REQUEST:
         if key.startswith("isUser"):
-	    logger.info("processing key $s", key)
+	    logger.debug("processing key $s", key)
 	    userName = key[6:]
 	    user = User.objects.get(username=userName)
 	    try:
