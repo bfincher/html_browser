@@ -372,25 +372,15 @@ def __assignGroupsToUser(user,request):
             user.groups.add(group)
 
 def __assignUsersToGroup(group, request):
-    userIdsInGroup = []
+
+    group.user_set.clear()
+
     for key in request.REQUEST:
         if key.startswith("isUser"):
 	    logger.debug("processing key $s", key)
 	    userName = key[6:]
 	    user = User.objects.get(username=userName)
-	    try:
-	        user.groups.remove(group)
-	    except ValueError:
-	        pass
-	    
-	    user.groups.add(group)
-	    user.save()
-	    userIdsInGroup.append(user.id)
-
-    users = User.objects.filter(groups__id=group.id).exclude(id__in=userIdsInGroup)
-    for user in users:
-        user.groups.remove(group)
-	user.save()
+	    group.user_set.add(user)
 
 def handleEditFolder(request, folder=None):
     if folder == None:
