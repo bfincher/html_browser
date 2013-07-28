@@ -158,10 +158,15 @@ def content(request):
         breadcrumbs = breadcrumbs + "&rsaquo; <a href=\"%scontent/?currentFolder=%s&currentPath=\">%s</a> " % (const.BASE_URL, currentFolder, currentFolder)
         crumbs = currentPath.split("/")
         accumulated = ""
-        for crumb in crumbs:
+        while len(crumbs) > 0:
+	    crumb = crumbs.pop(0)
             if crumb:
                 accumulated = accumulated + "/" + crumb
-                breadcrumbs = breadcrumbs + "&rsaquo; <a href=\"%scontent/?currentFolder=%s&currentPath=%s\">%s</a> " % (const.BASE_URL, currentFolder, accumulated, crumb)
+		breadcrumbs = breadcrumbs + "&rsaquo; "
+		if len(crumbs) > 0:
+                    breadcrumbs = breadcrumbs + "<a href=\"%scontent/?currentFolder=%s&currentPath=%s\">%s</a> " % (const.BASE_URL, currentFolder, accumulated, crumb)
+		else:
+		    breadcrumbs = breadcrumbs + crumb
 
     filter = None
     if request.REQUEST.has_key('filter'):
