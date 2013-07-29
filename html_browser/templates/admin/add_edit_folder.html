@@ -90,7 +90,7 @@
 	{% for groupPerm in groupPermissions %}
 	<tr>				
   	    <td>
-                <img src="{{ const.MEDIA_URL }}User-Group-icon.png">{{ groupPerm.group.name }}
+                <img src="{{ const.IMAGE_URL }}User-Group-icon.png">{{ groupPerm.group.name }}
             </td>
 	    <td>
                 <input type="checkbox" name="{{ groupPerm|readId }}" 
@@ -111,7 +111,7 @@
 	{% for userPerm in userPermissions %}
 	<tr>				
   	    <td>
-                <img src="{{ const.MEDIA_URL }}Administrator-icon.png"> {{ userPerm.user.username }}
+                <img src="{{ const.IMAGE_URL }}Administrator-icon.png"> {{ userPerm.user.username }}
             </td>
 	    <td>
                 <input type="checkbox" name="{{ userPerm|readId }}" 

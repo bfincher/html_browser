@@ -46,9 +46,9 @@
         var cell1 = row.insertCell(0);
 
         if (userOrGroup == "group") {
-                cell1.innerHTML = "<img src=\"" + mediaUrl + "User-Group-icon.png\"> " + userOrGroupName;
+                cell1.innerHTML = "<img src=\"" + imageUrl + "User-Group-icon.png\"> " + userOrGroupName;
         } else {
-                cell1.innerHTML = "<img src=\"" + mediaUrl + "Administrator-icon.png\"> " + userOrGroupName;
+                cell1.innerHTML = "<img src=\"" + imageUrl + "Administrator-icon.png\"> " + userOrGroupName;
         }
 
         var cell2 = row.insertCell(1);

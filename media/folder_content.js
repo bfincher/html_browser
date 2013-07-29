@@ -32,7 +32,7 @@
     	}
     	
     	var checkedContent = getCheckedBoxContent();
-    	var url = "/hb/content/?action=copyToClipboard&entries="
+    	var url = baseUrl + "content/?action=copyToClipboard&entries="
 			+ checkedContent
 			+ "&currentFolder=" + myEscape(currentFolder)
 			+ "&currentPath=" + myEscape(currentPath);
@@ -59,7 +59,7 @@
     	var newName = prompt("Please enter new file name for " + checkedBoxes[0].id, "");
     	
     	if (newName != null) {    	
-	    	var url = "/hb/content/?action=rename"
+	    	var url = baseUrl + "content/?action=rename"
 				+ "&file=" + myEscape(checkedBoxes[0].id)
 				+ "&newName=" + myEscape(newName)
 				+ "&currentFolder=" + myEscape(currentFolder)
@@ -86,7 +86,7 @@
     	}
     	
     	var checkedContent = getCheckedBoxContent();
-    	var url = "/hb/content/?action=cutToClipboard&entries="
+    	var url = baseUrl + "content/?action=cutToClipboard&entries="
 			+ checkedContent
 			+ "&currentFolder=" + myEscape(currentFolder)
 			+ "&currentPath=" + myEscape(currentPath);
@@ -100,7 +100,7 @@
     		return;
     	}
     	
-    	var url = "/hb/content/?action=pasteFromClipboard"
+    	var url = baseUrl + "content/?action=pasteFromClipboard"
 			+ "&currentFolder=" + myEscape(currentFolder)
 			+ "&currentPath=" + myEscape(currentPath);
     	
@@ -146,7 +146,7 @@
     		}
     			
     		if (confirm(confirmMessage)) {
-    			var url = "/hb/content/?action=deleteEntry&entries="
+    			var url = baseUrl + "content/?action=deleteEntry&entries="
     				+ checkedContent
     				+ "&currentFolder=" + myEscape(currentFolder)
     				+ "&currentPath=" + myEscape(currentPath);
@@ -165,7 +165,7 @@
     	var dir = prompt("Please enter the directory to create:", "");
     	
     	if (dir != null) {    	
-	    	var url = "/hb/content/?action=mkDir"
+	    	var url = baseUrl + "content/?action=mkDir"
 				+ "&dir=" + myEscape(dir)
 				+ "&currentFolder=" + myEscape(currentFolder)
 				+ "&currentPath=" + myEscape(currentPath);
@@ -215,7 +215,7 @@
     function viewTypeBoxChanged(box) {  
     	var selectedIndex = box.selectedIndex;
     	if (selectedIndex != -1) {
-    		var url = "/hb/content/?action=setViewType"
+    		var url = baseUrl + "content/?action=setViewType"
     			+ "&viewType=" + box.options[selectedIndex].text
 				+ "&currentFolder=" + myEscape(currentFolder)
 				+ "&currentPath=" + myEscape(currentPath);
