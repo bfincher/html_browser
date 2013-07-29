@@ -34,6 +34,7 @@
 {% block additional_header %} {% endblock %}
 
 <body>		
+    {% block navbar %}
     <div class="navbar navbar-inverse navbar-fixed-top">
 	<div class="navbar-inner">
 	    <div class="container">
@@ -45,7 +46,6 @@
 		<a class="brand" href="{{ const.BASE_URL }}">HTML File Explorer</a>
 		<div class="nav-collapse collapse">
 		    <ul class="nav">
-			 <li class="active"><a href="{{ const.BASE_URL }}">Home</a></li>
 			{% if user.is_authenticated %}
 			    {% if user.is_staff %}
 			        <li class="active"><a href="{{ const.BASE_URL }}hbAdmin">Administration  </a></li>
@@ -86,11 +86,12 @@
 		    </ul>
 		    {% endif %}
 
+		    <div class="small">
 		    {% if user.is_authenticated %}
-		    <ul class="nav pull-right">
-			<li class="active"><a href="#"> {{ user.username }} </a> </li>
-			<li class="active"><a href="{{ const.BASE_URL }}hbChangePassword">Change Password </a></li>
-			<li class="active"><a href="{{ const.BASE_URL }}hbLogout/">Log Out  </a></li>
+		    <ul class="nav pull-right" >
+			<li class="active"><a href="#" > {{ user.username }} </a> </li>
+			<li class="active"><a href="{{ const.BASE_URL }}hbChangePassword" >Change Password </a></li>
+			<li class="active"><a href="{{ const.BASE_URL }}hbLogout/" >Log Out  </a></li>
 		    </ul>
 		    {% else %}
 		    <form class="navbar-form pull-right" action="{{ const.BASE_URL }}hbLogin/" method="post" > {% csrf_token %}
@@ -100,11 +101,13 @@
 			<input class="span1" name="action" type="hidden" value="login" >
 		    </form>
 		    {% endif %}
+		    </div>
 		</div>
 	    </div>
 	</div>
     </div>
-
+    {% endblock %}
+    {% block navbar2 %}
     {% if breadcrumbs %}
     {% autoescape off %}
     <div class="breadcrumbs">
@@ -112,6 +115,10 @@
     </div>
     {% endautoescape %}
     {% endif %}
+    {% endblock %}
+
+    {% block navbar3 %}
+    {% endblock %}
 
 
     {% if errorText != None %}
