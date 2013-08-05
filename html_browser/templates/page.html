@@ -85,6 +85,26 @@
 				</center>
 			    </div>
 			</li>
+			<li class="dropdown" data-dropdown="dropdown">
+			    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Settings <b class="caret"></b></a>
+			    <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+			        <center>
+				<h3>Settings</h3>
+				<form action="post" action="{{ const.CONTENT_url }}"> {% csrf_token %}
+				    <input type="hidden" name="action" value="changeSettings" />
+			            <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
+			            <input type="hidden" name="currentPath" value="{{ currentPath }}" />
+				    <input type="checkbox" name="showHidden" 
+				    {% if showHidden %}checked="checked" {% endif %}
+				    />&nbsp;Show Hidden Files / Folders
+				    <br>
+				    <input class="btn" id="Save" name="submit" type="submit" value="Save" />
+				    &nbsp;&nbsp;
+				    <input class="btn" id="Cancel" name="submit" type="submit" value="Cancel" />
+				</form>
+				</center>
+			    </div>
+			</li>
 		    </ul>
 		    {% endif %}
 

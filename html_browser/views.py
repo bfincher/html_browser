@@ -138,6 +138,9 @@ def content(request):
             os.makedirs(getPath(folder.localPath, currentPath) + dirName)
         elif action == 'rename':
             handleRename(folder, currentPath, request.REQUEST['file'], request.REQUEST['newName'])
+	elif action == 'changeSettings':
+	    if request.REQUEST['submit'] == "Save":
+	        request.session['showHidden'] = request.REQUEST.has_key('showHidden')
         else:
             raise RuntimeError('Unknown action ' + action)
         
@@ -175,7 +178,7 @@ def content(request):
 
     if request.REQUEST.has_key('search'):
         search = request.REQUEST['search']
-        currentDirEntries= getCurrentDirEntriesSearch(folder, currentPath, search)
+        currentDirEntries= getCurrentDirEntriesSearch(folder, currentPath, __isShowHidden(request), search)
 
         c = RequestContext(request,
             {'currentFolder' : currentFolder,
@@ -188,10 +191,11 @@ def content(request):
              'const' : const,
              'user' : request.user,
 	     'breadcrumbs' : breadcrumbs,
+	     'showHidden' : __isShowHidden(request),
          })
         return render_to_response("content_search.html", c)
 
-    currentDirEntries = getCurrentDirEntries(folder, currentPath, filter)
+    currentDirEntries = getCurrentDirEntries(folder, currentPath, __isShowHidden(request), filter)
     
     if request.session.has_key('viewType'):
         viewType = request.session['viewType']
@@ -221,6 +225,7 @@ def content(request):
          'diskUnit' : diskUsage.unit,
 	 'showContent' : True,
 	 'breadcrumbs' : breadcrumbs,
+	 'showHidden' : __isShowHidden(request),
          })
     
     if viewType == const.detailsViewType:
@@ -546,6 +551,12 @@ def upload(request):
     
     return render_to_response('upload.html', c)
 
+def __isShowHidden(request):
+    if request.session.has_key('showHidden'):
+        return request.session['showHidden']
+    else:
+        return False
+
 def imageView(request):
     reqLogger.info("imageView")
     reqLogger.debug("request = %s", request)
@@ -561,7 +572,7 @@ def imageView(request):
     
     fileName = request.REQUEST['fileName']
     
-    currentDirEntries = getCurrentDirEntries(folder, currentPath)
+    currentDirEntries = getCurrentDirEntries(folder, currentPath, __isShowHidden(request))
     
     for i in range(len(currentDirEntries)):
         if currentDirEntries[i].name == fileName:

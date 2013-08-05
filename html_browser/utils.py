@@ -84,26 +84,26 @@ def getPath(folderPath, path):
         dirPath += '/'
     return dirPath
 
-def getCurrentDirEntriesSearch(folder, path, search):
+def getCurrentDirEntriesSearch(folder, path, showHidden, search):
     logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s search = %s", folder, path, search)
     returnList = []
     thisEntry = DirEntry(True, path, 0, datetime.fromtimestamp(getmtime(getPath(folder.localPath, path))), folder, path)
-    __getCurrentDirEntriesSearch(folder, path, search, thisEntry, returnList)
+    __getCurrentDirEntriesSearch(folder, path, showHidden, search, thisEntry, returnList)
 
     for entry in returnList:
         entry.name = entry.currentPathOrig + "/" + entry.name
 
     return returnList
 
-def __getCurrentDirEntriesSearch(folder, path, search, thisEntry, returnList):
+def __getCurrentDirEntriesSearch(folder, path, showHidden, search, thisEntry, returnList):
     logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s search = %s thisEntry = %s", folder, path, search, thisEntry)
-    entries = getCurrentDirEntries(folder, path)
+    entries = getCurrentDirEntries(folder, path, showHidden)
 
     includeThisDir = False
 
     for entry in entries:
         if entry.isDir:
-	    __getCurrentDirEntriesSearch(folder, path + "/" + entry.name, search, entry, returnList)
+	    __getCurrentDirEntriesSearch(folder, path + "/" + entry.name, showHidden, search, entry, returnList)
         else:
 	    if entry.name.find(search) != -1:
                 logger.debug("including this dir")
@@ -112,13 +112,15 @@ def __getCurrentDirEntriesSearch(folder, path, search, thisEntry, returnList):
     if includeThisDir:
         returnList.append(thisEntry)
 
-def getCurrentDirEntries(folder, path, filter=None):
+def getCurrentDirEntries(folder, path, showHidden, filter=None):
     dirPath = getPath(folder.localPath, path)
     dirEntries = []
     fileEntries = []
     
     os.chdir(dirPath)
     for fileName in os.listdir("."):
+        if not showHidden and fileName.startswith('.'):
+	    continue
         try:
             filePath = dirPath + fileName
             if os.path.isdir(fileName):
