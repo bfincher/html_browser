@@ -24,6 +24,7 @@ urlpatterns = patterns('html_browser.views',
     url(r'upload/.*', 'upload'),
     url(r'image_view/.*', 'imageView'),
     url(r'thumb/', 'thumb'),
+    url(r'deleteImage', 'deleteImage')
 #    url(r'admin/user/add/action/.*', 'addUserAction'),
     #url(r'admin/user/add/result/.*', 'addUserResult'),    
 #    url(r'admin/user/add/$', 'addUser'),

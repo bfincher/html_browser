@@ -145,6 +145,7 @@ def content(request):
             raise RuntimeError('Unknown action ' + action)
         
         redirectUrl = const.CONTENT_URL + "?currentFolder=" + currentFolder + "&currentPath=" + currentPath + "&status=" + status
+
         return redirect(redirectUrl)        
     
     parentDirLink = getParentDirLink(currentPath, currentFolder)
@@ -593,6 +594,8 @@ def imageView(request):
     
     imageUrl = const.BASE_URL + '__' + currentFolder + '__' + currentPath + '/' + fileName
     imageUrl = imageUrl.replace('//','/')
+
+    userCanDelete = folder.userCanDelete(request.user)
     
     c = RequestContext(request,
         {'currentFolder' : currentFolder,
@@ -606,6 +609,8 @@ def imageView(request):
          'prevLink' : prevLink,
          'nextLink' : nextLink,
          'imageUrl' : imageUrl,
+         'fileName' : fileName,
+         'userCanDelete' : userCanDelete,
          })
     
     return render_to_response('image_view.html', c)
@@ -615,3 +620,23 @@ def thumb(request):
     reqLogger.debug("request = %s", request)
     
     return render_to_response('test_image.html')
+
+def deleteImage(request):
+    reqLogger.info("deleteImage")
+    reqLogger.debug("request = %s", request)
+
+    currentFolder = request.REQUEST['currentFolder']
+    currentPath = request.REQUEST['currentPath']        
+    
+    folder = Folder.objects.filter(name=currentFolder)[0]
+    userCanDelete = folder.userCanDelete(request.user)
+    
+    if not userCanDelete:
+        status = "You don't have delete permission on this folder"
+    else:
+        handleDelete(folder, currentPath, request.REQUEST['fileName'])
+	status = "File deleted"
+
+    redirectUrl = const.CONTENT_URL + "?currentFolder=" + currentFolder + "&currentPath=" + currentPath + "&status=" + status
+
+    return redirect(redirectUrl)

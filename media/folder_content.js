@@ -126,6 +126,22 @@
     	    + "&currentPath=" + myEscape(currentPath);
     }
     
+    function deleteImage(fileName) {
+    	if (!userCanDelete) {
+    		alert("You do not have permission to delete from this folder");
+    		return;
+    	}
+
+    	var confirmMessage = "Are you sure you want to delete the selected entry?";
+	if (confirm(confirmMessage)) {
+    	    var url = baseUrl + "deleteImage?currentFolder=" + myEscape(currentFolder)
+    		+ "&currentPath=" + myEscape(currentPath)
+		+ "&fileName=" + myEscape(fileName);
+
+    	    window.location = url;
+	}
+        
+    }
     function del() {    	
     	
     	if (!userCanDelete) {

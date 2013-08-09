@@ -1,6 +1,11 @@
 {% extends "page.html" %}
 {% block body %}
 
+       <script>
+                setCurrentFolder('{{ currentFolder }}')
+                setCurrentPath('{{ currentPath }}')
+                setUserCanDelete('{{ userCanDelete }}')
+        </script>
 	<center>
 		{% if prevLink != None %}
 			<a href="{{ prevLink }}"><img src="{{ const.IMAGE_URL }}left_arrow.png"/></a>
@@ -14,7 +19,9 @@
 			<a href="{{ nextLink }}"><img src="{{ const.IMAGE_URL }}right_arrow.png"/></a>
 		{% endif %}
 		
-		<br>
+		<br><br>
+
+                <a href='javascript:deleteImage("{{ fileName }}")'>Delete File</a>
 	</center>
 	<img src="{{ imageUrl }}" />
 {% endblock %}
