@@ -12,7 +12,8 @@
         var newGroup = prompt("Please enter the new group name");
 	if (newGroup != null) {
 	    var url = baseUrl + "groupAdminAction/?action=addGroup"
-	        + "&groupName=" + encodeURI(newGroup);
+	        + "&groupName=" + encodeURI(newGroup)
+                + "&submit=Save";
 
             window.location = url;
 	}
