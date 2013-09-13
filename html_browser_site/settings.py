@@ -1,7 +1,9 @@
 # Django settings for html_browser_site project.
 
 URL_PREFIX = r''
-SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
+SENDFILE_BACKEND = 'sendfile.backends.nginx'
+SENDFILE_ROOT = '/'
+SENDFILE_URL = '/sendfile/'
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
