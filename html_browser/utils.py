@@ -187,7 +187,7 @@ class CopyPasteException(Exception):
     pass
 
 def replaceEscapedUrl(url):
-    return url.replace("(comma)", ",")
+    return url.replace("(comma)", ",").replace("(ampersand)", "&")
     
 def handlePaste(currentFolder, currentPath, clipboard):
     
