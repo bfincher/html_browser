@@ -98,7 +98,7 @@ class UserPermission(Permission):
     user = models.ForeignKey(User)
     
     def __str__(self):
-        return self.folder.name + " " + self.user.username + " " + str(self.permission)
+        return " ".join([self.folder.name, self.user.username, str(self.permission)])
     
     def getUserOrGroup(self):
         return "user"
@@ -113,7 +113,7 @@ class GroupPermission(Permission):
     group = models.ForeignKey(Group)
     
     def __str__(self):
-        return self.folder.name + " " + self.group.name + " " + str(self.permission)    
+        return " ".join([self.folder.name, self.group.name, str(self.permission)])
 
     def getUserOrGroup(self):
         return "group"

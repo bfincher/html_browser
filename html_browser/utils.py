@@ -16,6 +16,7 @@ from math import floor
 import collections
 import re
 import logging
+from logging import DEBUG
 from annoying.functions import get_object_or_None
 
 logger = logging.getLogger('html_browser.utils')
@@ -41,8 +42,7 @@ def getParentDirLink(path, currentFolder):
     if len(path) == 0:
         path = '/'
         
-    link = const.CONTENT_URL + "?currentFolder=" + quote_plus(currentFolder)
-    link += "&currentPath=" + quote_plus(path) 
+    link = "%s?currentFolder=%s&currentPath=%s" % (const.CONTENT_URL, quote_plus(currentFolder), quote_plus(path))
     
     return link
 
@@ -62,11 +62,11 @@ class DirEntry():
             self.size = str(size)
         self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')        
         
-        thumbPath = THUMBNAIL_DIR + '/' + folder.name + '/' + currentPath + '/' + name
+        thumbPath = "/".join([THUMBNAIL_DIR, folder.name, currentPath, name])
         
         if os.path.exists(thumbPath):
             self.hasThumbnail = True
-            self.thumbnailUrl = const.THUMBNAIL_URL + folder.name + "/" + currentPath + "/" + name
+            self.thumbnailUrl = "/".join([const.THUMBNAIL_URL + folder.name, currentPath, name])
         else:
             self.hasThumbnail = False
             self.thumbnailUrl = None
@@ -85,28 +85,31 @@ def getPath(folderPath, path):
     return dirPath
 
 def getCurrentDirEntriesSearch(folder, path, showHidden, search):
-    logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s search = %s", folder, path, search)
+    if logger.isEnabledFor(DEBUG):
+        logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s search = %s", folder, path, search)
     returnList = []
     thisEntry = DirEntry(True, path, 0, datetime.fromtimestamp(getmtime(getPath(folder.localPath, path))), folder, path)
     __getCurrentDirEntriesSearch(folder, path, showHidden, search, thisEntry, returnList)
 
     for entry in returnList:
-        entry.name = entry.currentPathOrig + "/" + entry.name
+        entry.name = "/".join([entry.currentPathOrig, entry.name])
 
     return returnList
 
 def __getCurrentDirEntriesSearch(folder, path, showHidden, search, thisEntry, returnList):
-    logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s search = %s thisEntry = %s", folder, path, search, thisEntry)
+    if logger.isEnabledFor(DEBUG):
+        logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s search = %s thisEntry = %s", folder, path, search, thisEntry)
     entries = getCurrentDirEntries(folder, path, showHidden)
 
     includeThisDir = False
 
     for entry in entries:
         if entry.isDir:
-	    __getCurrentDirEntriesSearch(folder, path + "/" + entry.name, showHidden, search, entry, returnList)
+	    __getCurrentDirEntriesSearch(folder, "/".join([path, entry.name]), showHidden, search, entry, returnList)
         else:
 	    if entry.name.find(search) != -1:
-                logger.debug("including this dir")
+                if logger.isEnabledFor(DEBUG):
+                    logger.debug("including this dir")
 	        includeThisDir = True
     
     if includeThisDir:
@@ -367,9 +370,10 @@ def __assignGroupsToUser(user,request):
 
     for key in request:
         if key.startswith("isGroup"):
-            logger.debug("processing key %s", key)
             groupName = key[7:]
-            logger.debug("groupName = %s", groupName)
+            if logger.isEnabledFor(DEBUG):
+                logger.debug("processing key %s", key)
+                logger.debug("groupName = %s", groupName)
             group = Group.objects.get(name=groupName)
             user.groups.add(group)
 
@@ -379,10 +383,11 @@ def __assignUsersToGroup(group, request):
 
     for key in request.REQUEST:
         if key.startswith("isUser"):
-	    logger.debug("processing key $s", key)
-	    userName = key[6:]
-	    user = User.objects.get(username=userName)
-	    group.user_set.add(user)
+            if logger.isEnabledFor(DEBUG):
+                logger.debug("processing key $s", key)
+            userName = key[6:]
+            user = User.objects.get(username=userName)
+            group.user_set.add(user)
 
 def handleEditFolder(request, folder=None):
     if folder == None:
