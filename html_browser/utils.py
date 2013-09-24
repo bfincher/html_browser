@@ -212,7 +212,7 @@ def handleDelete(folder, currentPath, entries):
     currentDirPath = getPath(folder.localPath, currentPath)
     
     for entry in entries.split(','):
-        entryPath = currentDirPath + replaceEscapedUrl(entry)
+        entryPath = os.path.join(currentDirPath, replaceEscapedUrl(entry))
         
         if os.path.isdir(entryPath):
             rmtree(entryPath)
