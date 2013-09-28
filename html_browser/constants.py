@@ -13,7 +13,7 @@ class _constants():
     ADD_GROUP_ACTION_URL = ADD_GROUP_URL + "action/"
     EDIT_GROUP_URL = GROUP_ADMIN_URL + "edit/"
     EDIT_GROUP_ACTION_URL = EDIT_GROUP_URL + "action/"
-    MEDIA_URL = '/hbmedia/'
+    MEDIA_URL = 'https://www.fincherhome.com:8081/hbmedia/'
     IMAGE_URL = MEDIA_URL + 'images/'
     IMAGE_VIEW_URL = BASE_URL + "image_view/"
     THUMBNAIL_URL = BASE_URL + "__media__/"
