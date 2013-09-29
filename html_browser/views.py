@@ -602,7 +602,7 @@ def imageView(request):
     else:
         nextLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, currentFolder, currentPath, currentDirEntries[i+1].name)
         
-    parentDirLink = "%s?currentFolder=%s&currentPath=" %(const.CONTENT_URL, currentFolder, currentPath)
+    parentDirLink = "%s?currentFolder=%s&currentPath=%s" %(const.CONTENT_URL, currentFolder, currentPath)
     
     imageUrl = '%s__%s__%s/%s' %(const.BASE_URL, currentFolder, currentPath, fileName)
     imageUrl = imageUrl.replace('//','/')
