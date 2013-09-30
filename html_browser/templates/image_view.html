@@ -1,6 +1,5 @@
 {% extends "page.html" %}
 {% block body %}
-
        <script>
                 setCurrentFolder('{{ currentFolder }}')
                 setCurrentPath('{{ currentPath }}')
@@ -21,8 +20,22 @@
 		
 		<br><br>
 
-                <a href='javascript:deleteImage("{{ fileName }}")'>Delete File</a>
 	</center>
-	<img src="{{ imageUrl }}" />
+
+    <table id="imageTable">
+        <tr><td><a href='javascript:deleteImage("{{ fileName }}")'>Delete File</a></td></tr>
+        <tr><td><img src="{{ imageUrl }}" /></td></tr>
+    </table>
+
+    <br>
+    <div id="loadingDiv"></div>
 {% endblock %}
-	
+
+{% block extra_js %}
+<script>
+fileName = "{{ fileName }}";
+lastImage = false;
+</script>
+<script src="{{ const.MEDIA_URL }}debounce.js" ></script>
+<script src="{{ const.MEDIA_URL }}image_view.js" ></script>
+{% endblock %}
