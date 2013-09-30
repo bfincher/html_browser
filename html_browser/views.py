@@ -2,6 +2,7 @@ from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from html_browser.models import Folder, UserPermission, GroupPermission
 from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.utils import simplejson as json
 from utils import getParentDirLink
 import html_browser.utils
 from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch, Clipboard, handlePaste, handleDelete,\
@@ -14,12 +15,14 @@ from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
 import os
+import re
 from django.http import HttpResponse
 import logging
 from logging import DEBUG
 from django.contrib.auth.models import User, Group
 
 reqLogger = logging.getLogger('django.request')
+imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$",re.IGNORECASE)
 
 class FolderViewOption():
     def __init__(self, value, display):
@@ -569,6 +572,23 @@ def __isShowHidden(request):
     else:
         return False
 
+def __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
+    folder = Folder.objects.filter(name=currentFolder)[0]
+    userCanRead = folder.userCanRead(request.user)
+    
+    if not userCanRead:
+        return HttpResponse("You don't have read permission on this folder")
+    
+    currentDirEntries = getCurrentDirEntries(folder, currentPath, __isShowHidden(request))
+    
+    for i in range(len(currentDirEntries)):
+        if currentDirEntries[i].name == fileName:
+            index = i
+            result = {'currentDirEntries' : currentDirEntries,
+                'index' : i}
+            return result
+        
+
 def imageView(request):
     reqLogger.info("imageView")
     if reqLogger.isEnabledFor(DEBUG):
@@ -576,37 +596,27 @@ def imageView(request):
 
     currentFolder = request.REQUEST['currentFolder']
     currentPath = request.REQUEST['currentPath']
-    
-    folder = Folder.objects.filter(name=currentFolder)[0]
-    userCanRead = folder.userCanRead(request.user)
-    
-    if not userCanRead:
-        return HttpResponse("You don't have read permission on this folder")
-    
     fileName = request.REQUEST['fileName']
-    
-    currentDirEntries = getCurrentDirEntries(folder, currentPath, __isShowHidden(request))
-    
-    for i in range(len(currentDirEntries)):
-        if currentDirEntries[i].name == fileName:
-            index = i
-            break
-        
-    if i == 0:
+    entries = __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName)
+    index = entries['index']
+    currentDirEntries = entries['currentDirEntries']
+
+    if index == 0:
         prevLink = None
     else:
-        prevLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, currentFolder, currentPath, currentDirEntries[i-1].name)
+        prevLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, currentFolder, currentPath, currentDirEntries[index-1].name)
         
-    if i == len(currentDirEntries) - 1:
+    if index == len(currentDirEntries) - 1:
         nextLink = None
     else:
-        nextLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, currentFolder, currentPath, currentDirEntries[i+1].name)
+        nextLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, currentFolder, currentPath, currentDirEntries[index+1].name)
         
     parentDirLink = "%s?currentFolder=%s&currentPath=%s" %(const.CONTENT_URL, currentFolder, currentPath)
     
     imageUrl = '%s__%s__%s/%s' %(const.BASE_URL, currentFolder, currentPath, fileName)
     imageUrl = imageUrl.replace('//','/')
 
+    folder = Folder.objects.filter(name=currentFolder)[0]
     userCanDelete = folder.userCanDelete(request.user)
     
     c = RequestContext(request,
@@ -654,3 +664,34 @@ def deleteImage(request):
     redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, currentFolder, currentPath, status)
 
     return redirect(redirectUrl)
+
+def getNextImage(request):
+    reqLogger.info("getNextImage")
+    if reqLogger.isEnabledFor(DEBUG):
+        reqLogger.debug("request = %s", request)
+
+    currentFolder = request.REQUEST['currentFolder']
+    currentPath = request.REQUEST['currentPath']        
+    fileName = request.REQUEST['fileName']
+
+    result = {}
+    entries = __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName)
+    if entries:
+        index = entries['index']
+        currentDirEntries = entries['currentDirEntries']
+
+        result['hasNextImage'] = False
+
+        for i in range(index+1, len(currentDirEntries)):
+            if imageRegex.match(currentDirEntries[i].name):
+                result['hasNextImage'] = True
+                nextFileName = currentDirEntries[i].name
+
+                imageUrl = '%s__%s__%s/%s' %(const.BASE_URL, currentFolder, currentPath, nextFileName)
+                imageUrl = imageUrl.replace('//','/')
+                result['imageUrl'] = imageUrl
+                result['fileName'] = nextFileName
+                break;
+
+    data = json.dumps(result)
+    return HttpResponse(data, mimetype='application/json')
