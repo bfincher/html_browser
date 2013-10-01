@@ -68,4 +68,11 @@ $(document).ready(function() {
        }, 500);
     });
     $(window).on('scroll', debounced); 
+
+    // necessary for pages where the initial image is amall enough
+    // to not need a scroll bar
+    if ($(document).height() == $(window).height()) {
+        // has scrollbar
+        getNextImage();
+    }
 });
