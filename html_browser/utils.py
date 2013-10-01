@@ -198,6 +198,11 @@ def handlePaste(currentFolder, currentPath, clipboard):
     
     for entry in clipboard.entries:
         source = getPath(clipboardFolder.localPath, clipboard.currentPath) + replaceEscapedUrl(entry)
+        if os.path.exists(os.path.join(dest, entry)):
+            return "One or more of the items already exists in the destination"
+        
+    for entry in clipboard.entries:
+        source = getPath(clipboardFolder.localPath, clipboard.currentPath) + replaceEscapedUrl(entry)
         if clipboard.clipboardType == 'COPY':
             if os.path.isdir(source):
                 copytree(source, dest + entry)

@@ -111,6 +111,7 @@ def content(request):
         return redirect(const.BASE_URL, 'You are not authorized to view this page')
     
     status = ''
+    statusError = None
 
     if request.REQUEST.has_key('action'):        
         action = request.REQUEST['action']
@@ -121,6 +122,7 @@ def content(request):
         elif action == 'cutToClipboard':
             if not userCanDelete:
                 status="You don't have delete permission on this folder"
+                statusError = True
             else:
                 entries = request.REQUEST['entries']
                 request.session['clipboard'] = Clipboard(currentFolder, currentPath, entries, 'CUT')            
@@ -128,12 +130,17 @@ def content(request):
         elif action == 'pasteFromClipboard':
             if not userCanWrite:
                 status = "You don't have write permission on this folder"
+                statusError = True
             else:
-                handlePaste(currentFolder, currentPath, request.session['clipboard'])
-                status = 'Items pasted'
+                status = handlePaste(currentFolder, currentPath, request.session['clipboard'])
+                if status:
+                    statusError = True
+                else:
+                    status = 'Items pasted'
         elif action == 'deleteEntry':
             if not userCanDelete:
                 status = "You don't have delete permission on this folder"
+                statusError = True
             else:
                 handleDelete(folder, currentPath, request.REQUEST['entries'])
                 status = 'File(s) deleted'
@@ -153,6 +160,9 @@ def content(request):
         
         redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, currentFolder, currentPath, status)
 
+        if statusError:
+            redirectUrl += "&statusError=%s" % statusError
+
         return redirect(redirectUrl)        
     
     parentDirLink = getParentDirLink(currentPath, currentFolder)
@@ -161,6 +171,9 @@ def content(request):
         status = request.REQUEST['status']
     else:
         status = ''
+
+    if request.REQUEST.has_key('statusError'):
+        statusError = request.REQUEST['statusError']
 
     breadcrumbs = None
     crumbs = currentPath.split("/")
@@ -188,8 +201,7 @@ def content(request):
         search = request.REQUEST['search']
         currentDirEntries= getCurrentDirEntriesSearch(folder, currentPath, __isShowHidden(request), search)
 
-        c = RequestContext(request,
-            {'currentFolder' : currentFolder,
+        values = {'currentFolder' : currentFolder,
              'currentPath' : currentPath,
              'userCanRead' : str(userCanRead).lower(),
              'userCanWrite' : str(userCanWrite).lower(),
@@ -198,9 +210,12 @@ def content(request):
              'currentDirEntries' : currentDirEntries,
              'const' : const,
              'user' : request.user,
-	     'breadcrumbs' : breadcrumbs,
-	     'showHidden' : __isShowHidden(request),
-         })
+             'breadcrumbs' : breadcrumbs,
+             'showHidden' : __isShowHidden(request),
+        }
+        if statusError:
+            values['statusError'] = True
+        c = RequestContext(request, values)
         return render_to_response("content_search.html", c)
 
     currentDirEntries = getCurrentDirEntries(folder, currentPath, __isShowHidden(request), filter)
@@ -213,8 +228,7 @@ def content(request):
     diskFreePct = getDiskPercentFree(getPath(folder.localPath, currentPath))
     diskUsage = getDiskUsageFormatted(getPath(folder.localPath, currentPath))
 
-    c = RequestContext(request,
-        {'currentFolder' : currentFolder,
+    values = {'currentFolder' : currentFolder,
          'currentPath' : currentPath,
          'userCanRead' : str(userCanRead).lower(),
          'userCanWrite' : str(userCanWrite).lower(),
@@ -226,15 +240,18 @@ def content(request):
          'currentDirEntries' : currentDirEntries,
          'const' : const,
          'user' : request.user,
-	 'diskFreePct' : diskFreePct,
-	 'diskFree' : diskUsage.freeformatted,
-	 'diskUsed' : diskUsage.usedformatted,
-	 'diskTotal' : diskUsage.totalformatted,
+         'diskFreePct' : diskFreePct,
+         'diskFree' : diskUsage.freeformatted,
+         'diskUsed' : diskUsage.usedformatted,
+         'diskTotal' : diskUsage.totalformatted,
          'diskUnit' : diskUsage.unit,
-	 'showContent' : True,
-	 'breadcrumbs' : breadcrumbs,
-	 'showHidden' : __isShowHidden(request),
-         })
+         'showContent' : True,
+         'breadcrumbs' : breadcrumbs,
+         'showHidden' : __isShowHidden(request),
+    }
+    if statusError:
+        values['statusError'] = True
+    c = RequestContext(request, values)
     
     if viewType == const.detailsViewType:
         template = 'content_detail.html'
