@@ -30,7 +30,10 @@ function getNextImage() {
             table.append($('<tr><td>&nbsp</td></tr>'));
             var row = $('<tr>');
             var cell = $('<td>');
-            cell.html("<a href='javascript:deleteImage('" + fileName + "');>Delete File</a>");
+            $("<a />", {
+                "href" : "javascript:deleteImage('" + fileName + "');",
+                "text" : "Delete File"
+            }).appendTo(cell);
             row.append(cell);
             table.append(row);
 
