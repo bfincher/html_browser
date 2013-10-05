@@ -23,7 +23,7 @@ DATABASES = {
     }
 }
 
-THUMBNAIL_DIR = '/srv/www/hb/media'
+THUMBNAIL_DIR = '/srv/www/hb/media/thumbs'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
