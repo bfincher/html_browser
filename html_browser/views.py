@@ -113,11 +113,11 @@ def content(request):
     status = ''
     statusError = None
 
-    if request.REQUEST.has_key('action'):        
+    if request.REQUEST.has_key('action'):
         action = request.REQUEST['action']
         if action == 'copyToClipboard':
             entries = request.REQUEST['entries']
-            request.session['clipboard'] = Clipboard(currentFolder, currentPath, entries, 'COPY')            
+            request.session['clipboard'] = Clipboard(currentFolder, currentPath, entries, 'COPY').toJson()
             status='Items copied to clipboard';
         elif action == 'cutToClipboard':
             if not userCanDelete:
@@ -125,14 +125,14 @@ def content(request):
                 statusError = True
             else:
                 entries = request.REQUEST['entries']
-                request.session['clipboard'] = Clipboard(currentFolder, currentPath, entries, 'CUT')            
+                request.session['clipboard'] = Clipboard(currentFolder, currentPath, entries, 'CUT').toJson()
                 status = 'Items copied to clipboard'
         elif action == 'pasteFromClipboard':
             if not userCanWrite:
                 status = "You don't have write permission on this folder"
                 statusError = True
             else:
-                status = handlePaste(currentFolder, currentPath, request.session['clipboard'])
+                status = handlePaste(currentFolder, currentPath, Clipboard.fromJson(request.session['clipboard']))
                 if status:
                     statusError = True
                 else:
@@ -152,9 +152,9 @@ def content(request):
             os.makedirs(getPath(folder.localPath, currentPath) + dirName)
         elif action == 'rename':
             handleRename(folder, currentPath, request.REQUEST['file'], request.REQUEST['newName'])
-	elif action == 'changeSettings':
-	    if request.REQUEST['submit'] == "Save":
-	        request.session['showHidden'] = request.REQUEST.has_key('showHidden')
+        elif action == 'changeSettings':
+            if request.REQUEST['submit'] == "Save":
+                request.session['showHidden'] = request.REQUEST.has_key('showHidden')
         else:
             raise RuntimeError('Unknown action %s' % action)
         

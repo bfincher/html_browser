@@ -5,6 +5,7 @@ from operator import attrgetter
 from constants import _constants as const
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User, Group
+from django.utils import simplejson as json
 from html_browser.models import Folder, UserPermission, GroupPermission
 from shutil import copy2, move, copytree, rmtree
 from zipfile import ZipFile
@@ -181,7 +182,24 @@ class Clipboard():
         self.currentFolder = currentFolder
         self.currentPath = currentPath
         self.clipboardType = clipboardType
-        self.entries = entries.split(',')    
+
+        if type(entries) is list:
+            self.entries = entries
+        else:
+            self.entries = entries.split(',')    
+
+    @staticmethod
+    def fromJson(jsonStr):
+        dictData = json.loads(jsonStr)
+        return Clipboard(dictData['currentFolder'], dictData['currentPath'], dictData['entries'], dictData['clipboardType'])
+
+    def toJson(self):
+        result = {'currentFolder' : self.currentFolder,
+            'currentPath' : self.currentPath,
+            'clipboardType' : self.clipboardType,
+            'entries' : self.entries}
+
+        return json.dumps(result)
         
 class CopyPasteException(Exception):
     pass
