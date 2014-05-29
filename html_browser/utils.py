@@ -55,12 +55,14 @@ class DirEntry():
         self.nameUrl = quote_plus(self.name)
 
         self.currentPathOrig = currentPath
-	self.currentPath = quote_plus(currentPath)
+        self.currentPath = quote_plus(currentPath)
         
         if isDir:
             self.size = '&nbsp'
+            self.sizeInt = 0
         else:
-            self.size = str(size)
+            self.size = formatBytes(size)
+            self.sizeInt = size
         self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')        
         
         thumbPath = "/".join([THUMBNAIL_DIR, folder.name, currentPath, name])
@@ -325,37 +327,52 @@ def handleZipUpload(f, folder, currentPath):
 
 def getDiskPercentFree(path):
     du = getDiskUsage(path)
+    logger.info("free = %s, total = %s", du.free, du.total)
     free = du.free / 1.0
     total = du.total / 1.0
     pct = free / total;
     pct = pct * 100.0;
-    return str(int(floor(pct))) + "%"
+    return "%.2f" % pct + "%" 
+
+def getBytesUnit(numBytes):
+    if numBytes / GIGABYTE > 1:
+        return "GB"
+    elif numBytes / MEGABYTE > 1:
+        return "MB"
+    elif numBytes / KILOBYTE > 1:
+        return "KB"
+    else:
+        return "Bytes"
+
+def formatBytes(numBytes, forceUnit=None, includeUnitSuffix=True):
+    if forceUnit:
+        unit = forceUnit
+    else:
+        unit = getBytesUnit(numBytes)
+
+    if unit == "GB":
+        returnValue = "%.2f" % (numBytes / GIGABYTE)
+    elif unit == "MB":
+        returnValue = "%.2f" % (numBytes / MEGABYTE)
+    elif unit == "KB":
+        returnValue = "%.2f" % (numBytes / KILOBYTE)
+    else:
+        returnValue = str(numBytes)
+
+    if includeUnitSuffix and unit != "Bytes":
+        return "%s %s" % (returnValue, unit)
+    else:
+        return returnValue
 
 def getDiskUsageFormatted(path):
     du = getDiskUsage(path)
 
     _ntuple_diskusage_formatted = collections.namedtuple('usage', 'total totalformatted used usedformatted free freeformatted unit')
 
-    if du.total / GIGABYTE > 1:
-        total = "%.2f" % (du.total / GIGABYTE)
-	used = "%.2f" % (du.used / GIGABYTE)
-	free = "%.2f" % (du.free / GIGABYTE)
-	unit = "GB"
-    elif du.total / MEGABYTE > 1:
-        total = "%.2f" % (du.total / MEGABYTE)
-	used = "%.2f" % (du.used / MEGABYTE)
-	free = "%.2f" % (du.free / MEGABYTE)
-	unit = "MB"
-    elif du.total / KILOBYTE > 1:
-        total = "%.2f" % (du.total / KILOBYTE)
-	used = "%.2f" % (du.used / KILOBYTE)
-	free = "%.2f" % (du.free / KILOBYTE)
-	unit = "KB"
-    else:
-        total = du.total
-	used = du.used
-	free = du.free
-	unit = "Bytes"
+    unit = getBytesUnit(du.total)
+    total = formatBytes(du.total, unit, False)
+    used = formatBytes(du.used, unit, False)
+    free = formatBytes(du.free, unit, False)
 
     return _ntuple_diskusage_formatted(du.total, total, du.used, used, du.free, free, unit)
 
