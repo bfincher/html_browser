@@ -62,7 +62,7 @@ class DirEntry():
             self.sizeInt = 0
         else:
             self.size = formatBytes(size)
-            self.sizeInt = size
+            self.sizeNumeric = size
         self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')        
         
         thumbPath = "/".join([THUMBNAIL_DIR, folder.name, currentPath, name])
