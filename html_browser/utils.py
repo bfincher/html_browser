@@ -11,9 +11,10 @@ from shutil import copy2, move, copytree, rmtree
 from zipfile import ZipFile
 import zipfile
 from sendfile import sendfile
-from glob import glob
 from html_browser_site.settings import THUMBNAIL_DIR
 from math import floor
+import sh
+
 import collections
 import re
 import logging
@@ -285,7 +286,9 @@ def addFolderToZip(zipFile, folder):
     __addFolderToZip__(zipFile, folder, folder)    
         
 def __addFolderToZip__(zipFile, folder, basePath):
-    for f in glob(folder + "/*"):
+    for f in sh.ls("-1", folder):
+        f = f.strip()
+        f = os.path.join(folder, f)
         if os.path.isfile(f):
             arcName = f.replace(basePath, '')
             zipFile.write(f, arcName, compress_type=zipfile.ZIP_DEFLATED)
