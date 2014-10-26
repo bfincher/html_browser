@@ -1,21 +1,36 @@
-Alias /static/admin/ /usr/local/lib/python2.7/dist-packages/django/contrib/admin/static/admin/
+<VirtualHost *:443>
+    ServerName hb.fincherhome.com
+    SSLEngine On
+    SSLCertificateFile    /etc/ssl/certs/server.crt
+    SSLCertificateKeyFile /etc/ssl/private/server.key
+    CustomLog /var/log/apache2/hb-ssl.log combined
+    ErrorLog /var/log/apache2/hb-ssl-error.log
 
-    WSGIDaemonProcess site-1 user=www-data group=www-data threads=25
-    WSGIProcessGroup site-1
+    ServerAdmin webmaster@localhost
+    ServerName hb.fincherhome.com
+
+    # These paths should be fine
+    ErrorLog /var/log/apache2/error.log
+    LogLevel warn
+
+    WSGIDaemonProcess html_browser user=www-data group=www-data threads=2
+    WSGIProcessGroup html_browser
 
     Alias /hbmedia/ /srv/www/hbmedia/
 
     <Directory /srv/www/hbmedia>
         Order deny,allow
-        Allow from all
+	Require all granted
     </Directory>
 
-    WSGIScriptAlias /hb /srv/www/hb/apache/django.wsgi
+    WSGIScriptAlias / /srv/www/hb/apache/django.wsgi
 
     <Directory /srv/www/hb/apache>
         Order deny,allow
-        Allow from all
-        XSendFile On
+	Require all granted
+	XSendFile On
         XSendFilePath "/tmp"
         XSendFilePath "/"
     </Directory>
+
+</VirtualHost>
