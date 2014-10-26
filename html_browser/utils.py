@@ -66,14 +66,18 @@ class DirEntry():
             self.sizeNumeric = size
         self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')        
         
-        thumbPath = "/".join([THUMBNAIL_DIR, folder.name, currentPath, name])
+        try:
+            thumbPath = "/".join([THUMBNAIL_DIR, folder.name, currentPath, name])
         
-        if os.path.exists(thumbPath):
-            self.hasThumbnail = True
-            self.thumbnailUrl = "/".join([const.THUMBNAIL_URL + folder.name, currentPath, name])
-        else:
-            self.hasThumbnail = False
-            self.thumbnailUrl = None
+            if os.path.exists(thumbPath):
+                self.hasThumbnail = True
+                self.thumbnailUrl = "/".join([const.THUMBNAIL_URL + folder.name, currentPath, name])
+            else:
+                self.hasThumbnail = False
+                self.thumbnailUrl = None
+
+        except UnicodeDecodeError, de:
+	        logger.exception(de)
 
     def __str__(self):
         return "DirEntry:  isDir = %s name = %s nameUrl = %s currentPath = %s currentPathOrig = %s size = %s lastModifyTime = %s hasThumbnail = %s thumbnailUrl = %s" % \
@@ -86,7 +90,7 @@ def getPath(folderPath, path):
     dirPath = folderPath.strip() + path
     if not dirPath.endswith('/'):
         dirPath += '/'
-    return dirPath
+    return dirPath.encode('utf8')
 
 def getCurrentDirEntriesSearch(folder, path, showHidden, search):
     if logger.isEnabledFor(DEBUG):
@@ -145,10 +149,10 @@ def getCurrentDirEntries(folder, path, showHidden, filter=None):
                 if include:
                     fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
         except OSError, ose:
-	    logger.error(ose)
+	    logger.exception(ose)
 
         except UnicodeDecodeError, de:
-	    logger.error(de)
+	    logger.exception(de)
             
     dirEntries.sort(key=attrgetter('name'))
     fileEntries.sort(key=attrgetter('name'))
