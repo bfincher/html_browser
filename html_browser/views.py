@@ -2,7 +2,6 @@ from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from html_browser.models import Folder, UserPermission, GroupPermission
 from django.contrib.auth import login as auth_login, logout as auth_logout
-from django.utils import simplejson as json
 from utils import getParentDirLink
 import html_browser.utils
 from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch, Clipboard, handlePaste, handleDelete,\
@@ -16,12 +15,13 @@ from django.contrib.auth import authenticate
 from sendfile import sendfile
 import os
 import re
+import json
 from django.http import HttpResponse
 import logging
 from logging import DEBUG
 from django.contrib.auth.models import User, Group
 
-reqLogger = logging.getLogger('django.request')
+_reqLogger = None
 imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$",re.IGNORECASE)
 
 class FolderViewOption():
@@ -35,7 +35,14 @@ for choice in html_browser.models.viewableChoices:
    option = FolderViewOption(choice[0], choice[1]) 
    folderViewOptions.append(option)
 
+def getReqLogger():
+    if not _reqLogger:
+        global _reqLogger
+        _reqLogger = logging.getLogger('django.request')
+    return _reqLogger;
+
 def index(request):
+    reqLogger = getReqLogger()
     reqLogger.info('index ')
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug(str(request))
@@ -61,6 +68,7 @@ def hbLogin(request):
     userName = request.POST['userName']
     password = request.POST['password']
 
+    reqLogger = getReqLogger()
     reqLogger.info("hbLogin")
     if userName is not None:
         reqLogger.info("userName = %s" % userName)
@@ -88,11 +96,13 @@ def hbLogin(request):
 
 
 def hbLogout(request):
+    reqLogger = getReqLogger()
     reqLogger.info("user %s logged out", request.user)
     auth_logout(request)
     return redirect(const.BASE_URL)
 
 def content(request):    
+    reqLogger = getReqLogger()
     reqLogger.info("content")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
@@ -262,6 +272,7 @@ def content(request):
     return render_to_response(template, c)
 
 def hbAdmin(request):
+    reqLogger = getReqLogger()
     reqLogger.info("admin")
 
     c = RequestContext(request, 
@@ -271,6 +282,7 @@ def hbAdmin(request):
     return render_to_response('admin/admin.html', c)
 
 def folderAdminAction(request):
+    reqLogger = getReqLogger()
     reqLogger.info("folderAdminAction")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
@@ -296,6 +308,7 @@ def folderAdminAction(request):
     pass
 
 def folderAdmin(request):
+    reqLogger = getReqLogger()
     reqLogger.info("folderAdmin")
 
     c = RequestContext(request,
@@ -314,6 +327,7 @@ def addFolder(request):
     return render_to_response('admin/add_folder.html', c)
 
 def editFolder(request):
+    reqLogger = getReqLogger()
     reqLogger.info("editFolder")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
@@ -347,6 +361,7 @@ def editFolder(request):
     return render_to_response('admin/edit_folder.html', c)
 
 def groupAdminAction(request):
+    reqLogger = getReqLogger()
     reqLogger.info("groupAdminAction")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
@@ -371,6 +386,7 @@ def groupAdminAction(request):
     return redirect(redirectUrl)           
 
 def editGroup(request):
+    reqLogger = getReqLogger()
     reqLogger.info("editGroup")
 
     groupName = request.REQUEST['groupName']
@@ -396,6 +412,7 @@ def editGroup(request):
     return render_to_response('admin/edit_group.html', c)
 
 def groupAdmin(request):
+    reqLogger = getReqLogger()
     reqLogger.info("groupAdmin")
 
     groups = []
@@ -409,6 +426,7 @@ def groupAdmin(request):
     return render_to_response('admin/group_admin.html', c)
 
 def userAdminAction(request):
+    reqLogger = getReqLogger()
     reqLogger.info("userAdminAction")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
@@ -435,6 +453,7 @@ def userAdminAction(request):
     return redirect(redirectUrl)           
 
 def userAdmin(request):
+    reqLogger = getReqLogger()
     reqLogger.info("userAdmins")
 
     if not request.user.is_staff:
@@ -451,6 +470,7 @@ def editUser(request):
         raise RuntimeError("User is not an admin")
 
     userName = request.REQUEST['userName']
+    reqLogger = getReqLogger()
     reqLogger.info("editUser: user = %s", userName)
 
     editUser = User.objects.get(username=userName)
@@ -473,6 +493,7 @@ def editUser(request):
     return render_to_response('admin/edit_user.html', c)
 
 def addUser(request):
+    reqLogger = getReqLogger()
     reqLogger.info("addUser")
 
     if not request.user.is_staff:
@@ -491,6 +512,7 @@ def addUser(request):
     return render_to_response('admin/add_user.html', c)
 
 def hbChangePassword(request):
+    reqLogger = getReqLogger()
     reqLogger.info("hbChangePassword")
     c = RequestContext(request, 
         {'const' : const,
@@ -500,6 +522,7 @@ def hbChangePassword(request):
 
 def hbChangePasswordResult(request):
     user = request.user
+    reqLogger = getReqLogger()
     reqLogger.info("hbChangePasswordResult: user = %s", user)
     errorMessage = None
     if user.check_password(request.POST['password']):
@@ -528,6 +551,7 @@ def hbChangePasswordResult(request):
         return render_to_response('admin/change_password_fail.html', c)
     
 def download(request):
+    reqLogger = getReqLogger()
     reqLogger.info("download")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
@@ -542,12 +566,14 @@ def download(request):
     return sendfile(request, filePath, attachment=True)
 
 def downloadZip(request):    
+    reqLogger = getReqLogger()
     reqLogger.info("downloadZip")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
     return handleDownloadZip(request)
 
 def upload(request):
+    reqLogger = getReqLogger()
     reqLogger.info("upload")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
@@ -607,6 +633,7 @@ def __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
         
 
 def imageView(request):
+    reqLogger = getReqLogger()
     reqLogger.info("imageView")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
@@ -655,6 +682,7 @@ def imageView(request):
     return render_to_response('image_view.html', c)
         
 def thumb(request):
+    reqLogger = getReqLogger()
     reqLogger.info("thumb")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
@@ -662,6 +690,7 @@ def thumb(request):
     return render_to_response('test_image.html')
 
 def deleteImage(request):
+    reqLogger = getReqLogger()
     reqLogger.info("deleteImage")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
@@ -683,6 +712,7 @@ def deleteImage(request):
     return redirect(redirectUrl)
 
 def getNextImage(request):
+    reqLogger = getReqLogger()
     reqLogger.info("getNextImage")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
@@ -711,4 +741,4 @@ def getNextImage(request):
                 break;
 
     data = json.dumps(result)
-    return HttpResponse(data, mimetype='application/json')
+    return HttpResponse(data, content_type='application/json')

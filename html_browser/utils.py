@@ -5,7 +5,6 @@ from operator import attrgetter
 from constants import _constants as const
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User, Group
-from django.utils import simplejson as json
 from html_browser.models import Folder, UserPermission, GroupPermission
 from shutil import copy2, move, copytree, rmtree
 from zipfile import ZipFile
@@ -14,6 +13,7 @@ from sendfile import sendfile
 from html_browser_site.settings import THUMBNAIL_DIR
 from math import floor
 import sh
+import json
 
 import collections
 import re
