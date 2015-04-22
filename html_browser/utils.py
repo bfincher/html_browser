@@ -334,9 +334,8 @@ def handleZipUpload(f, folder, currentPath):
 
 def getDiskPercentFree(path):
     du = getDiskUsage(path)
-    logger.info("free = %s, total = %s", du.free, du.total)
     free = du.free / 1.0
-    total = du.total / 1.0
+    total = du.free + du.used / 1.0
     pct = free / total;
     pct = pct * 100.0;
     return "%.2f" % pct + "%" 
