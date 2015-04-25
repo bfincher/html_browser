@@ -1,8 +1,8 @@
 
     function myEscape(str) {
-        str = str.replace(",", "(comma)", "gm");
+        str = str.replace(/,/g , "(comma)");
         str = encodeURIComponent(str);
-        str = str.replace("&", "(ampersand)", "gm");
+        str = str.replace(/&/g , "(ampersand)");
         return str;
     }
     function setCurrentFolder(_currentFolder) {
