@@ -28,49 +28,49 @@
 	<form id="form" action="{{ const.BASE_URL }}userAdminAction/" method="post"> {% csrf_token %}
 		<input name=action type=hidden value=addUser />
 
-	<div class="row-fluid settings">
-		<div class="span6">
+	<div class="row settings">
+		<div class="col-md-6">
 		    User Name <input id=userName name=userName type=text onkeyup="validateUserName('userName', 'Save')"/>
 		</div>
 	</div>
 	
-	<div class="row-fluid settings">
-	    <div class="span6">
+	<div class="row settings">
+	    <div class="col-md-6">
 	        <td>Password: </td>
 	        <input id="password" name=password type=password onkeyup="validatePassword('password', 'verifyPassword', 'Save')"/></td>
 	    </div>
-	    <div class="span6">
+	    <div class="col-md-6">
 	        Verify Password:
 		<input id="verifyPassword" name=verifyPassword type=password onkeyup="validatePassword('password', 'verifyPassword', 'Save')"/>
 	    </div>
 	</div>
 
-	<div class="row-fluid settings">
-	     <div class="span3">
+	<div class="row settings">
+	     <div class="col-md-3">
                  Is Administrator
              </div>
-             <div class="span1">
+             <div class="col-md-1">
                  <input name="isAdministrator" type="checkbox" />
              </div>
        </div>
 
 
 	{% for groupName in groupNames %}
-            <div class="row-fluid">
-                <div class="span1">
+            <div class="row">
+                <div class="col-md-1">
                     <input name="isGroup{{ groupName }}" type="checkbox"  />
                 </div>
-                <div class="span3">
+                <div class="col-md-3">
                     {{ groupName }}
 	        </div>
             </div>
         {% endfor %}
 
-	<div class="row-fluid settings">
-            <div class="span3">
+	<div class="row settings">
+            <div class="col-md-3">
                 <input class="btn" id=Save name=submit type=submit value="Save" disabled/>
             </div>
-            <div class="span3">
+            <div class="col-md-3">
                 <input class="btn" name=submit type=submit value="Cancel"/>
             </div>
         </div>

@@ -69,8 +69,8 @@
     {% block formContent %}
     <input name=action type=hidden value={%block actionName %}{% endblock %} /> {% csrf_token %}
     {% if folder %}<input name=name type=hidden value="{{ folder.name }}" /> {% endif %}
-    <div class="row-fluid">
-	    <div class="span3">
+    <div class="row">
+	    <div class="col-md-3">
 	        Directory&nbsp;&nbsp;
 	        <input name="directory" required="true" type="text" {% if folder %}value="{{ folder.localPath }}"{% endif %}/>
 	    </div>
@@ -143,9 +143,9 @@
 	</select>
     <br>
 
-    <div class="row-fluid">
-	<div class="span2"><input class="btn" name="submit" type="submit" value="Save" /></div>
-	<div class="span2"><input class="btn" name="submit" type="submit" value="Cancel" formnovalidate="formnovalidate" /></div>
+    <div class="row">
+	<div class="col-md-2"><input class="btn" name="submit" type="submit" value="Save" /></div>
+	<div class="col-md-2"><input class="btn" name="submit" type="submit" value="Cancel" formnovalidate="formnovalidate" /></div>
     </div>
     {% endblock %}
 </form>

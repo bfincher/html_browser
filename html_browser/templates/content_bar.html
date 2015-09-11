@@ -1,5 +1,5 @@
-        <div class="row-fluid">
-		<div class="span5">
+        <div class="row">
+		<div class="col-md-5">
 			<a href=" {{parentDirLink }}" title="Parent Folder"><img src="{{ const.IMAGE_URL }}folder-blue-parent-icon.png"></a>
 
 			<a title="Delete" href="javascript:del()"> <img src="{{ const.IMAGE_URL }}Symbols-Delete-icon.png"/></a>
@@ -11,7 +11,7 @@
 			<a title="Download Zip" href="javascript:zip()"><img src="{{ const.IMAGE_URL }}ZIP-File-icon.png"/></a>
 		</div>
 				
-		<div class="span4">
+		<div class="col-md-4">
 			<h5>
 				{{ currentFolder }}{{ currentPath }} &nbsp;&nbsp;&nbsp; 
                                 <a href="javascript:diskUsageShowPopup()">{{ diskFreePct }} free</a>
@@ -23,7 +23,7 @@
             {% endif %}
 		</div>
 
-		<div class="span3">
+		<div class="col-md-3">
 			<select id="viewTypeBox" onchange="viewTypeBoxChanged(this)">
 			
 			{% for view in viewTypes %}

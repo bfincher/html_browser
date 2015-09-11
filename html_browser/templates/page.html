@@ -14,9 +14,7 @@
 
     <link rel="stylesheet" href="{{ const.MEDIA_URL }}/html_browser.css" type="text/css" media="screen" title="no title" charset="utf-8">
 
-    <link rel="stylesheet" href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap.css">
-    <link href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
-    <!-- <link href="{{ const.MEDIA_URL }}bootstrap/css/docs.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap.min.css">
     <link href="{{ const.MEDIA_URL }}pretify.css" rel="stylesheet">
     <style type="text/css">
             body {
@@ -24,12 +22,6 @@
                     padding-bottom: 40px;
             }
     </style>
-    <link href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
-
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-            <script src="{{ const.MEDIA_URL }}bootstrap/js/html5shiv.js"></script>
-    <![endif]-->
 
     <script type="text/javascript" src="{{ const.MEDIA_URL }}folder_content.js"></script>
 </head>
@@ -39,25 +31,49 @@
 <body>		
     {% block navbar %}
     <div class="navbar navbar-inverse navbar-fixed-top">
-	<div class="navbar-inner">
-	    <div class="container">
-		<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-		    <span class="icon-bar"></span>
-		    <span class="icon-bar"></span>
-		    <span class="icon-bar"></span>
-		</button>
-		<a class="brand" href="{{ const.BASE_URL }}">HTML File Explorer</a>
-		<div class="nav-collapse collapse">
-		    <ul class="nav">
-			{% if user.is_authenticated %}
-			    {% if user.is_staff %}
-			        <li class="active"><a href="{{ const.BASE_URL }}hbAdmin">Administration  </a></li>
-			    {% endif %}
-			{% endif %}
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="{{ const.BASE_URL }}">HTML File Explorer</a>
+        </div>
+      <div id="navbar" class="navbar-collapse collapse">
+         <ul class="nav navbar-nav">
+           {% if user.is_authenticated %}
+             {% if user.is_staff %}
+               <li class="active"><a href="{{ const.BASE_URL }}hbAdmin">Administration</a></li>
 
-		    </ul>
+               {% if showContent %}
+                 <li class="dropdown">
+                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Filter <span class="caret"></span></a>
+                   <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                     <center>
+                       <h3>Apply a filter</h3>
+                       <form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
+                         <input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
+                         <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
+                         <input type="hidden" name="currentPath" value="{{ currentPath }}" />
+                         <input class="btn btn-default" type="submit" value="Filter" name="Filter" />
+                       </form>
+                     </center>
+                   </div>
+                 </li>
+               {% endif %}
+
+             {% endif %}
+           {% endif %}
+        </ul>
+
+      </div>
+      </div>
+    </div>
+    <!--
 		    {% if showContent %}
-		    <ul class="nav">
+		    <ul class="navbar-nav">
 			<li class="dropdown" data-dropdown="dropdown">
 		            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Filter <b class="caret"></b></a>
 			    <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
@@ -67,7 +83,7 @@
 			            <input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
 			            <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
 			            <input type="hidden" name="currentPath" value="{{ currentPath }}" />
-			            <input class="btn btn-primary" type="submit" value="Filter" name="Filter" />
+			            <input class="btn btn-default" type="submit" value="Filter" name="Filter" />
 			        </form>
 				</center>
 			    </div>
@@ -81,7 +97,7 @@
 			            <input type="text" name="search" value="{{ search }}" maxlength="20" size="10" />
 			            <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
 			            <input type="hidden" name="currentPath" value="{{ currentPath }}" />
-			            <input class="btn btn-primary" type="submit" value="Search" name="Search" />
+			            <input class="btn btn-default" type="submit" value="Search" name="Search" />
 			       </form>
 				</center>
 			    </div>
@@ -111,17 +127,17 @@
 
 		    <div class="small">
 		    {% if user.is_authenticated %}
-		    <ul class="nav pull-right" >
+		    <ul class="navbar-nav pull-right" >
 			<li class="active"><a href="#" > {{ user.username }} </a> </li>
 			<li class="active"><a href="{{ const.BASE_URL }}hbChangePassword" >Change Password </a></li>
 			<li class="active"><a href="{{ const.BASE_URL }}hbLogout/" >Log Out  </a></li>
 		    </ul>
 		    {% else %}
 		    <form class="navbar-form pull-right" action="{{ const.BASE_URL }}hbLogin/" method="post" > {% csrf_token %}
-			<input class="span2" name="userName" type="text" placeholder="User Name">
-			<input class="span2" name="password" type="password" placeholder="Password">
+			<input class="col-md-2" name="userName" type="text" placeholder="User Name">
+			<input class="col-md-2" name="password" type="password" placeholder="Password">
 			<button type="submit" class="btn">Sign in</button>
-			<input class="span1" name="action" type="hidden" value="login" >
+			<input class="col-md-1" name="action" type="hidden" value="login" >
 		    </form>
 		    {% endif %}
 		    </div>
@@ -129,6 +145,7 @@
 	    </div>
 	</div>
     </div>
+    -->
     {% endblock %}
     {% block navbar2 %}
     {% if breadcrumbs %}
@@ -153,19 +170,8 @@
 {% block body2 %} {% endblock %}
 
  <!-- Placed at the end of the document so the pages load faster -->
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/jquery.js"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-transition.js"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-alert.js"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-modal.js"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-dropdown.js"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-scrollspy.js"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-tab.js"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-tooltip.js"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-popover.js"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-button.js"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-collapse.js"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-carousel.js"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap-typeahead.js"></script>
+    <script src="{{ const.MEDIA_URL }}jjquery-1.11.3.min.js"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap.min.js"></script>
 {% block extra_js %} {% endblock %}
 </body>
 </html>
