@@ -46,106 +46,81 @@
            {% if user.is_authenticated %}
              {% if user.is_staff %}
                <li class="active"><a href="{{ const.BASE_URL }}hbAdmin">Administration</a></li>
-
-               {% if showContent %}
-                 <li class="dropdown">
-                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Filter <span class="caret"></span></a>
-                   <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
-                     <center>
-                       <h3>Apply a filter</h3>
-                       <form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
-                         <input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
-                         <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
-                         <input type="hidden" name="currentPath" value="{{ currentPath }}" />
-                         <input class="btn btn-default" type="submit" value="Filter" name="Filter" />
-                       </form>
-                     </center>
-                   </div>
-                 </li>
-               {% endif %}
-
              {% endif %}
+
+             {% if showContent %}
+               <li class="dropdown">
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Filter <span class="caret"></span></a>
+                 <span class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                   <center>
+                     <h3>Apply a filter</h3>
+                     <form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
+                       <input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
+                       <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
+                       <input type="hidden" name="currentPath" value="{{ currentPath }}" />
+                       <input class="btn btn-default" type="submit" value="Filter" name="Filter" />
+                     </form>
+                   </center>
+                 </span>
+               </li>
+               <li class="dropdown" data-dropdown="dropdown">
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Search <b class="caret"></b></a>
+                 <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                   <center>
+                     <h3>Search for filenames</h3>
+                     <form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
+                       <input type="text" name="search" value="{{ search }}" maxlength="20" size="10" />
+                       <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
+                       <input type="hidden" name="currentPath" value="{{ currentPath }}" />
+                       <input class="btn btn-default" type="submit" value="Search" name="Search" />
+                     </form>
+                   </center>
+                 </div>
+               </li>
+               <li class="dropdown" data-dropdown="dropdown">
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Settings <b class="caret"></b></a>
+                 <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                   <center>
+                     <h3>Settings</h3>
+                     <form action="post" action="{{ const.CONTENT_url }}"> {% csrf_token %}
+                       <input type="hidden" name="action" value="changeSettings" />
+                       <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
+                       <input type="hidden" name="currentPath" value="{{ currentPath }}" />
+                       <input type="checkbox" name="showHidden" 
+                       {% if showHidden %}checked="checked" {% endif %}
+                       />&nbsp;Show Hidden Files / Folders
+                       <br>
+                       <input class="btn" id="Save" name="submit" type="submit" value="Save" />
+                       &nbsp;&nbsp;
+                       <input class="btn" id="Cancel" name="submit" type="submit" value="Cancel" />
+                     </form>
+                   </center>
+                 </div>
+               </li>
+             </ul>
+           {% endif %} <!-- if showContent -->
+         {% endif %} <!-- if user is authenticated -->
+           </ul>
+         <div class="small">
+           {% if user.is_authenticated %}
+             <ul class="nav navbar-nav navbar-right" >
+               <li class="active"><a href="#" > {{ user.username }} </a> </li>
+               <li class="active"><a href="{{ const.BASE_URL }}hbChangePassword" >Change Password </a></li>
+               <li class="active"><a href="{{ const.BASE_URL }}hbLogout/" >Log Out  </a></li>
+             </ul>
+           {% else %}
+             <form class="navbar-form navbar-right" action="{{ const.BASE_URL }}hbLogin/" method="post" > {% csrf_token %}
+               <input class="form-control" name="userName" type="text" placeholder="User Name">
+               <input class="form-control" name="password" type="password" placeholder="Password">
+               <button type="submit" class="btn btn-success">Sign in</button>
+               <input name="action" type="hidden" value="login" >
+            </form>
            {% endif %}
-        </ul>
+         </div>
 
       </div>
       </div>
     </div>
-    <!--
-		    {% if showContent %}
-		    <ul class="navbar-nav">
-			<li class="dropdown" data-dropdown="dropdown">
-		            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Filter <b class="caret"></b></a>
-			    <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
-			        <center>
-			        <h3>Apply a filter</h3>
-		                <form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
-			            <input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
-			            <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
-			            <input type="hidden" name="currentPath" value="{{ currentPath }}" />
-			            <input class="btn btn-default" type="submit" value="Filter" name="Filter" />
-			        </form>
-				</center>
-			    </div>
-			</li>
-			<li class="dropdown" data-dropdown="dropdown">
-			    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Search <b class="caret"></b></a>
-			    <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
-			        <center>
-			        <h3>Search for filenames</h3>
-		                <form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
-			            <input type="text" name="search" value="{{ search }}" maxlength="20" size="10" />
-			            <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
-			            <input type="hidden" name="currentPath" value="{{ currentPath }}" />
-			            <input class="btn btn-default" type="submit" value="Search" name="Search" />
-			       </form>
-				</center>
-			    </div>
-			</li>
-			<li class="dropdown" data-dropdown="dropdown">
-			    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Settings <b class="caret"></b></a>
-			    <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
-			        <center>
-				<h3>Settings</h3>
-				<form action="post" action="{{ const.CONTENT_url }}"> {% csrf_token %}
-				    <input type="hidden" name="action" value="changeSettings" />
-			            <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
-			            <input type="hidden" name="currentPath" value="{{ currentPath }}" />
-				    <input type="checkbox" name="showHidden" 
-				    {% if showHidden %}checked="checked" {% endif %}
-				    />&nbsp;Show Hidden Files / Folders
-				    <br>
-				    <input class="btn" id="Save" name="submit" type="submit" value="Save" />
-				    &nbsp;&nbsp;
-				    <input class="btn" id="Cancel" name="submit" type="submit" value="Cancel" />
-				</form>
-				</center>
-			    </div>
-			</li>
-		    </ul>
-		    {% endif %}
-
-		    <div class="small">
-		    {% if user.is_authenticated %}
-		    <ul class="navbar-nav pull-right" >
-			<li class="active"><a href="#" > {{ user.username }} </a> </li>
-			<li class="active"><a href="{{ const.BASE_URL }}hbChangePassword" >Change Password </a></li>
-			<li class="active"><a href="{{ const.BASE_URL }}hbLogout/" >Log Out  </a></li>
-		    </ul>
-		    {% else %}
-		    <form class="navbar-form pull-right" action="{{ const.BASE_URL }}hbLogin/" method="post" > {% csrf_token %}
-			<input class="col-md-2" name="userName" type="text" placeholder="User Name">
-			<input class="col-md-2" name="password" type="password" placeholder="Password">
-			<button type="submit" class="btn">Sign in</button>
-			<input class="col-md-1" name="action" type="hidden" value="login" >
-		    </form>
-		    {% endif %}
-		    </div>
-		</div>
-	    </div>
-	</div>
-    </div>
-    -->
     {% endblock %}
     {% block navbar2 %}
     {% if breadcrumbs %}
@@ -170,7 +145,7 @@
 {% block body2 %} {% endblock %}
 
  <!-- Placed at the end of the document so the pages load faster -->
-    <script src="{{ const.MEDIA_URL }}jjquery-1.11.3.min.js"></script>
+    <script src="{{ const.MEDIA_URL }}jquery-1.11.3.min.js"></script>
     <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap.min.js"></script>
 {% block extra_js %} {% endblock %}
 </body>
