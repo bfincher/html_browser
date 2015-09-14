@@ -255,7 +255,6 @@ def content(request):
          'diskUsed' : diskUsage.usedformatted,
          'diskTotal' : diskUsage.totalformatted,
          'diskUnit' : diskUsage.unit,
-         'showContent' : True,
          'breadcrumbs' : breadcrumbs,
          'showHidden' : __isShowHidden(request),
     }

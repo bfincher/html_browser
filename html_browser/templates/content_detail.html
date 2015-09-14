@@ -3,6 +3,57 @@
     <script src="{{ const.MEDIA_URL }}/bootstrap-sortable.js"></script>
 {% endblock %}
 
+
+             {% block additional_navbar %}
+               <li class="dropdown">
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Filter <span class="caret"></span></a>
+                 <span class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                   <center>
+                     <h3>Apply a filter</h3>
+                     <form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
+                       <input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
+                       <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
+                       <input type="hidden" name="currentPath" value="{{ currentPath }}" />
+                       <input class="btn btn-default" type="submit" value="Filter" name="Filter" />
+                     </form>
+                   </center>
+                 </span>
+               </li>
+               <li class="dropdown" data-dropdown="dropdown">
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Search <b class="caret"></b></a>
+                 <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                   <center>
+                     <h3>Search for filenames</h3>
+                     <form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
+                       <input type="text" name="search" value="{{ search }}" maxlength="20" size="10" />
+                       <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
+                       <input type="hidden" name="currentPath" value="{{ currentPath }}" />
+                       <input class="btn btn-default" type="submit" value="Search" name="Search" />
+                     </form>
+                   </center>
+                 </div>
+               </li>
+               <li class="dropdown" data-dropdown="dropdown">
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Settings <b class="caret"></b></a>
+                 <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                   <center>
+                     <h3>Settings</h3>
+                     <form action="post" action="{{ const.CONTENT_url }}"> {% csrf_token %}
+                       <input type="hidden" name="action" value="changeSettings" />
+                       <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
+                       <input type="hidden" name="currentPath" value="{{ currentPath }}" />
+                       <input type="checkbox" name="showHidden" 
+                       {% if showHidden %}checked="checked" {% endif %}
+                       />&nbsp;Show Hidden Files / Folders
+                       <br>
+                       <input class="btn" id="Save" name="submit" type="submit" value="Save" />
+                       &nbsp;&nbsp;
+                       <input class="btn" id="Cancel" name="submit" type="submit" value="Cancel" />
+                     </form>
+                   </center>
+                 </div>
+               </li>
+             {% endblock %}
 {% block body %}
     <link rel="stylesheet" href="{{ const.MEDIA_URL }}/bootstrap-sortable.css" type="text/css" charset="utf-8">
 
