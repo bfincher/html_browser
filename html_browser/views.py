@@ -20,6 +20,7 @@ from django.http import HttpResponse
 import logging
 from logging import DEBUG
 from django.contrib.auth.models import User, Group
+import HTMLParser
 
 _reqLogger = None
 imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$",re.IGNORECASE)
@@ -109,7 +110,8 @@ def content(request):
     deleteOldFiles()
     
     currentFolder = request.REQUEST['currentFolder']
-    currentPath = request.REQUEST['currentPath']        
+    h = HTMLParser.HTMLParser()
+    currentPath = h.unescape(request.REQUEST['currentPath'])
     
     folder = Folder.objects.filter(name=currentFolder)[0]
     userCanDelete = folder.userCanDelete(request.user)

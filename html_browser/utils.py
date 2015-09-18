@@ -14,6 +14,7 @@ from html_browser_site.settings import THUMBNAIL_DIR
 from math import floor
 import sh
 import json
+import HTMLParser
 
 import collections
 import re
@@ -212,6 +213,8 @@ class CopyPasteException(Exception):
     pass
 
 def replaceEscapedUrl(url):
+    h = HTMLParser.HTMLParser()
+    url = h.unescape(url)
     return url.replace("(comma)", ",").replace("(ampersand)", "&")
     
 def handlePaste(currentFolder, currentPath, clipboard):
@@ -239,7 +242,7 @@ def handlePaste(currentFolder, currentPath, clipboard):
             raise CopyPasteException()
         
 def handleDelete(folder, currentPath, entries):
-    currentDirPath = getPath(folder.localPath, currentPath)
+    currentDirPath = replaceEscapedUrl(getPath(folder.localPath, currentPath))
     
     for entry in entries.split(','):
         entryPath = os.path.join(currentDirPath, replaceEscapedUrl(entry)).encode("utf-8")
