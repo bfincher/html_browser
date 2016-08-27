@@ -1,10 +1,10 @@
 
-from django.utils import unittest
+from django.test import TestCase
 from django.contrib.auth.models import User, Group
 from html_browser.models import UserPermission, Folder, GroupPermission
 
 
-class UserPermissionTest(unittest.TestCase):
+class UserPermissionTest(TestCase):
     def setUp(self):
         
         self.user1 = User()
@@ -74,7 +74,7 @@ class UserPermissionTest(unittest.TestCase):
         self.assertTrue(self.folder1.userCanWrite(self.user4))
         self.assertTrue(self.folder1.userCanDelete(self.user4))
         
-class GroupPermissionTest(unittest.TestCase):
+class GroupPermissionTest(TestCase):
     def setUp(self):
         
         self.group1 = Group()

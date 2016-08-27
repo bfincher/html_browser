@@ -86,7 +86,8 @@ class Folder(models.Model):
             return self.__checkGroupPerm__(user, CAN_DELETE)                    
     
 class Permission(models.Model):
-    folder = models.ForeignKey(Folder)
+    folder = models.ForeignKey(Folder,
+                               on_delete=models.CASCADE)
     permission = models.CharField(max_length = 1,
                                  choices = permChoices,
                                  default = CAN_READ)    
@@ -95,7 +96,8 @@ class Permission(models.Model):
         abstract = True
 
 class UserPermission(Permission):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE)
     
     def __str__(self):
         return " ".join([self.folder.name, self.user.username, str(self.permission)])
@@ -110,7 +112,8 @@ class UserPermission(Permission):
         return self.permission == CAN_READ
 
 class GroupPermission(Permission):
-    group = models.ForeignKey(Group)
+    group = models.ForeignKey(Group,
+                              on_delete=models.CASCADE)
     
     def __str__(self):
         return " ".join([self.folder.name, self.group.name, str(self.permission)])
