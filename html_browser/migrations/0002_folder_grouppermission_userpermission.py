@@ -28,8 +28,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('permission', models.CharField(default=b'R', max_length=1, choices=[(b'R', b'Read Only'), (b'W', b'Read/Write'), (b'D', b'Read/Write/Delete')])),
-                ('folder', models.ForeignKey(to='html_browser.Folder')),
-                ('group', models.ForeignKey(to='auth.Group')),
+                ('folder', models.ForeignKey(to='html_browser.Folder', on_delete=models.CASCADE)),
+                ('group', models.ForeignKey(to='auth.Group', on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -40,8 +40,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('permission', models.CharField(default=b'R', max_length=1, choices=[(b'R', b'Read Only'), (b'W', b'Read/Write'), (b'D', b'Read/Write/Delete')])),
-                ('folder', models.ForeignKey(to='html_browser.Folder')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('folder', models.ForeignKey(to='html_browser.Folder', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
