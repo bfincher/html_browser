@@ -261,7 +261,7 @@ def handleDownloadZip(request):
     currentFolder = request.GET['currentFolder']
     currentPath = request.GET['currentPath']
     folder = Folder.objects.filter(name=currentFolder)[0]
-    entries = request.REQUEST['files'] 
+    entries = getRequestField(request, 'files') 
         
     compression = zipfile.ZIP_DEFLATED
     
@@ -430,7 +430,7 @@ def __assignUsersToGroup(group, request):
 
     group.user_set.clear()
 
-    for key in request.REQUEST:
+    for key in getRequestDict(request):
         if key.startswith("isUser"):
             if logger.isEnabledFor(DEBUG):
                 logger.debug("processing key $s", key)
@@ -440,16 +440,16 @@ def __assignUsersToGroup(group, request):
 
 def handleEditFolder(request, folder=None):
     if folder == None:
-        folderName = request.REQUEST['name']
+        folderName = getRequestField(request,'name')
         folder = Folder.objects.get(name=folderName)
 
-    folder.localPath = request.REQUEST['directory']
-    folder.viewOption = request.REQUEST['viewOption']
+    folder.localPath = getRequestField(request,'directory')
+    folder.viewOption = getRequestField(request,'viewOption')
     folder.save()
 
     newUsers = {}
     newGroups = {}
-    for key in request.REQUEST:
+    for key in getRequestDict(request):
         if key.startswith('user-'):
 	    tokens = key.split('-')
 	    newUsers[tokens[1]] = tokens[2]
@@ -493,13 +493,13 @@ def handleEditFolder(request, folder=None):
 
 
 def handleAddFolder(request):
-    folderName = request.REQUEST['name']
+    folderName = getRequestField(request,'name')
     folder = Folder()
     folder.name = folderName
     handleEditFolder(request, folder)
 
 def handleDeleteFolder(request):
-    folderName = request.REQUEST['name']
+    folderName = getRequestField(request,'name')
     folder = Folder.objects.get(name=folderName)
     folder.delete()
 
@@ -549,16 +549,16 @@ def handleAddUser(request):
     user.save()
 
 def handleDeleteUser(request):
-    user = User.objects.get(username=request.REQUEST['userToDelete'])
+    user = User.objects.get(username=getRequestField(request,'userToDelete'))
     logger.info("Deleting user %s", user)
     user.delete()
 
 def handleEditGroup(request):
-    group = Group.objects.get(name = request.REQUEST['groupName'])
+    group = Group.objects.get(name = getRequestField(request,'groupName'))
     __assignUsersToGroup(group, request)
 
 def handleAddGroup(request):
-    groupName = request.REQUEST['groupName']
+    groupName = getRequestField(request,'groupName')
 
     group = get_object_or_None(Group, name=groupName)
 
@@ -570,7 +570,21 @@ def handleAddGroup(request):
     group.save()
 
 def handleDeleteGroup(request):
-    groupName = request.REQUEST['groupToDelete']
+    groupName = getRequestField(request,'groupToDelete')
 
     group = Group.objects.get(name=groupName)
     group.delete()
+
+def getRequestDict(request):
+    if request.method == "GET":
+        return request.GET
+    else:
+        return request.POST
+
+def getRequestField(request, field, default=None):
+    _dict = getRequestDict(request)
+
+    if _dict.has_key(field):
+        return _dict[field]
+    else:
+        return default 

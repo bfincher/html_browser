@@ -9,7 +9,8 @@ from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch,
     handleFileUpload, handleZipUpload, getDiskPercentFree, getPath,\
     getDiskUsageFormatted, handleAddUser, handleEditUser, handleDeleteUser,\
     handleAddGroup, handleEditGroup, handleDeleteGroup, \
-    handleEditFolder, handleAddFolder, handleDeleteFolder
+    handleEditFolder, handleAddFolder, handleDeleteFolder, \
+    getRequestField
 from constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
@@ -48,9 +49,7 @@ def index(request):
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug(str(request))
 
-    errorText = None
-    if request.REQUEST.has_key('errorText'):
-        errorText = request.REQUEST['errorText']
+    errorText = getRequestField(request, 'errorText')
 
     allFolders = Folder.objects.all()
     folders = []
@@ -109,9 +108,9 @@ def content(request):
         reqLogger.debug("request = %s", request)
     deleteOldFiles()
     
-    currentFolder = request.REQUEST['currentFolder']
+    currentFolder = getRequestField(request,'currentFolder')
     h = HTMLParser.HTMLParser()
-    currentPath = h.unescape(request.REQUEST['currentPath'])
+    currentPath = h.unescape(getRequestField(request,'currentPath'))
     
     folder = Folder.objects.filter(name=currentFolder)[0]
     userCanDelete = folder.userCanDelete(request.user)
@@ -125,10 +124,10 @@ def content(request):
     status = ''
     statusError = None
 
-    if request.REQUEST.has_key('action'):
-        action = request.REQUEST['action']
+    action = getRequestField(request,'action')
+    if action:
         if action == 'copyToClipboard':
-            entries = request.REQUEST['entries']
+            entries = getRequestField(request,'entries')
             request.session['clipboard'] = Clipboard(currentFolder, currentPath, entries, 'COPY').toJson()
             status='Items copied to clipboard';
         elif action == 'cutToClipboard':
@@ -136,7 +135,7 @@ def content(request):
                 status="You don't have delete permission on this folder"
                 statusError = True
             else:
-                entries = request.REQUEST['entries']
+                entries = getRequestField(request,'entries')
                 request.session['clipboard'] = Clipboard(currentFolder, currentPath, entries, 'CUT').toJson()
                 status = 'Items copied to clipboard'
         elif action == 'pasteFromClipboard':
@@ -154,19 +153,19 @@ def content(request):
                 status = "You don't have delete permission on this folder"
                 statusError = True
             else:
-                handleDelete(folder, currentPath, request.REQUEST['entries'])
+                handleDelete(folder, currentPath, getRequestField(request,'entries'))
                 status = 'File(s) deleted'
         elif action=='setViewType':
-            viewType = request.REQUEST['viewType']
+            viewType = getRequestField(request,'viewType')
             request.session['viewType'] = viewType
         elif action == 'mkDir':
-            dirName = request.REQUEST['dir']
+            dirName = getRequestField(request,'dir')
             os.makedirs(getPath(folder.localPath, currentPath) + dirName)
         elif action == 'rename':
-            handleRename(folder, currentPath, request.REQUEST['file'], request.REQUEST['newName'])
+            handleRename(folder, currentPath, getRequestField(request,'file'), getRequestField(request,'newName'))
         elif action == 'changeSettings':
-            if request.REQUEST['submit'] == "Save":
-                request.session['showHidden'] = request.REQUEST.has_key('showHidden')
+            if getRequestField(request,'submit') == "Save":
+                request.session['showHidden'] = getRequestField(request,'showHidden') != None
         else:
             raise RuntimeError('Unknown action %s' % action)
         
@@ -179,13 +178,9 @@ def content(request):
     
     parentDirLink = getParentDirLink(currentPath, currentFolder)
     
-    if request.REQUEST.has_key('status'):
-        status = request.REQUEST['status']
-    else:
-        status = ''
+    status = getRequestField(request,'status', '')
 
-    if request.REQUEST.has_key('statusError'):
-        statusError = request.REQUEST['statusError']
+    statusError = getRequestField(request,'statusError')
 
     breadcrumbs = None
     crumbs = currentPath.split("/")
@@ -204,13 +199,12 @@ def content(request):
 		else:
 		    breadcrumbs = breadcrumbs + crumb
 
-    filter = None
-    if request.REQUEST.has_key('filter'):
-        filter = request.REQUEST['filter']
-        status = status + ' Filtered on %s' % request.REQUEST['filter']
+    filter = getRequestField(request,'filter')
+    if filter:
+        status = status + ' Filtered on %s' % getRequestField(request,'filter')
 
-    if request.REQUEST.has_key('search'):
-        search = request.REQUEST['search']
+    search = getRequestField(request,'search')
+    if search:
         currentDirEntries= getCurrentDirEntriesSearch(folder, currentPath, __isShowHidden(request), search)
 
         values = {'currentFolder' : currentFolder,
@@ -290,8 +284,8 @@ def folderAdminAction(request):
 
     errorText = None
 
-    if request.REQUEST['submit'] == "Save":
-        action = request.REQUEST['action']
+    if getRequestField(request,'submit') == "Save":
+        action = getRequestField(request,'action')
         if action == 'addFolder':
             errorText = handleAddFolder(request)
         elif action == 'editFolder':
@@ -333,7 +327,7 @@ def editFolder(request):
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
 
-    folderName = request.REQUEST['name']
+    folderName = getRequestField(request,'name')
     folder = Folder.objects.get(name = folderName)
 
     userIds = []
@@ -369,8 +363,8 @@ def groupAdminAction(request):
 
     errorText = None
 
-    if request.REQUEST['submit'] == "Save":
-        action = request.REQUEST['action']
+    if getRequestField(request,'submit') == "Save":
+        action = getRequestField(request,'action')
         if action == 'addGroup':
             errorText = handleAddGroup(request)
         elif action == 'editGroup':
@@ -390,7 +384,7 @@ def editGroup(request):
     reqLogger = getReqLogger()
     reqLogger.info("editGroup")
 
-    groupName = request.REQUEST['groupName']
+    groupName = getRequestField(request,'groupName')
     group = Group.objects.get(name = groupName)
 
     usersInGroup = User.objects.filter(groups__id=group.id)
@@ -433,11 +427,11 @@ def userAdminAction(request):
         reqLogger.debug("request = %s", request)
     errorText = None
 
-    if request.REQUEST['submit'] == "Save":
+    if getRequestField(request,'submit') == "Save":
         if not request.user.is_staff:
             raise RuntimeError("User is not an admin")
 
-        action = request.REQUEST['action']
+        action = getRequestField(request,'action')
         if action == 'editUser':
             handleEditUser(request.POST)
         elif action == 'addUser':
@@ -470,7 +464,7 @@ def editUser(request):
     if not request.user.is_staff:
         raise RuntimeError("User is not an admin")
 
-    userName = request.REQUEST['userName']
+    userName = getRequestField(request,'userName')
     reqLogger = getReqLogger()
     reqLogger.info("editUser: user = %s", userName)
 
@@ -578,8 +572,8 @@ def upload(request):
     reqLogger.info("upload")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
-    currentFolder = request.REQUEST['currentFolder']
-    currentPath = request.REQUEST['currentPath']
+    currentFolder = getRequestField(request,'currentFolder')
+    currentPath = getRequestField(request,'currentPath')
     
     folder = Folder.objects.filter(name=currentFolder)[0]
     userCanWrite = folder.userCanWrite(request.user)
@@ -587,8 +581,8 @@ def upload(request):
     if not userCanWrite:
         return HttpResponse("You don't have write permission on this folder")
     
-    if request.REQUEST.has_key('action'):
-        action = request.REQUEST['action']
+    action = getRequestField(request,'action')
+    if action:
         if action == 'uploadFile':
 #            return HttpResponse(str(type(request.FILES['upload1'])))
             handleFileUpload(request.FILES['upload1'], folder, currentPath)
@@ -639,9 +633,9 @@ def imageView(request):
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
 
-    currentFolder = request.REQUEST['currentFolder']
-    currentPath = request.REQUEST['currentPath']
-    fileName = request.REQUEST['fileName']
+    currentFolder = getRequestField(request,'currentFolder')
+    currentPath = getRequestField(request,'currentPath')
+    fileName = getRequestField(request,'fileName')
     entries = __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName)
     index = entries['index']
     currentDirEntries = entries['currentDirEntries']
@@ -696,8 +690,8 @@ def deleteImage(request):
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
 
-    currentFolder = request.REQUEST['currentFolder']
-    currentPath = request.REQUEST['currentPath']        
+    currentFolder = getRequestField(request,'currentFolder')
+    currentPath = getRequestField(request,'currentPath')
     
     folder = Folder.objects.filter(name=currentFolder)[0]
     userCanDelete = folder.userCanDelete(request.user)
@@ -705,7 +699,7 @@ def deleteImage(request):
     if not userCanDelete:
         status = "You don't have delete permission on this folder"
     else:
-        handleDelete(folder, currentPath, request.REQUEST['fileName'])
+        handleDelete(folder, currentPath, getRequestField(request,'fileName'))
 	status = "File deleted"
 
     redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, currentFolder, currentPath, status)
@@ -718,9 +712,9 @@ def getNextImage(request):
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
 
-    currentFolder = request.REQUEST['currentFolder']
-    currentPath = request.REQUEST['currentPath']        
-    fileName = request.REQUEST['fileName']
+    currentFolder = getRequestField(request,'currentFolder')
+    currentPath = getRequestField(request,'currentPath')
+    fileName = getRequestField(request,'fileName')
 
     result = {}
     entries = __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName)
