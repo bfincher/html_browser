@@ -23,6 +23,7 @@ from logging import DEBUG
 from django.contrib.auth.models import User, Group
 import HTMLParser
 
+logger = logging.getLogger(__name__)
 _reqLogger = None
 imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$",re.IGNORECASE)
 
@@ -572,8 +573,8 @@ def upload(request):
     reqLogger.info("upload")
     if reqLogger.isEnabledFor(DEBUG):
         reqLogger.debug("request = %s", request)
-    currentFolder = getRequestField(request,'currentFolder')
-    currentPath = getRequestField(request,'currentPath')
+    currentFolder = getRequestField(request,'currentFolder', getOrPost = request.GET)
+    currentPath = getRequestField(request,'currentPath', getOrPost = request.GET)
     
     folder = Folder.objects.filter(name=currentFolder)[0]
     userCanWrite = folder.userCanWrite(request.user)
@@ -581,7 +582,7 @@ def upload(request):
     if not userCanWrite:
         return HttpResponse("You don't have write permission on this folder")
     
-    action = getRequestField(request,'action')
+    action = getRequestField(request,'action', getOrPost = request.GET)
     if action:
         if action == 'uploadFile':
 #            return HttpResponse(str(type(request.FILES['upload1'])))

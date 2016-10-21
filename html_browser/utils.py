@@ -542,6 +542,7 @@ def handleAddUser(request):
     user.is_staff = isAdmin
     user.is_superuser = isAdmin
     user.is_active = True
+    user.last_login = datetime(year=1970, month=1, day=1)
     user.save()
 
     __assignGroupsToUser(user, request)
@@ -581,10 +582,11 @@ def getRequestDict(request):
     else:
         return request.POST
 
-def getRequestField(request, field, default=None):
-    _dict = getRequestDict(request)
+def getRequestField(request, field, default=None, getOrPost=None):
+    if not getOrPost:
+        getOrPost = getRequestDict(request)
 
-    if _dict.has_key(field):
-        return _dict[field]
+    if getOrPost.has_key(field):
+        return getOrPost[field]
     else:
         return default 
