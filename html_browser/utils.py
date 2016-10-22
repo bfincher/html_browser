@@ -78,11 +78,11 @@ class DirEntry():
                 self.thumbnailUrl = None
 
         except UnicodeDecodeError, de:
-	        logger.exception(de)
+            logger.exception(de)
 
     def __str__(self):
         return "DirEntry:  isDir = %s name = %s nameUrl = %s currentPath = %s currentPathOrig = %s size = %s lastModifyTime = %s hasThumbnail = %s thumbnailUrl = %s" % \
-	    (str(self.isDir), self.name, self.nameUrl, self.currentPath, self.currentPathOrig, self.size, self.lastModifyTime, self.hasThumbnail, self.thumbnailUrl)
+        (str(self.isDir), self.name, self.nameUrl, self.currentPath, self.currentPathOrig, self.size, self.lastModifyTime, self.hasThumbnail, self.thumbnailUrl)
 
 def getPath(folderPath, path):
     path = path.strip()
@@ -114,12 +114,11 @@ def __getCurrentDirEntriesSearch(folder, path, showHidden, search, thisEntry, re
 
     for entry in entries:
         if entry.isDir:
-	    __getCurrentDirEntriesSearch(folder, "/".join([path, entry.name]), showHidden, search, entry, returnList)
-        else:
-	    if entry.name.find(search) != -1:
-                if logger.isEnabledFor(DEBUG):
-                    logger.debug("including this dir")
-	        includeThisDir = True
+            __getCurrentDirEntriesSearch(folder, "/".join([path, entry.name]), showHidden, search, entry, returnList)
+        elif entry.name.find(search) != -1:
+            if logger.isEnabledFor(DEBUG):
+                logger.debug("including this dir")
+            includeThisDir = True
     
     if includeThisDir:
         returnList.append(thisEntry)
@@ -132,7 +131,7 @@ def getCurrentDirEntries(folder, path, showHidden, filter=None):
     os.chdir(dirPath)
     for fileName in os.listdir("."):
         if not showHidden and fileName.startswith('.'):
-	    continue
+            continue
         try:
             filePath = dirPath + fileName
             if os.path.isdir(fileName):
@@ -150,10 +149,10 @@ def getCurrentDirEntries(folder, path, showHidden, filter=None):
                 if include:
                     fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
         except OSError, ose:
-	    logger.exception(ose)
+            logger.exception(ose)
 
         except UnicodeDecodeError, de:
-	    logger.exception(de)
+            logger.exception(de)
             
     dirEntries.sort(key=attrgetter('name'))
     fileEntries.sort(key=attrgetter('name'))
@@ -451,45 +450,45 @@ def handleEditFolder(request, folder=None):
     newGroups = {}
     for key in getRequestDict(request):
         if key.startswith('user-'):
-	    tokens = key.split('-')
-	    newUsers[tokens[1]] = tokens[2]
+            tokens = key.split('-')
+            newUsers[tokens[1]] = tokens[2]
         elif key.startswith('group-'):
-	    tokens = key.split('-')
-	    newGroups[tokens[1]] = tokens[2]
+            tokens = key.split('-')
+            newGroups[tokens[1]] = tokens[2]
 
     for userPerm in UserPermission.objects.filter(folder = folder):
         if newUsers.has_key(userPerm.user.username):
             userPerm.permission = _permMap[newUsers[userPerm.user.username]]
-	    userPerm.save()
+            userPerm.save()
 
-	    del newUsers[userPerm.user.username]
+            del newUsers[userPerm.user.username]
 
         else:
-	    userPerm.delete()
+            userPerm.delete()
 
     for key in newUsers:
         perm = UserPermission()
-	perm.folder = folder
-	perm.permission = _permMap[newUsers[key]]
-	perm.user = User.objects.get(username = key)
-	perm.save()
+        perm.folder = folder
+        perm.permission = _permMap[newUsers[key]]
+        perm.user = User.objects.get(username = key)
+        perm.save()
     
     for groupPerm in GroupPermission.objects.filter(folder = folder):
         if newGroups.has_key(groupPerm.group.name):
             groupPerm.permission = _permMap[newGroups[groupPerm.group.name]]
-	    groupPerm.save()
+            groupPerm.save()
 
-	    del newGroups[groupPerm.group.name]
+            del newGroups[groupPerm.group.name]
 
         else:
-	    groupPerm.delete()
+            groupPerm.delete()
 
     for key in newGroups:
         perm = GroupPermission()
-	perm.folder = folder
-	perm.permission = _permMap[newGroups[key]]
-	perm.group = Group.objects.get(name = key)
-	perm.save()
+        perm.folder = folder
+        perm.permission = _permMap[newGroups[key]]
+        perm.group = Group.objects.get(name = key)
+        perm.save()
 
 
 def handleAddFolder(request):

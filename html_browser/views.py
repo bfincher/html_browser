@@ -191,14 +191,14 @@ def content(request):
         crumbs = currentPath.split("/")
         accumulated = ""
         while len(crumbs) > 0:
-	    crumb = crumbs.pop(0)
+            crumb = crumbs.pop(0)
             if crumb:
                 accumulated = "/".join([accumulated, crumb])
-		breadcrumbs = breadcrumbs + "&rsaquo; "
-		if len(crumbs) > 0:
+                breadcrumbs = breadcrumbs + "&rsaquo; "
+                if len(crumbs) > 0:
                     breadcrumbs = breadcrumbs + "<a href=\"%scontent/?currentFolder=%s&currentPath=%s\">%s</a> " % (const.BASE_URL, currentFolder, accumulated, crumb)
-		else:
-		    breadcrumbs = breadcrumbs + crumb
+                else:
+                    breadcrumbs = breadcrumbs + crumb
 
     filter = getRequestField(request,'filter')
     if filter:
@@ -316,7 +316,7 @@ def folderAdmin(request):
 def addFolder(request):
     c = RequestContext(request,
         {'const' : const,
-	 'viewOptions' : folderViewOptions,
+         'viewOptions' : folderViewOptions,
          'usersNotAssignedToFolder' : User.objects.all(),
          'groupsNotAssignedToFolder' : Group.objects.all(),
         })
@@ -347,12 +347,12 @@ def editFolder(request):
 
     c = RequestContext(request,
         {'const' : const,
-	 'folder' : folder,
+         'folder' : folder,
          'usersNotAssignedToFolder' : usersNotInFolder,
          'groupsNotAssignedToFolder' : groupsNotInFolder,
-	 'groupPermissions' : groupPerms,
-	 'userPermissions' : userPerms,
-	 'viewOptions' : folderViewOptions,
+         'groupPermissions' : groupPerms,
+         'userPermissions' : userPerms,
+         'viewOptions' : folderViewOptions,
         })
     return render_to_response('admin/edit_folder.html', c)
 
@@ -402,8 +402,8 @@ def editGroup(request):
     c = RequestContext(request, 
         {'const' : const,
          'groupName' : groupName,
-	 'activeUserNames' : activeUserNames,
-	 'userNames' : userNames,
+         'activeUserNames' : activeUserNames,
+         'userNames' : userNames,
         })
     return render_to_response('admin/edit_group.html', c)
 
@@ -535,15 +535,15 @@ def hbChangePasswordResult(request):
         
     if errorMessage == None:
         c = RequestContext(request, 
-	    {'const' : const,
-	     'user' : request.user,
-	    })
+        {'const' : const,
+         'user' : request.user,
+        })
         return render_to_response('admin/change_password_success.html', c)
     else:
         reqLogger.warn(errorMessage)
         c = RequestContext(request, {'errorMessage' : errorMessage,
                                      'const' : const,
-				     'user' : request.user})
+                                     'user' : request.user})
         return render_to_response('admin/change_password_fail.html', c)
     
 def download(request):
@@ -701,7 +701,7 @@ def deleteImage(request):
         status = "You don't have delete permission on this folder"
     else:
         handleDelete(folder, currentPath, getRequestField(request,'fileName'))
-	status = "File deleted"
+        status = "File deleted"
 
     redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, currentFolder, currentPath, status)
 
