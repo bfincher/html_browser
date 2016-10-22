@@ -10,15 +10,21 @@
     ServerName hb.fincherhome.com
 
     # These paths should be fine
-    ErrorLog /var/log/apache2/error.log
+    #ErrorLog /var/log/apache2/error.log
     LogLevel warn
 
     WSGIDaemonProcess html_browser user=www-data group=www-data threads=2
     WSGIProcessGroup html_browser
 
     Alias /hbmedia/ /srv/www/hbmedia/
+    Alias /hbmediatest/ /srv/www/hbmediatest/
 
     <Directory /srv/www/hbmedia>
+        Order deny,allow
+	Require all granted
+    </Directory>
+
+    <Directory /srv/www/hbmediatest>
         Order deny,allow
 	Require all granted
     </Directory>
@@ -26,6 +32,14 @@
     WSGIScriptAlias / /srv/www/hb/apache/django.wsgi
 
     <Directory /srv/www/hb/apache>
+        Order deny,allow
+	Require all granted
+	XSendFile On
+        XSendFilePath "/tmp"
+        XSendFilePath "/"
+    </Directory>
+
+    <Directory /srv/www/hbtest/apache>
         Order deny,allow
 	Require all granted
 	XSendFile On
