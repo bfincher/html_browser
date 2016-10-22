@@ -3,9 +3,9 @@ from django.db import models
 from django.contrib.auth.models import User, Group  
 from urllib import quote_plus
 
-CAN_READ = 'R'
-CAN_WRITE = 'W'
-CAN_DELETE = 'D'
+CAN_READ = 1 
+CAN_WRITE = 2
+CAN_DELETE = 3
 
 permChoices = [
     (CAN_READ, 'Read Only'),
@@ -41,14 +41,14 @@ class Folder(models.Model):
         else:
             perms = self.userpermission_set.filter(user__username=user.username)
             for perm in perms:
-                if perm.permission == desiredPerm:
+                if perm.permission >= desiredPerm:
                     return True
             return False
         
     def __checkGroupPerm__(self, user, desiredPerm):
         for perm in self.grouppermission_set.all():
             if perm.group in user.groups.all():
-                if perm.permission == desiredPerm:
+                if perm.permission >= desiredPerm:
                     return True
         return False
     
@@ -62,34 +62,19 @@ class Folder(models.Model):
             if not canRead:
                 canRead = self.__checkGroupPerm__(user, CAN_READ)
             
-            if not canRead:
-                canRead = self.userCanWrite(user)
-            
             return canRead
             
     
     def userCanWrite(self, user):
-        canWrite = self.__checkUserPerm__(user, CAN_WRITE)
-        if not canWrite:
-            canWrite = self.__checkGroupPerm__(user, CAN_WRITE)
-            
-        if not canWrite:
-            canWrite = self.userCanDelete(user)
-            
-        return canWrite
+        return self.__checkUserPerm__(user, CAN_WRITE) or self.__checkGroupPerm__(user, CAN_WRITE)
     
     def userCanDelete(self, user):
-        canDelete =self.__checkUserPerm__(user, CAN_DELETE)
-        if canDelete:
-            return True
-        else:
-            return self.__checkGroupPerm__(user, CAN_DELETE)                    
+        return self.__checkUserPerm__(user, CAN_DELETE) or self.__checkGroupPerm__(user, CAN_DELETE)
     
 class Permission(models.Model):
     folder = models.ForeignKey(Folder,
                                on_delete=models.CASCADE)
-    permission = models.CharField(max_length = 1,
-                                 choices = permChoices,
+    permission = models.SmallIntegerField(choices = permChoices,
                                  default = CAN_READ)    
 
     class Meta:
@@ -109,7 +94,7 @@ class UserPermission(Permission):
         return self.user.username
 
     def canRead(self):
-        return self.permission == CAN_READ
+        return self.permission >= CAN_READ
 
 class GroupPermission(Permission):
     group = models.ForeignKey(Group,
