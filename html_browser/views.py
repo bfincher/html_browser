@@ -3,10 +3,10 @@ from django.template import RequestContext
 from html_browser.models import Folder, UserPermission, GroupPermission
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from utils import getParentDirLink
-import html_browser.utils
+import html_browser
 from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch, Clipboard, handlePaste, handleDelete,\
     getPath, handleRename, handleDownloadZip, deleteOldFiles,\
-    handleFileUpload, handleZipUpload, getDiskPercentFree, getPath,\
+    handleFileUpload, handleZipUpload, getDiskPercentFree,\
     getDiskUsageFormatted, handleAddUser, handleEditUser, handleDeleteUser,\
     handleAddGroup, handleEditGroup, handleDeleteGroup, \
     handleEditFolder, handleAddFolder, handleDeleteFolder, \
@@ -35,8 +35,8 @@ class FolderViewOption():
 folderViewOptions = []
 
 for choice in html_browser.models.viewableChoices:
-   option = FolderViewOption(choice[0], choice[1]) 
-   folderViewOptions.append(option)
+    option = FolderViewOption(choice[0], choice[1]) 
+    folderViewOptions.append(option)
 
 def getReqLogger():
     if not _reqLogger:
@@ -200,8 +200,8 @@ def content(request):
                 else:
                     breadcrumbs = breadcrumbs + crumb
 
-    filter = getRequestField(request,'filter')
-    if filter:
+    contentFilter = getRequestField(request,'filter')
+    if contentFilter:
         status = status + ' Filtered on %s' % getRequestField(request,'filter')
 
     search = getRequestField(request,'search')
@@ -225,7 +225,7 @@ def content(request):
         c = RequestContext(request, values)
         return render_to_response("content_search.html", c)
 
-    currentDirEntries = getCurrentDirEntries(folder, currentPath, __isShowHidden(request), filter)
+    currentDirEntries = getCurrentDirEntries(folder, currentPath, __isShowHidden(request), contentFilter)
     
     if request.session.has_key('viewType'):
         viewType = request.session['viewType']

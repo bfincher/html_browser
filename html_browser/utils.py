@@ -11,7 +11,6 @@ from zipfile import ZipFile
 import zipfile
 from sendfile import sendfile
 from html_browser_site.settings import THUMBNAIL_DIR
-from math import floor
 import sh
 import json
 import HTMLParser
@@ -123,7 +122,7 @@ def __getCurrentDirEntriesSearch(folder, path, showHidden, search, thisEntry, re
     if includeThisDir:
         returnList.append(thisEntry)
 
-def getCurrentDirEntries(folder, path, showHidden, filter=None):
+def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
     dirPath = getPath(folder.localPath, path)
     dirEntries = []
     fileEntries = []
@@ -138,8 +137,8 @@ def getCurrentDirEntries(folder, path, showHidden, filter=None):
                 dirEntries.append(DirEntry(True, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
             else:
                 include = False
-                if filter != None:
-                    tempFilter = filter.replace('.', '\.')
+                if contentFilter:
+                    tempFilter = contentFilter.replace('.', '\.')
                     tempFilter = tempFilter.replace('*', '.*')
                     if re.search(tempFilter, fileName):
                         include = True 
