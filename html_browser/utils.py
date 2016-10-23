@@ -23,6 +23,7 @@ from logging import DEBUG
 from annoying.functions import get_object_or_None
 
 logger = logging.getLogger('html_browser.utils')
+_reqLogger = None
 
 KILOBYTE = 1024.0
 MEGABYTE = KILOBYTE * KILOBYTE
@@ -590,3 +591,9 @@ def getRequestField(request, field, default=None, getOrPost=None):
         return getOrPost[field]
     else:
         return default 
+
+def getReqLogger():
+    if not _reqLogger:
+        global _reqLogger
+        _reqLogger = logging.getLogger('django.request')
+    return _reqLogger;
