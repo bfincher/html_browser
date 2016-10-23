@@ -1,10 +1,13 @@
 # Django settings for html_browser_site project.
+import os
 
 URL_PREFIX = r''
 SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../', __file__))))
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -108,13 +111,23 @@ ROOT_URLCONF = 'html_browser_site.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'html_browser_site.wsgi.application'
 
-TEMPLATE_DIRS = (
-    'html_browser/templates',
-    'html_browser_site/templates'
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'html_browser/templates'),
+                 os.path.join(BASE_DIR, 'html_browser_site/templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 INSTALLED_APPS = (
     'django.contrib.auth',
