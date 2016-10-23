@@ -5,7 +5,7 @@ from operator import attrgetter
 from constants import _constants as const
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User, Group
-from html_browser.models import Folder, UserPermission, GroupPermission
+from html_browser.models import Folder, UserPermission, GroupPermission, FilesToDelete
 from shutil import copy2, move, copytree, rmtree
 from zipfile import ZipFile
 import zipfile
@@ -22,7 +22,6 @@ from logging import DEBUG
 from annoying.functions import get_object_or_None
 
 logger = logging.getLogger('html_browser.utils')
-filesToDelete = []
 
 KILOBYTE = 1024.0
 MEGABYTE = KILOBYTE * KILOBYTE
@@ -277,7 +276,7 @@ def handleDownloadZip(request):
         
     zipFile.close()
     
-    filesToDelete.append((fileName, datetime.now()))
+    FilesToDelete.objects.create(filePath=fileName)
     
     return sendfile(request, fileName, attachment=True)
             
@@ -302,10 +301,12 @@ def __addFolderToZip__(zipFile, folder, basePath):
             
 def deleteOldFiles():
     now = datetime.now()
-    while len(filesToDelete) > 0:
-        delta = now - filesToDelete[0][1]
+    for fileToDelete in FilesToDelete.objects.all().order_by('time'):
+        delta = now - fileToDelete.time
         if delta > timedelta(minutes=10):
-            os.remove(filesToDelete.pop(0)[0])
+            if os.path.isfile(fileToDelete.filePath):
+                os.remove(fileToDelete.filePath)
+            fileToDelete.delete()
         else:
             return
         

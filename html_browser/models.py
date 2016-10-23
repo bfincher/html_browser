@@ -109,3 +109,6 @@ class GroupPermission(Permission):
     def getUserOrGroupName(self):
         return self.group.name
 
+class FilesToDelete(models.Model):
+    filePath = models.CharField(max_length=250)
+    time = models.DateTimeField(auto_now=True)
