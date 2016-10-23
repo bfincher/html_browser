@@ -12,7 +12,7 @@ from html_browser.utils import getReqLogger, getRequestField,\
     handleEditGroup, handleAddGroup, handleDeleteGroup, \
     handleAddUser, handleEditUser, handleDeleteUser
 
-from constants import _constants as const
+from .constants import _constants as const
 
 class FolderViewOption():
     def __init__(self, value, display):

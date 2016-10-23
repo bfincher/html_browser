@@ -1,7 +1,7 @@
 from django import template
 from django.db import models
 from django.contrib.auth.models import User, Group  
-from urllib import quote_plus
+from urllib.parse import quote_plus
 
 CAN_READ = 1 
 CAN_WRITE = 2

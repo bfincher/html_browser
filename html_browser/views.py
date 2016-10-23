@@ -2,13 +2,13 @@ from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from html_browser.models import Folder
 from django.contrib.auth import login as auth_login, logout as auth_logout
-from utils import getParentDirLink
+from .utils import getParentDirLink
 import html_browser
 from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch, Clipboard, handlePaste, handleDelete,\
     getPath, handleRename, handleDownloadZip, deleteOldFiles,\
     handleFileUpload, handleZipUpload, getDiskPercentFree,\
     getDiskUsageFormatted, getRequestField, getReqLogger
-from constants import _constants as const
+from .constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
 import os
@@ -17,7 +17,7 @@ import json
 from django.http import HttpResponse
 import logging
 from logging import DEBUG
-import HTMLParser
+import html.parser
 
 logger = logging.getLogger(__name__)
 imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$",re.IGNORECASE)
@@ -88,7 +88,7 @@ def content(request):
     deleteOldFiles()
     
     currentFolder = getRequestField(request,'currentFolder')
-    h = HTMLParser.HTMLParser()
+    h = html.parser.HTMLParser()
     currentPath = h.unescape(getRequestField(request,'currentPath'))
     
     folder = Folder.objects.filter(name=currentFolder)[0]
@@ -205,7 +205,7 @@ def content(request):
 
     currentDirEntries = getCurrentDirEntries(folder, currentPath, __isShowHidden(request), contentFilter)
     
-    if request.session.has_key('viewType'):
+    if 'viewType' in request:
         viewType = request.session['viewType']
     else:
         viewType = const.viewTypes[0]                   
@@ -305,7 +305,7 @@ def upload(request):
     return render_to_response('upload.html', c)
 
 def __isShowHidden(request):
-    if request.session.has_key('showHidden'):
+    if 'showHidden' in request:
         return request.session['showHidden']
     else:
         return False

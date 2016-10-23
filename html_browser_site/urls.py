@@ -3,7 +3,7 @@ from django.conf.urls import patterns, include, url
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 from html_browser.models import Folder
-from settings import URL_PREFIX
+from .settings import URL_PREFIX
 admin.autodiscover()
 
 urlpatterns = patterns('',

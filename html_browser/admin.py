@@ -1,4 +1,4 @@
-from models import Folder, UserPermission, GroupPermission
+from .models import Folder, UserPermission, GroupPermission
 from django.contrib import admin
 
 class FolderAdmin(admin.ModelAdmin):

@@ -14,7 +14,7 @@ def addFolderToZip(zipFile, folder):
 def __addFolderToZip__(zipFile, folder, basePath):
     for f in glob(folder + "/*"):
         if os.path.isfile(f):
-            print f
+            print(f)
             arcName = f.replace(basePath, '')
             zipFile.write(f, arcName, compress_type=zipfile.ZIP_DEFLATED)
         elif os.path.isdir(f):
@@ -55,10 +55,10 @@ def main():
 
     list = []
     list.append((1, 2))
-    print len(list)
-    print list[0][1]
+    print(len(list))
+    print(list[0][1])
     list.pop(0)
-    print len(list)
+    print(len(list))
 
 if __name__ == '__main__':
     main()

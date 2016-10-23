@@ -60,7 +60,7 @@ class Thumbnail():
             if os.path.isdir(file):
                 self.processDir(file)
             else:
-                print "Processing %s" % file
+                print("Processing %s" % file)
                 try:
                     im = Image.open(file)
                     im.thumbnail((150, 150), Image.ANTIALIAS)
@@ -71,10 +71,10 @@ class Thumbnail():
 
                     im.save(destFile,  imageTypes[extension])
                 except IOError as e:
-                    print e
+                    print(e)
 
     def renameLargeFiles(self, dir):
-        print "renameLargeFiles processing dir %s" % dir
+        print("renameLargeFiles processing dir %s" % dir)
         count = 1
         for root, dirs, files in os.walk(dir):
             for f in files:
@@ -99,7 +99,7 @@ class Thumbnail():
                         if not os.path.exists(newFileName):
                             break
 
-                    print "Renaming %s to %s" % (f, newFileName)
+                    print("Renaming %s to %s" % (f, newFileName))
                     os.rename(file, os.path.join(root, newFileName))
 	        
 
@@ -112,7 +112,7 @@ def deleteObsoleteThumbs(picDir, thumbDir):
 	    if os.path.isdir(picFile):
 	        deleteObsoleteThumbs(picFile, thumbFile)
 	else:
-	    print "Deleting %s" % thumbFile
+	    print("Deleting %s" % thumbFile)
 	    if os.path.isdir(thumbFile):
 	        shutil.rmtree(thumbFile)
 	    else:
@@ -129,13 +129,13 @@ def main(argv):
     baseThumbsDir = argv[2]
     thumb = Thumbnail(basePath, baseThumbsDir)
 
-    print "basePath = %s, baseThumbsDir = %s" % (basePath, baseThumbsDir)
+    print("basePath = %s, baseThumbsDir = %s" % (basePath, baseThumbsDir))
 
-    print "renaming large file names"
+    print("renaming large file names")
     thumb.renameLargeFiles(baseDir)
-    print "processing %s" % baseDir
+    print("processing %s" % baseDir)
     thumb.processDir(baseDir)
-    print "deleting obsolete thumbs"
+    print("deleting obsolete thumbs")
     deleteObsoleteThumbs(basePath, baseThumbsDir)
 
 

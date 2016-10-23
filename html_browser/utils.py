@@ -1,8 +1,8 @@
-from urllib import quote_plus
+from urllib.parse import quote_plus
 import os
 from genericpath import getsize, getmtime
 from operator import attrgetter  
-from constants import _constants as const
+from .constants import _constants as const
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User, Group
 from html_browser.models import Folder, UserPermission, GroupPermission, FilesToDelete,\
@@ -14,7 +14,7 @@ from sendfile import sendfile
 from html_browser_site.settings import THUMBNAIL_DIR
 import sh
 import json
-import HTMLParser
+import html.parser
 
 import collections
 import re
@@ -77,7 +77,7 @@ class DirEntry():
                 self.hasThumbnail = False
                 self.thumbnailUrl = None
 
-        except UnicodeDecodeError, de:
+        except UnicodeDecodeError as de:
             logger.exception(de)
 
     def __str__(self):
@@ -148,10 +148,10 @@ def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
 
                 if include:
                     fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
-        except OSError, ose:
+        except OSError as ose:
             logger.exception(ose)
 
-        except UnicodeDecodeError, de:
+        except UnicodeDecodeError as de:
             logger.exception(de)
             
     dirEntries.sort(key=attrgetter('name'))
@@ -212,7 +212,7 @@ class CopyPasteException(Exception):
     pass
 
 def replaceEscapedUrl(url):
-    h = HTMLParser.HTMLParser()
+    h = html.parser.HTMLParser()
     url = h.unescape(url)
     return url.replace("(comma)", ",").replace("(ampersand)", "&")
     
@@ -402,7 +402,7 @@ def getDiskUsage(path):
 
         _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), \
                        ctypes.c_ulonglong()
-        if sys.version_info >= (3,) or isinstance(path, unicode):
+        if sys.version_info >= (3,) or isinstance(path, str):
             fun = ctypes.windll.kernel32.GetDiskFreeSpaceExW
         else:
             fun = ctypes.windll.kernel32.GetDiskFreeSpaceExA
@@ -459,7 +459,7 @@ def handleEditFolder(request, folder=None):
             newGroups[tokens[1]] = tokens[2]
 
     for userPerm in UserPermission.objects.filter(folder = folder):
-        if newUsers.has_key(userPerm.user.username):
+        if userPerm.user.username in newUsers:
             userPerm.permission = _permMap[newUsers[userPerm.user.username]]
             userPerm.save()
 
@@ -476,7 +476,7 @@ def handleEditFolder(request, folder=None):
         perm.save()
     
     for groupPerm in GroupPermission.objects.filter(folder = folder):
-        if newGroups.has_key(groupPerm.group.name):
+        if groupPerm.group.name in newGroups:
             groupPerm.permission = _permMap[newGroups[groupPerm.group.name]]
             groupPerm.save()
 
@@ -508,10 +508,10 @@ def handleEditUser(request):
 
     userName = request['userName']
 
-    if request.has_key('password'):
+    if 'password' in request:
         password = request['password']
 
-    isAdmin = request.has_key('isAdministrator')
+    isAdmin = 'isAdministrator' in request
 
     user = User.objects.get(username=userName)
     if password:
@@ -535,7 +535,7 @@ def handleAddUser(request):
 
     password = request['password']
 
-    isAdmin = request.has_key('isAdministrator')
+    isAdmin = 'isAdministrator' in request
 
     user = User()
     user.username = userName;
@@ -587,7 +587,7 @@ def getRequestField(request, field, default=None, getOrPost=None):
     if not getOrPost:
         getOrPost = getRequestDict(request)
 
-    if getOrPost.has_key(field):
+    if field in getOrPost:
         return getOrPost[field]
     else:
         return default 
