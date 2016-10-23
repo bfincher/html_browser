@@ -1,4 +1,4 @@
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import render_to_response, redirect, render
 from django.template import RequestContext
 from html_browser.models import Folder
 from django.contrib.auth import login as auth_login, logout as auth_logout
@@ -15,6 +15,7 @@ import os
 import re
 import json
 from django.http import HttpResponse
+from django.views import View
 import logging
 from logging import DEBUG
 import HTMLParser
@@ -22,58 +23,71 @@ import HTMLParser
 logger = logging.getLogger(__name__)
 imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$",re.IGNORECASE)
 
-def index(request):
-    reqLogger = getReqLogger()
-    reqLogger.info('index ')
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug(str(request))
+class BaseView(View):
+    def __init__(self):
+        self.reqLogger = getReqLogger()
+        
+    def logGet(self, request):
+        self.reqLogger.info(self.__class__.__name__)
+        if self.reqLogger.isEnabledFor(DEBUG):
+            self.reqLogger.debug(str(request))
 
-    errorText = getRequestField(request, 'errorText')
+    def buildBaseContext(self, request, errorText=None):
+        if not errorText:
+            errorText = getRequestField(request, 'errorText')
 
-    allFolders = Folder.objects.all()
-    folders = []
-    for folder in allFolders:
-        if folder.userCanRead(request.user):
-            folders.append(folder)
+        c = {errorText: 'errorText',
+            'user' : request.user,
+            'const': const
+            }
+
+        return c
+
+class IndexView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+
+        allFolders = Folder.objects.all()
+        folders = []
+        for folder in allFolders:
+            if folder.userCanRead(request.user):
+                folders.append(folder)
             
-    c = RequestContext(request, {'folders' : folders,
-         'user' : request.user,
-         'errorText' : errorText,
-         'const' : const})
+        c = self.buildBaseContext(request)
+        c['folders'] = folders
     
-    return render_to_response('index.html', c)
+        return render(request, 'index.html', c)
 
-def hbLogin(request):
-    userName = request.POST['userName']
-    password = request.POST['password']
+class LoginView(BaseView):
+    def post(self, request, *args, **kwargs):
+        self.logGet(request)
 
-    reqLogger = getReqLogger()
-    reqLogger.info("hbLogin")
-    if userName is not None:
-        reqLogger.info("userName = %s" % userName)
+        userName = request.POST['userName']
+        password = request.POST['password']
+
+        errorText = None
     
-    errorText = None
-    
-    user = authenticate(username=userName, password=password)
-    if user is not None:
-        if user.is_active:
-            auth_login(request, user)
-            if reqLogger.isEnabledFor(DEBUG):
-                reqLogger.debug("%s authenticated", user)
+        user = authenticate(username=userName, password=password)
+        if user is not None:
+            if user.is_active:
+                auth_login(request, user)
+                if self.reqLogger.isEnabledFor(DEBUG):
+                    self.reqLogger.debug("%s authenticated", user)
+            else:
+                self.reqLogger.warn("%s attempted to log in to a disabled account", user)
+                errorText = 'Account has been disabled'
         else:
-            reqLogger.warn("%s attempted to log in to a disabled account", user)
-            errorText = 'Account has been disabled'
-    else:
-        errorText = 'Invalid login'
-        reqLogger.error("empty userName")
+            errorText = 'Invalid login'
+            self.reqLogger.error("empty userName")
     
-    redirectUrl = const.BASE_URL
+        redirectUrl = const.BASE_URL
 
-    if errorText != None:
-        redirectUrl = "%s?errorText=%s" % (redirectUrl, errorText)
-    return redirect(redirectUrl)
+        if errorText != None:
+            redirectUrl = "%s?errorText=%s" % (redirectUrl, errorText)
+        return redirect(redirectUrl)
 
 
+#class LogoutView(BaseView):
 def hbLogout(request):
     reqLogger = getReqLogger()
     reqLogger.info("user %s logged out", request.user)

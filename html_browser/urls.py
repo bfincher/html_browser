@@ -3,12 +3,12 @@ from html_browser import views as hb_views
 from html_browser import adminViews as admin_views
 
 urlpatterns = [
-    url(r'^$', hb_views.index),
-    url(r'^hb/$', hb_views.index),
+    url(r'^$', hb_views.IndexView.as_view()),
+    url(r'^hb/$', hb_views.IndexView.as_view()),
     url(r'content/.*', hb_views.content),
     url(r'download_zip/.*', hb_views.downloadZip),
     url(r'download/.*', hb_views.download),
-    url(r'hbLogin/.*', hb_views.hbLogin),
+    url(r'hbLogin/.*', hb_views.LoginView.as_view()),
     url(r'hbLogout/.*', hb_views.hbLogout),
     url(r'upload/.*', hb_views.upload),
     url(r'image_view/.*', hb_views.imageView),
