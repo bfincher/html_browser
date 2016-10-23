@@ -1,7 +1,7 @@
 
 from django.test import TestCase
 from django.contrib.auth.models import User, Group
-from html_browser.models import UserPermission, Folder, GroupPermission
+from html_browser.models import UserPermission, Folder, GroupPermission, CAN_READ, CAN_WRITE, CAN_DELETE
 
 
 class UserPermissionTest(TestCase):
@@ -34,19 +34,19 @@ class UserPermissionTest(TestCase):
         
         self.userPerm1 = UserPermission()
         self.userPerm1.folder = self.folder1
-        self.userPerm1.permission = 'R'
+        self.userPerm1.permission = CAN_READ
         self.userPerm1.user = self.user1
         self.userPerm1.save()
         
         self.userPerm2 = UserPermission()
         self.userPerm2.folder = self.folder1
-        self.userPerm2.permission = 'W'
+        self.userPerm2.permission = CAN_WRITE
         self.userPerm2.user = self.user3
         self.userPerm2.save()
         
         self.userPerm3 = UserPermission()
         self.userPerm3.folder = self.folder1
-        self.userPerm3.permission = 'D'
+        self.userPerm3.permission = CAN_DELET
         self.userPerm3.user = self.user4
         self.userPerm3.save()
         
@@ -124,19 +124,19 @@ class GroupPermissionTest(TestCase):
         
         self.groupPerm1 = GroupPermission()
         self.groupPerm1.folder = self.folder1
-        self.groupPerm1.permission = 'R'
+        self.groupPerm1.permission = CAN_READ
         self.groupPerm1.group = self.group1
         self.groupPerm1.save()
         
         self.groupPerm2 = GroupPermission()
         self.groupPerm2.folder = self.folder1
-        self.groupPerm2.permission = 'W'
+        self.groupPerm2.permission = CAN_WRITE
         self.groupPerm2.group = self.group2
         self.groupPerm2.save()
         
         self.groupPerm3 = GroupPermission()
         self.groupPerm3.folder = self.folder1
-        self.groupPerm3.permission = 'D'
+        self.groupPerm3.permission = CAN_DELETE
         self.groupPerm3.group = self.group3
         self.groupPerm3.save()
         

@@ -5,7 +5,8 @@ from operator import attrgetter
 from constants import _constants as const
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User, Group
-from html_browser.models import Folder, UserPermission, GroupPermission, FilesToDelete
+from html_browser.models import Folder, UserPermission, GroupPermission, FilesToDelete,\
+CAN_READ, CAN_WRITE, CAN_DELETE
 from shutil import copy2, move, copytree, rmtree
 from zipfile import ZipFile
 import zipfile
@@ -27,7 +28,7 @@ KILOBYTE = 1024.0
 MEGABYTE = KILOBYTE * KILOBYTE
 GIGABYTE = MEGABYTE * KILOBYTE
 
-_permMap = {'read' : 'R', 'write' : 'W', 'delete' : 'D'}
+_permMap = {'read' : CAN_READ, 'write' : CAN_WRITE, 'delete' : CAN_DELETE}
 
 def getParentDirLink(path, currentFolder):
     if path == '/':
