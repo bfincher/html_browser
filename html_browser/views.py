@@ -33,13 +33,16 @@ class BaseView(View):
             self.reqLogger.debug(str(request))
 
     def buildBaseContext(self, request, errorText=None):
+
+        c = {'user' : request.user,
+            'const': const
+            }
+
         if not errorText:
             errorText = getRequestField(request, 'errorText')
 
-        c = {errorText: 'errorText',
-            'user' : request.user,
-            'const': const
-            }
+        if errorText:
+            c['errorText'] = errorText
 
         return c
 
@@ -285,42 +288,44 @@ class DownloadZipView(BaseView):
         self.logGet(request)
         return handleDownloadZip(request)
 
-def upload(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("upload")
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug("request = %s", request)
-    currentFolder = getRequestField(request,'currentFolder', getOrPost = request.GET)
-    currentPath = getRequestField(request,'currentPath', getOrPost = request.GET)
+class UploadView(BaseView):
+    def get(self, request, *args, **kwargs):
+        return self._get_or_post(request)
+
+    def post(self, request, *args, **kwargs):
+        return self._get_or_post(request)
+
+    def _get_or_post(self, request):
+        self.logGet(request)
+
+        currentFolder = getRequestField(request,'currentFolder', getOrPost = request.GET)
+        currentPath = getRequestField(request,'currentPath', getOrPost = request.GET)
     
-    folder = Folder.objects.filter(name=currentFolder)[0]
-    userCanWrite = folder.userCanWrite(request.user)
+        folder = Folder.objects.filter(name=currentFolder)[0]
+        userCanWrite = folder.userCanWrite(request.user)
     
-    if not userCanWrite:
-        return HttpResponse("You don't have write permission on this folder")
+        if not userCanWrite:
+            return HttpResponse("You don't have write permission on this folder")
     
-    action = getRequestField(request,'action', getOrPost = request.GET)
-    if action:
-        if action == 'uploadFile':
-#            return HttpResponse(str(type(request.FILES['upload1'])))
-            handleFileUpload(request.FILES['upload1'], folder, currentPath)
-            redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded" % (const.CONTENT_URL, currentFolder, currentPath)
-            return redirect(redirectUrl)           
-        elif action == 'uploadZip':
-            handleZipUpload(request.FILES['zipupload1'], folder, currentPath)
-            redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded and extracted" % (const.CONTENT_URL, currentFolder, currentPath)
-            return redirect(redirectUrl)         
+        action = getRequestField(request,'action', getOrPost = request.GET)
+        if action:
+            if action == 'uploadFile':
+#                return HttpResponse(str(type(request.FILES['upload1'])))
+                handleFileUpload(request.FILES['upload1'], folder, currentPath)
+                redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded" % (const.CONTENT_URL, currentFolder, currentPath)
+                return redirect(redirectUrl)           
+            elif action == 'uploadZip':
+                handleZipUpload(request.FILES['zipupload1'], folder, currentPath)
+                redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded and extracted" % (const.CONTENT_URL, currentFolder, currentPath)
+                return redirect(redirectUrl)         
     
-    c = RequestContext(request,
-        {'currentFolder' : currentFolder,
-         'currentPath' : currentPath,
-         'status' : '',
-         'viewTypes' : const.viewTypes,
-         'const' : const,
-         'user' : request.user,
-         })
+        c = self.buildBaseContext(request)
+        c['currentFolder'] = currentFolder
+        c['currentPath'] = currentPath
+        c['status'] = ''
+        c['viewTypes'] = const.viewTypes
     
-    return render_to_response('upload.html', c)
+        return render(request, 'upload.html', c)
 
 def __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
     folder = Folder.objects.filter(name=currentFolder)[0]

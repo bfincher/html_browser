@@ -10,7 +10,7 @@ urlpatterns = [
     url(r'download/.*', hb_views.DownloadView.as_view),
     url(r'hbLogin/.*', hb_views.LoginView.as_view()),
     url(r'hbLogout/.*', hb_views.LogoutView.as_view()),
-    url(r'upload/.*', hb_views.upload),
+    url(r'upload/.*', hb_views.UploadView.as_view()),
     url(r'image_view/.*', hb_views.imageView),
     url(r'thumb/', hb_views.thumb),
     url(r'deleteImage', hb_views.deleteImage),
