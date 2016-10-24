@@ -43,6 +43,14 @@ class BaseView(View):
 
         return c
 
+    @staticmethod
+    def isShowHidden(request):
+        if request.session.has_key('showHidden'):
+            return request.session['showHidden']
+        else:
+            return False
+
+
 class IndexView(BaseView):
     def get(self, request, *args, **kwargs):
         self.logGet(request)
@@ -87,178 +95,178 @@ class LoginView(BaseView):
         return redirect(redirectUrl)
 
 
-#class LogoutView(BaseView):
-def hbLogout(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("user %s logged out", request.user)
-    auth_logout(request)
-    return redirect(const.BASE_URL)
+class LogoutView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+        auth_logout(request)
+        return redirect(const.BASE_URL)
 
-def content(request):    
-    reqLogger = getReqLogger()
-    reqLogger.info("content")
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug("request = %s", request)
-    deleteOldFiles()
-    
-    currentFolder = getRequestField(request,'currentFolder')
-    h = HTMLParser.HTMLParser()
-    currentPath = h.unescape(getRequestField(request,'currentPath'))
-    
-    folder = Folder.objects.filter(name=currentFolder)[0]
-    userCanDelete = folder.userCanDelete(request.user)
-    userCanWrite = userCanDelete or folder.userCanWrite(request.user)
-    userCanRead = userCanWrite or folder.userCanRead(request.user)    
-    
-    if userCanRead == False:
-        reqLogger.warn("%s not allowed to read %s", request.user, currentFolder)
-        return redirect(const.BASE_URL, 'You are not authorized to view this page')
-    
-    status = ''
-    statusError = None
+class ContentView(BaseView):
+    def get(self, request, *args, **kwargs):
+        return self._get_or_post(request, args, kwargs)
 
-    action = getRequestField(request,'action')
-    if action:
+    def post(self, request, *args, **kwargs):
+        return self._get_or_post(request, args, kwargs)
+
+    def _get_or_post(self, request, *args, **kwargs):
+        self.request = request
+        deleteOldFiles()
+    
+        self.currentFolder = getRequestField(self.request,'currentFolder')
+        h = HTMLParser.HTMLParser()
+        self.currentPath = h.unescape(getRequestField(self.request,'currentPath'))
+    
+        self.folder = Folder.objects.filter(name=self.currentFolder)[0]
+        self.userCanDelete = self.folder.userCanDelete(self.request.user)
+        self.userCanWrite = self.userCanDelete or self.folder.userCanWrite(self.request.user)
+        self.userCanRead = self.userCanWrite or self.folder.userCanRead(self.request.user)    
+    
+        if self.userCanRead == False:
+            self.reqLogger.warn("%s not allowed to read %s", self.request.user, self.currentFolder)
+            return redirect(const.BASE_URL, 'You are not authorized to view this page')
+    
+        self.status = ''
+        self.statusError = None
+
+        action = getRequestField(self.request,'action')
+        if action:
+            return self._handleAction(action)
+    
+        self.status = getRequestField(self.request,'status', '')
+
+        self.statusError = getRequestField(self.request,'statusError')
+
+        self.breadcrumbs = None
+        crumbs = self.currentPath.split("/")
+        if len(crumbs) > 1:
+            self.breadcrumbs = "<a href=\"%s\">Home</a> " % const.BASE_URL
+            self.breadcrumbs = self.breadcrumbs + "&rsaquo; <a href=\"%scontent/?currentFolder=%s&currentPath=\">%s</a> " % (const.BASE_URL, self.currentFolder, self.currentFolder)
+            crumbs = self.currentPath.split("/")
+            accumulated = ""
+            while len(crumbs) > 0:
+                crumb = crumbs.pop(0)
+                if crumb:
+                    accumulated = "/".join([accumulated, crumb])
+                    self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
+                    if len(crumbs) > 0:
+                        self.breadcrumbs = self.breadcrumbs + "<a href=\"%scontent/?currentFolder=%s&currentPath=%s\">%s</a> " % (const.BASE_URL, self.currentFolder, accumulated, crumb)
+                    else:
+                        self.breadcrumbs = self.breadcrumbs + crumb
+
+        contentFilter = getRequestField(self.request,'filter')
+        if contentFilter:
+            self.status = self.status + ' Filtered on %s' % getRequestField(self.request,'filter')
+
+
+        self.values = self.buildBaseContext(request)
+        self.values['currentFolder'] = self.currentFolder
+        self.values['currentPath'] = self.currentPath
+        self.values['userCanRead'] = str(self.userCanRead).lower()
+        self.values['userCanWrite'] = str(self.userCanWrite).lower()
+        self.values['userCanDelete'] = str(self.userCanDelete).lower()
+        self.values['status'] = self.status
+        self.values['breadcrumbs'] = self.breadcrumbs
+        self.values['showHidden'] = BaseView.isShowHidden(self.request)
+
+        if self.statusError:
+            self.values['statusError'] = True
+
+        search = getRequestField(self.request,'search')
+        if search:
+            return self._handleSearch(search)
+
+        currentDirEntries = getCurrentDirEntries(self.folder, self.currentPath, BaseView.isShowHidden(self.request), contentFilter)
+    
+        if self.request.session.has_key('viewType'):
+            viewType = self.request.session['viewType']
+        else:
+            viewType = const.viewTypes[0]                   
+
+        diskFreePct = getDiskPercentFree(getPath(self.folder.localPath, self.currentPath))
+        diskUsage = getDiskUsageFormatted(getPath(self.folder.localPath, self.currentPath))
+
+        parentDirLink = getParentDirLink(self.currentPath, self.currentFolder)
+        self.values['parentDirLink'] = parentDirLink
+        self.values['viewTypes'] = const.viewTypes
+        self.values['selectedViewType'] = viewType
+        self.values['currentDirEntries'] = currentDirEntries
+        self.values['diskFreePct'] = diskFreePct
+        self.values['diskFree'] = diskUsage.freeformatted
+        self.values['diskUsed'] = diskUsage.usedformatted
+        self.values['diskTotal'] = diskUsage.totalformatted
+        self.values['diskUnit'] = diskUsage.unit
+
+        if self.statusError:
+            self.values['statusError'] = True
+        c = RequestContext(self.request, self.values)
+    
+        if viewType == const.detailsViewType:
+            template = 'content_detail.html'
+        elif viewType == const.listViewType:
+            template = 'content_list.html'
+        else:
+            template = 'content_thumbnail.html'
+        return render(request, template, self.values)
+        
+    def _handleAction(self, action):
         if action == 'copyToClipboard':
-            entries = getRequestField(request,'entries')
-            request.session['clipboard'] = Clipboard(currentFolder, currentPath, entries, 'COPY').toJson()
-            status='Items copied to clipboard';
+            entries = getRequestField(self.request,'entries')
+            self.request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'COPY').toJson()
+            self.status='Items copied to clipboard';
         elif action == 'cutToClipboard':
-            if not userCanDelete:
-                status="You don't have delete permission on this folder"
-                statusError = True
+            if not self.userCanDelete:
+                self.status="You don't have delete permission on this folder"
+                self.statusError = True
             else:
-                entries = getRequestField(request,'entries')
-                request.session['clipboard'] = Clipboard(currentFolder, currentPath, entries, 'CUT').toJson()
-                status = 'Items copied to clipboard'
+                entries = getRequestField(self.request,'entries')
+                self.request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'CUT').toJson()
+                self.status = 'Items copied to clipboard'
         elif action == 'pasteFromClipboard':
-            if not userCanWrite:
-                status = "You don't have write permission on this folder"
-                statusError = True
+            if not self.userCanWrite:
+                self.status = "You don't have write permission on this folder"
+                self.statusError = True
             else:
-                status = handlePaste(currentFolder, currentPath, Clipboard.fromJson(request.session['clipboard']))
-                if status:
-                    statusError = True
+                self.status = handlePaste(self.currentFolder, self.currentPath, Clipboard.fromJson(self.request.session['clipboard']))
+                if self.status:
+                    self.statusError = True
                 else:
-                    status = 'Items pasted'
+                    self.status = 'Items pasted'
         elif action == 'deleteEntry':
-            if not userCanDelete:
-                status = "You don't have delete permission on this folder"
-                statusError = True
+            if not self.userCanDelete:
+                self.status = "You don't have delete permission on this folder"
+                self.statusError = True
             else:
-                handleDelete(folder, currentPath, getRequestField(request,'entries'))
-                status = 'File(s) deleted'
+                handleDelete(self.folder, self.currentPath, getRequestField(self.request,'entries'))
+                self.status = 'File(s) deleted'
         elif action=='setViewType':
-            viewType = getRequestField(request,'viewType')
-            request.session['viewType'] = viewType
+            viewType = getRequestField(self.request,'viewType')
+            self.request.session['viewType'] = viewType
         elif action == 'mkDir':
-            dirName = getRequestField(request,'dir')
-            os.makedirs(getPath(folder.localPath, currentPath) + dirName)
+            dirName = getRequestField(self.request,'dir')
+            os.makedirs(getPath(self.folder.localPath, self.currentPath) + dirName)
         elif action == 'rename':
-            handleRename(folder, currentPath, getRequestField(request,'file'), getRequestField(request,'newName'))
+            handleRename(self.folder, self.currentPath, getRequestField(self.request,'file'), getRequestField(self.request,'newName'))
         elif action == 'changeSettings':
-            if getRequestField(request,'submit') == "Save":
-                request.session['showHidden'] = getRequestField(request,'showHidden') != None
+            if getRequestField(self.request,'submit') == "Save":
+                self.request.session['showHidden'] = getRequestField(self.request,'showHidden') != None
         else:
             raise RuntimeError('Unknown action %s' % action)
-        
-        redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, currentFolder, currentPath, status)
+    
+        redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, self.currentFolder, self.currentPath, self.status)
 
-        if statusError:
-            redirectUrl += "&statusError=%s" % statusError
+        if self.statusError:
+            redirectUrl += "&statusError=%s" % self.statusError
 
         return redirect(redirectUrl)        
-    
-    parentDirLink = getParentDirLink(currentPath, currentFolder)
-    
-    status = getRequestField(request,'status', '')
 
-    statusError = getRequestField(request,'statusError')
+    def _handleSearch(self, search):
+        currentDirEntries= getCurrentDirEntriesSearch(self.folder, self.currentPath, BaseView.isShowHidden(self.request), search)
 
-    breadcrumbs = None
-    crumbs = currentPath.split("/")
-    if len(crumbs) > 1:
-        breadcrumbs = "<a href=\"%s\">Home</a> " % const.BASE_URL
-        breadcrumbs = breadcrumbs + "&rsaquo; <a href=\"%scontent/?currentFolder=%s&currentPath=\">%s</a> " % (const.BASE_URL, currentFolder, currentFolder)
-        crumbs = currentPath.split("/")
-        accumulated = ""
-        while len(crumbs) > 0:
-            crumb = crumbs.pop(0)
-            if crumb:
-                accumulated = "/".join([accumulated, crumb])
-                breadcrumbs = breadcrumbs + "&rsaquo; "
-                if len(crumbs) > 0:
-                    breadcrumbs = breadcrumbs + "<a href=\"%scontent/?currentFolder=%s&currentPath=%s\">%s</a> " % (const.BASE_URL, currentFolder, accumulated, crumb)
-                else:
-                    breadcrumbs = breadcrumbs + crumb
+        self.values['currentDirEntries'] = currentDirEntries
 
-    contentFilter = getRequestField(request,'filter')
-    if contentFilter:
-        status = status + ' Filtered on %s' % getRequestField(request,'filter')
+        return render(self.request, "content_search.html", self.values)
 
-    search = getRequestField(request,'search')
-    if search:
-        currentDirEntries= getCurrentDirEntriesSearch(folder, currentPath, __isShowHidden(request), search)
-
-        values = {'currentFolder' : currentFolder,
-             'currentPath' : currentPath,
-             'userCanRead' : str(userCanRead).lower(),
-             'userCanWrite' : str(userCanWrite).lower(),
-             'userCanDelete' : str(userCanDelete).lower(),
-             'status' : status,
-             'currentDirEntries' : currentDirEntries,
-             'const' : const,
-             'user' : request.user,
-             'breadcrumbs' : breadcrumbs,
-             'showHidden' : __isShowHidden(request),
-        }
-        if statusError:
-            values['statusError'] = True
-        c = RequestContext(request, values)
-        return render_to_response("content_search.html", c)
-
-    currentDirEntries = getCurrentDirEntries(folder, currentPath, __isShowHidden(request), contentFilter)
-    
-    if request.session.has_key('viewType'):
-        viewType = request.session['viewType']
-    else:
-        viewType = const.viewTypes[0]                   
-
-    diskFreePct = getDiskPercentFree(getPath(folder.localPath, currentPath))
-    diskUsage = getDiskUsageFormatted(getPath(folder.localPath, currentPath))
-
-    values = {'currentFolder' : currentFolder,
-         'currentPath' : currentPath,
-         'userCanRead' : str(userCanRead).lower(),
-         'userCanWrite' : str(userCanWrite).lower(),
-         'userCanDelete' : str(userCanDelete).lower(),
-         'parentDirLink' : parentDirLink,
-         'status' : status,
-         'viewTypes' : const.viewTypes,
-         'selectedViewType' : viewType,
-         'currentDirEntries' : currentDirEntries,
-         'const' : const,
-         'user' : request.user,
-         'diskFreePct' : diskFreePct,
-         'diskFree' : diskUsage.freeformatted,
-         'diskUsed' : diskUsage.usedformatted,
-         'diskTotal' : diskUsage.totalformatted,
-         'diskUnit' : diskUsage.unit,
-         'breadcrumbs' : breadcrumbs,
-         'showHidden' : __isShowHidden(request),
-    }
-    if statusError:
-        values['statusError'] = True
-    c = RequestContext(request, values)
-    
-    if viewType == const.detailsViewType:
-        template = 'content_detail.html'
-    elif viewType == const.listViewType:
-        template = 'content_list.html'
-    else:
-        template = 'content_thumbnail.html'
-    return render_to_response(template, c)
-
+        
 def download(request):
     reqLogger = getReqLogger()
     reqLogger.info("download")
@@ -318,12 +326,6 @@ def upload(request):
     
     return render_to_response('upload.html', c)
 
-def __isShowHidden(request):
-    if request.session.has_key('showHidden'):
-        return request.session['showHidden']
-    else:
-        return False
-
 def __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
     folder = Folder.objects.filter(name=currentFolder)[0]
     userCanRead = folder.userCanRead(request.user)
@@ -331,7 +333,7 @@ def __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
     if not userCanRead:
         return HttpResponse("You don't have read permission on this folder")
     
-    currentDirEntries = getCurrentDirEntries(folder, currentPath, __isShowHidden(request))
+    currentDirEntries = getCurrentDirEntries(folder, currentPath, BaseView.isShowHidden(self.request))
     
     for i in range(len(currentDirEntries)):
         if currentDirEntries[i].name == fileName:

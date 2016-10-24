@@ -5,11 +5,11 @@ from html_browser import adminViews as admin_views
 urlpatterns = [
     url(r'^$', hb_views.IndexView.as_view()),
     url(r'^hb/$', hb_views.IndexView.as_view()),
-    url(r'content/.*', hb_views.content),
+    url(r'content/.*', hb_views.ContentView.as_view()),
     url(r'download_zip/.*', hb_views.downloadZip),
     url(r'download/.*', hb_views.download),
     url(r'hbLogin/.*', hb_views.LoginView.as_view()),
-    url(r'hbLogout/.*', hb_views.hbLogout),
+    url(r'hbLogout/.*', hb_views.LogoutView.as_view()),
     url(r'upload/.*', hb_views.upload),
     url(r'image_view/.*', hb_views.imageView),
     url(r'thumb/', hb_views.thumb),
