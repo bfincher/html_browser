@@ -267,27 +267,23 @@ class ContentView(BaseView):
         return render(self.request, "content_search.html", self.values)
 
         
-def download(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("download")
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug("request = %s", request)
+class DownloadView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
 
-    currentFolder = request.GET['currentFolder']
-    currentPath = request.GET['currentPath']
-    fileName = request.GET['fileName']
-    folder = Folder.objects.filter(name=currentFolder)[0]
+        currentFolder = request.GET['currentFolder']
+        currentPath = request.GET['currentPath']
+        fileName = request.GET['fileName']
+        folder = Folder.objects.filter(name=currentFolder)[0]
     
-    filePath = "/".join([folder.localPath + currentPath, fileName])
+        filePath = "/".join([folder.localPath + currentPath, fileName])
     
-    return sendfile(request, filePath, attachment=True)
+        return sendfile(request, filePath, attachment=True)
 
-def downloadZip(request):    
-    reqLogger = getReqLogger()
-    reqLogger.info("downloadZip")
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug("request = %s", request)
-    return handleDownloadZip(request)
+class DownloadZipView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+        return handleDownloadZip(request)
 
 def upload(request):
     reqLogger = getReqLogger()
