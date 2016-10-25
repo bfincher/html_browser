@@ -26,6 +26,9 @@ imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$",re.IGNORECASE)
 class BaseView(View):
     def __init__(self):
         self.reqLogger = getReqLogger()
+        self.folder = None
+        self.currentFolder = None
+        self.currentPath = None
         
     def logGet(self, request):
         self.reqLogger.info(self.__class__.__name__)
@@ -44,7 +47,20 @@ class BaseView(View):
         if errorText:
             c['errorText'] = errorText
 
+        if self.currentFolder:
+           c['currentFolder'] = self.currentFolder
+
+        if self.currentPath:
+           c['currentPath'] = self.currentPath
+
         return c
+
+    def getFolder(self, request):
+        self.currentFolder = getRequestField(self.request,'currentFolder')
+        h = HTMLParser.HTMLParser()
+        self.currentPath = h.unescape(getRequestField(self.request,'currentPath'))
+    
+        self.folder = Folder.objects.filter(name=self.currentFolder)[0]
 
     @staticmethod
     def isShowHidden(request):
@@ -115,11 +131,7 @@ class ContentView(BaseView):
         self.request = request
         deleteOldFiles()
     
-        self.currentFolder = getRequestField(self.request,'currentFolder')
-        h = HTMLParser.HTMLParser()
-        self.currentPath = h.unescape(getRequestField(self.request,'currentPath'))
-    
-        self.folder = Folder.objects.filter(name=self.currentFolder)[0]
+        self.getFolder(request)
         self.userCanDelete = self.folder.userCanDelete(self.request.user)
         self.userCanWrite = self.userCanDelete or self.folder.userCanWrite(self.request.user)
         self.userCanRead = self.userCanWrite or self.folder.userCanRead(self.request.user)    
@@ -162,8 +174,6 @@ class ContentView(BaseView):
 
 
         self.values = self.buildBaseContext(request)
-        self.values['currentFolder'] = self.currentFolder
-        self.values['currentPath'] = self.currentPath
         self.values['userCanRead'] = str(self.userCanRead).lower()
         self.values['userCanWrite'] = str(self.userCanWrite).lower()
         self.values['userCanDelete'] = str(self.userCanDelete).lower()
@@ -201,7 +211,6 @@ class ContentView(BaseView):
 
         if self.statusError:
             self.values['statusError'] = True
-        c = RequestContext(self.request, self.values)
     
         if viewType == const.detailsViewType:
             template = 'content_detail.html'
@@ -274,12 +283,10 @@ class DownloadView(BaseView):
     def get(self, request, *args, **kwargs):
         self.logGet(request)
 
-        currentFolder = request.GET['currentFolder']
-        currentPath = request.GET['currentPath']
+        self.getFolder(request)
         fileName = request.GET['fileName']
-        folder = Folder.objects.filter(name=currentFolder)[0]
     
-        filePath = "/".join([folder.localPath + currentPath, fileName])
+        filePath = "/".join([self.folder.localPath + self.currentPath, fileName])
     
         return sendfile(request, filePath, attachment=True)
 
