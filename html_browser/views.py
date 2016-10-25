@@ -327,7 +327,7 @@ class UploadView(BaseView):
     
         return render(request, 'upload.html', c)
 
-def __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
+def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
     folder = Folder.objects.filter(name=currentFolder)[0]
     userCanRead = folder.userCanRead(request.user)
     
@@ -344,113 +344,101 @@ def __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
             return result
         
 
-def imageView(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("imageView")
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug("request = %s", request)
+class ImageView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
 
-    currentFolder = getRequestField(request,'currentFolder')
-    currentPath = getRequestField(request,'currentPath')
-    fileName = getRequestField(request,'fileName')
-    entries = __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName)
-    index = entries['index']
-    currentDirEntries = entries['currentDirEntries']
-
-    if index == 0:
-        prevLink = None
-    else:
-        prevLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, currentFolder, currentPath, currentDirEntries[index-1].name)
-        
-    if index == len(currentDirEntries) - 1:
-        nextLink = None
-    else:
-        nextLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, currentFolder, currentPath, currentDirEntries[index+1].name)
-        
-    parentDirLink = "%s?currentFolder=%s&currentPath=%s" %(const.CONTENT_URL, currentFolder, currentPath)
-    
-    imageUrl = '%s__%s__%s/%s' %(const.BASE_URL, currentFolder, currentPath, fileName)
-    imageUrl = imageUrl.replace('//','/')
-
-    folder = Folder.objects.filter(name=currentFolder)[0]
-    userCanDelete = folder.userCanDelete(request.user)
-    
-    c = RequestContext(request,
-        {'currentFolder' : currentFolder,
-         'currentPath' : currentPath,
-         'status' : '',
-         'viewTypes' : const.viewTypes,
-         'const' : const,
-         'user' : request.user,
-         'fileName' : fileName,
-         'parentDirLink' : parentDirLink,
-         'prevLink' : prevLink,
-         'nextLink' : nextLink,
-         'imageUrl' : imageUrl,
-         'fileName' : fileName,
-         'userCanDelete' : userCanDelete,
-         })
-    
-    return render_to_response('image_view.html', c)
-        
-def thumb(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("thumb")
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug("request = %s", request)
-    
-    return render_to_response('test_image.html')
-
-def deleteImage(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("deleteImage")
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug("request = %s", request)
-
-    currentFolder = getRequestField(request,'currentFolder')
-    currentPath = getRequestField(request,'currentPath')
-    
-    folder = Folder.objects.filter(name=currentFolder)[0]
-    userCanDelete = folder.userCanDelete(request.user)
-    
-    if not userCanDelete:
-        status = "You don't have delete permission on this folder"
-    else:
-        handleDelete(folder, currentPath, getRequestField(request,'fileName'))
-        status = "File deleted"
-
-    redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, currentFolder, currentPath, status)
-
-    return redirect(redirectUrl)
-
-def getNextImage(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("getNextImage")
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug("request = %s", request)
-
-    currentFolder = getRequestField(request,'currentFolder')
-    currentPath = getRequestField(request,'currentPath')
-    fileName = getRequestField(request,'fileName')
-
-    result = {}
-    entries = __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName)
-    if entries:
+        currentFolder = getRequestField(request,'currentFolder')
+        currentPath = getRequestField(request,'currentPath')
+        fileName = getRequestField(request,'fileName')
+        entries = getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName)
         index = entries['index']
         currentDirEntries = entries['currentDirEntries']
 
-        result['hasNextImage'] = False
+        if index == 0:
+            prevLink = None
+        else:
+            prevLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, currentFolder, currentPath, currentDirEntries[index-1].name)
+        
+        if index == len(currentDirEntries) - 1:
+            nextLink = None
+        else:
+            nextLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, currentFolder, currentPath, currentDirEntries[index+1].name)
+        
+        parentDirLink = "%s?currentFolder=%s&currentPath=%s" %(const.CONTENT_URL, currentFolder, currentPath)
+    
+        imageUrl = '%s__%s__%s/%s' %(const.BASE_URL, currentFolder, currentPath, fileName)
+        imageUrl = imageUrl.replace('//','/')
 
-        for i in range(index+1, len(currentDirEntries)):
-            if imageRegex.match(currentDirEntries[i].name):
-                result['hasNextImage'] = True
-                nextFileName = currentDirEntries[i].name
+        folder = Folder.objects.filter(name=currentFolder)[0]
+        userCanDelete = folder.userCanDelete(request.user)
+    
+        c = self.buildBaseContext(request)
+        c['currentFolder'] = currentFolder
+        c['currentPath'] = currentPath
+        c['status'] = ''
+        c['viewTypes'] = const.viewTypes
+        c['fileName'] = fileName
+        c['parentDirLink'] = parentDirLink
+        c['prevLink'] = prevLink
+        c['nextLink'] = nextLink
+        c['imageUrl'] = imageUrl
+        c['fileName'] = fileName
+        c['userCanDelete'] = userCanDelete
+    
+        return render(request, 'image_view.html', c)
+        
+class ThumbView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+        return render(request, 'test_image.html')
 
-                imageUrl = '%s__%s__%s/%s' %(const.BASE_URL, currentFolder, currentPath, nextFileName)
-                imageUrl = imageUrl.replace('//','/')
-                result['imageUrl'] = imageUrl
-                result['fileName'] = nextFileName
-                break;
+class DeleteImageView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
 
-    data = json.dumps(result)
-    return HttpResponse(data, content_type='application/json')
+        currentFolder = getRequestField(request,'currentFolder')
+        currentPath = getRequestField(request,'currentPath')
+    
+        folder = Folder.objects.filter(name=currentFolder)[0]
+        userCanDelete = folder.userCanDelete(request.user)
+    
+        if not userCanDelete:
+            status = "You don't have delete permission on this folder"
+        else:
+            handleDelete(folder, currentPath, getRequestField(request,'fileName'))
+            status = "File deleted"
+
+        redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, currentFolder, currentPath, status)
+
+        return redirect(redirectUrl)
+
+class GetNextImageView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+
+        currentFolder = getRequestField(request,'currentFolder')
+        currentPath = getRequestField(request,'currentPath')
+        fileName = getRequestField(request,'fileName')
+
+        result = {}
+        entries = getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName)
+        if entries:
+            index = entries['index']
+            currentDirEntries = entries['currentDirEntries']
+
+            result['hasNextImage'] = False
+
+            for i in range(index+1, len(currentDirEntries)):
+                if imageRegex.match(currentDirEntries[i].name):
+                    result['hasNextImage'] = True
+                    nextFileName = currentDirEntries[i].name
+
+                    imageUrl = '%s__%s__%s/%s' %(const.BASE_URL, currentFolder, currentPath, nextFileName)
+                    imageUrl = imageUrl.replace('//','/')
+                    result['imageUrl'] = imageUrl
+                    result['fileName'] = nextFileName
+                    break;
+
+        data = json.dumps(result)
+        return HttpResponse(data, content_type='application/json')
