@@ -334,7 +334,7 @@ def __getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
     if not userCanRead:
         return HttpResponse("You don't have read permission on this folder")
     
-    currentDirEntries = getCurrentDirEntries(folder, currentPath, BaseView.isShowHidden(self.request))
+    currentDirEntries = getCurrentDirEntries(folder, currentPath, BaseView.isShowHidden(request))
     
     for i in range(len(currentDirEntries)):
         if currentDirEntries[i].name == fileName:

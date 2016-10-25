@@ -16,7 +16,7 @@ class _constants():
     MEDIA_URL = "/hbmedia/"
     IMAGE_URL = MEDIA_URL + 'images/'
     IMAGE_VIEW_URL = BASE_URL + "image_view/"
-    THUMBNAIL_URL = BASE_URL + "__media__/thumbs/"
+    THUMBNAIL_URL = MEDIA_URL + "/thumbs/"
     
     detailsViewType = 'details'
     listViewType = 'list'
