@@ -297,12 +297,27 @@ class DownloadZipView(BaseView):
 
 class UploadView(BaseView):
     def get(self, request, *args, **kwargs):
-        return self._get_or_post(request)
+        self.logGet(request)
 
+        currentFolder = getRequestField(request,'currentFolder', getOrPost = request.GET)
+        currentPath = getRequestField(request,'currentPath', getOrPost = request.GET)
+    
+        folder = Folder.objects.filter(name=currentFolder)[0]
+        userCanWrite = folder.userCanWrite(request.user)
+    
+        if not userCanWrite:
+            return HttpResponse("You don't have write permission on this folder")
+    
+        c = self.buildBaseContext(request)
+        c['currentFolder'] = currentFolder
+        c['currentPath'] = currentPath
+        c['status'] = ''
+        c['viewTypes'] = const.viewTypes
+    
+        return render(request, 'upload.html', c)
+
+class UploadActionView(BaseView):
     def post(self, request, *args, **kwargs):
-        return self._get_or_post(request)
-
-    def _get_or_post(self, request):
         self.logGet(request)
 
         currentFolder = getRequestField(request,'currentFolder', getOrPost = request.GET)
@@ -315,24 +330,14 @@ class UploadView(BaseView):
             return HttpResponse("You don't have write permission on this folder")
     
         action = getRequestField(request,'action', getOrPost = request.GET)
-        if action:
-            if action == 'uploadFile':
-#                return HttpResponse(str(type(request.FILES['upload1'])))
-                handleFileUpload(request.FILES['upload1'], folder, currentPath)
-                redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded" % (const.CONTENT_URL, currentFolder, currentPath)
-                return redirect(redirectUrl)           
-            elif action == 'uploadZip':
-                handleZipUpload(request.FILES['zipupload1'], folder, currentPath)
-                redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded and extracted" % (const.CONTENT_URL, currentFolder, currentPath)
-                return redirect(redirectUrl)         
-    
-        c = self.buildBaseContext(request)
-        c['currentFolder'] = currentFolder
-        c['currentPath'] = currentPath
-        c['status'] = ''
-        c['viewTypes'] = const.viewTypes
-    
-        return render(request, 'upload.html', c)
+        if action == 'uploadFile':
+            handleFileUpload(request.FILES['upload1'], folder, currentPath)
+            redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded" % (const.CONTENT_URL, currentFolder, currentPath)
+            return redirect(redirectUrl)           
+        elif action == 'uploadZip':
+            handleZipUpload(request.FILES['zipupload1'], folder, currentPath)
+            redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded and extracted" % (const.CONTENT_URL, currentFolder, currentPath)
+            return redirect(redirectUrl)         
 
 def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
     folder = Folder.objects.filter(name=currentFolder)[0]

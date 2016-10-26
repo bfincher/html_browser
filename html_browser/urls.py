@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'hbLogin/.*', hb_views.LoginView.as_view()),
     url(r'hbLogout/.*', hb_views.LogoutView.as_view()),
     url(r'upload/.*', hb_views.UploadView.as_view()),
+    url(r'uploadAction/.*', hb_views.UploadActionView.as_view()),
     url(r'image_view/.*', hb_views.ImageView.as_view()),
     url(r'thumb/', hb_views.ThumbView.as_view()),
     url(r'deleteImage', hb_views.DeleteImageView.as_view()),

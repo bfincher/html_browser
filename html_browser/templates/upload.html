@@ -28,7 +28,7 @@
 		<tr>
 			<td>
 				<form ENCTYPE="multipart/form-data" method="POST" 
-				    action="/hb/upload/?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}&action=uploadFile"> {% csrf_token %}
+				    action="/hb/uploadAction/?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}&action=uploadFile"> {% csrf_token %}
 				<table align="center">				
 					<caption>File upload</caption>					
 					<tr><td align="center"><input type="file" size="30" name="upload1"></td></tr>
@@ -44,7 +44,7 @@
 			</td>
 			<td>
 				<form ENCTYPE="multipart/form-data" method="POST" 
-				    action="/hb/upload/?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}&action=uploadZip"> {% csrf_token %}			
+				    action="/hb/uploadAction/?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}&action=uploadZip"> {% csrf_token %}			
 				<table align="center">
 					<caption>Zip Upload</caption>
 					<tr><td align="center"><input type="file" size="30" name="zipupload1" id="zipupload1" onchange="verifyZip('zipupload1')"></td></tr>
