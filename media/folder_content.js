@@ -1,4 +1,12 @@
 
+    function setContentActionUrl(_contentActionUrl) {
+        contentActionUrl = _contentActionUrl;
+    }
+
+    function setCsrf(_csrf) {
+        csrf = _csrf;
+    }
+
     function myEscape(str) {
         str = str.replace(/,/g , "(comma)");
         str = encodeURIComponent(str);
@@ -34,12 +42,12 @@
     	}
     	
     	var checkedContent = getCheckedBoxContent();
-    	var url = baseUrl + "content/?action=copyToClipboard&entries="
-			+ checkedContent
-			+ "&currentFolder=" + myEscape(currentFolder)
-			+ "&currentPath=" + myEscape(currentPath);
-			
-		window.location = url;
+
+        post(contentActionUrl, {'action': 'copyToClipboard',
+            'entries': checkedContent,
+            'currentFolder': currentFolder,
+            'currentPath': currentPath});
+
     }
     
     function rename() {
@@ -61,13 +69,11 @@
     	var newName = prompt("Please enter new file name for " + checkedBoxes[0].id, "");
     	
     	if (newName != null) {    	
-	    	var url = baseUrl + "content/?action=rename"
-				+ "&file=" + myEscape(checkedBoxes[0].id)
-				+ "&newName=" + myEscape(newName)
-				+ "&currentFolder=" + myEscape(currentFolder)
-				+ "&currentPath=" + myEscape(currentPath);
-    	
-    		window.location = url;
+            post(contentActionUrl, {'action': 'rename',
+                'file': checkedBoxes[0].id,
+                'newName': newName,
+                'currentFolder': currentFolder,
+                'currentPath': currentPath});
     	}
     	
     	
@@ -88,12 +94,10 @@
     	}
     	
     	var checkedContent = getCheckedBoxContent();
-    	var url = baseUrl + "content/?action=cutToClipboard&entries="
-			+ checkedContent
-			+ "&currentFolder=" + myEscape(currentFolder)
-			+ "&currentPath=" + myEscape(currentPath);
-			
-		window.location = url;
+        post(contentActionUrl, {'action': 'cutToClipboard',
+            'entries': checkedContent,
+            'currentFolder': currentFolder,
+            'currentPath': currentPath});
     }
     
     function paste() {
@@ -102,11 +106,9 @@
     		return;
     	}
     	
-    	var url = baseUrl + "content/?action=pasteFromClipboard"
-			+ "&currentFolder=" + myEscape(currentFolder)
-			+ "&currentPath=" + myEscape(currentPath);
-    	
-    	window.location = url;
+        post(contentActionUrl, {'action': 'pasteFromClipboard',
+            'currentFolder': currentFolder,
+            'currentPath': currentPath});
     }
     
     function zip() {
@@ -135,12 +137,11 @@
     	}
 
     	var confirmMessage = "Are you sure you want to delete the selected entry?";
-	if (confirm(confirmMessage)) {
-    	    var url = baseUrl + "deleteImage?currentFolder=" + myEscape(currentFolder)
-    		+ "&currentPath=" + myEscape(currentPath)
-		+ "&fileName=" + myEscape(fileName);
-
-    	    window.location = url;
+	    if (confirm(confirmMessage)) {
+            post(baseUrl + "deleteImage", {'action': 'deleteImage',
+                'fileName': fileName,
+                'currentFolder': currentFolder,
+                'currentPath': currentPath});
 	}
         
     }
@@ -164,12 +165,10 @@
     		}
     			
     		if (confirm(confirmMessage)) {
-    			var url = baseUrl + "content/?action=deleteEntry&entries="
-    				+ checkedContent
-    				+ "&currentFolder=" + myEscape(currentFolder)
-    				+ "&currentPath=" + myEscape(currentPath);
-    				
-    			window.location = url;
+                post(contentActionUrl, {'action': 'deleteEntry',
+                    'entries': checkedContent,
+                    'currentFolder': currentFolder,
+                    'currentPath': currentPath});
     		}
     	}
     }
@@ -183,12 +182,10 @@
     	var dir = prompt("Please enter the directory to create:", "");
     	
     	if (dir != null) {    	
-	    	var url = baseUrl + "content/?action=mkDir"
-				+ "&dir=" + myEscape(dir)
-				+ "&currentFolder=" + myEscape(currentFolder)
-				+ "&currentPath=" + myEscape(currentPath);
-    	
-    		window.location = url;
+            post(contentActionUrl, {'action': 'mkDir',
+                'dir': dir,
+                'currentFolder': currentFolder,
+                'currentPath': currentPath});
     	}
     }
     
@@ -233,11 +230,10 @@
     function viewTypeBoxChanged(box) {  
     	var selectedIndex = box.selectedIndex;
     	if (selectedIndex != -1) {
-    		var url = baseUrl + "content/?action=setViewType"
-    			+ "&viewType=" + box.options[selectedIndex].text
-				+ "&currentFolder=" + myEscape(currentFolder)
-				+ "&currentPath=" + myEscape(currentPath);
-    		window.location = url;
+            post(contentActionUrl, {'action': 'setViewType',
+                'viewType': box.options[selectedIndex].text,
+                'currentFolder': myEscape(currentFolder),
+                'currentPath': myEscape(currentPath)});
     	}
     }
 
@@ -249,5 +245,26 @@
     function diskUsageHidePopup() {
         var el = document.getElementById("disk_usage");
         el.style.visibility = "hidden";
+    }
+
+    function post(path, params) {
+        var form = $('<form></form>');
+
+        form.attr("method", "post");
+        form.attr("action", path);
+
+        form.append(csrf);
+
+        $.each(params, function(key, value) {
+            var field = $('<input></input>');
+            field.attr("type", "hidden");
+            field.attr("name", key);
+            field.attr("value", value);
+
+            form.append(field);
+        });
+
+        $(document.body).append(form);
+        form.submit();
     }
 

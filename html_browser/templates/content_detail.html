@@ -11,7 +11,7 @@
                  <span class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
                    <center>
                      <h3>Apply a filter</h3>
-                     <form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
+                     <form method="get" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
                        <input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
                        <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
                        <input type="hidden" name="currentPath" value="{{ currentPath }}" />
@@ -25,7 +25,7 @@
                  <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
                    <center>
                      <h3>Search for filenames</h3>
-                     <form method="post" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
+                     <form method="get" action="{{ const.CONTENT_URL }}"> {% csrf_token %}
                        <input type="text" name="search" value="{{ search }}" maxlength="20" size="10" />
                        <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
                        <input type="hidden" name="currentPath" value="{{ currentPath }}" />
@@ -39,7 +39,7 @@
                  <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
                    <center>
                      <h3>Settings</h3>
-                     <form action="post" action="{{ const.CONTENT_url }}"> {% csrf_token %}
+                     <form action="post" action="{{ const.CONTENT_ACTION_URL }}"> {% csrf_token %}
                        <input type="hidden" name="action" value="changeSettings" />
                        <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
                        <input type="hidden" name="currentPath" value="{{ currentPath }}" />

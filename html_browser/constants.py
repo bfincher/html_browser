@@ -3,6 +3,7 @@ class _constants():
     
     BASE_URL = '/hb/'
     CONTENT_URL = BASE_URL + 'content/'
+    CONTENT_ACTION_URL = BASE_URL + 'contentAction/'
     DOWNLOAD_URL = BASE_URL + "download/"
     ADMIN_URL = BASE_URL + "admin/"
     USER_ADMIN_URL = ADMIN_URL + "user/"
