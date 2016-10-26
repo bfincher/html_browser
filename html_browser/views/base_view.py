@@ -1,13 +1,12 @@
-from django.shortcuts import render_to_response, redirect, render
+from django.shortcuts import redirect, render
 from django.template import RequestContext
 from html_browser.models import Folder
 from django.contrib.auth import login as auth_login, logout as auth_logout
-from html_browser.utils import getParentDirLink
 import html_browser
-from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch, Clipboard, handlePaste, handleDelete,\
-    getPath, handleRename, handleDownloadZip, deleteOldFiles,\
-    handleFileUpload, handleZipUpload, getDiskPercentFree,\
-    getDiskUsageFormatted, getRequestField, getReqLogger
+from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch, handleDelete,\
+    getPath, handleDownloadZip,\
+    handleFileUpload, handleZipUpload,\
+    getRequestField, getReqLogger
 from html_browser.constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
@@ -120,165 +119,6 @@ class LogoutView(BaseView):
         auth_logout(request)
         return redirect(const.BASE_URL)
 
-class ContentView(BaseView):
-    def get(self, request, *args, **kwargs):
-        return self._get_or_post(request, args, kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self._get_or_post(request, args, kwargs)
-
-    def _get_or_post(self, request, *args, **kwargs):
-        self.request = request
-        deleteOldFiles()
-    
-        self.getFolder(request)
-        self.userCanDelete = self.folder.userCanDelete(self.request.user)
-        self.userCanWrite = self.userCanDelete or self.folder.userCanWrite(self.request.user)
-        self.userCanRead = self.userCanWrite or self.folder.userCanRead(self.request.user)    
-    
-        if self.userCanRead == False:
-            self.reqLogger.warn("%s not allowed to read %s", self.request.user, self.currentFolder)
-            return redirect(const.BASE_URL, 'You are not authorized to view this page')
-    
-        self.status = ''
-        self.statusError = None
-
-        action = getRequestField(self.request,'action')
-        if action:
-            return self._handleAction(action)
-    
-        self.status = getRequestField(self.request,'status', '')
-
-        self.statusError = getRequestField(self.request,'statusError')
-
-        self.breadcrumbs = None
-        crumbs = self.currentPath.split("/")
-        if len(crumbs) > 1:
-            self.breadcrumbs = "<a href=\"%s\">Home</a> " % const.BASE_URL
-            self.breadcrumbs = self.breadcrumbs + "&rsaquo; <a href=\"%scontent/?currentFolder=%s&currentPath=\">%s</a> " % (const.BASE_URL, self.currentFolder, self.currentFolder)
-            crumbs = self.currentPath.split("/")
-            accumulated = ""
-            while len(crumbs) > 0:
-                crumb = crumbs.pop(0)
-                if crumb:
-                    accumulated = "/".join([accumulated, crumb])
-                    self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
-                    if len(crumbs) > 0:
-                        self.breadcrumbs = self.breadcrumbs + "<a href=\"%scontent/?currentFolder=%s&currentPath=%s\">%s</a> " % (const.BASE_URL, self.currentFolder, accumulated, crumb)
-                    else:
-                        self.breadcrumbs = self.breadcrumbs + crumb
-
-        contentFilter = getRequestField(self.request,'filter')
-        if contentFilter:
-            self.status = self.status + ' Filtered on %s' % getRequestField(self.request,'filter')
-
-
-        self.values = self.buildBaseContext(request)
-        self.values['userCanRead'] = str(self.userCanRead).lower()
-        self.values['userCanWrite'] = str(self.userCanWrite).lower()
-        self.values['userCanDelete'] = str(self.userCanDelete).lower()
-        self.values['status'] = self.status
-        self.values['breadcrumbs'] = self.breadcrumbs
-        self.values['showHidden'] = BaseView.isShowHidden(self.request)
-
-        if self.statusError:
-            self.values['statusError'] = True
-
-        search = getRequestField(self.request,'search')
-        if search:
-            return self._handleSearch(search)
-
-        currentDirEntries = getCurrentDirEntries(self.folder, self.currentPath, BaseView.isShowHidden(self.request), contentFilter)
-    
-        if self.request.session.has_key('viewType'):
-            viewType = self.request.session['viewType']
-        else:
-            viewType = const.viewTypes[0]                   
-
-        diskFreePct = getDiskPercentFree(getPath(self.folder.localPath, self.currentPath))
-        diskUsage = getDiskUsageFormatted(getPath(self.folder.localPath, self.currentPath))
-
-        parentDirLink = getParentDirLink(self.currentPath, self.currentFolder)
-        self.values['parentDirLink'] = parentDirLink
-        self.values['viewTypes'] = const.viewTypes
-        self.values['selectedViewType'] = viewType
-        self.values['currentDirEntries'] = currentDirEntries
-        self.values['diskFreePct'] = diskFreePct
-        self.values['diskFree'] = diskUsage.freeformatted
-        self.values['diskUsed'] = diskUsage.usedformatted
-        self.values['diskTotal'] = diskUsage.totalformatted
-        self.values['diskUnit'] = diskUsage.unit
-
-        if self.statusError:
-            self.values['statusError'] = True
-    
-        if viewType == const.detailsViewType:
-            template = 'content_detail.html'
-        elif viewType == const.listViewType:
-            template = 'content_list.html'
-        else:
-            template = 'content_thumbnail.html'
-        return render(request, template, self.values)
-        
-    def _handleAction(self, action):
-        if action == 'copyToClipboard':
-            entries = getRequestField(self.request,'entries')
-            self.request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'COPY').toJson()
-            self.status='Items copied to clipboard';
-        elif action == 'cutToClipboard':
-            if not self.userCanDelete:
-                self.status="You don't have delete permission on this folder"
-                self.statusError = True
-            else:
-                entries = getRequestField(self.request,'entries')
-                self.request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'CUT').toJson()
-                self.status = 'Items copied to clipboard'
-        elif action == 'pasteFromClipboard':
-            if not self.userCanWrite:
-                self.status = "You don't have write permission on this folder"
-                self.statusError = True
-            else:
-                self.status = handlePaste(self.currentFolder, self.currentPath, Clipboard.fromJson(self.request.session['clipboard']))
-                if self.status:
-                    self.statusError = True
-                else:
-                    self.status = 'Items pasted'
-        elif action == 'deleteEntry':
-            if not self.userCanDelete:
-                self.status = "You don't have delete permission on this folder"
-                self.statusError = True
-            else:
-                handleDelete(self.folder, self.currentPath, getRequestField(self.request,'entries'))
-                self.status = 'File(s) deleted'
-        elif action=='setViewType':
-            viewType = getRequestField(self.request,'viewType')
-            self.request.session['viewType'] = viewType
-        elif action == 'mkDir':
-            dirName = getRequestField(self.request,'dir')
-            os.makedirs(getPath(self.folder.localPath, self.currentPath) + dirName)
-        elif action == 'rename':
-            handleRename(self.folder, self.currentPath, getRequestField(self.request,'file'), getRequestField(self.request,'newName'))
-        elif action == 'changeSettings':
-            if getRequestField(self.request,'submit') == "Save":
-                self.request.session['showHidden'] = getRequestField(self.request,'showHidden') != None
-        else:
-            raise RuntimeError('Unknown action %s' % action)
-    
-        redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, self.currentFolder, self.currentPath, self.status)
-
-        if self.statusError:
-            redirectUrl += "&statusError=%s" % self.statusError
-
-        return redirect(redirectUrl)        
-
-    def _handleSearch(self, search):
-        currentDirEntries= getCurrentDirEntriesSearch(self.folder, self.currentPath, BaseView.isShowHidden(self.request), search)
-
-        self.values['currentDirEntries'] = currentDirEntries
-
-        return render(self.request, "content_search.html", self.values)
-
-        
 class DownloadView(BaseView):
     def get(self, request, *args, **kwargs):
         self.logGet(request)
