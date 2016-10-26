@@ -55,10 +55,10 @@ class BaseView(View):
 
         return c
 
-    def getFolder(self, request):
-        self.currentFolder = getRequestField(self.request,'currentFolder')
+    def getFolder(self, request, getOrPost=None):
+        self.currentFolder = getRequestField(self.request,'currentFolder', getOrPost)
         h = HTMLParser.HTMLParser()
-        self.currentPath = h.unescape(getRequestField(self.request,'currentPath'))
+        self.currentPath = h.unescape(getRequestField(self.request,'currentPath', getOrPost))
     
         self.folder = Folder.objects.filter(name=self.currentFolder)[0]
 
@@ -299,18 +299,14 @@ class UploadView(BaseView):
     def get(self, request, *args, **kwargs):
         self.logGet(request)
 
-        currentFolder = getRequestField(request,'currentFolder', getOrPost = request.GET)
-        currentPath = getRequestField(request,'currentPath', getOrPost = request.GET)
+        self.getFolder(request)
     
-        folder = Folder.objects.filter(name=currentFolder)[0]
-        userCanWrite = folder.userCanWrite(request.user)
+        userCanWrite = self.folder.userCanWrite(request.user)
     
         if not userCanWrite:
             return HttpResponse("You don't have write permission on this folder")
     
         c = self.buildBaseContext(request)
-        c['currentFolder'] = currentFolder
-        c['currentPath'] = currentPath
         c['status'] = ''
         c['viewTypes'] = const.viewTypes
     
@@ -320,23 +316,20 @@ class UploadActionView(BaseView):
     def post(self, request, *args, **kwargs):
         self.logGet(request)
 
-        currentFolder = getRequestField(request,'currentFolder', getOrPost = request.GET)
-        currentPath = getRequestField(request,'currentPath', getOrPost = request.GET)
-    
-        folder = Folder.objects.filter(name=currentFolder)[0]
-        userCanWrite = folder.userCanWrite(request.user)
+        self.getFolder(request)
+        userCanWrite = self.folder.userCanWrite(request.user)
     
         if not userCanWrite:
             return HttpResponse("You don't have write permission on this folder")
     
-        action = getRequestField(request,'action', getOrPost = request.GET)
+        action = getRequestField(request,'action')
         if action == 'uploadFile':
-            handleFileUpload(request.FILES['upload1'], folder, currentPath)
-            redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded" % (const.CONTENT_URL, currentFolder, currentPath)
+            handleFileUpload(request.FILES['upload1'], self.folder, self.currentPath)
+            redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded" % (const.CONTENT_URL, self.currentFolder, self.currentPath)
             return redirect(redirectUrl)           
         elif action == 'uploadZip':
-            handleZipUpload(request.FILES['zipupload1'], folder, currentPath)
-            redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded and extracted" % (const.CONTENT_URL, currentFolder, currentPath)
+            handleZipUpload(request.FILES['zipupload1'], self.folder, self.currentPath)
+            redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded and extracted" % (const.CONTENT_URL, self.currentFolder, self.currentPath)
             return redirect(redirectUrl)         
 
 def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
