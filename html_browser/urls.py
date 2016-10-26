@@ -1,6 +1,6 @@
 from django.conf.urls import url
-from html_browser import views as hb_views
-from html_browser import adminViews as admin_views
+from html_browser.views import base_view as hb_views
+from html_browser.views import adminViews as admin_views
 
 urlpatterns = [
     url(r'^$', hb_views.IndexView.as_view()),

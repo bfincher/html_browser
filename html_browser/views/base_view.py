@@ -2,13 +2,13 @@ from django.shortcuts import render_to_response, redirect, render
 from django.template import RequestContext
 from html_browser.models import Folder
 from django.contrib.auth import login as auth_login, logout as auth_logout
-from utils import getParentDirLink
+from html_browser.utils import getParentDirLink
 import html_browser
 from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch, Clipboard, handlePaste, handleDelete,\
     getPath, handleRename, handleDownloadZip, deleteOldFiles,\
     handleFileUpload, handleZipUpload, getDiskPercentFree,\
     getDiskUsageFormatted, getRequestField, getReqLogger
-from constants import _constants as const
+from html_browser.constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
 import os
