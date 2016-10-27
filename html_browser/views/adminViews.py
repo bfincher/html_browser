@@ -113,70 +113,62 @@ class EditFolderView(BaseView):
         c['viewOptions'] = folderViewOptions
         return render(request, 'admin/edit_folder.html', c)
 
-def groupAdminAction(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("groupAdminAction")
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug("request = %s", request)
+class GroupAdminActionView(BaseView):
+    def post(self, request, *args, **kwargs):
+        self.logGet(request)
 
-    errorText = None
+        errorText = None
 
-    if getRequestField(request,'submit') == "Save":
         action = getRequestField(request,'action')
-        if action == 'addGroup':
-            errorText = handleAddGroup(request)
-        elif action == 'editGroup':
-            handleEditGroup(request)
-        elif action == 'deleteGroup':
+        if action == 'deleteGroup':
             handleDeleteGroup(request)
-        else:
-            raise RuntimeError('Unknown action %s' % action)
+        elif action == 'addGroup':
+            errorText = handleAddGroup(request)
+        elif getRequestField(request,'submit') == "Save":
+            if action == 'editGroup':
+                handleEditGroup(request)
+            else:
+                raise RuntimeError('Unknown action %s' % action)
 
-    redirectUrl = const.BASE_URL + "groupAdmin/"
-    if errorText != None:
-        redirectUrl = redirectUrl + "?errorText=%s" % errorText
+        redirectUrl = const.BASE_URL + "groupAdmin/"
+        if errorText != None:
+            redirectUrl = redirectUrl + "?errorText=%s" % errorText
 
-    return redirect(redirectUrl)           
+        return redirect(redirectUrl)           
 
-def editGroup(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("editGroup")
+class EditGroupView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+        groupName = getRequestField(request,'groupName')
+        group = Group.objects.get(name = groupName)
 
-    groupName = getRequestField(request,'groupName')
-    group = Group.objects.get(name = groupName)
+        usersInGroup = User.objects.filter(groups__id=group.id)
+        otherUsers = User.objects.exclude(groups__id=group.id)
 
-    usersInGroup = User.objects.filter(groups__id=group.id)
-    otherUsers = User.objects.exclude(groups__id=group.id)
+        activeUserNames = []
+        for user in usersInGroup:
+            activeUserNames.append(user.username)
 
-    activeUserNames = []
-    for user in usersInGroup:
-        activeUserNames.append(user.username)
+        userNames = []
+        for user in otherUsers:
+            userNames.append(user.username)
 
-    userNames = []
-    for user in otherUsers:
-        userNames.append(user.username)
+        c = self.buildBaseContext(request)
+        c['groupName'] = groupName
+        c['activeUserNames'] = activeUserNames
+        c['userNames'] = userNames
+        return render(request, 'admin/edit_group.html', c)
 
-    c = RequestContext(request, 
-        {'const' : const,
-         'groupName' : groupName,
-         'activeUserNames' : activeUserNames,
-         'userNames' : userNames,
-        })
-    return render_to_response('admin/edit_group.html', c)
+class GroupAdminView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+        groups = []
+        for group in Group.objects.all():
+            groups.append(group.name)
 
-def groupAdmin(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("groupAdmin")
-
-    groups = []
-    for group in Group.objects.all():
-        groups.append(group.name)
-
-    c = RequestContext(request, 
-        {'const' : const,
-         'groups' : groups,
-        })
-    return render_to_response('admin/group_admin.html', c)
+        c = self.buildBaseContext(request)
+        c['groups'] = groups
+        return render(request, 'admin/group_admin.html', c)
 
 def userAdminAction(request):
     reqLogger = getReqLogger()
