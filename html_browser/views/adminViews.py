@@ -170,91 +170,87 @@ class GroupAdminView(BaseView):
         c['groups'] = groups
         return render(request, 'admin/group_admin.html', c)
 
-def userAdminAction(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("userAdminAction")
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug("request = %s", request)
-    errorText = None
+class UserAdminActionView(BaseView):
+    def post(self, request, *args, **kwargs):
+        self.logGet(request)
+        errorText = None
 
-    if getRequestField(request,'submit') == "Save":
+        action = getRequestField(request,'action')
+        if action == 'deleteUser':
+            if not request.user.is_staff:
+                raise RuntimeError("User is not an admin")
+            handleDeleteUser(request)
+        elif getRequestField(request,'submit') == "Save":
+            if not request.user.is_staff:
+                raise RuntimeError("User is not an admin")
+
+            if action == 'editUser':
+                handleEditUser(request.POST)
+            elif action == 'addUser':
+                errorText = handleAddUser(request.POST)
+            else:
+                raise RuntimeError('Unknown action %s' % action)
+
+        redirectUrl = const.BASE_URL + "userAdmin/"
+        if errorText != None:
+            redirectUrl = redirectUrl + "?errorText=%s" % errorText
+
+        return redirect(redirectUrl)           
+
+class UserAdminView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+
         if not request.user.is_staff:
             raise RuntimeError("User is not an admin")
 
-        action = getRequestField(request,'action')
-        if action == 'editUser':
-            handleEditUser(request.POST)
-        elif action == 'addUser':
-            errorText = handleAddUser(request.POST)
-        elif action == 'deleteUser':
-            handleDeleteUser(request)
-        else:
-            raise RuntimeError('Unknown action %s' % action)
+        c = self.buildBaseContext(request)
+        c['users'] = User.objects.all()
+        return render(request, 'admin/user_admin.html', c)
 
-    redirectUrl = const.BASE_URL + "userAdmin/"
-    if errorText != None:
-        redirectUrl = redirectUrl + "?errorText=%s" % errorText
+class EditUserView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+        if not request.user.is_staff:
+            raise RuntimeError("User is not an admin")
 
-    return redirect(redirectUrl)           
+        userName = getRequestField(request,'userName')
+        reqLogger = getReqLogger()
+        reqLogger.info("editUser: user = %s", userName)
 
-def userAdmin(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("userAdmins")
+        editUser = User.objects.get(username=userName)
 
-    if not request.user.is_staff:
-        raise RuntimeError("User is not an admin")
+        activeGroupNames = []
+        groupNames = []
 
-    c = RequestContext(request, 
-        {'const' : const,
-         'users' : User.objects.all(),
-        })
-    return render_to_response('admin/user_admin.html', c)
+        for group in editUser.groups.all():
+            activeGroupNames.append(group.name)
 
-def editUser(request):
-    if not request.user.is_staff:
-        raise RuntimeError("User is not an admin")
+        for group in Group.objects.exclude(id__in = editUser.groups.all().values_list('id', flat=True)):
+            groupNames.append(group.name)
 
-    userName = getRequestField(request,'userName')
-    reqLogger = getReqLogger()
-    reqLogger.info("editUser: user = %s", userName)
+        c = self.buildBaseContext(request)
+        c['editUser'] = editUser
+        c['activeGroupNames'] = activeGroupNames
+        c['groupNames'] = groupNames
+        return render(request, 'admin/edit_user.html', c)
 
-    editUser = User.objects.get(username=userName)
+class AddUserView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
 
-    activeGroupNames = []
-    groupNames = []
+        if not request.user.is_staff:
+            raise RuntimeError("User is not an admin")
 
-    for group in editUser.groups.all():
-        activeGroupNames.append(group.name)
+        groupNames = []
 
-    for group in Group.objects.exclude(id__in = editUser.groups.all().values_list('id', flat=True)):
-        groupNames.append(group.name)
+        for group in Group.objects.all():
+            groupNames.append(group.name)
 
-    c = RequestContext(request, 
-        {'const' : const,
-         'editUser' : editUser,
-         'activeGroupNames' : activeGroupNames,
-         'groupNames' : groupNames,
-        })
-    return render_to_response('admin/edit_user.html', c)
+        c = self.buildBaseContext(request)
+        c['groupNames'] = groupNames
 
-def addUser(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("addUser")
-
-    if not request.user.is_staff:
-        raise RuntimeError("User is not an admin")
-
-    groupNames = []
-
-    for group in Group.objects.all():
-        groupNames.append(group.name)
-
-    c = RequestContext(request, 
-        {'const' : const,
-         'groupNames' : groupNames,
-        })
-
-    return render_to_response('admin/add_user.html', c)
+        return render(request, 'admin/add_user.html', c)
 
 def hbChangePassword(request):
     reqLogger = getReqLogger()

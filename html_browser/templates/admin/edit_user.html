@@ -15,9 +15,11 @@
 	.settings {
 		margin: 40px 0;
 	}
-
-
 </style>
+
+<script>
+    setCsrf("{% csrf_token %}");
+</script>
 {% endblock %}
 
 {% block body %}
