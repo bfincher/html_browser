@@ -278,7 +278,7 @@ class EditUserView(BaseView):
         if not request.user.is_staff:
             raise RuntimeError("User is not an admin")
 
-        userName = request['userName']
+        userName = request.GET['userName']
         reqLogger = getReqLogger()
         reqLogger.info("editUser: user = %s", userName)
 
