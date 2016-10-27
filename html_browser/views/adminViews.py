@@ -1,21 +1,22 @@
+from datetime import datetime
 import logging
 from logging import DEBUG
 
 from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect, render_to_response
 from django.template import RequestContext
+from annoying.functions import get_object_or_None
 
 import html_browser
-from html_browser.models import Folder, UserPermission, GroupPermission
-from html_browser.utils import getReqLogger, getRequestField,\
-    handleAddFolder, handleEditFolder, handleDeleteFolder,\
-    handleEditGroup, handleAddGroup, handleDeleteGroup, \
-    handleAddUser, handleEditUser, handleDeleteUser
+from html_browser.models import Folder, UserPermission, GroupPermission,\
+CAN_READ, CAN_WRITE, CAN_DELETE
+from html_browser.utils import getReqLogger, getRequestField, getRequestDict
 
 from .base_view import BaseView
 
 from html_browser.constants import _constants as const
 
+_permMap = {'read' : CAN_READ, 'write' : CAN_WRITE, 'delete' : CAN_DELETE}
 logger = logging.getLogger(__name__)
 
 class FolderViewOption():
@@ -50,10 +51,15 @@ class FolderAdminActionView(BaseView):
         if action == 'deleteFolder':
         # there is no submit button for deleting folders as the request
         # comes from javascript
-            handleDeleteFolder(request)
+            folderName = getRequestField(request,'name')
+            folder = Folder.objects.get(name=folderName)
+            folder.delete()
         elif getRequestField(request,'submit') == "Save":
             if action == 'addFolder':
-                errorText = handleAddFolder(request)
+                folderName = getRequestField(request,'name')
+                folder = Folder()
+                folder.name = folderName
+                handleEditFolder(request, folder)
             elif action == 'editFolder':
                 handleEditFolder(request)
             else:
@@ -121,12 +127,30 @@ class GroupAdminActionView(BaseView):
 
         action = getRequestField(request,'action')
         if action == 'deleteGroup':
-            handleDeleteGroup(request)
+            groupName = getRequestField(request,'groupToDelete')
+            group = Group.objects.get(name=groupName)
+            group.delete()
         elif action == 'addGroup':
-            errorText = handleAddGroup(request)
+            groupName = getRequestField(request,'groupName')
+            group = get_object_or_None(Group, name=groupName)
+            if not group:
+                group = Group()
+                group.name = groupName
+                group.save()
+            else:
+                errorText = "Group %s already exists" % groupName
         elif getRequestField(request,'submit') == "Save":
             if action == 'editGroup':
-                handleEditGroup(request)
+                group = Group.objects.get(name = getRequestField(request,'groupName'))
+                group.user_set.clear()
+
+                for key in getRequestDict(request):
+                    if key.startswith("isUser"):
+                        if logger.isEnabledFor(DEBUG):
+                            logger.debug("processing key $s", key)
+                        userName = key[6:]
+                        user = User.objects.get(username=userName)
+                        group.user_set.add(user)
             else:
                 raise RuntimeError('Unknown action %s' % action)
 
@@ -179,15 +203,55 @@ class UserAdminActionView(BaseView):
         if action == 'deleteUser':
             if not request.user.is_staff:
                 raise RuntimeError("User is not an admin")
-            handleDeleteUser(request)
+            user = User.objects.get(username=getRequestField(request,'userToDelete'))
+            logger.info("Deleting user %s", user)
+            user.delete()
         elif getRequestField(request,'submit') == "Save":
             if not request.user.is_staff:
                 raise RuntimeError("User is not an admin")
 
             if action == 'editUser':
-                handleEditUser(request.POST)
+                userName = request.POST['userName']
+
+                password = None
+                if 'password' in request.POST:
+                    password = request.POST['password']
+
+                isAdmin = 'isAdministrator' in request.POST
+
+                user = User.objects.get(username=userName)
+                if password:
+                    user.set_password(password)
+                user.is_staff = isAdmin
+                user.is_superuser = isAdmin
+                user.is_active = True
+                user.save()
+
+                assignGroupsToUser(user, request.POST)
+                #userGroups = user.groups.all()
+
+                user.save()
             elif action == 'addUser':
-                errorText = handleAddUser(request.POST)
+                userName = request.POST['userName']
+
+                user = get_object_or_None(User, username=userName)
+                if user:
+                    errorText = "User %s already exists" % userName
+
+                password = request.POST['password']
+
+                isAdmin = request.POST.has_key('isAdministrator')
+
+                user = User()
+                user.username = userName;
+                user.set_password(password)
+                user.is_staff = isAdmin
+                user.is_superuser = isAdmin
+                user.is_active = True
+                user.last_login = datetime(year=1970, month=1, day=1)
+                user.save()
+                assignGroupsToUser(user, request)
+                user.save()
             else:
                 raise RuntimeError('Unknown action %s' % action)
 
@@ -252,41 +316,99 @@ class AddUserView(BaseView):
 
         return render(request, 'admin/add_user.html', c)
 
-def hbChangePassword(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("hbChangePassword")
-    c = RequestContext(request, 
-        {'const' : const,
-         'user' : request.user
-        })
-    return render_to_response('admin/change_password.html', c)
+class ChangePasswordView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+        c = self.buildBaseContext(request)
+        return render(request, 'admin/change_password.html', c)
 
-def hbChangePasswordResult(request):
-    user = request.user
-    reqLogger = getReqLogger()
-    reqLogger.info("hbChangePasswordResult: user = %s", user)
-    errorMessage = None
-    if user.check_password(request.POST['password']):
-        newPw = request.POST['newPassword']
-        confirmPw = request.POST['newPassword2']
+class ChangePasswordResultView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+        user = request.user
+        errorMessage = None
+        if user.check_password(request.POST['password']):
+            newPw = request.POST['newPassword']
+            confirmPw = request.POST['newPassword2']
         
-        if newPw == confirmPw:
-            user.set_password(newPw)
-            user.save()
+            if newPw == confirmPw:
+                user.set_password(newPw)
+                user.save()
+            else:
+                errorMessage = "Passwords don't match"
         else:
-            errorMessage = "Passwords don't match"
-    else:
-        errorMessage = "Incorrect current password"
+            errorMessage = "Incorrect current password"
         
-    if errorMessage == None:
-        c = RequestContext(request, 
-        {'const' : const,
-         'user' : request.user,
-        })
-        return render_to_response('admin/change_password_success.html', c)
-    else:
-        reqLogger.warn(errorMessage)
-        c = RequestContext(request, {'errorMessage' : errorMessage,
-                                     'const' : const,
-                                     'user' : request.user})
-        return render_to_response('admin/change_password_fail.html', c)
+        context = self.buildBaseContext(request)
+        if errorMessage == None:
+            return render_to_response(request, 'admin/change_password_success.html', context)
+        else:
+            reqLogger.warn(errorMessage)
+            context['errorMessage'] = errorMessage
+            return render_to_response(request, 'admin/change_password_fail.html', context)
+
+def handleEditFolder(request, folder=None):
+    if folder == None:
+        folderName = getRequestField(request,'name')
+        folder = Folder.objects.get(name=folderName)
+
+    folder.localPath = getRequestField(request,'directory')
+    folder.viewOption = getRequestField(request,'viewOption')
+    folder.save()
+
+    newUsers = {}
+    newGroups = {}
+    for key in getRequestDict(request):
+        if key.startswith('user-'):
+            tokens = key.split('-')
+            newUsers[tokens[1]] = tokens[2]
+        elif key.startswith('group-'):
+            tokens = key.split('-')
+            newGroups[tokens[1]] = tokens[2]
+
+    for userPerm in UserPermission.objects.filter(folder = folder):
+        if newUsers.has_key(userPerm.user.username):
+            userPerm.permission = _permMap[newUsers[userPerm.user.username]]
+            userPerm.save()
+
+            del newUsers[userPerm.user.username]
+
+        else:
+            userPerm.delete()
+
+    for key in newUsers:
+        perm = UserPermission()
+        perm.folder = folder
+        perm.permission = _permMap[newUsers[key]]
+        perm.user = User.objects.get(username = key)
+        perm.save()
+    
+    for groupPerm in GroupPermission.objects.filter(folder = folder):
+        if newGroups.has_key(groupPerm.group.name):
+            groupPerm.permission = _permMap[newGroups[groupPerm.group.name]]
+            groupPerm.save()
+
+            del newGroups[groupPerm.group.name]
+
+        else:
+            groupPerm.delete()
+
+    for key in newGroups:
+        perm = GroupPermission()
+        perm.folder = folder
+        perm.permission = _permMap[newGroups[key]]
+        perm.group = Group.objects.get(name = key)
+        perm.save()
+
+
+def assignGroupsToUser(user,requestDict):
+    user.groups.clear()
+
+    for key in requestDict:
+        if key.startswith("isGroup"):
+            groupName = key[7:]
+            if logger.isEnabledFor(DEBUG):
+                logger.debug("processing key %s", key)
+                logger.debug("groupName = %s", groupName)
+            group = Group.objects.get(name=groupName)
+            user.groups.add(group)
