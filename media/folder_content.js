@@ -194,7 +194,7 @@
     	var checkedContent = "";
     	
     	for (i = 0; i < checkedBoxes.length; i++) {
-    		checkedContent = checkedContent + myEscape(checkedBoxes[i].id);
+    		checkedContent = checkedContent + checkedBoxes[i].id;
     				
     		if (i != checkedBoxes.length - 1) {
     			checkedContent = checkedContent + ",";
