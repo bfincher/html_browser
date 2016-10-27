@@ -17,6 +17,10 @@
 
 
 </style>
+
+<script>
+    setCsrf("{% csrf_token %}");
+</script>
 {% endblock %}
 {% load PermissionFilters %}
 {% block body %}
@@ -66,6 +70,7 @@
 {% endif %}
 	
 <form id="form" action="{{ const.BASE_URL }}folderAdminAction/" method="post">
+    {% csrf_token %}
     {% block formContent %}
     <input name=action type=hidden value={%block actionName %}{% endblock %} /> {% csrf_token %}
     {% if folder %}<input name=name type=hidden value="{{ folder.name }}" /> {% endif %}
@@ -139,7 +144,7 @@
 	<select name="viewOption" required="true" style="width: 400px;">
 	    {% for option in viewOptions %}
 	    <option value="{{ option.value }}" {% if folder and option.value == folder.viewOption %}selected="true" {% endif %}>{{ option.display }}</option>
-            {% endfor %}
+        {% endfor %}
 	</select>
     <br>
 

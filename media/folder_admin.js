@@ -1,7 +1,9 @@
 	function confirmDelete(folderName) {
                 var r=confirm("Are you sure you want to delete " + folderName);
                 if (r==true) {
-                        window.location = baseUrl + "folderAdminAction/?action=deleteFolder&name=" + folderName + "&submit=Save";
+                    var url = baseUrl + "/folderAdminAction/";
+                    post(url, {'action': 'deleteFolder',
+                        'name': folderName});
                 }
         }
 

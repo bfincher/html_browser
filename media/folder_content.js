@@ -3,10 +3,6 @@
         contentActionUrl = _contentActionUrl;
     }
 
-    function setCsrf(_csrf) {
-        csrf = _csrf;
-    }
-
     function myEscape(str) {
         str = str.replace(/,/g , "(comma)");
         str = encodeURIComponent(str);
@@ -247,24 +243,4 @@
         el.style.visibility = "hidden";
     }
 
-    function post(path, params) {
-        var form = $('<form></form>');
-
-        form.attr("method", "post");
-        form.attr("action", path);
-
-        form.append(csrf);
-
-        $.each(params, function(key, value) {
-            var field = $('<input></input>');
-            field.attr("type", "hidden");
-            field.attr("name", key);
-            field.attr("value", value);
-
-            form.append(field);
-        });
-
-        $(document.body).append(form);
-        form.submit();
-    }
 

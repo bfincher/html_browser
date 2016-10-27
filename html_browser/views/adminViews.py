@@ -2,7 +2,7 @@ import logging
 from logging import DEBUG
 
 from django.contrib.auth.models import User, Group
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import render, redirect, render_to_response
 from django.template import RequestContext
 
 import html_browser
@@ -12,12 +12,22 @@ from html_browser.utils import getReqLogger, getRequestField,\
     handleEditGroup, handleAddGroup, handleDeleteGroup, \
     handleAddUser, handleEditUser, handleDeleteUser
 
+from .base_view import BaseView
+
 from html_browser.constants import _constants as const
+
+logger = logging.getLogger(__name__)
 
 class FolderViewOption():
     def __init__(self, value, display):
         self.value = value
         self.display = display
+
+    def __str__(self):
+        return self.display
+
+    def __repr__(self):
+        return self.__str__()
 
 folderViewOptions = []
 
@@ -25,93 +35,83 @@ for choice in html_browser.models.viewableChoices:
     option = FolderViewOption(choice[0], choice[1]) 
     folderViewOptions.append(option)
 
-def hbAdmin(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("admin")
+class AdminView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+        c = self.buildBaseContext(request)
+        return render(request, 'admin/admin.html', c)
 
-    c = RequestContext(request, 
-        {'const' : const,
-         'user' : request.user
-        })
-    return render_to_response('admin/admin.html', c)
+class FolderAdminActionView(BaseView):
+    def post(self, request, *args, **kwargs):
+        self.logGet(request)
+        errorText = None
 
-def folderAdminAction(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("folderAdminAction")
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug("request = %s", request)
-
-    errorText = None
-
-    if getRequestField(request,'submit') == "Save":
         action = getRequestField(request,'action')
-        if action == 'addFolder':
-            errorText = handleAddFolder(request)
-        elif action == 'editFolder':
-            handleEditFolder(request)
-        elif action == 'deleteFolder':
+        if action == 'deleteFolder':
+        # there is no submit button for deleting folders as the request
+        # comes from javascript
             handleDeleteFolder(request)
-        else:
-            raise RuntimeError('Unknown action %s' % action)
+        elif getRequestField(request,'submit') == "Save":
+            if action == 'addFolder':
+                errorText = handleAddFolder(request)
+            elif action == 'editFolder':
+                handleEditFolder(request)
+            else:
+                raise RuntimeError('Unknown action %s' % action)
 
-    redirectUrl = const.BASE_URL + "folderAdmin/" 
-    if errorText != None:
-        redirectUrl = redirectUrl + "?errorText=%s" % errorText
+        redirectUrl = const.BASE_URL + "folderAdmin/" 
+        if errorText != None:
+            redirectUrl = redirectUrl + "?errorText=%s" % errorText
 
-    return redirect(redirectUrl)
+        return redirect(redirectUrl)
 
-def folderAdmin(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("folderAdmin")
+class FolderAdminView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
 
-    c = RequestContext(request,
-        {'const' : const,
-         'folders' : Folder.objects.all(),
-        })
-    return render_to_response('admin/folder_admin.html', c)
+        c = self.buildBaseContext(request)
+        c['folders'] = Folder.objects.all()
+        return render(request, 'admin/folder_admin.html', c)
 
-def addFolder(request):
-    c = RequestContext(request,
-        {'const' : const,
-         'viewOptions' : folderViewOptions,
-         'usersNotAssignedToFolder' : User.objects.all(),
-         'groupsNotAssignedToFolder' : Group.objects.all(),
-        })
-    return render_to_response('admin/add_folder.html', c)
+class AddFolderView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
+        c = self.buildBaseContext(request)
+        #c.update({'viewOptions': folderViewOptions})
+        c['viewOptions'] = folderViewOptions
+        c['usersNotAssignedToFolder'] = User.objects.all()
+        c['groupsNotAssignedToFolder'] = Group.objects.all()
+        return render(request, 'admin/add_folder.html', c)
 
-def editFolder(request):
-    reqLogger = getReqLogger()
-    reqLogger.info("editFolder")
-    if reqLogger.isEnabledFor(DEBUG):
-        reqLogger.debug("request = %s", request)
+class EditFolderView(BaseView):
+    def get(self, request, *args, **kwargs):
+        self.logGet(request)
 
-    folderName = getRequestField(request,'name')
-    folder = Folder.objects.get(name = folderName)
+        folderName = getRequestField(request,'name')
+        folder = Folder.objects.get(name = folderName)
+    
+        userIds = []
+        userPerms = UserPermission.objects.filter(folder=folder)
+        for perm in userPerms:
+            userIds.append(perm.user.id)
 
-    userIds = []
-    userPerms = UserPermission.objects.filter(folder=folder)
-    for perm in userPerms:
-        userIds.append(perm.user.id)
+        usersNotInFolder = User.objects.exclude(id__in = userIds)
 
-    usersNotInFolder = User.objects.exclude(id__in = userIds)
+        groupIds = []
+        groupPerms = GroupPermission.objects.filter(folder=folder)
+        for perm in groupPerms:
+            groupIds.append(perm.group.id)
 
-    groupIds = []
-    groupPerms = GroupPermission.objects.filter(folder=folder)
-    for perm in groupPerms:
-        groupIds.append(perm.group.id)
+        groupsNotInFolder = Group.objects.exclude(id__in = groupIds)
 
-    groupsNotInFolder = Group.objects.exclude(id__in = groupIds)
-
-    c = RequestContext(request,
-        {'const' : const,
-         'folder' : folder,
-         'usersNotAssignedToFolder' : usersNotInFolder,
-         'groupsNotAssignedToFolder' : groupsNotInFolder,
-         'groupPermissions' : groupPerms,
-         'userPermissions' : userPerms,
-         'viewOptions' : folderViewOptions,
-        })
-    return render_to_response('admin/edit_folder.html', c)
+        c = self.buildBaseContext(request)
+        c['folder'] = folder
+        c['usersNotAssignedToFolder'] = usersNotInFolder
+        c['groupsNotAssignedToFolder'] = groupsNotInFolder
+        c['groupPermissions'] = groupPerms
+        c['userPermissions'] = userPerms
+        c['viewOptions'] = folderViewOptions
+        return render(request, 'admin/edit_folder.html', c)
 
 def groupAdminAction(request):
     reqLogger = getReqLogger()
