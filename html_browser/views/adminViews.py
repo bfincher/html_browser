@@ -10,7 +10,7 @@ from annoying.functions import get_object_or_None
 import html_browser
 from html_browser.models import Folder, UserPermission, GroupPermission,\
 CAN_READ, CAN_WRITE, CAN_DELETE
-from html_browser.utils import getReqLogger, getRequestField, getRequestDict
+from html_browser.utils import getReqLogger
 
 from .base_view import BaseView
 
@@ -47,16 +47,16 @@ class FolderAdminActionView(BaseView):
         self.logGet(request)
         errorText = None
 
-        action = getRequestField(request,'action')
+        action = request.POST['action']
         if action == 'deleteFolder':
         # there is no submit button for deleting folders as the request
         # comes from javascript
-            folderName = getRequestField(request,'name')
+            folderName = request.POST['name']
             folder = Folder.objects.get(name=folderName)
             folder.delete()
-        elif getRequestField(request,'submit') == "Save":
+        elif request.POST['submit'] == "Save":
             if action == 'addFolder':
-                folderName = getRequestField(request,'name')
+                folderName = request.POST['name']
                 folder = Folder()
                 folder.name = folderName
                 handleEditFolder(request, folder)
@@ -93,7 +93,7 @@ class EditFolderView(BaseView):
     def get(self, request, *args, **kwargs):
         self.logGet(request)
 
-        folderName = getRequestField(request,'name')
+        folderName = request.GET['name']
         folder = Folder.objects.get(name = folderName)
     
         userIds = []
@@ -125,13 +125,13 @@ class GroupAdminActionView(BaseView):
 
         errorText = None
 
-        action = getRequestField(request,'action')
+        action = request.POST['action']
         if action == 'deleteGroup':
-            groupName = getRequestField(request,'groupToDelete')
+            groupName = request.POST['groupToDelete']
             group = Group.objects.get(name=groupName)
             group.delete()
         elif action == 'addGroup':
-            groupName = getRequestField(request,'groupName')
+            groupName = request.POST['groupName']
             group = get_object_or_None(Group, name=groupName)
             if not group:
                 group = Group()
@@ -139,12 +139,12 @@ class GroupAdminActionView(BaseView):
                 group.save()
             else:
                 errorText = "Group %s already exists" % groupName
-        elif getRequestField(request,'submit') == "Save":
+        elif request.POST['submit'] == "Save":
             if action == 'editGroup':
-                group = Group.objects.get(name = getRequestField(request,'groupName'))
+                group = Group.objects.get(name=request.POST['groupName'])
                 group.user_set.clear()
 
-                for key in getRequestDict(request):
+                for key in REQUEST.POST:
                     if key.startswith("isUser"):
                         if logger.isEnabledFor(DEBUG):
                             logger.debug("processing key $s", key)
@@ -163,7 +163,7 @@ class GroupAdminActionView(BaseView):
 class EditGroupView(BaseView):
     def get(self, request, *args, **kwargs):
         self.logGet(request)
-        groupName = getRequestField(request,'groupName')
+        groupName = request.GET['groupName']
         group = Group.objects.get(name = groupName)
 
         usersInGroup = User.objects.filter(groups__id=group.id)
@@ -199,14 +199,14 @@ class UserAdminActionView(BaseView):
         self.logGet(request)
         errorText = None
 
-        action = getRequestField(request,'action')
+        action = request.POST['action']
         if action == 'deleteUser':
             if not request.user.is_staff:
                 raise RuntimeError("User is not an admin")
-            user = User.objects.get(username=getRequestField(request,'userToDelete'))
+            user = User.objects.get(username=request.POST['userToDelete'])
             logger.info("Deleting user %s", user)
             user.delete()
-        elif getRequestField(request,'submit') == "Save":
+        elif request.POST['submit'] == "Save":
             if not request.user.is_staff:
                 raise RuntimeError("User is not an admin")
 
@@ -278,7 +278,7 @@ class EditUserView(BaseView):
         if not request.user.is_staff:
             raise RuntimeError("User is not an admin")
 
-        userName = getRequestField(request,'userName')
+        userName = request['userName']
         reqLogger = getReqLogger()
         reqLogger.info("editUser: user = %s", userName)
 
@@ -349,16 +349,16 @@ class ChangePasswordResultView(BaseView):
 
 def handleEditFolder(request, folder=None):
     if folder == None:
-        folderName = getRequestField(request,'name')
+        folderName = request.POST['name']
         folder = Folder.objects.get(name=folderName)
 
-    folder.localPath = getRequestField(request,'directory')
-    folder.viewOption = getRequestField(request,'viewOption')
+    folder.localPath = request.POST['directory']
+    folder.viewOption = request.POST['viewOption']
     folder.save()
 
     newUsers = {}
     newGroups = {}
-    for key in getRequestDict(request):
+    for key in request.POST:
         if key.startswith('user-'):
             tokens = key.split('-')
             newUsers[tokens[1]] = tokens[2]

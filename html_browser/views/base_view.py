@@ -162,7 +162,7 @@ class UploadActionView(BaseView):
         if not userCanWrite:
             return HttpResponse("You don't have write permission on this folder")
     
-        action = getRequestField(request,'action')
+        action = request.POST['action']
         if action == 'uploadFile':
             handleFileUpload(request.FILES['upload1'], self.folder, self.currentPath)
             redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded" % (const.CONTENT_URL, self.currentFolder, self.currentPath)
@@ -193,34 +193,30 @@ class ImageView(BaseView):
     def get(self, request, *args, **kwargs):
         self.logGet(request)
 
-        currentFolder = getRequestField(request,'currentFolder')
-        currentPath = getRequestField(request,'currentPath')
+        self.getFolder(request)
         fileName = getRequestField(request,'fileName')
-        entries = getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName)
+        entries = getIndexIntoCurrentDir(request, self.currentFolder, self.currentPath, fileName)
         index = entries['index']
         currentDirEntries = entries['currentDirEntries']
 
         if index == 0:
             prevLink = None
         else:
-            prevLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, currentFolder, currentPath, currentDirEntries[index-1].name)
+            prevLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, self.currentFolder, self.currentPath, currentDirEntries[index-1].name)
         
         if index == len(currentDirEntries) - 1:
             nextLink = None
         else:
-            nextLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, currentFolder, currentPath, currentDirEntries[index+1].name)
+            nextLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %(const.IMAGE_VIEW_URL, self.currentFolder, self.currentPath, currentDirEntries[index+1].name)
         
-        parentDirLink = "%s?currentFolder=%s&currentPath=%s" %(const.CONTENT_URL, currentFolder, currentPath)
+        parentDirLink = "%s?currentFolder=%s&currentPath=%s" %(const.CONTENT_URL, self.currentFolder, self.currentPath)
     
-        imageUrl = '%s__%s__%s/%s' %(const.BASE_URL, currentFolder, currentPath, fileName)
+        imageUrl = '%s__%s__%s/%s' %(const.BASE_URL, self.currentFolder, self.currentPath, fileName)
         imageUrl = imageUrl.replace('//','/')
 
-        folder = Folder.objects.filter(name=currentFolder)[0]
-        userCanDelete = folder.userCanDelete(request.user)
+        userCanDelete = self.folder.userCanDelete(request.user)
     
         c = self.buildBaseContext(request)
-        c['currentFolder'] = currentFolder
-        c['currentPath'] = currentPath
         c['status'] = ''
         c['viewTypes'] = const.viewTypes
         c['fileName'] = fileName
@@ -242,19 +238,16 @@ class DeleteImageView(BaseView):
     def get(self, request, *args, **kwargs):
         self.logGet(request)
 
-        currentFolder = getRequestField(request,'currentFolder')
-        currentPath = getRequestField(request,'currentPath')
-    
-        folder = Folder.objects.filter(name=currentFolder)[0]
-        userCanDelete = folder.userCanDelete(request.user)
+        self.getFolder(request)
+        userCanDelete = self.folder.userCanDelete(request.user)
     
         if not userCanDelete:
             status = "You don't have delete permission on this folder"
         else:
-            handleDelete(folder, currentPath, getRequestField(request,'fileName'))
+            handleDelete(self.folder, self.currentPath, getRequestField(request,'fileName'))
             status = "File deleted"
 
-        redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, currentFolder, currentPath, status)
+        redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, self.currentFolder, self.currentPath, status)
 
         return redirect(redirectUrl)
 
@@ -262,12 +255,11 @@ class GetNextImageView(BaseView):
     def get(self, request, *args, **kwargs):
         self.logGet(request)
 
-        currentFolder = getRequestField(request,'currentFolder')
-        currentPath = getRequestField(request,'currentPath')
+        self.getFolder(request)
         fileName = getRequestField(request,'fileName')
 
         result = {}
-        entries = getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName)
+        entries = getIndexIntoCurrentDir(request, self.currentFolder, self.currentPath, fileName)
         if entries:
             index = entries['index']
             currentDirEntries = entries['currentDirEntries']
@@ -279,7 +271,7 @@ class GetNextImageView(BaseView):
                     result['hasNextImage'] = True
                     nextFileName = currentDirEntries[i].name
 
-                    imageUrl = '%s__%s__%s/%s' %(const.BASE_URL, currentFolder, currentPath, nextFileName)
+                    imageUrl = '%s__%s__%s/%s' %(const.BASE_URL, self.currentFolder, self.currentPath, nextFileName)
                     imageUrl = imageUrl.replace('//','/')
                     result['imageUrl'] = imageUrl
                     result['fileName'] = nextFileName
