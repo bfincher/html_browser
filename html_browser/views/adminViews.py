@@ -38,13 +38,12 @@ for choice in html_browser.models.viewableChoices:
 
 class AdminView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
-        c = self.buildBaseContext(request)
-        return render(request, 'admin/admin.html', c)
+        super(AdminView, self).get(request, args, kwargs)
+        return render(request, 'admin/admin.html', self.context)
 
 class FolderAdminActionView(BaseView):
     def post(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(FolderAdminView, self).post(request, args, kwargs)
         errorText = None
 
         action = request.POST['action']
@@ -73,25 +72,23 @@ class FolderAdminActionView(BaseView):
 
 class FolderAdminView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(FolderAdminView, self).get(request, args, kwargs)
 
-        c = self.buildBaseContext(request)
-        c['folders'] = Folder.objects.all()
-        return render(request, 'admin/folder_admin.html', c)
+        self.context['folders'] = Folder.objects.all()
+        return render(request, 'admin/folder_admin.html', self.context)
 
 class AddFolderView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
-        c = self.buildBaseContext(request)
+        super(AddFolderView, self).get(request, args, kwargs)
         #c.update({'viewOptions': folderViewOptions})
-        c['viewOptions'] = folderViewOptions
-        c['usersNotAssignedToFolder'] = User.objects.all()
-        c['groupsNotAssignedToFolder'] = Group.objects.all()
-        return render(request, 'admin/add_folder.html', c)
+        self.context['viewOptions'] = folderViewOptions
+        self.context['usersNotAssignedToFolder'] = User.objects.all()
+        self.context['groupsNotAssignedToFolder'] = Group.objects.all()
+        return render(request, 'admin/add_folder.html', self.context)
 
 class EditFolderView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(EditFolderView, self).get(request, args, kwargs)
 
         folderName = request.GET['name']
         folder = Folder.objects.get(name = folderName)
@@ -110,18 +107,17 @@ class EditFolderView(BaseView):
 
         groupsNotInFolder = Group.objects.exclude(id__in = groupIds)
 
-        c = self.buildBaseContext(request)
-        c['folder'] = folder
-        c['usersNotAssignedToFolder'] = usersNotInFolder
-        c['groupsNotAssignedToFolder'] = groupsNotInFolder
-        c['groupPermissions'] = groupPerms
-        c['userPermissions'] = userPerms
-        c['viewOptions'] = folderViewOptions
-        return render(request, 'admin/edit_folder.html', c)
+        self.context['folder'] = folder
+        self.context['usersNotAssignedToFolder'] = usersNotInFolder
+        self.context['groupsNotAssignedToFolder'] = groupsNotInFolder
+        self.context['groupPermissions'] = groupPerms
+        self.context['userPermissions'] = userPerms
+        self.context['viewOptions'] = folderViewOptions
+        return render(request, 'admin/edit_folder.html', self.context)
 
 class GroupAdminActionView(BaseView):
     def post(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(GroupAdminAction, self).post(request, args, kwargs)
 
         errorText = None
 
@@ -162,7 +158,7 @@ class GroupAdminActionView(BaseView):
 
 class EditGroupView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(EditGroupView, self).get(request, args, kwargs)
         groupName = request.GET['groupName']
         group = Group.objects.get(name = groupName)
 
@@ -177,26 +173,24 @@ class EditGroupView(BaseView):
         for user in otherUsers:
             userNames.append(user.username)
 
-        c = self.buildBaseContext(request)
-        c['groupName'] = groupName
-        c['activeUserNames'] = activeUserNames
-        c['userNames'] = userNames
-        return render(request, 'admin/edit_group.html', c)
+        self.context['groupName'] = groupName
+        self.context['activeUserNames'] = activeUserNames
+        self.context['userNames'] = userNames
+        return render(request, 'admin/edit_group.html', self.context)
 
 class GroupAdminView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(GroupAdminView, self).get(request, args, kwargs)
         groups = []
         for group in Group.objects.all():
             groups.append(group.name)
 
-        c = self.buildBaseContext(request)
-        c['groups'] = groups
-        return render(request, 'admin/group_admin.html', c)
+        self.context['groups'] = groups
+        return render(request, 'admin/group_admin.html', self.context)
 
 class UserAdminActionView(BaseView):
     def post(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(UserdminView, self).post(request, args, kwargs)
         errorText = None
 
         action = request.POST['action']
@@ -263,18 +257,17 @@ class UserAdminActionView(BaseView):
 
 class UserAdminView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(UserAdminView, self).get(request, args, kwargs)
 
         if not request.user.is_staff:
             raise RuntimeError("User is not an admin")
 
-        c = self.buildBaseContext(request)
-        c['users'] = User.objects.all()
-        return render(request, 'admin/user_admin.html', c)
+        self.context['users'] = User.objects.all()
+        return render(request, 'admin/user_admin.html', self.context)
 
 class EditUserView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(EditUserView, self).get(request, args, kwargs)
         if not request.user.is_staff:
             raise RuntimeError("User is not an admin")
 
@@ -293,15 +286,14 @@ class EditUserView(BaseView):
         for group in Group.objects.exclude(id__in = editUser.groups.all().values_list('id', flat=True)):
             groupNames.append(group.name)
 
-        c = self.buildBaseContext(request)
-        c['editUser'] = editUser
-        c['activeGroupNames'] = activeGroupNames
-        c['groupNames'] = groupNames
-        return render(request, 'admin/edit_user.html', c)
+        self.context['editUser'] = editUser
+        self.context['activeGroupNames'] = activeGroupNames
+        self.context['groupNames'] = groupNames
+        return render(request, 'admin/edit_user.html', self.context)
 
 class AddUserView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(AddUserView, self).get(request, args, kwargs)
 
         if not request.user.is_staff:
             raise RuntimeError("User is not an admin")
@@ -311,20 +303,18 @@ class AddUserView(BaseView):
         for group in Group.objects.all():
             groupNames.append(group.name)
 
-        c = self.buildBaseContext(request)
-        c['groupNames'] = groupNames
+        self.context['groupNames'] = groupNames
 
-        return render(request, 'admin/add_user.html', c)
+        return render(request, 'admin/add_user.html', self.context)
 
 class ChangePasswordView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
-        c = self.buildBaseContext(request)
-        return render(request, 'admin/change_password.html', c)
+        super(ChangePasswordView, self).get(request, args, kwargs)
+        return render(request, 'admin/change_password.html', self.context)
 
 class ChangePasswordResultView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(ChangePasswordView, self).get(request, args, kwargs)
         user = request.user
         errorMessage = None
         if user.check_password(request.POST['password']):
@@ -339,13 +329,12 @@ class ChangePasswordResultView(BaseView):
         else:
             errorMessage = "Incorrect current password"
         
-        context = self.buildBaseContext(request)
         if errorMessage == None:
-            return render_to_response(request, 'admin/change_password_success.html', context)
+            return render(request, 'admin/change_password_success.html', self.context)
         else:
             reqLogger.warn(errorMessage)
-            context['errorMessage'] = errorMessage
-            return render_to_response(request, 'admin/change_password_fail.html', context)
+            self.context['errorMessage'] = errorMessage
+            return render(request, 'admin/change_password_fail.html', self.context)
 
 def handleEditFolder(request, folder=None):
     if folder == None:

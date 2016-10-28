@@ -16,13 +16,13 @@ from html_browser.utils import getRequestField, getCurrentDirEntries, getCurrent
 class AbstractContentView(BaseView):
     def __setup__(self, request, getOrPost=None):
         self.request = request
-        self.getFolder(request, getOrPost)
         self.userCanDelete = self.folder.userCanDelete(self.request.user)
         self.userCanWrite = self.userCanDelete or self.folder.userCanWrite(self.request.user)
         self.userCanRead = self.userCanWrite or self.folder.userCanRead(self.request.user)    
     
 class ContentActionView(AbstractContentView):
     def post(self, request, *args, **kwargs):
+        super(ContentActionView, self).post(request, args, kwargs)
         self.__setup__(request) 
         
         if self.userCanRead == False:
@@ -90,6 +90,7 @@ class ContentActionView(AbstractContentView):
         
 class ContentView(AbstractContentView):
     def get(self, request, *args, **kwargs):
+        super(ContentView, self).get(request, args, kwargs)
         self.__setup__(request)
         
         if self.userCanRead == False:
@@ -123,16 +124,15 @@ class ContentView(AbstractContentView):
             self.status = self.status + ' Filtered on %s' % getRequestField(self.request,'filter')
 
 
-        self.values = self.buildBaseContext(request)
-        self.values['userCanRead'] = str(self.userCanRead).lower()
-        self.values['userCanWrite'] = str(self.userCanWrite).lower()
-        self.values['userCanDelete'] = str(self.userCanDelete).lower()
-        self.values['status'] = self.status
-        self.values['breadcrumbs'] = self.breadcrumbs
-        self.values['showHidden'] = BaseView.isShowHidden(self.request)
+        self.context['userCanRead'] = str(self.userCanRead).lower()
+        self.context['userCanWrite'] = str(self.userCanWrite).lower()
+        self.context['userCanDelete'] = str(self.userCanDelete).lower()
+        self.context['status'] = self.status
+        self.context['breadcrumbs'] = self.breadcrumbs
+        self.context['showHidden'] = BaseView.isShowHidden(self.request)
 
         if self.statusError:
-            self.values['statusError'] = True
+            self.context['statusError'] = True
 
         search = getRequestField(self.request,'search')
         if search:
@@ -149,18 +149,18 @@ class ContentView(AbstractContentView):
         diskUsage = getDiskUsageFormatted(getPath(self.folder.localPath, self.currentPath))
 
         parentDirLink = getParentDirLink(self.currentPath, self.currentFolder)
-        self.values['parentDirLink'] = parentDirLink
-        self.values['viewTypes'] = const.viewTypes
-        self.values['selectedViewType'] = viewType
-        self.values['currentDirEntries'] = currentDirEntries
-        self.values['diskFreePct'] = diskFreePct
-        self.values['diskFree'] = diskUsage.freeformatted
-        self.values['diskUsed'] = diskUsage.usedformatted
-        self.values['diskTotal'] = diskUsage.totalformatted
-        self.values['diskUnit'] = diskUsage.unit
+        self.context['parentDirLink'] = parentDirLink
+        self.context['viewTypes'] = const.viewTypes
+        self.context['selectedViewType'] = viewType
+        self.context['currentDirEntries'] = currentDirEntries
+        self.context['diskFreePct'] = diskFreePct
+        self.context['diskFree'] = diskUsage.freeformatted
+        self.context['diskUsed'] = diskUsage.usedformatted
+        self.context['diskTotal'] = diskUsage.totalformatted
+        self.context['diskUnit'] = diskUsage.unit
 
         if self.statusError:
-            self.values['statusError'] = True
+            self.context['statusError'] = True
     
         if viewType == const.detailsViewType:
             template = 'content_detail.html'
@@ -168,14 +168,14 @@ class ContentView(AbstractContentView):
             template = 'content_list.html'
         else:
             template = 'content_thumbnail.html'
-        return render(request, template, self.values)       
+        return render(request, template, self.context)       
 
     def _handleSearch(self, search):
         currentDirEntries= getCurrentDirEntriesSearch(self.folder, self.currentPath, BaseView.isShowHidden(self.request), search)
 
-        self.values['currentDirEntries'] = currentDirEntries
+        self.context['currentDirEntries'] = currentDirEntries
 
-        return render(self.request, "content_search.html", self.values)
+        return render(self.request, "content_search.html", self.context)
 
     @staticmethod
     def deleteOldFiles():

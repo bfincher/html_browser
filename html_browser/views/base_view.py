@@ -29,37 +29,36 @@ class BaseView(View):
         self.currentFolder = None
         self.currentPath = None
         
-    def logGet(self, request):
+    def get(self, request, *args, **kwargs):
+        self.__commonGetPost(request)
+    def post(self, request, *args, **kwargs):
+        self.__commonGetPost(request)
+
+    def __commonGetPost(self, request):
         self.reqLogger.info(self.__class__.__name__)
         if self.reqLogger.isEnabledFor(DEBUG):
             self.reqLogger.debug(str(request))
 
-    def buildBaseContext(self, request, errorText=None):
+        self.currentFolder = getRequestField(self.request,'currentFolder')
+        if self.currentFolder:
+            h = HTMLParser.HTMLParser()
+            self.currentPath = h.unescape(getRequestField(self.request,'currentPath'))
+            self.folder = Folder.objects.filter(name=self.currentFolder)[0]
 
-        c = {'user' : request.user,
-            'const': const
-            }
+        self.context = {'user' : request.user,
+                        'const': const
+        }
 
-        if not errorText:
-            errorText = getRequestField(request, 'errorText')
+        errorText = getRequestField(request, 'errorText')
 
         if errorText:
-            c['errorText'] = errorText
+            self.context['errorText'] = errorText
 
         if self.currentFolder:
-           c['currentFolder'] = self.currentFolder
+           self.context['currentFolder'] = self.currentFolder
 
         if self.currentPath:
-           c['currentPath'] = self.currentPath
-
-        return c
-
-    def getFolder(self, request, getOrPost=None):
-        self.currentFolder = getRequestField(self.request,'currentFolder', getOrPost)
-        h = HTMLParser.HTMLParser()
-        self.currentPath = h.unescape(getRequestField(self.request,'currentPath', getOrPost))
-    
-        self.folder = Folder.objects.filter(name=self.currentFolder)[0]
+           self.context['currentPath'] = self.currentPath
 
     @staticmethod
     def isShowHidden(request):
@@ -71,7 +70,7 @@ class BaseView(View):
 
 class IndexView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(IndexView, self).get(request, args, kwargs)
 
         allFolders = Folder.objects.all()
         folders = []
@@ -79,14 +78,13 @@ class IndexView(BaseView):
             if folder.userCanRead(request.user):
                 folders.append(folder)
             
-        c = self.buildBaseContext(request)
-        c['folders'] = folders
+        self.context['folders'] = folders
     
-        return render(request, 'index.html', c)
+        return render(request, 'index.html', self.context)
 
 class LoginView(BaseView):
     def post(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(LoginView, self).post(request, args, kwargs)
 
         userName = request.POST['userName']
         password = request.POST['password']
@@ -115,15 +113,14 @@ class LoginView(BaseView):
 
 class LogoutView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(LogoutView, self).get(request, args, kwargs)
         auth_logout(request)
         return redirect(const.BASE_URL)
 
 class DownloadView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(DownloadView, self).get(request, args, kwargs)
 
-        self.getFolder(request)
         fileName = request.GET['fileName']
     
         filePath = "/".join([self.folder.localPath + self.currentPath, fileName])
@@ -132,31 +129,27 @@ class DownloadView(BaseView):
 
 class DownloadZipView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(DownloadZipView, self).get(request, args, kwargs)
         return handleDownloadZip(request)
 
 class UploadView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(UploadView, self).get(request, args, kwargs)
 
-        self.getFolder(request)
-    
         userCanWrite = self.folder.userCanWrite(request.user)
     
         if not userCanWrite:
             return HttpResponse("You don't have write permission on this folder")
     
-        c = self.buildBaseContext(request)
-        c['status'] = ''
-        c['viewTypes'] = const.viewTypes
+        self.context['status'] = ''
+        self.context['viewTypes'] = const.viewTypes
     
-        return render(request, 'upload.html', c)
+        return render(request, 'upload.html', self.context)
 
 class UploadActionView(BaseView):
     def post(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(UploadActionView, self).post(request, args, kwargs)
 
-        self.getFolder(request)
         userCanWrite = self.folder.userCanWrite(request.user)
     
         if not userCanWrite:
@@ -191,9 +184,8 @@ def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
 
 class ImageView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(ImageView, self).get(request, args, kwargs)
 
-        self.getFolder(request)
         fileName = getRequestField(request,'fileName')
         entries = getIndexIntoCurrentDir(request, self.currentFolder, self.currentPath, fileName)
         index = entries['index']
@@ -216,29 +208,27 @@ class ImageView(BaseView):
 
         userCanDelete = self.folder.userCanDelete(request.user)
     
-        c = self.buildBaseContext(request)
-        c['status'] = ''
-        c['viewTypes'] = const.viewTypes
-        c['fileName'] = fileName
-        c['parentDirLink'] = parentDirLink
-        c['prevLink'] = prevLink
-        c['nextLink'] = nextLink
-        c['imageUrl'] = imageUrl
-        c['fileName'] = fileName
-        c['userCanDelete'] = userCanDelete
+        self.context['status'] = ''
+        self.context['viewTypes'] = const.viewTypes
+        self.context['fileName'] = fileName
+        self.context['parentDirLink'] = parentDirLink
+        self.context['prevLink'] = prevLink
+        self.context['nextLink'] = nextLink
+        self.context['imageUrl'] = imageUrl
+        self.context['fileName'] = fileName
+        self.context['userCanDelete'] = userCanDelete
     
-        return render(request, 'image_view.html', c)
+        return render(request, 'image_view.html', self.context)
         
 class ThumbView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(ThumbView, self).get(request, args, kwargs)
         return render(request, 'test_image.html')
 
 class DeleteImageView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(DeleteImageView, self).get(request, args, kwargs)
 
-        self.getFolder(request)
         userCanDelete = self.folder.userCanDelete(request.user)
     
         if not userCanDelete:
@@ -253,9 +243,8 @@ class DeleteImageView(BaseView):
 
 class GetNextImageView(BaseView):
     def get(self, request, *args, **kwargs):
-        self.logGet(request)
+        super(GetNextImageView, self).get(request, args, kwargs)
 
-        self.getFolder(request)
         fileName = getRequestField(request,'fileName')
 
         result = {}
