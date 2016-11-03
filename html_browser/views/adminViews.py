@@ -43,7 +43,7 @@ class AdminView(BaseView):
 
 class FolderAdminActionView(BaseView):
     def post(self, request, *args, **kwargs):
-        super(FolderAdminView, self).post(request, args, kwargs)
+        super(FolderAdminActionView, self).post(request, args, kwargs)
         errorText = None
 
         action = request.POST['action']
