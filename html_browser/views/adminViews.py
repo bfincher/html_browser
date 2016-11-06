@@ -282,50 +282,48 @@ class UserAdminView(BaseView):
         return render(request, 'admin/user_admin.html', self.context)
 
 class EditUserView(BaseView):
+    def initForm(self, request):
+        if request.method == "GET":
+            userName = request.GET['userName']
+            user = User.objects.get(username=userName)
+            self.form = EditUserForm(instance=user)
+        else:
+            user = User.objects.get(pk=request.POST['pk'])
+            self.form = EditUserForm(request.POST, instance=user)
+
     def get(self, request, *args, **kwargs):
         super(EditUserView, self).get(request, *args, **kwargs)
         if not request.user.is_staff:
             raise RuntimeError("User is not an admin")
 
-        userName = request.GET['userName']
+        self.initForm(request)
+
         reqLogger = getReqLogger()
-        reqLogger.info("editUser: user = %s", userName)
+        reqLogger.info("editUser: user = %s", self.form.instance.username)
 
-        editUser = User.objects.get(username=userName)
-
-        form = EditUserForm()
-        form.setUser(editUser)
-        self.context['editUser'] = editUser
-        self.context['form'] = form
+        self.context['username'] = self.form.instance.username
+        self.context['form'] = self.form
         return render(request, 'admin/edit_user.html', self.context)
 
-class EditUserActionView(BaseView):
     def post(self, request, *args, **kwargs):
-        super(EditUserActionView, self).post(request, *args, **kwargs)
+        super(EditUserView, self).post(request, *args, **kwargs)
         errorText = None
 
         form = EditUserForm(request.POST)
         if form.is_valid():
-            userName = form.cleaned_data['userName']
+            user = form.save()
 
+            '''
             password = None
             if form.cleaned_data['password']:
                 password = form.cleaned_data['password']
 
-            isAdmin = form.cleaned_data['isAdministrator']
-
-            user = User.objects.get(username=userName)
             if password:
                 user.set_password(password)
             user.is_staff = isAdmin
             user.is_superuser = isAdmin
-            user.is_active = True
             user.save()
-
-            assignGroupsToUser(user, form.cleaned_data)
-            #userGroups = user.groups.all()
-
-            user.save()
+            '''
         else:
             reqLogger = getReqLogger()
             reqLogger.error('form.errors = %s', form.errors)
@@ -356,25 +354,9 @@ class AddUserActionView(BaseView):
 
         form = AddUserForm(request.POST)
         if (form.is_valid()):
-            userName = form.cleaned_data['userName']
-
-            user = get_object_or_None(User, username=userName)
-            if user:
-                errorText = "User %s already exists" % userName
-                redirectUrl = redirectUrl + "?errorText=%s" % errorText
-                return redirect(redirectUrl)           
-
-            password = form.cleaned_data['password']
-            isAdmin =form.cleaned_data['isAdministrator']
-            user = User()
-            user.username = userName
-            user.set_password(password)
-            user.is_staff = isAdmin
-            user.is_superuser = isAdmin
-            user.is_active = True
+            user = form.save(commit=False)
+            user.is_staff = user.is_superuser
             user.last_login = datetime(year=1970, month=1, day=1)
-            user.save()
-            assignGroupsToUser(user, form.cleaned_data)
             user.save()
         else:
             logger.error('form.errors = %s', form.errors())
@@ -409,12 +391,3 @@ class ChangePasswordResultView(BaseView):
             reqLogger.warn(errorMessage)
             self.context['errorMessage'] = errorMessage
             return render(request, 'admin/change_password_fail.html', self.context)
-
-def assignGroupsToUser(user,requestDict):
-    user.groups.clear()
-
-    for groupName in requestDict['groups']:
-        if logger.isEnabledFor(DEBUG):
-            logger.debug("groupName = %s", groupName)
-        group = Group.objects.get(name=groupName)
-        user.groups.add(group)

@@ -5,7 +5,7 @@ from django.template.context import Context
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Button, Layout, LayoutObject, TEMPLATE_PACK, HTML
 
-from html_browser.models import Group, User, Folder, UserPermission, GroupPermission
+from html_browser.models import Folder, UserPermission, GroupPermission, User, Group
 
 class Formset(LayoutObject):
     """
@@ -189,48 +189,34 @@ class EditGroupForm(forms.Form):
         self.fields['users'].initial = activeUsers
 
 
-class AddUserForm(forms.Form):
-    userName = forms.CharField(required=True)
-    password = forms.CharField(widget=forms.PasswordInput())
+class AddUserForm(forms.ModelForm):
     verifyPassword = forms.CharField(label='Verify Password', widget=forms.PasswordInput())
-    isAdministrator = forms.BooleanField(required=False,label='Is Administrator')
-
-    groups = []
-    for group in Group.objects.all():
-        groups.append((group.name, group.name))
-
-    groups = forms.MultipleChoiceField(choices=groups,
-        required=False,
-        widget=forms.CheckboxSelectMultiple)
-    
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_id='form'
         self.helper.form_method='post'
-        self.helper.form_action='addUserAction'
+        self.helper.form_action='addUser'
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
+
+        self.helper.layout = Layout('username', 'password', 'verifyPassword', 'groups', 'first_name', 'last_name', 'email', 'is_superuser', 'is_active') 
+
         super(AddUserForm, self).__init__(*args, **kwargs)
+
+        self.fields['password'].widget=forms.PasswordInput()
+
+    class Meta:
+        model=User
+        fields=('username', 'password', 'groups', 'first_name', 'last_name', 'email', 'is_superuser', 'is_active',)
 
 class EditUserForm(AddUserForm):
     def __init__(self, *args, **kwargs):
         super(EditUserForm, self).__init__(*args, **kwargs)
-        self.helper.form_action="editUserAction"
+        self.helper.form_action="editUser"
         self.helper.add_input(Button('deleteUser', 'Delete User', css_class='btn'))
-        self.fields['userName'].required=False
-        self.fields['userName'].widget=forms.HiddenInput()
+        self.fields['username'].required=False
+        self.fields['username'].widget=forms.HiddenInput()
         self.fields['password'].required=False
         self.fields['verifyPassword'].required=False
-
-    def setUser(self, user):
-        self.fields['userName'].initial = user.username
-        self.fields['isAdministrator'].initial = user.is_staff
-
-        activeGroups = []
-
-        for group in user.groups.all():
-            activeGroups.append(group.name)
-
-        self.fields['groups'].initial = activeGroups
 
