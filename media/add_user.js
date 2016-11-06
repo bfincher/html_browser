@@ -43,3 +43,7 @@
         passwordInValid = !valid;
         document.getElementById(okButtonId).disabled=(userNameInValid || passwordInValid);
     }
+
+    $(document).ready(function() {
+        $('#submit-id-submit').attr('disabled', 'disabled');
+    });

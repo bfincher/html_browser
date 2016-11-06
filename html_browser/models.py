@@ -96,6 +96,9 @@ class UserPermission(Permission):
     def canRead(self):
         return self.permission >= CAN_READ
 
+    class Meta:
+        unique_together = ('folder', 'user')
+
 class GroupPermission(Permission):
     group = models.ForeignKey(Group,
                               on_delete=models.CASCADE)
@@ -108,6 +111,9 @@ class GroupPermission(Permission):
 
     def getUserOrGroupName(self):
         return self.group.name
+
+    class Meta:
+        unique_together = ('folder', 'group')
 
 class FilesToDelete(models.Model):
     filePath = models.CharField(max_length=250)

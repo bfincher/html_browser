@@ -138,9 +138,13 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'html_browser',
     'django.contrib.admin',
+    'crispy_forms',
+    'djangoformsetjs',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
+
+CRISPY_TEMPLATE_PACK='bootstrap3'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -157,7 +161,7 @@ LOGGING = {
     },
     'handlers': {
         'default': {
-            'level' : 'INFO',
+            'level' : 'DEBUG',
 	    'class' : 'logging.handlers.RotatingFileHandler',
 	    'filename' : '/var/log/hb/hb.log',
 	    'maxBytes' : 1024*1024*10, # 10 MB
@@ -165,7 +169,7 @@ LOGGING = {
 	    'formatter' : 'standard',
 	},
 	'request_handler' : {
-	    'level' : 'INFO',
+	    'level' : 'DEBUG',
 	    'class' : 'logging.handlers.RotatingFileHandler',
 	    'filename' : '/var/log/hb/request.log',
 	    'maxBytes' : 1024*1024*10, # 10 MB
@@ -182,12 +186,12 @@ LOGGING = {
     'loggers': {
         '': {
             'handlers': ['default'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         },
         'django.request': {
             'handlers': ['request_handler'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False,
         },
     }

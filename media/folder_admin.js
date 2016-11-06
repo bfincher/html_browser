@@ -1,90 +1,116 @@
-	function confirmDelete(folderName) {
-                var r=confirm("Are you sure you want to delete " + folderName);
-                if (r==true) {
-                    var url = baseUrl + "/folderAdminAction/";
-                    post(url, {'action': 'deleteFolder',
-                        'name': folderName});
-                }
-        }
+userPermTableId = "user_perm_formset_table";
+userPermTotalFormId = "id_user_perm-TOTAL_FORMS";
+groupPermTableId = "group_perm_formset_table";
+groupPermTotalFormId = "id_group_perm-TOTAL_FORMS";
 
-        function writeClicked(writeFieldId, readFieldId) {
-                var writeBox = document.getElementById(writeFieldId);
-                var readBox = document.getElementById(readFieldId);
+numUserPerms = 0;
+numGroupPerms = 0;
 
-                if (writeBox.checked) {
-                        readBox.checked = true;
-                        readBox.disabled = true;
-                } else {
-                        readBox.disabled = false;
-                }
-        }
+function confirmDelete(folderName) {
+    var r=confirm("Are you sure you want to delete " + folderName);
+    if (r==true) {
+        var url = baseUrl + "/deleteFolder/";
+        post(url, {'name': folderName});
+    }
+}
 
-	function deleteClicked(deleteFieldId, writeFieldId, readFieldId) {
-                var deleteBox = document.getElementById(deleteFieldId);
-                var writeBox = document.getElementById(writeFieldId);
-                var readBox = document.getElementById(readFieldId);
+function replaceAttr(elem, attrName, rowId) {
+    var val = elem.attr(attrName);
+    if (val != null) {
+        newVal = val.replace(/([a-zA-Z_-]+)(\d+)(.*)/, "$1" + rowId + "$3");
+        console.log('newVal = ' + newVal);
+//        newVal = val.replace(/(\w+-)(\d+|(__prefix__))(-\w+)/, "$1" + rowId + "$4" );
+        elem.attr(attrName, newVal);
+    }
+}
 
-                if (deleteBox.checked) {
-                        readBox.checked = true;
-                        readBox.disabled = true;
+/*
+function updateFormsetIds() {
+    var userRowId = 0;
+    var groupRowId = 0;
+    $('#permissionTable tr').each(function() {
+        var hasUserInput = false;
+        var hasGroupInput = false;
+        $(this).find("td :input").each(function() {
+	    var name = $(this).attr('name');
+	    if (name != null) {
+	        if (name.startsWith(userPermFormPrefix)) {
+	            hasUserInput = true;
+                    replaceAttr($(this), 'name', userRowId);
+                    replaceAttr($(this), 'id', userRowId);
+	        } else if (name.startsWith(groupPermFormPrefix)) {
+	            hasGroupInput = true;
+                    replaceAttr($(this), 'name', groupRowId);
+                    replaceAttr($(this), 'id', groupRowId);
+	        }
+	    }
 
-                        writeBox.checked = true;
-                        writeBox.disabled = true;
-                } else {
-                        readBox.disabled = false;
-                        writeBox.disabled = false;
-                }
+        });
 
-                writeClicked(writeFieldId, readFieldId);
-        }
+        if (hasUserInput) {
+            userRowId++;
+        } else if (hasGroupInput) {
+	    groupRowId++;
+	}
+    });
+    
+    $('#id_' + userPermFormPrefix + '-TOTAL_FORMS').val(userRowId);
+    $('#id_' + groupPermFormPrefix + '-TOTAL_FORMS').val(groupRowId);
+}
+*/
 
-	function addRow(tableID, userOrGroupId, userOrGroup) {
-        var table = document.getElementById(tableID);
-        var userOrGroupName = document.getElementById(userOrGroupId).value;
+function addRow(tableId, row, index) {
+    row.each(function() {
+        $(this).find(":input").each(function() {
+            replaceAttr($(this), 'name', index);
+            replaceAttr($(this), 'id', index);
+        });
+    });
 
-        var rowCount = table.rows.length;
-        var row = table.insertRow(rowCount);
+    var tbody = $('#' + tableId + " tbody");
+    tbody.append(row);
+}
 
-        var cell1 = row.insertCell(0);
+function addUserPermRow() {
+    addRow(userPermTableId, emptyUserPerm.clone(), numUserPerms);
+    numUserPerms++;
+    $('#' + userPermTotalFormId).val(numUserPerms);
+}
 
-        if (userOrGroup == "group") {
-                cell1.innerHTML = "<img src=\"" + imageUrl + "User-Group-icon.png\"> " + userOrGroupName;
-        } else {
-                cell1.innerHTML = "<img src=\"" + imageUrl + "Administrator-icon.png\"> " + userOrGroupName;
-        }
+function addGroupPermRow() {
+    addRow(groupPermTableId, emptyGroupPerm.clone(), numGroupPerms);
+    numGroupPerms++;
+    $('#' + groupPermTotalFormId).val(numGroupPerms);
+}
 
-        var cell2 = row.insertCell(1);
-        var element2 = document.createElement("input");
-        element2.type="checkbox";
-        element2.name = userOrGroup + "-" + userOrGroupName + "-read";
-        element2.id = userOrGroup + "-" + userOrGroupName + "-read";
-        cell2.appendChild(element2);
+$(document).ready(function() {
+    emptyUserPerm = $('#' + userPermTableId + ' tr:last');
+    var regexp = /(id_)?[a-zA-Z_]+-(\d+).*/;
 
-        var cell3 = row.insertCell(2);
-        var element3 = document.createElement("input");
-        element3.type="checkbox";
-        element3.name="write";
-        element3.name = userOrGroup + "-" + userOrGroupName + "-write";
-        element3.id = userOrGroup + "-" + userOrGroupName + "-write";
-        element3.onclick=function(){writeClicked(element3.id, element2.id);};
-        cell3.appendChild(element3);
-
-        var cell4 = row.insertCell(3);
-        var element4 = document.createElement("input");
-        element4.type="checkbox";
-        element4.name="delete";
-	element4.name = userOrGroup + "-" + userOrGroupName + "-delete";
-        element4.id = userOrGroup + "-" + userOrGroupName + "-delete";
-        element4.onclick=function(){deleteClicked(element4.id, element3.id, element2.id);};
-        cell4.appendChild(element4);
+    if (emptyUserPerm.find('select:first').val() == "") {
+        emptyUserPerm.remove();
+        var match = regexp.exec(emptyUserPerm.find('input').attr('name'))
+        numUserPerms = parseInt(match[2]);
+    } else {
+        var name = parseInt($('#' + userPermTableId + ' tr:last').find('input:first').attr('name'));
+        var match = regexp.exec(emptyUserPerm.find('input').attr('name'))
+        numUserPerms = parseInt(match[2]) + 1;
     }
 
-        function showDialog(id) {
-                var el = document.getElementById(id);
-                el.style.visibility = "visible";
-        }
 
-        function hideDialog(id) {
-                var el = document.getElementById(id);
-                el.style.visibility = "hidden";
-        }
+    emptyGroupPerm = $('#' + groupPermTableId + ' tr:last');
+
+    if (emptyGroupPerm.find('select:first').val() == "") {
+        emptyGroupPerm.remove();
+        var match = regexp.exec(emptyGroupPerm.find('input').attr('name'))
+        numGroupPerms = parseInt(match[2]);
+    } else {
+        var name = parseInt($('#' + groupPermTableId + ' tr:last').find('input:first').attr('name'));
+        var match = regexp.exec(emptyGroupPerm.find('input').attr('name'))
+        numGroupPerms = parseInt(match[2]) + 1;
+    }
+
+
+    $('#' + userPermTotalFormId).val(numUserPerms);
+    $('#' + groupPermTotalFormId).val(numGroupPerms);
+});

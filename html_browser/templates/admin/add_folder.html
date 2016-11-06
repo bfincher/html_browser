@@ -1,14 +1,2 @@
 {% extends "admin/add_edit_folder.html" %}
 {% block title %}Add Folder{% endblock %}
-{% block actionName %}addFolder{% endblock %}
-{% block delete %}{% endblock %}
-
-{% block formContent %}
-        <div class="row">
-            <div class="col-md-4">
-                Folder Name&nbsp;&nbsp;
-                <input name="name" required="true" type="text" />
-            </div>
-	</div>
-    {{ block.super }}
-{% endblock %}

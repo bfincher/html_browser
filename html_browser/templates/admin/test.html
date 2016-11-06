@@ -1,0 +1,83 @@
+{% extends "page.html" %}
+
+{% block additional_header %}
+{% load crispy_forms_tags %}
+<style type="text/css">
+	body {
+		padding-top: 20px;
+		padding-bottom: 40px;
+	}
+
+	.container-narrow {
+		margin: 0 auto;
+		max-width: 700px;
+	}
+
+	.settings {
+		margin: 40px 0;
+	}
+</style>
+
+<script>
+    setCsrf("{% csrf_token %}");
+</script>
+{% endblock %}
+
+{% block body %}
+<div>
+	<h1 style="margin-top: 50px;">Edit User</h1>
+	<h2>{{ editUser.username }}</h2>
+ 	<font color="red"><p id="pwErrorText"></p></font>
+	
+    
+    <div class="entry">
+        <form method="post" action="">
+        <table class="table" id="id_user_perm_info_table">
+        <thead>
+        <caption>User Permissions</caption>
+        <tr>
+            <th>User</th>
+            <th>Permission</th>
+        </tr>
+        </thead>
+
+        <tbody>
+		{{ user_perm_formset.empty_form.user }}
+            {% for userPermForm in user_perm_formset.forms %}
+                <tr id="{{ userPermForm.prefix }}-row" class="form-container">
+                    <td>
+                        {% for fld in userPermForm.hidden_fields %}{{ fld }}{% endfor %}
+                        {% if userPermForm.instance.pk %}{{ userPermForm.DELETE }}{% endif %}
+                        <img src="{{ const.IMAGE_URL }}Administrator-icon.png"> {{ userPermForm.user }}
+                    </td>
+                    <td>
+                    {{ userPermForm.permission }}
+                    </td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+        </table>
+
+        {{ user_perm_formset.management_form }}
+	</form>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ const.MEDIA_URL }}jquery.formset.js"></script>
+
+<script type="text/javascript">
+    $('#id_user_perm_info_table tbody tr').formset({
+        formCssClass: "dynamic-user-perm-form",
+        prefix: "{{ user_perm_formset.prefix }}"
+    });
+
+</script>
+
+
+{% endblock %}
+
+

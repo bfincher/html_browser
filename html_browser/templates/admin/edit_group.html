@@ -1,6 +1,7 @@
 {% extends "page.html" %}
 
 {% block additional_header %}
+{% load crispy_forms_tags %}
 <style type="text/css">
 	body {
 		padding-top: 20px;
@@ -24,54 +25,12 @@
 	<h1 style="margin-top: 50px;">Edit Group</h1>
 	<h2>{{ groupName }}</h2>
 	
-	<form id="form" action="{{ const.BASE_URL }}groupAdminAction/" method="post"> {% csrf_token %}
-		<input name=action type=hidden value=editGroup />
-		<input name=groupName type=hidden value="{{ groupName}}" />
-
-	<p>Users Assigned To Group</p>
-	<div class="scroll-pane" style="height: 200px; width: 200px; overflow: auto; border: 1px solid black;" >
-	{% for userName in activeUserNames %}
-	    <div class="row settings">
-		<div class="col-md-1">
-		    <input name="isUser{{ userName }}" type="checkbox" checked="checked" />
-		</div>
-		<div class="col-md-3">
-		    {{ userName }}
-		</div>
-	    </div>
-	{% endfor %}
-
-	{% for userName in userNames %}
-	    <div class="row settings">
-		<div class="col-md-1">
-		    <input name="isUser{{ userName }}" type="checkbox" />
-		</div>
-		<div class="col-md-3">
-		    {{ userName }}
-		</div>
-	    </div>
-	{% endfor %}
-	</div>
-
-	<br>
-	<div class="row settings">
-	    <div class="col-md-2">
-	        <input class="btn" id=Save name=submit type=submit value="Save"/>
-	    </div>
-	    <div class="col-md-2">
-	        <input class="btn" name=submit type=submit value="Cancel"/>
-	    </div>
-	</div>
-        </form>
-	<div class="row settings">
-	    <div class="col-md-12">
-	        <input class="btn" type="submit" value="Delete Group" onclick="deleteGroup('{{ groupName}}')"; />
-	    </div>
-	</div>
-
+    {% crispy form %}
 
 </div>
-<script src="{{ const.MEDIA_URL }}edit_group.js"></script>
+{% endblock %}
 
+{% block extra_js %}
+<script src="{{ const.MEDIA_URL }}edit_group.js"></script>
 {% endblock %}
 

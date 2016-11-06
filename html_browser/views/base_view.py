@@ -28,6 +28,7 @@ class BaseView(View):
         self.folder = None
         self.currentFolder = None
         self.currentPath = None
+        self.errorHtml = ""
         
     def get(self, request, *args, **kwargs):
         self.__commonGetPost(request)
@@ -37,7 +38,14 @@ class BaseView(View):
     def __commonGetPost(self, request):
         self.reqLogger.info(self.__class__.__name__)
         if self.reqLogger.isEnabledFor(DEBUG):
-            self.reqLogger.debug(str(request))
+            _dict=None
+            if request.method == "GET":
+                _dict = request.GET
+            else:
+                _dict = request.POST
+
+            for key, value in sorted(_dict.items()):
+                self.reqLogger.debug("%s: %s", key, value)
 
         self.currentFolder = getRequestField(self.request,'currentFolder')
         if self.currentFolder:
@@ -50,15 +58,36 @@ class BaseView(View):
         }
 
         errorText = getRequestField(request, 'errorText')
-
         if errorText:
             self.context['errorText'] = errorText
+
+        if self.errorHtml:
+            self.context['errorHtml'] = self.errorHtml
+        else:
+            errorHtml = getRequestField(request, 'errorHtml')
+            if errorHtml:
+                self.context['errorHtml'] = errorHtml
 
         if self.currentFolder:
            self.context['currentFolder'] = self.currentFolder
 
         if self.currentPath:
            self.context['currentPath'] = self.currentPath
+
+    def appendFormErrors(self, form):
+        if form.errors:
+            for _dict in form.errors:
+                self.errorHtml = self.errorHtml + _dict.as_ul()
+
+        try:
+            if form.non_form_errors:
+                for _dict in form.non_form_errors():
+                    self.errorHtml = self.errorHtml + _dict.as_ul()
+        except AttributeError, e:
+            pass
+
+        if self.errorHtml:
+            self.context['errorHtml'] = self.errorHtml
 
     @staticmethod
     def isShowHidden(request):
@@ -70,7 +99,7 @@ class BaseView(View):
 
 class IndexView(BaseView):
     def get(self, request, *args, **kwargs):
-        super(IndexView, self).get(request, args, kwargs)
+        super(IndexView, self).get(request, *args, **kwargs)
 
         allFolders = Folder.objects.all()
         folders = []
@@ -84,7 +113,7 @@ class IndexView(BaseView):
 
 class LoginView(BaseView):
     def post(self, request, *args, **kwargs):
-        super(LoginView, self).post(request, args, kwargs)
+        super(LoginView, self).post(request, *args, **kwargs)
 
         userName = request.POST['userName']
         password = request.POST['password']
@@ -113,13 +142,13 @@ class LoginView(BaseView):
 
 class LogoutView(BaseView):
     def get(self, request, *args, **kwargs):
-        super(LogoutView, self).get(request, args, kwargs)
+        super(LogoutView, self).get(request, *args, **kwargs)
         auth_logout(request)
         return redirect(const.BASE_URL)
 
 class DownloadView(BaseView):
     def get(self, request, *args, **kwargs):
-        super(DownloadView, self).get(request, args, kwargs)
+        super(DownloadView, self).get(request, *args, **kwargs)
 
         fileName = request.GET['fileName']
     
@@ -129,12 +158,12 @@ class DownloadView(BaseView):
 
 class DownloadZipView(BaseView):
     def get(self, request, *args, **kwargs):
-        super(DownloadZipView, self).get(request, args, kwargs)
+        super(DownloadZipView, self).get(request, *args, **kwargs)
         return handleDownloadZip(request)
 
 class UploadView(BaseView):
     def get(self, request, *args, **kwargs):
-        super(UploadView, self).get(request, args, kwargs)
+        super(UploadView, self).get(request, *args, **kwargs)
 
         userCanWrite = self.folder.userCanWrite(request.user)
     
@@ -148,7 +177,7 @@ class UploadView(BaseView):
 
 class UploadActionView(BaseView):
     def post(self, request, *args, **kwargs):
-        super(UploadActionView, self).post(request, args, kwargs)
+        super(UploadActionView, self).post(request, *args, **kwargs)
 
         userCanWrite = self.folder.userCanWrite(request.user)
     
@@ -184,7 +213,7 @@ def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
 
 class ImageView(BaseView):
     def get(self, request, *args, **kwargs):
-        super(ImageView, self).get(request, args, kwargs)
+        super(ImageView, self).get(request, *args, **kwargs)
 
         fileName = getRequestField(request,'fileName')
         entries = getIndexIntoCurrentDir(request, self.currentFolder, self.currentPath, fileName)
@@ -222,12 +251,12 @@ class ImageView(BaseView):
         
 class ThumbView(BaseView):
     def get(self, request, *args, **kwargs):
-        super(ThumbView, self).get(request, args, kwargs)
+        super(ThumbView, self).get(request, *args, **kwargs)
         return render(request, 'test_image.html')
 
 class DeleteImageView(BaseView):
     def get(self, request, *args, **kwargs):
-        super(DeleteImageView, self).get(request, args, kwargs)
+        super(DeleteImageView, self).get(request, *args, **kwargs)
 
         userCanDelete = self.folder.userCanDelete(request.user)
     
@@ -243,7 +272,7 @@ class DeleteImageView(BaseView):
 
 class GetNextImageView(BaseView):
     def get(self, request, *args, **kwargs):
-        super(GetNextImageView, self).get(request, args, kwargs)
+        super(GetNextImageView, self).get(request, *args, **kwargs)
 
         fileName = getRequestField(request,'fileName')
 

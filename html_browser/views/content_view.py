@@ -22,7 +22,7 @@ class AbstractContentView(BaseView):
     
 class ContentActionView(AbstractContentView):
     def post(self, request, *args, **kwargs):
-        super(ContentActionView, self).post(request, args, kwargs)
+        super(ContentActionView, self).post(request, *args, **kwargs)
         self.__setup__(request) 
         
         if self.userCanRead == False:
@@ -90,7 +90,7 @@ class ContentActionView(AbstractContentView):
         
 class ContentView(AbstractContentView):
     def get(self, request, *args, **kwargs):
-        super(ContentView, self).get(request, args, kwargs)
+        super(ContentView, self).get(request, *args, **kwargs)
         self.__setup__(request)
         
         if self.userCanRead == False:
