@@ -1,0 +1,35 @@
+{% extends "page.html" %}
+{% block additional_header %}
+{% load crispy_forms_tags %}
+<style type="text/css">
+        body {
+                padding-top: 20px;
+                padding-bottom: 40px;
+        }
+
+        .container-narrow {
+                margin: 0 auto;
+                max-width: 700px;
+        }
+
+        .settings {
+                margin: 60px 0;
+        }
+
+
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-narrow">
+	<h1 style="margin-top: 50px;">{% block title %}{% endblock %}</h1>
+	<font color="red"><p id="userNameErrorText"></p></font>
+	<font color="red"><p id="pwErrorText"></p></font>
+	
+    {% crispy form %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ const.MEDIA_URL }}user_admin.js"></script>
+{% endblock %}

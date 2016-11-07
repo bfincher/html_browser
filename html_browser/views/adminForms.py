@@ -206,11 +206,24 @@ class AddUserForm(forms.ModelForm):
 
         self.fields['password'].widget=forms.PasswordInput()
 
+    def save(self, commit=True):
+        user = super(AddUserForm, self).save(commit=False)
+
+        password = self.cleaned_data['password']
+        if password:
+            user.set_password(password)
+        if commit:
+            user.save()
+        return user
+
     class Meta:
         model=User
         fields=('username', 'password', 'groups', 'first_name', 'last_name', 'email', 'is_superuser', 'is_active',)
 
 class EditUserForm(AddUserForm):
+
+    userPk = forms.CharField(required=False, widget=forms.HiddenInput())
+
     def __init__(self, *args, **kwargs):
         super(EditUserForm, self).__init__(*args, **kwargs)
         self.helper.form_action="editUser"
@@ -219,4 +232,9 @@ class EditUserForm(AddUserForm):
         self.fields['username'].widget=forms.HiddenInput()
         self.fields['password'].required=False
         self.fields['verifyPassword'].required=False
+
+        instance = kwargs['instance']
+        self.fields['userPk'].initial = instance.pk
+
+        self.Meta.fields = ('userPk',) + self.Meta.fields
 

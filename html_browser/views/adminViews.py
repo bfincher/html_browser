@@ -261,14 +261,19 @@ class GroupAdminView(BaseView):
 class DeleteUserView(BaseView):
     def post(self, request, *args, **kwargs):
         super(DeleteUserView, self).post(request, *args, **kwargs)
+        redirectUrl = const.BASE_URL + "userAdmin/"
 
         if not request.user.is_staff:
             raise RuntimeError("User is not an admin")
+
+        if request.user.username == request.POST['userToDelete']:
+            redirectUrl += "?errorText=Unable to delete current user"
+            return redirect(redirectUrl)           
+            
         user = User.objects.get(username=request.POST['userToDelete'])
         logger.info("Deleting user %s", user)
         user.delete()
 
-        redirectUrl = const.BASE_URL + "userAdmin/"
         return redirect(redirectUrl)           
 
 class UserAdminView(BaseView):
@@ -281,49 +286,44 @@ class UserAdminView(BaseView):
         self.context['users'] = User.objects.all()
         return render(request, 'admin/user_admin.html', self.context)
 
-class EditUserView(BaseView):
-    def initForm(self, request):
-        if request.method == "GET":
-            userName = request.GET['userName']
-            user = User.objects.get(username=userName)
-            self.form = EditUserForm(instance=user)
-        else:
-            user = User.objects.get(pk=request.POST['pk'])
-            self.form = EditUserForm(request.POST, instance=user)
+class AbstractUserView(BaseView):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def initForm(self, request): pass
+
+    @abstractmethod
+    def getTemplate(self): pass
 
     def get(self, request, *args, **kwargs):
-        super(EditUserView, self).get(request, *args, **kwargs)
+        super(AbstractUserView, self).get(request, *args, **kwargs)
         if not request.user.is_staff:
             raise RuntimeError("User is not an admin")
 
         self.initForm(request)
 
-        reqLogger = getReqLogger()
-        reqLogger.info("editUser: user = %s", self.form.instance.username)
-
-        self.context['username'] = self.form.instance.username
+        if self.form.instance:
+            self.context['username'] = self.form.instance.username
         self.context['form'] = self.form
-        return render(request, 'admin/edit_user.html', self.context)
+        return render(request, self.getTemplate(), self.context)
 
     def post(self, request, *args, **kwargs):
-        super(EditUserView, self).post(request, *args, **kwargs)
+        super(AbstractUserView, self).post(request, *args, **kwargs)
         errorText = None
 
-        form = EditUserForm(request.POST)
-        if form.is_valid():
-            user = form.save()
+        self.initForm(request)
 
-            '''
-            password = None
-            if form.cleaned_data['password']:
-                password = form.cleaned_data['password']
+        if self.form.is_valid():
+            user = self.form.save()
 
-            if password:
-                user.set_password(password)
-            user.is_staff = isAdmin
-            user.is_superuser = isAdmin
+            user.groups.clear()
+            for group in self.form.cleaned_data['groups']:
+                user.groups.add(group)
+
+            user.is_staff = user.is_superuser
+            if not user.last_login:
+                user.last_login = datetime(year=1970, month=1, day=1)
             user.save()
-            '''
         else:
             reqLogger = getReqLogger()
             reqLogger.error('form.errors = %s', form.errors)
@@ -334,34 +334,28 @@ class EditUserView(BaseView):
 
         return redirect(redirectUrl)           
     
-
-class AddUserView(BaseView):
-    def get(self, request, *args, **kwargs):
-        super(AddUserView, self).get(request, *args, **kwargs)
-
-        if not request.user.is_staff:
-            raise RuntimeError("User is not an admin")
-
-        form = AddUserForm()
-        self.context['form'] = form
-
-        return render(request, 'admin/add_user.html', self.context)
-
-class AddUserActionView(BaseView):
-    def post(self, request, *args, **kwargs):
-        super(AddUserActionView, self).__init__(*args, **kwargs)
-        redirectUrl = const.BASE_URL + "userAdmin/"
-
-        form = AddUserForm(request.POST)
-        if (form.is_valid()):
-            user = form.save(commit=False)
-            user.is_staff = user.is_superuser
-            user.last_login = datetime(year=1970, month=1, day=1)
-            user.save()
+class EditUserView(AbstractUserView):
+    def initForm(self, request):
+        if request.method == "GET":
+            userName = request.GET['userName']
+            user = User.objects.get(username=userName)
+            self.form = EditUserForm(instance=user)
         else:
-            logger.error('form.errors = %s', form.errors())
+            user = User.objects.get(pk=request.POST['userPk'])
+            self.form = EditUserForm(request.POST, instance=user)
 
-        return redirect(redirectUrl)           
+    def getTemplate(self):
+        return 'admin/edit_user.html'
+
+class AddUserView(AbstractUserView):
+    def initForm(self, request):
+        if request.method == "GET":
+            self.form = AddUserForm()
+        else:
+            self.form = AddUserForm(request.POST)
+
+    def getTemplate(self):
+        return 'admin/add_user.html'
 
 class ChangePasswordView(BaseView):
     def get(self, request, *args, **kwargs):

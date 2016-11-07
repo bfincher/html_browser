@@ -131,7 +131,6 @@ class LoginView(BaseView):
                 errorText = 'Account has been disabled'
         else:
             errorText = 'Invalid login'
-            self.reqLogger.error("empty userName")
     
         redirectUrl = const.BASE_URL
 
