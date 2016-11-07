@@ -1,36 +1,15 @@
-{% extends "page.html" %}
-{% block additional_header %}
-{% load crispy_forms_tags %}
-<style type="text/css">
-        body {
-                padding-top: 20px;
-                padding-bottom: 40px;
-        }
+{% extends "admin/add_edit_user.html" %}
 
-        .container-narrow {
-                margin: 0 auto;
-                max-width: 700px;
-        }
-
-        .settings {
-                margin: 60px 0;
-        }
-
-
-</style>
-{% endblock %}
-
-{% block body %}
-<div class="container-narrow">
-	<h1 style="margin-top: 50px;">Add User</h1>
-	<font color="red"><p id="userNameErrorText"></p></font>
-	<font color="red"><p id="pwErrorText"></p></font>
-	
-    {% crispy form %}
-</div>
-{% endblock %}
+{% block title %}Add User{% endblock %}
 
 {% block extra_js %}
-<script src="{{ const.MEDIA_URL }}add_user.js"></script>
-<script src="{{ const.MEDIA_URL }}validate_password.js"></script>
+{{ block.super }}
+
+<script>
+$(document).ready(function() {
+    $('#submit-id-submit').attr('disabled', 'disabled');
+});
+</script>
+
 {% endblock %}
+
