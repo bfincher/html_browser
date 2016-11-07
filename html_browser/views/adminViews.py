@@ -197,9 +197,9 @@ class DeleteGroupView(BaseView):
         redirectUrl = const.BASE_URL + "groupAdmin/"
         return redirect(redirectUrl)
 
-class AddGroupActionView(BaseView):
+class AddGroupView(BaseView):
     def post(self, request, *args, **kwargs):
-        super(AddGroupActionView, self).__init__(*args, **kwargs)
+        super(AddGroupView, self).__init__(*args, **kwargs)
         errorText = None
         groupName = request.POST['groupName']
         group = get_object_or_None(Group, name=groupName)
@@ -216,9 +216,21 @@ class AddGroupActionView(BaseView):
 
         return redirect(redirectUrl)           
 
-class EditGroupActionView(BaseView):
+class EditGroupView(BaseView):
+    def get(self, request, *args, **kwargs):
+        super(EditGroupView, self).get(request, *args, **kwargs)
+        groupName = request.GET['groupName']
+        group = Group.objects.get(name = groupName)
+
+        form = EditGroupForm()
+        form.setGroup(group)
+
+        self.context['groupName'] = groupName
+        self.context['form'] = form
+        return render(request, 'admin/edit_group.html', self.context)
+
     def post(self, request, *args, **kwargs):
-        super(EditGroupActionView, self).__init__(*args, **kwargs)
+        super(EditGroupView, self).__init__(*args, **kwargs)
         form = EditGroupForm(request.POST)
         if form.is_valid():
             group = Group.objects.get(name=form.cleaned_data['groupName'])
@@ -234,19 +246,6 @@ class EditGroupActionView(BaseView):
 
         redirectUrl = const.BASE_URL + "groupAdmin/"
         return redirect(redirectUrl)           
-
-class EditGroupView(BaseView):
-    def get(self, request, *args, **kwargs):
-        super(EditGroupView, self).get(request, *args, **kwargs)
-        groupName = request.GET['groupName']
-        group = Group.objects.get(name = groupName)
-
-        form = EditGroupForm()
-        form.setGroup(group)
-
-        self.context['groupName'] = groupName
-        self.context['form'] = form
-        return render(request, 'admin/edit_group.html', self.context)
 
 class GroupAdminView(BaseView):
     def get(self, request, *args, **kwargs):

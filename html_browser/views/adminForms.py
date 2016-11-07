@@ -171,7 +171,7 @@ class EditGroupForm(forms.Form):
         self.helper = FormHelper()
         self.helper.form_id='form'
         self.helper.form_method='post'
-        self.helper.form_action='editGroupAction'
+        self.helper.form_action='editGroup'
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
         self.helper.add_input(Button('deleteGroup', 'Delete Group', css_class='btn'))

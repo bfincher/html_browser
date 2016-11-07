@@ -30,8 +30,6 @@ urlpatterns = [
     url(r'groupAdmin/.*', admin_views.GroupAdminView.as_view()),
     url(r'addGroup/.*', admin_views.AddGroupView.as_view()),
     url(r'deleteGroup/.*', admin_views.DeleteGroupView.as_view()), 
-    url(r'addGroupAction/.*', admin_views.AddGroupActionView.as_view()), 
-    url(r'editGroupAction/.*', admin_views.EditGroupActionView.as_view(), name='editGroupAction'), 
     url(r'hbChangePassword/.*', admin_views.ChangePasswordView.as_view()),
     url(r'hbChangePasswordResult/.*', admin_views.ChangePasswordResultView.as_view()),
     ]
