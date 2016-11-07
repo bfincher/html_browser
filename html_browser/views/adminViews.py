@@ -289,6 +289,10 @@ class UserAdminView(BaseView):
 class AbstractUserView(BaseView):
     __metaclass__ = ABCMeta
 
+    def __init__(self, *args, **kwargs):
+        super(AbstractUserView, self).__init__(*args, **kwargs)
+        self.form = None
+
     @abstractmethod
     def initForm(self, request): pass
 
@@ -300,7 +304,10 @@ class AbstractUserView(BaseView):
         if not request.user.is_staff:
             raise RuntimeError("User is not an admin")
 
-        self.initForm(request)
+        if not self.form:
+            self.initForm(request)
+
+        self.appendFormErrors(self.form)
 
         if self.form.instance:
             self.context['username'] = self.form.instance.username
@@ -309,24 +316,27 @@ class AbstractUserView(BaseView):
 
     def post(self, request, *args, **kwargs):
         super(AbstractUserView, self).post(request, *args, **kwargs)
+        if not request.user.is_staff:
+            raise RuntimeError("User is not an admin")
         errorText = None
 
         self.initForm(request)
 
-        if self.form.is_valid():
-            user = self.form.save()
+        with transaction.atomic():
+            if self.form.is_valid():
+                user = self.form.save()
+    
+                user.groups.clear()
+                for group in self.form.cleaned_data['groups']:
+                    user.groups.add(group)
 
-            user.groups.clear()
-            for group in self.form.cleaned_data['groups']:
-                user.groups.add(group)
-
-            user.is_staff = user.is_superuser
-            if not user.last_login:
-                user.last_login = datetime(year=1970, month=1, day=1)
-            user.save()
-        else:
-            reqLogger = getReqLogger()
-            reqLogger.error('form.errors = %s', form.errors)
+                user.is_staff = user.is_superuser
+                if not user.last_login:
+                    user.last_login = datetime(year=1970, month=1, day=1)
+                user.save()
+            else:
+                reqLogger = getReqLogger()
+                reqLogger.error('form.errors = %s', self.form.errors)
 
         redirectUrl = const.BASE_URL + "userAdmin/"
         if errorText != None:
@@ -335,6 +345,9 @@ class AbstractUserView(BaseView):
         return redirect(redirectUrl)           
     
 class EditUserView(AbstractUserView):
+    def __init__(self, *args, **kwargs):
+        super(EditUserView, self).__init__(*args, **kwargs)
+
     def initForm(self, request):
         if request.method == "GET":
             userName = request.GET['userName']
@@ -348,6 +361,9 @@ class EditUserView(AbstractUserView):
         return 'admin/edit_user.html'
 
 class AddUserView(AbstractUserView):
+    def __init__(self, *args, **kwargs):
+        super(AddUserView, self).__init__(*args, **kwargs)
+
     def initForm(self, request):
         if request.method == "GET":
             self.form = AddUserForm()
