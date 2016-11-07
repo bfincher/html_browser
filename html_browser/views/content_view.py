@@ -10,7 +10,7 @@ from django.shortcuts import redirect, render
 from base_view import BaseView
 from html_browser.models import FilesToDelete, Folder
 from html_browser.constants import _constants as const
-from html_browser.utils import getRequestField, getCurrentDirEntries, getCurrentDirEntriesSearch,\
+from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch,\
     getPath, formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete
 
 class AbstractContentView(BaseView):
@@ -32,9 +32,9 @@ class ContentActionView(AbstractContentView):
         self.status = ''
         self.statusError = False
         
-        action = getRequestField(self.request,'action')
+        action = request.POST['action']
         if action == 'copyToClipboard':
-            entries = getRequestField(self.request,'entries')
+            entries = request.POST['entries']
             self.request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'COPY').toJson()
             self.status='Items copied to clipboard';
         elif action == 'cutToClipboard':
@@ -42,7 +42,7 @@ class ContentActionView(AbstractContentView):
                 self.status="You don't have delete permission on this folder"
                 self.statusError = True
             else:
-                entries = getRequestField(self.request,'entries')
+                entries = request.POST['entries']
                 self.request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'CUT').toJson()
                 self.status = 'Items copied to clipboard'
         elif action == 'pasteFromClipboard':
@@ -60,19 +60,19 @@ class ContentActionView(AbstractContentView):
                 self.status = "You don't have delete permission on this folder"
                 self.statusError = True
             else:
-                handleDelete(self.folder, self.currentPath, getRequestField(self.request,'entries'))
+                handleDelete(self.folder, self.currentPath, request.POST['entries'])
                 self.status = 'File(s) deleted'
         elif action=='setViewType':
-            viewType = getRequestField(self.request,'viewType')
+            viewType = request.POST['viewType']
             self.request.session['viewType'] = viewType
         elif action == 'mkDir':
-            dirName = getRequestField(self.request,'dir')
+            dirName = request.POST['dir']
             os.makedirs(getPath(self.folder.localPath, self.currentPath) + dirName)
         elif action == 'rename':
-            self.handleRename(getRequestField(self.request,'file'), getRequestField(self.request,'newName'))
+            self.handleRename(request.POST['file'], request.POST['newName'])
         elif action == 'changeSettings':
-            if getRequestField(self.request,'submit') == "Save":
-                self.request.session['showHidden'] = getRequestField(self.request,'showHidden') != None
+            if request.POST['submit'] == "Save":
+                self.request.session['showHidden'] = request.POST['showHidden'] != None
         else:
             raise RuntimeError('Unknown action %s' % action)
     
@@ -99,8 +99,13 @@ class ContentView(AbstractContentView):
         
         ContentView.deleteOldFiles()
     
-        self.status = getRequestField(self.request,'status', '')
-        self.statusError = getRequestField(self.request,'statusError')
+        self.status = ''
+        if 'status' in request.GET:
+            self.status = request.GET['status'], '')
+
+        self.statusError = None
+        if 'statusError' in request.GET:
+            self.statusError = request.GET['statusError']
 
         self.breadcrumbs = None
         crumbs = self.currentPath.split("/")
@@ -119,9 +124,9 @@ class ContentView(AbstractContentView):
                     else:
                         self.breadcrumbs = self.breadcrumbs + crumb
 
-        contentFilter = getRequestField(self.request,'filter')
-        if contentFilter:
-            self.status = self.status + ' Filtered on %s' % getRequestField(self.request,'filter')
+        if 'filter' in request.GET:
+            contentFilter = request.GET['filter']
+            self.status = self.status + ' Filtered on %s' % contentFilter
 
 
         self.context['userCanRead'] = str(self.userCanRead).lower()
@@ -134,8 +139,8 @@ class ContentView(AbstractContentView):
         if self.statusError:
             self.context['statusError'] = True
 
-        search = getRequestField(self.request,'search')
-        if search:
+        if 'search' in self.request.GET:
+            search = request.GET['search']
             return self._handleSearch(search)
 
         currentDirEntries = getCurrentDirEntries(self.folder, self.currentPath, BaseView.isShowHidden(self.request), contentFilter)
