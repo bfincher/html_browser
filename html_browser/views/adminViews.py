@@ -296,11 +296,9 @@ class AbstractUserView(BaseView):
     @abstractmethod
     def initForm(self, request): pass
 
-    @abstractmethod
-    def getTemplate(self): pass
-
     def get(self, request, *args, **kwargs):
         super(AbstractUserView, self).get(request, *args, **kwargs)
+        self.title = kwargs['title']
         if not request.user.is_staff:
             raise RuntimeError("User is not an admin")
 
@@ -312,7 +310,8 @@ class AbstractUserView(BaseView):
         if self.form.instance:
             self.context['username'] = self.form.instance.username
         self.context['form'] = self.form
-        return render(request, self.getTemplate(), self.context)
+        self.context['title'] = self.title
+        return render(request, 'admin/add_edit_user.html', self.context)
 
     def post(self, request, *args, **kwargs):
         super(AbstractUserView, self).post(request, *args, **kwargs)
@@ -337,6 +336,7 @@ class AbstractUserView(BaseView):
             else:
                 reqLogger = getReqLogger()
                 reqLogger.error('form.errors = %s', self.form.errors)
+                return self.get(request, *args, **kwargs)
 
         redirectUrl = const.BASE_URL + "userAdmin/"
         if errorText != None:
@@ -357,9 +357,6 @@ class EditUserView(AbstractUserView):
             user = User.objects.get(pk=request.POST['userPk'])
             self.form = EditUserForm(request.POST, instance=user)
 
-    def getTemplate(self):
-        return 'admin/edit_user.html'
-
 class AddUserView(AbstractUserView):
     def __init__(self, *args, **kwargs):
         super(AddUserView, self).__init__(*args, **kwargs)
@@ -369,9 +366,6 @@ class AddUserView(AbstractUserView):
             self.form = AddUserForm()
         else:
             self.form = AddUserForm(request.POST)
-
-    def getTemplate(self):
-        return 'admin/add_user.html'
 
 class ChangePasswordView(BaseView):
     def get(self, request, *args, **kwargs):
