@@ -214,7 +214,7 @@ class ImageView(BaseView):
     def get(self, request, *args, **kwargs):
         super(ImageView, self).get(request, *args, **kwargs)
 
-        fileName = getRequestField(request,'fileName')
+        fileName = request.GET['fileName']
         entries = getIndexIntoCurrentDir(request, self.currentFolder, self.currentPath, fileName)
         index = entries['index']
         currentDirEntries = entries['currentDirEntries']
@@ -262,7 +262,7 @@ class DeleteImageView(BaseView):
         if not userCanDelete:
             status = "You don't have delete permission on this folder"
         else:
-            handleDelete(self.folder, self.currentPath, getRequestField(request,'fileName'))
+            handleDelete(self.folder, self.currentPath, request.GET['fileName'])
             status = "File deleted"
 
         redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, self.currentFolder, self.currentPath, status)
@@ -273,7 +273,7 @@ class GetNextImageView(BaseView):
     def get(self, request, *args, **kwargs):
         super(GetNextImageView, self).get(request, *args, **kwargs)
 
-        fileName = getRequestField(request,'fileName')
+        fileName = request.GET['fileName']
 
         result = {}
         entries = getIndexIntoCurrentDir(request, self.currentFolder, self.currentPath, fileName)

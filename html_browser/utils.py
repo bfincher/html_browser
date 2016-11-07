@@ -180,7 +180,7 @@ def handleDownloadZip(request):
     currentFolder = request.GET['currentFolder']
     currentPath = request.GET['currentPath']
     folder = Folder.objects.filter(name=currentFolder)[0]
-    entries = getRequestField(request, 'files') 
+    entries = request.GET['files'] 
         
     compression = zipfile.ZIP_DEFLATED
     
