@@ -32,4 +32,5 @@
 
 {% block extra_js %}
 <script src="{{ const.MEDIA_URL }}user_admin.js"></script>
+<script> setCsrf("{% csrf_token %}");</script>
 {% endblock %}
