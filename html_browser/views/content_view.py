@@ -13,20 +13,20 @@ from html_browser.constants import _constants as const
 from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch,\
     getPath, formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete
 
-class AbstractContentView(BaseView):
+class ContentView(BaseView):
+
     def __setup__(self, request, getOrPost=None):
-        self.request = request
-        self.userCanDelete = self.folder.userCanDelete(self.request.user)
-        self.userCanWrite = self.userCanDelete or self.folder.userCanWrite(self.request.user)
-        self.userCanRead = self.userCanWrite or self.folder.userCanRead(self.request.user)    
+        request = request
+        self.userCanDelete = self.folder.userCanDelete(request.user)
+        self.userCanWrite = self.userCanDelete or self.folder.userCanWrite(request.user)
+        self.userCanRead = self.userCanWrite or self.folder.userCanRead(request.user)    
     
-class ContentActionView(AbstractContentView):
     def post(self, request, *args, **kwargs):
-        super(ContentActionView, self).post(request, *args, **kwargs)
+        super(ContentView, self).post(request, *args, **kwargs)
         self.__setup__(request) 
         
         if self.userCanRead == False:
-            self.reqLogger.warn("%s not allowed to read %s", self.request.user, self.currentFolder)
+            self.reqLogger.warn("%s not allowed to read %s", request.user, self.currentFolder)
             return redirect(const.BASE_URL, 'You are not authorized to view this page')   
         
         self.status = ''
@@ -35,7 +35,7 @@ class ContentActionView(AbstractContentView):
         action = request.POST['action']
         if action == 'copyToClipboard':
             entries = request.POST['entries']
-            self.request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'COPY').toJson()
+            request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'COPY').toJson()
             self.status='Items copied to clipboard';
         elif action == 'cutToClipboard':
             if not self.userCanDelete:
@@ -43,14 +43,14 @@ class ContentActionView(AbstractContentView):
                 self.statusError = True
             else:
                 entries = request.POST['entries']
-                self.request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'CUT').toJson()
+                request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'CUT').toJson()
                 self.status = 'Items copied to clipboard'
         elif action == 'pasteFromClipboard':
             if not self.userCanWrite:
                 self.status = "You don't have write permission on this folder"
                 self.statusError = True
             else:
-                self.status = handlePaste(self.currentFolder, self.currentPath, Clipboard.fromJson(self.request.session['clipboard']))
+                self.status = handlePaste(self.currentFolder, self.currentPath, Clipboard.fromJson(request.session['clipboard']))
                 if self.status:
                     self.statusError = True
                 else:
@@ -64,7 +64,7 @@ class ContentActionView(AbstractContentView):
                 self.status = 'File(s) deleted'
         elif action=='setViewType':
             viewType = request.POST['viewType']
-            self.request.session['viewType'] = viewType
+            request.session['viewType'] = viewType
         elif action == 'mkDir':
             dirName = request.POST['dir']
             os.makedirs(getPath(self.folder.localPath, self.currentPath) + dirName)
@@ -72,7 +72,7 @@ class ContentActionView(AbstractContentView):
             self.handleRename(request.POST['file'], request.POST['newName'])
         elif action == 'changeSettings':
             if request.POST['submit'] == "Save":
-                self.request.session['showHidden'] = request.POST['showHidden'] != None
+                request.session['showHidden'] = request.POST['showHidden'] != None
         else:
             raise RuntimeError('Unknown action %s' % action)
     
@@ -88,13 +88,12 @@ class ContentActionView(AbstractContentView):
         dest = getPath(self.folder.localPath, self.currentPath) + replaceEscapedUrl(newName)
         move(source, dest)
         
-class ContentView(AbstractContentView):
     def get(self, request, *args, **kwargs):
         super(ContentView, self).get(request, *args, **kwargs)
         self.__setup__(request)
         
         if self.userCanRead == False:
-            self.reqLogger.warn("%s not allowed to read %s", self.request.user, self.currentFolder)
+            self.reqLogger.warn("%s not allowed to read %s", request.user, self.currentFolder)
             return redirect(const.BASE_URL, 'You are not authorized to view this page')
         
         ContentView.deleteOldFiles()
@@ -135,19 +134,19 @@ class ContentView(AbstractContentView):
         self.context['userCanDelete'] = str(self.userCanDelete).lower()
         self.context['status'] = self.status
         self.context['breadcrumbs'] = self.breadcrumbs
-        self.context['showHidden'] = BaseView.isShowHidden(self.request)
+        self.context['showHidden'] = BaseView.isShowHidden(request)
 
         if self.statusError:
             self.context['statusError'] = True
 
-        if 'search' in self.request.GET:
+        if 'search' in request.GET:
             search = request.GET['search']
-            return self._handleSearch(search)
+            return self._handleSearch(request, search)
 
-        currentDirEntries = getCurrentDirEntries(self.folder, self.currentPath, BaseView.isShowHidden(self.request), contentFilter)
+        currentDirEntries = getCurrentDirEntries(self.folder, self.currentPath, BaseView.isShowHidden(request), contentFilter)
     
-        if self.request.session.has_key('viewType'):
-            viewType = self.request.session['viewType']
+        if request.session.has_key('viewType'):
+            viewType = request.session['viewType']
         else:
             viewType = const.viewTypes[0]                   
 
@@ -176,12 +175,12 @@ class ContentView(AbstractContentView):
             template = 'content_thumbnail.html'
         return render(request, template, self.context)       
 
-    def _handleSearch(self, search):
-        currentDirEntries= getCurrentDirEntriesSearch(self.folder, self.currentPath, BaseView.isShowHidden(self.request), search)
+    def _handleSearch(self, request, search):
+        currentDirEntries= getCurrentDirEntriesSearch(self.folder, self.currentPath, BaseView.isShowHidden(request), search)
 
         self.context['currentDirEntries'] = currentDirEntries
 
-        return render(self.request, "content_search.html", self.context)
+        return render(request, "content_search.html", self.context)
 
     @staticmethod
     def deleteOldFiles():
