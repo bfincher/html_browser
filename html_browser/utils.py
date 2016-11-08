@@ -11,7 +11,7 @@ from zipfile import ZipFile
 import zipfile
 from sendfile import sendfile
 from html_browser_site.settings import THUMBNAIL_DIR
-import sh
+#import sh
 import HTMLParser
 
 import re
@@ -89,12 +89,16 @@ def __getCurrentDirEntriesSearch(folder, path, showHidden, search, thisEntry, re
     includeThisDir = False
 
     for entry in entries:
-        if entry.isDir:
-            __getCurrentDirEntriesSearch(folder, "/".join([path, entry.name]), showHidden, search, entry, returnList)
-        elif entry.name.find(search) != -1:
-            if logger.isEnabledFor(DEBUG):
-                logger.debug("including this dir")
-            includeThisDir = True
+        try:
+            if entry.isDir:
+                __getCurrentDirEntriesSearch(folder, "/".join([path, entry.name]), showHidden, search, entry, returnList)
+            elif entry.name.find(search) != -1:
+                if logger.isEnabledFor(DEBUG):
+                    logger.debug("including this dir")
+                includeThisDir = True
+        except UnicodeDecodeError, e:
+            logger.error('UnicodeDecodeError: %s', entry.name)
+
     
     if includeThisDir:
         returnList.append(thisEntry)
