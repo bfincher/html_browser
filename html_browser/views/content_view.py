@@ -101,7 +101,7 @@ class ContentView(AbstractContentView):
     
         self.status = ''
         if 'status' in request.GET:
-            self.status = request.GET['status'], '')
+            self.status = request.GET['status']
 
         self.statusError = None
         if 'statusError' in request.GET:
@@ -124,6 +124,7 @@ class ContentView(AbstractContentView):
                     else:
                         self.breadcrumbs = self.breadcrumbs + crumb
 
+        contentFilter = None
         if 'filter' in request.GET:
             contentFilter = request.GET['filter']
             self.status = self.status + ' Filtered on %s' % contentFilter
