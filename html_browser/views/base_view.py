@@ -19,7 +19,7 @@ import logging
 from logging import DEBUG
 import HTMLParser
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('html_browser.base_view')
 imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$",re.IGNORECASE)
 
 class BaseView(View):

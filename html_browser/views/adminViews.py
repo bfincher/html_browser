@@ -21,7 +21,7 @@ from .base_view import BaseView
 from html_browser.constants import _constants as const
 
 _permMap = {'read' : CAN_READ, 'write' : CAN_WRITE, 'delete' : CAN_DELETE}
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('html_browser.adminViews')
 
 class FolderViewOption():
     def __init__(self, value, display):

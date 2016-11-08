@@ -209,7 +209,7 @@ LOGGING = {
 #        }
     },
     'loggers': {
-        '': {
+        'html_browser': {
             'handlers': ['default'],
             'level': 'DEBUG',
             'propagate': True,
