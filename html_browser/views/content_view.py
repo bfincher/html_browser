@@ -10,7 +10,7 @@ from django.shortcuts import redirect, render
 from base_view import BaseView
 from html_browser.models import FilesToDelete, Folder
 from html_browser.constants import _constants as const
-from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch,\
+from html_browser.utils import getCurrentDirEntries,\
     getPath, formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete
 
 class ContentView(BaseView):
@@ -139,9 +139,11 @@ class ContentView(BaseView):
         if self.statusError:
             self.context['statusError'] = True
 
+        '''
         if 'search' in request.GET:
             search = request.GET['search']
             return self._handleSearch(request, search)
+        '''
 
         currentDirEntries = getCurrentDirEntries(self.folder, self.currentPath, BaseView.isShowHidden(request), contentFilter)
     
@@ -175,12 +177,14 @@ class ContentView(BaseView):
             template = 'content_thumbnail.html'
         return render(request, template, self.context)       
 
+    '''
     def _handleSearch(self, request, search):
         currentDirEntries= getCurrentDirEntriesSearch(self.folder, self.currentPath, BaseView.isShowHidden(request), search)
 
         self.context['currentDirEntries'] = currentDirEntries
 
         return render(request, "content_search.html", self.context)
+    '''
 
     @staticmethod
     def deleteOldFiles():

@@ -69,6 +69,7 @@ def getPath(folderPath, path):
         dirPath += '/'
     return dirPath.encode('utf8')
 
+'''
 def getCurrentDirEntriesSearch(folder, path, showHidden, searchRegexStr):
     if logger.isEnabledFor(DEBUG):
         logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s searchRegexStr = %s", folder, path, searchRegexStr)
@@ -104,6 +105,7 @@ def __getCurrentDirEntriesSearch(folder, path, showHidden, searchRegex, thisEntr
     
     if includeThisDir:
         returnList.append(thisEntry)
+'''
 
 def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
     dirPath = getPath(folder.localPath, path)

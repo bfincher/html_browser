@@ -3,7 +3,7 @@ from django.template import RequestContext
 from html_browser.models import Folder
 from django.contrib.auth import login as auth_login, logout as auth_logout
 import html_browser
-from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch, handleDelete,\
+from html_browser.utils import getCurrentDirEntries, handleDelete,\
     getPath, handleDownloadZip,\
     handleFileUpload, handleZipUpload,\
     getRequestField, getReqLogger
