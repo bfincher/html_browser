@@ -35,7 +35,7 @@ class Formset(LayoutObject):
             'formset': formset,
             'form_id': self.formset_id}))
 
-class AbstractFolderForm(forms.ModelForm):
+class AddFolderForm(forms.ModelForm):
 
     class Meta:
         model=Folder
@@ -44,7 +44,7 @@ class AbstractFolderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_show_errors = True
-        super(AbstractFolderForm, self).__init__(*args, **kwargs)
+        super(AddFolderForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = 'Folder Name'
         self.fields['localPath'].label = 'Local Path'
         self.fields['viewOption'].label = 'View Option'
@@ -61,16 +61,12 @@ class AbstractFolderForm(forms.ModelForm):
             addGroupPermHtml)
 
         self.helper.form_method='post'
+        self.helper.form_action='%saddFolder/' % const.BASE_URL
 
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
 
-class AddFolderForm(AbstractFolderForm):
-    def __init__(self, *args, **kwargs):
-        super(AddFolderForm, self).__init__(*args, **kwargs)
-        self.helper.form_action='%saddFolder/' % const.BASE_URL
-
-class EditFolderForm(AbstractFolderForm):
+class EditFolderForm(AddFolderForm):
 
     def __init__(self, *args, **kwargs):
         super(EditFolderForm, self).__init__(*args, **kwargs)
