@@ -24,7 +24,7 @@ urlpatterns = [
     url(r'editGroup/.*', admin_views.EditGroupView.as_view()),
     url(r'folderAdmin/.*', admin_views.FolderAdminView.as_view(), name='folderAdmin'),
     url(r'deleteFolder/.*', admin_views.DeleteFolderView.as_view()),
-    url(r'editFolder/.*', admin_views.EditFolderView.as_view()),
+    url(r'editFolder/(?P<folderName>.*?)/$', admin_views.EditFolderView.as_view()),
     url(r'addFolder/.*', admin_views.AddFolderView.as_view()),
     url(r'groupAdmin/.*', admin_views.GroupAdminView.as_view(), name='groupAdmin'),
     url(r'addGroup/.*', admin_views.AddGroupView.as_view()),

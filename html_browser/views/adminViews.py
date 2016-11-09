@@ -69,14 +69,14 @@ class AbstractFolderView(BaseView):
         self.groupPermFormset=None
 
     @abstractmethod
-    def initForms(self, request): pass
+    def initForms(self, request, *args, **kwargs): pass
 
     @abstractmethod
     def getTemplate(self): pass
 
     def post(self, request, *args, **kwargs):
         super(AbstractFolderView, self).post(request, *args, **kwargs)
-        self.initForms(request)
+        self.initForms(request, *args, **kwargs)
 
         reqLogger = getReqLogger()
         if not self.folderForm.is_valid():
@@ -116,7 +116,7 @@ class AbstractFolderView(BaseView):
 
     def get(self, request, *args, **kwargs):
         super(AbstractFolderView, self).get(request, *args, **kwargs)
-        self.initForms(request)
+        self.initForms(request, *args, **kwargs)
         return self.render(request)
 
     def render(self, request):
@@ -138,16 +138,15 @@ class EditFolderView(AbstractFolderView):
     def getTemplate(self):
         return 'admin/edit_folder.html'
 
-    def initForms(self, request):
-        if request.method == "GET":
-            folderName = request.GET['name']
-            self.folder = Folder.objects.get(name = folderName)
+    def initForms(self, request, *args, **kwargs):
+        folderName = kwargs['folderName']
+        self.folder = Folder.objects.get(name=folderName)
 
+        if request.method == "GET":
             self.folderForm = EditFolderForm(instance=self.folder)
             self.userPermFormset = UserPermissionFormSet(instance=self.folder)
             self.groupPermFormset = GroupPermissionFormSet(instance=self.folder)
         else:
-            self.folder = Folder.objects.get(pk=request.POST['folderPk'])
             self.folderForm = EditFolderForm(request.POST, instance=self.folder)
             self.userPermFormset = UserPermissionFormSet(request.POST, instance=self.folder)
             self.groupPermFormset = GroupPermissionFormSet(request.POST, instance=self.folder)
@@ -159,7 +158,7 @@ class AddFolderView(AbstractFolderView):
     def getTemplate(self):
         return 'admin/add_folder.html'
 
-    def initForms(self, request):
+    def initForms(self, request, *args, **kwargs):
         if request.method == "GET":
             self.folder = Folder()
             self.folderForm = AddFolderForm(instance=self.folder)

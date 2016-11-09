@@ -52,7 +52,7 @@ class AbstractFolderForm(forms.ModelForm):
         addUserPermHtml = HTML('''<br><a href='#' onclick="addUserPermRow();return false;">Add User Permission</a>''')
         addGroupPermHtml = HTML('''<br><a href='#' onclick="addGroupPermRow();return false;">Add Group Permission</a><br><br>''')
 
-        self.baseLayout = Layout('name', 
+        self.helper.layout = Layout('name', 
             'localPath', 
             'viewOption', 
             Formset('userPermFormset', template='admin/perm_crispy/table_inline_formset.html', formset_id='user_perm_formset'), 
@@ -61,7 +61,6 @@ class AbstractFolderForm(forms.ModelForm):
             addGroupPermHtml)
 
         self.helper.form_method='post'
-        self.helper.form_action='editFolder'
 
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
@@ -69,21 +68,16 @@ class AbstractFolderForm(forms.ModelForm):
 class AddFolderForm(AbstractFolderForm):
     def __init__(self, *args, **kwargs):
         super(AddFolderForm, self).__init__(*args, **kwargs)
-        self.helper.layout = self.baseLayout
+        self.helper.form_action='%saddFolder/' % const.BASE_URL
 
 class EditFolderForm(AbstractFolderForm):
-
-    folderPk = forms.CharField(required=False, widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super(EditFolderForm, self).__init__(*args, **kwargs)
         self.fields['name'].widget=forms.HiddenInput()
 
         instance = kwargs['instance']
-        self.fields['folderPk'].initial = kwargs['instance'].pk
-
-        self.helper.layout = Layout('folderPk',
-            self.baseLayout)
+        self.helper.form_action='%seditFolder/%s/' % (const.BASE_URL, instance.name)
 
         self.helper.add_input(Button('delete', 'Delete Folder', css_class='btn', onclick="confirmDelete('%s')" % instance.name))
 
