@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 from datetime import datetime
 import logging
 from logging import DEBUG
+import re
 
 from django.contrib.auth.models import User, Group
 from django.db import transaction
@@ -20,6 +21,7 @@ from .base_view import BaseView
 
 from html_browser.constants import _constants as const
 
+groupNameRegex = re.compile(r'^\w+$')
 _permMap = {'read' : CAN_READ, 'write' : CAN_WRITE, 'delete' : CAN_DELETE}
 logger = logging.getLogger('html_browser.adminViews')
 
@@ -174,13 +176,16 @@ class AddGroupView(BaseView):
         super(AddGroupView, self).post(request, *args, **kwargs)
         errorText=None
         groupName = request.POST['groupName']
-        group = get_object_or_None(Group, name=groupName)
-        if not group:
-            group = Group()
-            group.name = groupName
-            group.save()
+        if groupNameRegex.match(groupName):
+            group = get_object_or_None(Group, name=groupName)
+            if not group:
+                group = Group()
+                group.name = groupName
+                group.save()
+            else:
+                errorText="%s already exists" % groupName
         else:
-            errorText="%s already exists" % groupName
+            errorText="Invalid group name.  Must only contain letters, numbers, and underscores"
 
         return self.redirect(const.BASE_URL + "groupAdmin/", errorText=errorText)
 
@@ -192,21 +197,6 @@ class DeleteGroupView(BaseView):
         group.delete()
 
         return redirect('groupAdmin')
-
-class AddGroupView(BaseView):
-    def post(self, request, *args, **kwargs):
-        super(AddGroupView, self).__init__(*args, **kwargs)
-        errorText = None
-        groupName = request.POST['groupName']
-        group = get_object_or_None(Group, name=groupName)
-        if not group:
-            group = Group()
-            group.name = groupName
-            group.save()
-        else:
-            errorText = "Group %s already exists" % groupName
-
-        return self.redirect(const.BASE_URL + "groupAdmin/", errorText=errorText)
 
 class EditGroupView(BaseView):
     def get(self, request, *args, **kwargs):
