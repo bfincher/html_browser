@@ -175,7 +175,7 @@ class AddFolderView(AbstractFolderView):
 class AddGroupView(BaseView):
     def post(self, request, *args, **kwargs):
         super(AddGroupView, self).post(request, *args, **kwargs)
-        redirectUrl = const.BASE_URL + "groupAdmin/"
+        errorText=None
         groupName = request.POST['groupName']
         group = get_object_or_None(Group, name=groupName)
         if not group:
@@ -183,9 +183,9 @@ class AddGroupView(BaseView):
             group.name = groupName
             group.save()
         else:
-            redirectUrl = redirectUrl + "?errorText=Group %s already exists" % groupName
+            errorText="?errorText=Group %s already exists" % groupName
 
-        return redirect(redirectUrl)
+        return self.redirect(const.BASE_URL + "groupAdmin/", errorText=errorText)
 
 class DeleteGroupView(BaseView):
     def post(self, request, *args, **kwargs):
@@ -210,11 +210,7 @@ class AddGroupView(BaseView):
         else:
             errorText = "Group %s already exists" % groupName
 
-        redirectUrl = const.BASE_URL + "groupAdmin/"
-        if errorText != None:
-            redirectUrl = redirectUrl + "?errorText=%s" % errorText
-
-        return redirect(redirectUrl)           
+        return self.redirect(const.BASE_URL + "groupAdmin/", errorText=errorText)
 
 class EditGroupView(BaseView):
     def get(self, request, *args, **kwargs):
@@ -266,8 +262,7 @@ class DeleteUserView(BaseView):
             raise RuntimeError("User is not an admin")
 
         if request.user.username == request.POST['userToDelete']:
-            redirectUrl += "?errorText=Unable to delete current user"
-            return redirect(redirectUrl)           
+            return self.redirect(redirectUrl, errorText="Unable to delete current user")
             
         user = User.objects.get(username=request.POST['userToDelete'])
         logger.info("Deleting user %s", user)
@@ -337,11 +332,7 @@ class AbstractUserView(BaseView):
                 reqLogger.error('form.errors = %s', self.form.errors)
                 return self.get(request, *args, **kwargs)
 
-        redirectUrl = const.BASE_URL + "userAdmin/"
-        if errorText != None:
-            redirectUrl = redirectUrl + "?errorText=%s" % errorText
-
-        return redirect(redirectUrl)           
+        return self.redirect(const.BASE_URL + "userAdmin/", errorText=errorText)
     
 class EditUserView(AbstractUserView):
     def __init__(self, *args, **kwargs):

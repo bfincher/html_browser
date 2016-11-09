@@ -76,12 +76,7 @@ class ContentView(BaseView):
         else:
             raise RuntimeError('Unknown action %s' % action)
     
-        redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, self.currentFolder, self.currentPath, self.status)
-
-        if self.statusError:
-            redirectUrl += "&statusError=%s" % self.statusError
-
-        return redirect(redirectUrl) 
+        return self.redirect(const.CONTENT_URL, currentFolder=self.currentFolder, currentPath=self.currentPath, status=self.status, statusError=self.statusError)
 
     def handleRename(self, fileName, newName):
         source = getPath(self.folder.localPath, self.currentPath) + replaceEscapedUrl(fileName)
