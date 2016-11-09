@@ -56,8 +56,7 @@ class DeleteFolderView(BaseView):
     def post(self, request, *args, **kwargs):
         super(DeleteFolderView, self).post(request, *args, **kwargs)
         Folder.objects.filter(name=request.POST['name']).delete()
-        redirectUrl = const.BASE_URL + "folderAdmin/" 
-        return redirect(redirectUrl)
+        return redirect('folderAdmin')
 
 class AbstractFolderView(BaseView):
     __metaclass__ = ABCMeta
@@ -113,8 +112,7 @@ class AbstractFolderView(BaseView):
                         instance.folder = folder
                         instance.save()
 
-        redirectUrl = const.BASE_URL + "folderAdmin/" 
-        return redirect(redirectUrl)
+        return redirect('folderAdmin')
 
     def get(self, request, *args, **kwargs):
         super(AbstractFolderView, self).get(request, *args, **kwargs)
@@ -183,7 +181,7 @@ class AddGroupView(BaseView):
             group.name = groupName
             group.save()
         else:
-            errorText="?errorText=Group %s already exists" % groupName
+            errorText="%s already exists" % groupName
 
         return self.redirect(const.BASE_URL + "groupAdmin/", errorText=errorText)
 
@@ -194,8 +192,7 @@ class DeleteGroupView(BaseView):
         group = Group.objects.get(name=groupName)
         group.delete()
 
-        redirectUrl = const.BASE_URL + "groupAdmin/"
-        return redirect(redirectUrl)
+        return redirect('groupAdmin')
 
 class AddGroupView(BaseView):
     def post(self, request, *args, **kwargs):
@@ -240,8 +237,7 @@ class EditGroupView(BaseView):
             reqLogger = getReqLogger()
             reqLogger.error('form.errors = %s', form.errors)
 
-        redirectUrl = const.BASE_URL + "groupAdmin/"
-        return redirect(redirectUrl)           
+        return redirect('groupAdmin')           
 
 class GroupAdminView(BaseView):
     def get(self, request, *args, **kwargs):
