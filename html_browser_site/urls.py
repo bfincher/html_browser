@@ -4,7 +4,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from html_browser.models import Folder
 from settings import URL_PREFIX
-import dynamic_media_serve
+#import dynamic_media_serve
 admin.autodiscover()
 
 urlpatterns = [ 
@@ -15,7 +15,7 @@ urlpatterns = [
     ]
 
 
-for folder in Folder.objects.all():
-	urlpatterns.append(url(URL_PREFIX + r"__" + folder.name + r"__/(?P<path>.*)$", 
-                dynamic_media_serve.serve, {"document_root": folder.localPath}))
+#for folder in Folder.objects.all():
+#	urlpatterns.append(url(URL_PREFIX + r"__" + folder.name + r"__/(?P<path>.*)$", 
+#                dynamic_media_serve.serve, {"document_root": folder.localPath}))
 	
