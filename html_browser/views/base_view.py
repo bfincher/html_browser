@@ -17,7 +17,7 @@ from django.http import HttpResponse
 from django.views import View
 import logging
 from logging import DEBUG
-import HTMLParser
+from html.parser import HTMLParser
 
 logger = logging.getLogger('html_browser.base_view')
 imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$",re.IGNORECASE)
@@ -53,7 +53,7 @@ class BaseView(View):
 
         self.currentFolder = getRequestField(self.request,'currentFolder')
         if self.currentFolder:
-            h = HTMLParser.HTMLParser()
+            h = HTMLParser()
             self.currentPath = h.unescape(getRequestField(self.request,'currentPath'))
             self.folder = Folder.objects.filter(name=self.currentFolder)[0]
 
@@ -87,7 +87,7 @@ class BaseView(View):
             if form.non_form_errors:
                 for _dict in form.non_form_errors():
                     self.errorHtml = self.errorHtml + _dict.as_ul()
-        except AttributeError, e:
+        except AttributeError as e:
             pass
 
         if self.errorHtml:

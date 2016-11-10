@@ -1,5 +1,6 @@
 from urllib.parse import quote_plus
 import os
+from datetime import datetime
 from genericpath import getsize, getmtime
 from operator import attrgetter  
 from .constants import _constants as const
@@ -18,7 +19,7 @@ import logging
 from logging import DEBUG
 
 logger = logging.getLogger('html_browser.utils')
-_reqLogger = None
+reqLogger = None
 
 KILOBYTE = 1024.0
 MEGABYTE = KILOBYTE * KILOBYTE
@@ -66,7 +67,8 @@ def getPath(folderPath, path):
     dirPath = folderPath.strip() + path
     if not dirPath.endswith('/'):
         dirPath += '/'
-    return dirPath.encode('utf8')
+    return dirPath
+#    return dirPath.encode('utf8')
 
 '''
 def getCurrentDirEntriesSearch(folder, path, showHidden, searchRegexStr):
@@ -98,7 +100,7 @@ def __getCurrentDirEntriesSearch(folder, path, showHidden, searchRegex, thisEntr
                 includeThisDir = True
             elif entry.isDir:
                 __getCurrentDirEntriesSearch(folder, "/".join([path, entry.name]), showHidden, searchRegex, entry, returnList)
-        except UnicodeDecodeError, e:
+        except UnicodeDecodeError as e:
             logger.error('UnicodeDecodeError: %s', entry.name)
 
     
@@ -268,10 +270,10 @@ def getRequestField(request, field, default=None, getOrPost=None):
         return default 
 
 def getReqLogger():
-    if not _reqLogger:
-        global _reqLogger
-        _reqLogger = logging.getLogger('django.request')
-    return _reqLogger;
+    if not reqLogger:
+        global reqLogger
+        reqLogger = logging.getLogger('django.request')
+    return reqLogger;
 
 def formatBytes(numBytes, forceUnit=None, includeUnitSuffix=True):
     if forceUnit:

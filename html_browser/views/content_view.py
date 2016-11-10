@@ -3,11 +3,11 @@ from datetime import datetime, timedelta
 import json
 import os
 from shutil import copy2, copytree, move
-from urllib import quote_plus
+from urllib.parse import quote_plus
 
 from django.shortcuts import redirect, render
 
-from base_view import BaseView
+from .base_view import BaseView
 from html_browser.models import FilesToDelete, Folder
 from html_browser.constants import _constants as const
 from html_browser.utils import getCurrentDirEntries,\
