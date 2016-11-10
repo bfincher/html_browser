@@ -1,5 +1,6 @@
 {% extends "page.html" %}
 {% block additional_header %}
+{% load crispy_forms_tags %}
 <style type="text/css">
         body {
                 padding-top: 20px;
@@ -25,58 +26,11 @@
 	<font color="red"><p id="userNameErrorText"></p></font>
 	<font color="red"><p id="pwErrorText"></p></font>
 	
-	<form id="form" action="{{ const.BASE_URL }}userAdminAction/" method="post"> {% csrf_token %}
-		<input name=action type=hidden value=addUser />
-
-	<div class="row settings">
-		<div class="col-md-6">
-		    User Name <input id=userName name=userName type=text onkeyup="validateUserName('userName', 'Save')"/>
-		</div>
-	</div>
-	
-	<div class="row settings">
-	    <div class="col-md-6">
-	        <td>Password: </td>
-	        <input id="password" name=password type=password onkeyup="validatePassword('password', 'verifyPassword', 'Save')"/></td>
-	    </div>
-	    <div class="col-md-6">
-	        Verify Password:
-		<input id="verifyPassword" name=verifyPassword type=password onkeyup="validatePassword('password', 'verifyPassword', 'Save')"/>
-	    </div>
-	</div>
-
-	<div class="row settings">
-	     <div class="col-md-3">
-                 Is Administrator
-             </div>
-             <div class="col-md-1">
-                 <input name="isAdministrator" type="checkbox" />
-             </div>
-       </div>
-
-
-	{% for groupName in groupNames %}
-            <div class="row">
-                <div class="col-md-1">
-                    <input name="isGroup{{ groupName }}" type="checkbox"  />
-                </div>
-                <div class="col-md-3">
-                    {{ groupName }}
-	        </div>
-            </div>
-        {% endfor %}
-
-	<div class="row settings">
-            <div class="col-md-3">
-                <input class="btn" id=Save name=submit type=submit value="Save" disabled/>
-            </div>
-            <div class="col-md-3">
-                <input class="btn" name=submit type=submit value="Cancel"/>
-            </div>
-        </div>
-
-	</form>
+    {% crispy form %}
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script src="{{ const.MEDIA_URL }}add_user.js"></script>
+<script src="{{ const.MEDIA_URL }}validate_password.js"></script>
 {% endblock %}

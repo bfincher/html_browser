@@ -1,9 +1,13 @@
 <html>
 {% block header %} 
 <head>
-    <meta content="initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" name="viewport">
+    <meta content="initial-scale=1.0; maximum-scale=1.0; user-scalable=0; name=viewport">
     <title>HTML File Explorer</title>
 
+    <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
+    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap.min.js"></script>
+
+    {% block extra_js %} {% endblock %}
     <script src="{{ const.MEDIA_URL }}base.js"></script>
     <script type="text/javascript">
         setBaseUrl("{{ const.BASE_URL }}");
@@ -22,7 +26,6 @@
             }
     </style>
 
-    <script type="text/javascript" src="{{ const.MEDIA_URL }}folder_content.js"></script>
 </head>
 {% endblock %} 
 {% block additional_header %} {% endblock %}
@@ -86,17 +89,18 @@
     {% endblock %}
 
 
-    {% if errorText != None %}
+    {% if errorText %}
     <div id="error"> {{ errorText }}</div><br>
+    {% endif %}
+
+    {% if errorHtml %}
+    <br><br>
+    <div id="error"> {{ errorHtml|safe }}</div><br>
     {% endif %}
 
 {% block body %} {% endblock %}
 
 {% block body2 %} {% endblock %}
 
- <!-- Placed at the end of the document so the pages load faster -->
-    <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap.min.js"></script>
-{% block extra_js %} {% endblock %}
 </body>
 </html>

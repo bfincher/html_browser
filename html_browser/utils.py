@@ -3,24 +3,19 @@ import os
 from genericpath import getsize, getmtime
 from operator import attrgetter  
 from .constants import _constants as const
-from datetime import datetime, timedelta
 from django.contrib.auth.models import User, Group
-from html_browser.models import Folder, UserPermission, GroupPermission, FilesToDelete,\
-CAN_READ, CAN_WRITE, CAN_DELETE
-from shutil import copy2, move, copytree, rmtree
+from html_browser.models import Folder, UserPermission, GroupPermission, FilesToDelete
+from shutil import rmtree
 from zipfile import ZipFile
 import zipfile
 from sendfile import sendfile
 from html_browser_site.settings import THUMBNAIL_DIR
 import sh
-import json
 import html.parser
 
-import collections
 import re
 import logging
 from logging import DEBUG
-from annoying.functions import get_object_or_None
 
 logger = logging.getLogger('html_browser.utils')
 _reqLogger = None
@@ -28,26 +23,6 @@ _reqLogger = None
 KILOBYTE = 1024.0
 MEGABYTE = KILOBYTE * KILOBYTE
 GIGABYTE = MEGABYTE * KILOBYTE
-
-_permMap = {'read' : CAN_READ, 'write' : CAN_WRITE, 'delete' : CAN_DELETE}
-
-def getParentDirLink(path, currentFolder):
-    if path == '/':
-        return const.BASE_URL
-    
-    if path.endswith('/'):
-        path = path[0:-1]
-        
-    idx = path.rfind('/')
-    
-    path = path[0:idx]
-    
-    if len(path) == 0:
-        path = '/'
-        
-    link = "%s?currentFolder=%s&currentPath=%s" % (const.CONTENT_URL, quote_plus(currentFolder), quote_plus(path))
-    
-    return link
 
 class DirEntry():
     def __init__(self, isDir, name, size, lastModifyTime, folder, currentPath):
@@ -184,62 +159,11 @@ def getGroupNamesForUser(user):
         
     return groupNames
 
-class Clipboard():
-    def __init__(self, currentFolder, currentPath, entries, clipboardType):
-        self.currentFolder = currentFolder
-        self.currentPath = currentPath
-        self.clipboardType = clipboardType
-
-        if type(entries) is list:
-            self.entries = entries
-        else:
-            self.entries = entries.split(',')    
-
-    @staticmethod
-    def fromJson(jsonStr):
-        dictData = json.loads(jsonStr)
-        return Clipboard(dictData['currentFolder'], dictData['currentPath'], dictData['entries'], dictData['clipboardType'])
-
-    def toJson(self):
-        result = {'currentFolder' : self.currentFolder,
-            'currentPath' : self.currentPath,
-            'clipboardType' : self.clipboardType,
-            'entries' : self.entries}
-
-        return json.dumps(result)
-        
-class CopyPasteException(Exception):
-    pass
-
 def replaceEscapedUrl(url):
     h = html.parser.HTMLParser()
     url = h.unescape(url)
     return url.replace("(comma)", ",").replace("(ampersand)", "&")
     
-def handlePaste(currentFolder, currentPath, clipboard):
-    
-    folder = Folder.objects.filter(name=currentFolder)[0]
-    clipboardFolder = Folder.objects.filter(name=clipboard.currentFolder)[0]
-    
-    dest = getPath(folder.localPath, currentPath)
-    
-    for entry in clipboard.entries:
-        source = getPath(clipboardFolder.localPath, clipboard.currentPath) + replaceEscapedUrl(entry)
-        if os.path.exists(os.path.join(dest, entry)):
-            return "One or more of the items already exists in the destination"
-        
-    for entry in clipboard.entries:
-        source = getPath(clipboardFolder.localPath, clipboard.currentPath) + replaceEscapedUrl(entry)
-        if clipboard.clipboardType == 'COPY':
-            if os.path.isdir(source):
-                copytree(source, dest + entry)
-            else:
-                copy2(source, dest)
-        elif clipboard.clipboardType == 'CUT':
-            move(source, dest)
-        else:
-            raise CopyPasteException()
-        
 def handleDelete(folder, currentPath, entries):
     currentDirPath = replaceEscapedUrl(getPath(folder.localPath, currentPath))
     
@@ -251,11 +175,6 @@ def handleDelete(folder, currentPath, entries):
         else:
             os.remove(entryPath)
             
-def handleRename(folder, currentPath, fileName, newName):
-    source = getPath(folder.localPath, currentPath) + replaceEscapedUrl(fileName)
-    dest = getPath(folder.localPath, currentPath) + replaceEscapedUrl(newName)
-    move(source, dest)
-    
 def handleDownloadZip(request):
     currentFolder = request.GET['currentFolder']
     currentPath = request.GET['currentPath']
@@ -301,17 +220,6 @@ def __addFolderToZip__(zipFile, folder, basePath):
         elif os.path.isdir(f):
             __addFolderToZip__(zipFile, f, basePath)
             
-def deleteOldFiles():
-    now = datetime.now()
-    for fileToDelete in FilesToDelete.objects.all().order_by('time'):
-        delta = now - fileToDelete.time
-        if delta > timedelta(minutes=10):
-            if os.path.isfile(fileToDelete.filePath):
-                os.remove(fileToDelete.filePath)
-            fileToDelete.delete()
-        else:
-            return
-        
 def handleFileUpload(f, folder, currentPath):
     fileName = getPath(folder.localPath, currentPath) + f.name
     dest = open(fileName, 'w')
@@ -336,23 +244,26 @@ def handleZipUpload(f, folder, currentPath):
     
     os.remove(fileName)
 
-def getDiskPercentFree(path):
-    du = getDiskUsage(path)
-    free = du.free / 1.0
-    total = du.free + du.used / 1.0
-    pct = free / total;
-    pct = pct * 100.0;
-    return "%.2f" % pct + "%" 
-
-def getBytesUnit(numBytes):
-    if numBytes / GIGABYTE > 1:
-        return "GB"
-    elif numBytes / MEGABYTE > 1:
-        return "MB"
-    elif numBytes / KILOBYTE > 1:
-        return "KB"
+def getRequestDict(request):
+    if request.method == "GET":
+        return request.GET
     else:
-        return "Bytes"
+        return request.POST
+
+def getRequestField(request, field, default=None, getOrPost=None):
+    if not getOrPost:
+        getOrPost = getRequestDict(request)
+
+    if getOrPost.has_key(field):
+        return getOrPost[field]
+    else:
+        return default 
+
+def getReqLogger():
+    if not _reqLogger:
+        global _reqLogger
+        _reqLogger = logging.getLogger('django.request')
+    return _reqLogger;
 
 def formatBytes(numBytes, forceUnit=None, includeUnitSuffix=True):
     if forceUnit:
@@ -589,11 +500,13 @@ def getRequestField(request, field, default=None, getOrPost=None):
 
     if field in getOrPost:
         return getOrPost[field]
+def getBytesUnit(numBytes):
+    if numBytes / GIGABYTE > 1:
+        return "GB"
+    elif numBytes / MEGABYTE > 1:
+        return "MB"
+    elif numBytes / KILOBYTE > 1:
+        return "KB"
     else:
-        return default 
+        return "Bytes"
 
-def getReqLogger():
-    if not _reqLogger:
-        global _reqLogger
-        _reqLogger = logging.getLogger('django.request')
-    return _reqLogger;

@@ -1,6 +1,7 @@
 {% extends "page.html" %}
 
 {% block additional_header %}
+{% load crispy_forms_tags %}
 <style type="text/css">
 	body {
 		padding-top: 20px;
@@ -15,9 +16,11 @@
 	.settings {
 		margin: 40px 0;
 	}
-
-
 </style>
+
+<script>
+    setCsrf("{% csrf_token %}");
+</script>
 {% endblock %}
 
 {% block body %}
@@ -26,71 +29,13 @@
 	<h2>{{ editUser.username }}</h2>
  	<font color="red"><p id="pwErrorText"></p></font>
 	
-	<form id="form" action="{{ const.BASE_URL }}userAdminAction/" method="post"> {% csrf_token %}
-		<input name=action type=hidden value=editUser />
-		<input name=userName type=hidden value="{{ editUser.username }}" />
-	<div class="row settings">
-	    <div class="col-md-6">
-		Password:
-		<input id="password" name=password type=password onkeyup="validatePassword('password', 'verifyPassword', 'Save')"/></td>
-	    </div>
-	    <div class="col-md-6">
-		Verify Password:
-		<input id="verifyPassword" name=verifyPassword type=password onkeyup="validatePassword('password', 'verifyPassword', 'Save')"/>
-	    </div>
-	</div>
-
-	<div class="row settings">
-	   <div class="col-md-3">
-	       Is Administrator
-	   </div>
-	   <div class="col-md-1">
-	       <input name="isAdministrator" type="checkbox" 
-		{% if editUser.is_staff %} checked="checked" {% endif %} 
-	       />
-	   </div>
-	</div>
-
-	{% for groupName in activeGroupNames %}
-	    <div class="row settings">
-		<div class="col-md-1">
-		    <input name="isGroup{{ groupName }}" type="checkbox" checked="checked" />
-		</div>
-		<div class="col-md-3">
-		    {{ groupName }}
-		</div>
-	    </div>
-	{% endfor %}
-
-	{% for groupName in groupNames %}
-	    <div class="row">
-		<div class="col-md-1">
-		    <input name="isGroup{{ groupName }}" type="checkbox"  /> 
-		</div>
-		<div class="col-md-3">
-		    {{ groupName }}
-		</div>
-	    </div>
-	{% endfor %}
-
-	<div class="row settings">
-	    <div class="col-md-3">
-	        <input class="btn" id=Save name=submit type=submit value="Save"/>
-	    </div>
-	    <div class="col-md-3">
-	        <input class="btn" name=submit type=submit value="Cancel"/>
-	    </div>
-	</div>
-        </form>
-	<div class="row settings">
-	    <div class="col-md-12">
-	        <input class="btn" type="submit" value="Delete User" onclick="deleteUser('{{ editUser.username }}')"; />
-	    </div>
-	</div>
-
+    {% crispy form %}
 
 </div>
-<script src="{{ const.MEDIA_URL }}edit_user.js"></script>
+{% endblock %}
 
+{% block extra_js %}
+<script src="{{ const.MEDIA_URL }}edit_user.js"></script>
+<script src="{{ const.MEDIA_URL }}validate_password.js"></script>
 {% endblock %}
 

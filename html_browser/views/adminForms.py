@@ -1,0 +1,236 @@
+from django import forms
+from django.forms import inlineformset_factory, BaseInlineFormSet
+from django.template.loader import render_to_string
+from django.template.context import Context
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit, Button, Layout, LayoutObject, TEMPLATE_PACK, HTML
+
+from html_browser.models import Group, User, Folder, UserPermission, GroupPermission
+
+class Formset(LayoutObject):
+    """
+    Layout object. It renders an entire formset, as though it were a Field.
+
+    Example::
+
+    Formset("attached_files_formset")
+    """
+
+    template = "%s/table_inline_formset.html" % TEMPLATE_PACK
+
+    def __init__(self, formset_name_in_context, template=None, formset_id=None):
+        self.formset_name_in_context = formset_name_in_context
+        self.formset_id = formset_id
+
+        # crispy_forms/layout.py:302 requires us to have a fields property
+        self.fields = []
+
+        # Overrides class variable with an instance level variable
+        if template:
+            self.template = template
+
+    def render(self, form, form_style, context, template_pack=TEMPLATE_PACK):
+        formset = context[self.formset_name_in_context]
+        return render_to_string(self.template, Context({'wrapper': self,
+            'formset': formset,
+            'form_id': self.formset_id}))
+
+class AbstractFolderForm(forms.ModelForm):
+
+    class Meta:
+        model=Folder
+        fields="__all__"
+
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_show_errors = True
+        super(AbstractFolderForm, self).__init__(*args, **kwargs)
+        self.fields['name'].label = 'Folder Name'
+        self.fields['localPath'].label = 'Local Path'
+        self.fields['viewOption'].label = 'View Option'
+
+        addUserPermHtml = HTML('''<br><a href='#' onclick="addUserPermRow();return false;">Add User Permission</a>''')
+        addGroupPermHtml = HTML('''<br><a href='#' onclick="addGroupPermRow();return false;">Add Group Permission</a><br><br>''')
+
+        self.baseLayout = Layout('name', 
+            'localPath', 
+            'viewOption', 
+            Formset('userPermFormset', template='admin/perm_crispy/table_inline_formset.html', formset_id='user_perm_formset'), 
+            addUserPermHtml,
+            Formset('groupPermFormset', template='admin/perm_crispy/table_inline_formset.html', formset_id='group_perm_formset'),
+            addGroupPermHtml)
+
+        self.helper.form_method='post'
+        self.helper.form_action='editFolder'
+
+        self.helper.add_input(Submit('submit', 'Save'))
+        self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
+
+class AddFolderForm(AbstractFolderForm):
+    def __init__(self, *args, **kwargs):
+        super(AddFolderForm, self).__init__(*args, **kwargs)
+        self.helper.layout = self.baseLayout
+
+class EditFolderForm(AbstractFolderForm):
+
+    folderPk = forms.CharField(required=False, widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super(EditFolderForm, self).__init__(*args, **kwargs)
+        self.fields['name'].widget=forms.HiddenInput()
+
+        instance = kwargs['instance']
+        self.fields['folderPk'].initial = kwargs['instance'].pk
+
+        self.helper.layout = Layout('folderPk',
+            self.baseLayout)
+
+        self.helper.add_input(Button('delete', 'Delete Folder', css_class='btn', onclick="confirmDelete('%s')" % instance.name))
+
+class UserPermissionForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(UserPermissionForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].widget=forms.HiddenInput()
+
+        self.helper = FormHelper()
+        self.helper.form_show_errors = True
+        self.helper.form_id='user_perm_form'
+
+    def __iter__(self):
+        fieldOrder = [self['id'], self['folder'], self['user'], self['permission'], self['DELETE']]
+        return iter(fieldOrder)
+
+    class Meta:
+        model=UserPermission
+        fields="__all__"
+
+class GroupPermissionForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(GroupPermissionForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].widget=forms.HiddenInput()
+        self.helper = FormHelper()
+        self.helper.form_show_errors = True
+        self.helper.form_id='group_perm_form'
+
+    def __iter__(self):
+        fieldOrder = [self['id'], self['folder'], self['group'], self['permission'], self['DELETE']]
+        return iter(fieldOrder)
+
+    class Meta:
+        model=GroupPermission
+        fields="__all__"
+
+class BaseUserPermissionFormSet(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        kwargs['prefix'] = 'user_perm'
+        super(BaseUserPermissionFormSet, self).__init__(*args, **kwargs)
+
+        
+    def clean(self):
+        pass
+        #TODO implement
+
+UserPermissionFormSet = inlineformset_factory(Folder, 
+    UserPermission, 
+    formset=BaseUserPermissionFormSet, 
+    form=UserPermissionForm, 
+    fields="__all__", 
+    extra=1, 
+    can_delete=True)
+
+class BaseGroupPermissionFormSet(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        kwargs['prefix'] = 'group_perm'
+        super(BaseGroupPermissionFormSet, self).__init__(*args, **kwargs)
+
+        
+    def clean(self):
+        pass
+        #TODO implement
+
+GroupPermissionFormSet = inlineformset_factory(Folder, 
+    GroupPermission, 
+    formset=BaseGroupPermissionFormSet,
+    form=GroupPermissionForm,
+    fields="__all__", 
+    extra=1, 
+    can_delete=True)
+
+class EditGroupForm(forms.Form):
+    groupName = forms.CharField(required=False, widget=forms.HiddenInput())
+
+    users = []
+    for user in User.objects.all():
+        users.append((user.username, user.username))
+
+    users = forms.MultipleChoiceField(choices=users,
+        required=False,
+        widget=forms.CheckboxSelectMultiple)
+
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_id='form'
+        self.helper.form_method='post'
+        self.helper.form_action='editGroupAction'
+        self.helper.add_input(Submit('submit', 'Save'))
+        self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
+        self.helper.add_input(Button('deleteGroup', 'Delete Group', css_class='btn'))
+
+        super(EditGroupForm, self).__init__(*args, **kwargs)
+
+    def setGroup(self, group):
+        self.fields['groupName'].initial = group.name
+
+        activeUsers = []
+
+        for user in User.objects.filter(groups__id=group.id):
+            activeUsers.append(user.username)
+
+        self.fields['users'].initial = activeUsers
+
+
+class AddUserForm(forms.Form):
+    userName = forms.CharField(required=True)
+    password = forms.CharField(widget=forms.PasswordInput())
+    verifyPassword = forms.CharField(label='Verify Password', widget=forms.PasswordInput())
+    isAdministrator = forms.BooleanField(required=False,label='Is Administrator')
+
+    groups = []
+    for group in Group.objects.all():
+        groups.append((group.name, group.name))
+
+    groups = forms.MultipleChoiceField(choices=groups,
+        required=False,
+        widget=forms.CheckboxSelectMultiple)
+    
+
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_id='form'
+        self.helper.form_method='post'
+        self.helper.form_action='addUserAction'
+        self.helper.add_input(Submit('submit', 'Save'))
+        self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
+        super(AddUserForm, self).__init__(*args, **kwargs)
+
+class EditUserForm(AddUserForm):
+    def __init__(self, *args, **kwargs):
+        super(EditUserForm, self).__init__(*args, **kwargs)
+        self.helper.form_action="editUserAction"
+        self.helper.add_input(Button('deleteUser', 'Delete User', css_class='btn'))
+        self.fields['userName'].required=False
+        self.fields['userName'].widget=forms.HiddenInput()
+        self.fields['password'].required=False
+        self.fields['verifyPassword'].required=False
+
+    def setUser(self, user):
+        self.fields['userName'].initial = user.username
+        self.fields['isAdministrator'].initial = user.is_staff
+
+        activeGroups = []
+
+        for group in user.groups.all():
+            activeGroups.append(group.name)
+
+        self.fields['groups'].initial = activeGroups
+

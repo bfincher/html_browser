@@ -3,6 +3,7 @@ class _constants():
     
     BASE_URL = '/hb/'
     CONTENT_URL = BASE_URL + 'content/'
+    CONTENT_ACTION_URL = BASE_URL + 'contentAction/'
     DOWNLOAD_URL = BASE_URL + "download/"
     ADMIN_URL = BASE_URL + "admin/"
     USER_ADMIN_URL = ADMIN_URL + "user/"
@@ -16,7 +17,7 @@ class _constants():
     MEDIA_URL = "/hbmedia/"
     IMAGE_URL = MEDIA_URL + 'images/'
     IMAGE_VIEW_URL = BASE_URL + "image_view/"
-    THUMBNAIL_URL = BASE_URL + "__media__/thumbs/"
+    THUMBNAIL_URL = MEDIA_URL + "/thumbs/"
     
     detailsViewType = 'details'
     listViewType = 'list'

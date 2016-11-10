@@ -11,7 +11,16 @@
     {
         text-align: center;
     }
+
+    .center-table th
+    {
+        text-align: center;
+    }
 </style>
+
+<script>
+    setCsrf("{% csrf_token %}");
+</script>
 {% endblock %}
 {% block body %}
 
@@ -19,12 +28,12 @@
 	
 	<table class="col-md-5 center-table">
 		<tr>
-			<th> Group Name </th>
+			<th>Group Name</th>
 		</tr>
 		
-                {% for group in groups %}
+        {% for group in groups %}
 		<tr>
-			<td> <a href="{{ const.BASE_URL }}editGroup?groupName={{ group }}">{{ group }} </a></td>
+			<td><a href="{{ const.BASE_URL }}editGroup?groupName={{ group }}">{{ group }} </a></td>
 		</tr>
 		{% endfor %}
 	</table>
