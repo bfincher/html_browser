@@ -44,8 +44,12 @@ class BaseView(View):
             else:
                 _dict = request.POST
 
-            for key, value in sorted(_dict.items()):
-                self.reqLogger.debug("%s: %s", key, value)
+            if self.reqLogger.isEnabledFor(DEBUG):
+                for key, value in sorted(_dict.items()):
+                    if key in ['password', 'verifyPassword']:
+                        self.reqLogger.debug("%s: ********", key)
+                    else:
+                        self.reqLogger.debug("%s: %s", key, value)
 
         self.currentFolder = getRequestField(self.request,'currentFolder')
         if self.currentFolder:
