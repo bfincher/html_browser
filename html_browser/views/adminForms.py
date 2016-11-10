@@ -6,6 +6,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Button, Layout, LayoutObject, TEMPLATE_PACK, HTML
 
 from html_browser.models import Folder, UserPermission, GroupPermission, User, Group
+from html_browser.constants import _constants as const
 
 class Formset(LayoutObject):
     """
@@ -61,7 +62,7 @@ class AddFolderForm(forms.ModelForm):
             addGroupPermHtml)
 
         self.helper.form_method='post'
-        self.helper.form_action='%saddFolder/' % const.BASE_URL
+        self.helper.form_action='/%saddFolder/' % const.BASE_URL
 
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
@@ -147,8 +148,6 @@ GroupPermissionFormSet = inlineformset_factory(Folder,
     can_delete=True)
 
 class EditGroupForm(forms.Form):
-    groupName = forms.CharField(required=False, widget=forms.HiddenInput())
-
     users = []
     for user in User.objects.all():
         users.append((user.username, user.username))
@@ -161,7 +160,6 @@ class EditGroupForm(forms.Form):
         self.helper = FormHelper()
         self.helper.form_id='form'
         self.helper.form_method='post'
-        self.helper.form_action='editGroup'
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
         self.helper.add_input(Button('deleteGroup', 'Delete Group', css_class='btn'))
@@ -169,8 +167,7 @@ class EditGroupForm(forms.Form):
         super(EditGroupForm, self).__init__(*args, **kwargs)
 
     def setGroup(self, group):
-        self.fields['groupName'].initial = group.name
-
+        self.form_action='/%s/editGroup/%s/' % (const.BASE_URL, group.name)
         activeUsers = []
 
         for user in User.objects.filter(groups__id=group.id):

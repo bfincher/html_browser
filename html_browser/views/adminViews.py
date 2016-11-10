@@ -199,9 +199,8 @@ class DeleteGroupView(BaseView):
         return redirect('groupAdmin')
 
 class EditGroupView(BaseView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request, groupName, *args, **kwargs):
         super(EditGroupView, self).get(request, *args, **kwargs)
-        groupName = request.GET['groupName']
         group = Group.objects.get(name = groupName)
 
         form = EditGroupForm()
@@ -211,11 +210,11 @@ class EditGroupView(BaseView):
         self.context['form'] = form
         return render(request, 'admin/edit_group.html', self.context)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, groupName, *args, **kwargs):
         super(EditGroupView, self).__init__(*args, **kwargs)
         form = EditGroupForm(request.POST)
         if form.is_valid():
-            group = Group.objects.get(name=form.cleaned_data['groupName'])
+            group = Group.objects.get(name=groupName)
             group.user_set.clear()
 
             for userName in form.cleaned_data['users']:
