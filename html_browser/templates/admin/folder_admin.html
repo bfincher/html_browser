@@ -31,7 +31,7 @@
 		
 		{% for folder in folders %}
 		<tr>
-			<td><a href="{{ const.BASE_URL }}editFolder/?name={{ folder.name }}">{{ folder.name }}</a></td>
+			<td><a href="{{ const.BASE_URL }}editFolder/{{ folder.name }}/">{{ folder.name }}</a></td>
 			<td>{{ folder.localPath }}</td>
 		</tr>
 		{% endfor %}

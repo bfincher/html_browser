@@ -22,7 +22,7 @@
 
 {% block body %}
 <div class="container-narrow">
-	<h1 style="margin-top: 50px;">Add User</h1>
+	<h1 style="margin-top: 50px;">{{ title }}</h1>
 	<font color="red"><p id="userNameErrorText"></p></font>
 	<font color="red"><p id="pwErrorText"></p></font>
 	
@@ -31,6 +31,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ const.MEDIA_URL }}add_user.js"></script>
-<script src="{{ const.MEDIA_URL }}validate_password.js"></script>
+<script src="{{ const.MEDIA_URL }}user_admin.js"></script>
+<script> setCsrf("{% csrf_token %}");</script>
 {% endblock %}

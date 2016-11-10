@@ -1,20 +1,19 @@
 <html>
 {% block header %} 
 <head>
-    <meta content="initial-scale=1.0; maximum-scale=1.0; user-scalable=0; name=viewport">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>HTML File Explorer</title>
 
     <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
     <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap.min.js"></script>
 
-    {% block extra_js %} {% endblock %}
     <script src="{{ const.MEDIA_URL }}base.js"></script>
     <script type="text/javascript">
         setBaseUrl("{{ const.BASE_URL }}");
         setMediaUrl("{{ const.MEDIA_URL }}");        
         setImageUrl("{{ const.IMAGE_URL }}");
-
     </script>
+    {% block extra_js %} {% endblock %}
 
     <link rel="stylesheet" href="{{ const.MEDIA_URL }}/html_browser.css" type="text/css" media="screen" title="no title" charset="utf-8">
 

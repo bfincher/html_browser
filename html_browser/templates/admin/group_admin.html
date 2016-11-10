@@ -33,7 +33,7 @@
 		
         {% for group in groups %}
 		<tr>
-			<td><a href="{{ const.BASE_URL }}editGroup?groupName={{ group }}">{{ group }} </a></td>
+			<td><a href="{{ const.BASE_URL }}editGroup/{{ group }}">{{ group }} </a></td>
 		</tr>
 		{% endfor %}
 	</table>

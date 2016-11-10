@@ -1,5 +1,6 @@
 # Django settings for html_browser_site project.
 import os
+import platform
 
 URL_PREFIX = r''
 SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
@@ -15,7 +16,20 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASES = {
+DATABASES=None
+
+DATABASES_CYGWIN = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '/home/n86538/tmp/html_browser_python/hb.db',                      # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }
+}
+
+DATABASES_LINUX = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'hb',                      # Or path to database file if using sqlite3.
@@ -25,6 +39,12 @@ DATABASES = {
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
+
+if platform.system().startswith("CYG"):
+    DATABASES=DATABASES_CYGWIN
+    DATABASES['default']['NAME'] = os.path.dirname(os.path.abspath(__file__)) + "/../hb.db"
+else:
+    DATABASES=DATABASES_LINUX
 
 THUMBNAIL_DIR = '/srv/www/hb/media/thumbs'
 
@@ -66,16 +86,22 @@ MEDIA_URL = ''
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = ''
 
-# URL prefix for static files.
-# Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+if platform.system().startswith("CYG"):
+    # URL prefix for static files.
+    # Example: "http://media.lawrence.com/static/"
+    STATIC_URL = '/hbmedia/'
 
-# Additional locations of static files
-STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+    # Additional locations of static files
+    STATICFILES_DIRS = (
+        '/home/n86538/tmp/html_browser_python/media',
+        # Put strings here, like "/home/html/static" or "C:/www/django/static".
+        # Always use forward slashes, even on Windows.
+        # Don't forget to use absolute paths, not relative paths.
 )
+else:
+    STATIC_URL = None
+    STATICFILES_DIRS = ()
+
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -139,7 +165,6 @@ INSTALLED_APPS = (
     'html_browser',
     'django.contrib.admin',
     'crispy_forms',
-    'djangoformsetjs',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -184,7 +209,7 @@ LOGGING = {
 #        }
     },
     'loggers': {
-        '': {
+        'html_browser': {
             'handlers': ['default'],
             'level': 'DEBUG',
             'propagate': True,

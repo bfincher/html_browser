@@ -5,7 +5,8 @@ from django.template.context import Context
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Button, Layout, LayoutObject, TEMPLATE_PACK, HTML
 
-from html_browser.models import Group, User, Folder, UserPermission, GroupPermission
+from html_browser.models import Folder, UserPermission, GroupPermission, User, Group
+from html_browser.constants import _constants as const
 
 class Formset(LayoutObject):
     """
@@ -35,7 +36,7 @@ class Formset(LayoutObject):
             'formset': formset,
             'form_id': self.formset_id}))
 
-class AbstractFolderForm(forms.ModelForm):
+class AddFolderForm(forms.ModelForm):
 
     class Meta:
         model=Folder
@@ -44,7 +45,7 @@ class AbstractFolderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_show_errors = True
-        super(AbstractFolderForm, self).__init__(*args, **kwargs)
+        super(AddFolderForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = 'Folder Name'
         self.fields['localPath'].label = 'Local Path'
         self.fields['viewOption'].label = 'View Option'
@@ -52,7 +53,7 @@ class AbstractFolderForm(forms.ModelForm):
         addUserPermHtml = HTML('''<br><a href='#' onclick="addUserPermRow();return false;">Add User Permission</a>''')
         addGroupPermHtml = HTML('''<br><a href='#' onclick="addGroupPermRow();return false;">Add Group Permission</a><br><br>''')
 
-        self.baseLayout = Layout('name', 
+        self.helper.layout = Layout('name', 
             'localPath', 
             'viewOption', 
             Formset('userPermFormset', template='admin/perm_crispy/table_inline_formset.html', formset_id='user_perm_formset'), 
@@ -61,29 +62,19 @@ class AbstractFolderForm(forms.ModelForm):
             addGroupPermHtml)
 
         self.helper.form_method='post'
-        self.helper.form_action='editFolder'
+        self.helper.form_action='/%saddFolder/' % const.BASE_URL
 
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
 
-class AddFolderForm(AbstractFolderForm):
-    def __init__(self, *args, **kwargs):
-        super(AddFolderForm, self).__init__(*args, **kwargs)
-        self.helper.layout = self.baseLayout
-
-class EditFolderForm(AbstractFolderForm):
-
-    folderPk = forms.CharField(required=False, widget=forms.HiddenInput())
+class EditFolderForm(AddFolderForm):
 
     def __init__(self, *args, **kwargs):
         super(EditFolderForm, self).__init__(*args, **kwargs)
         self.fields['name'].widget=forms.HiddenInput()
 
         instance = kwargs['instance']
-        self.fields['folderPk'].initial = kwargs['instance'].pk
-
-        self.helper.layout = Layout('folderPk',
-            self.baseLayout)
+        self.helper.form_action='%seditFolder/%s/' % (const.BASE_URL, instance.name)
 
         self.helper.add_input(Button('delete', 'Delete Folder', css_class='btn', onclick="confirmDelete('%s')" % instance.name))
 
@@ -157,8 +148,6 @@ GroupPermissionFormSet = inlineformset_factory(Folder,
     can_delete=True)
 
 class EditGroupForm(forms.Form):
-    groupName = forms.CharField(required=False, widget=forms.HiddenInput())
-
     users = []
     for user in User.objects.all():
         users.append((user.username, user.username))
@@ -171,7 +160,6 @@ class EditGroupForm(forms.Form):
         self.helper = FormHelper()
         self.helper.form_id='form'
         self.helper.form_method='post'
-        self.helper.form_action='editGroupAction'
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
         self.helper.add_input(Button('deleteGroup', 'Delete Group', css_class='btn'))
@@ -179,8 +167,7 @@ class EditGroupForm(forms.Form):
         super(EditGroupForm, self).__init__(*args, **kwargs)
 
     def setGroup(self, group):
-        self.fields['groupName'].initial = group.name
-
+        self.form_action='/%s/editGroup/%s/' % (const.BASE_URL, group.name)
         activeUsers = []
 
         for user in User.objects.filter(groups__id=group.id):
@@ -189,48 +176,52 @@ class EditGroupForm(forms.Form):
         self.fields['users'].initial = activeUsers
 
 
-class AddUserForm(forms.Form):
-    userName = forms.CharField(required=True)
-    password = forms.CharField(widget=forms.PasswordInput())
+class AddUserForm(forms.ModelForm):
     verifyPassword = forms.CharField(label='Verify Password', widget=forms.PasswordInput())
-    isAdministrator = forms.BooleanField(required=False,label='Is Administrator')
-
-    groups = []
-    for group in Group.objects.all():
-        groups.append((group.name, group.name))
-
-    groups = forms.MultipleChoiceField(choices=groups,
-        required=False,
-        widget=forms.CheckboxSelectMultiple)
-    
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_id='form'
         self.helper.form_method='post'
-        self.helper.form_action='addUserAction'
+        self.helper.form_action='addUser'
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
+
+        self.helper.layout = Layout('username', 'password', 'verifyPassword', 'groups', 'first_name', 'last_name', 'email', 'is_superuser', 'is_active') 
+
         super(AddUserForm, self).__init__(*args, **kwargs)
 
+        self.fields['password'].widget=forms.PasswordInput()
+
+    def save(self, commit=True):
+        user = super(AddUserForm, self).save(commit=False)
+
+        password = self.cleaned_data['password']
+        if password:
+            user.set_password(password)
+        if commit:
+            user.save()
+        return user
+
+    class Meta:
+        model=User
+        fields=('username', 'password', 'groups', 'first_name', 'last_name', 'email', 'is_superuser', 'is_active',)
+
 class EditUserForm(AddUserForm):
+
+    userPk = forms.CharField(required=False, widget=forms.HiddenInput())
+
     def __init__(self, *args, **kwargs):
         super(EditUserForm, self).__init__(*args, **kwargs)
-        self.helper.form_action="editUserAction"
+        self.helper.form_action="editUser"
         self.helper.add_input(Button('deleteUser', 'Delete User', css_class='btn'))
-        self.fields['userName'].required=False
-        self.fields['userName'].widget=forms.HiddenInput()
+        self.fields['username'].required=False
+        self.fields['username'].widget=forms.HiddenInput()
         self.fields['password'].required=False
         self.fields['verifyPassword'].required=False
 
-    def setUser(self, user):
-        self.fields['userName'].initial = user.username
-        self.fields['isAdministrator'].initial = user.is_staff
+        instance = kwargs['instance']
+        self.fields['userPk'].initial = instance.pk
 
-        activeGroups = []
-
-        for group in user.groups.all():
-            activeGroups.append(group.name)
-
-        self.fields['groups'].initial = activeGroups
+        self.Meta.fields = ('userPk',) + self.Meta.fields
 

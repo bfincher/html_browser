@@ -3,7 +3,7 @@ from django.template import RequestContext
 from html_browser.models import Folder
 from django.contrib.auth import login as auth_login, logout as auth_logout
 import html_browser
-from html_browser.utils import getCurrentDirEntries, getCurrentDirEntriesSearch, handleDelete,\
+from html_browser.utils import getCurrentDirEntries, handleDelete,\
     getPath, handleDownloadZip,\
     handleFileUpload, handleZipUpload,\
     getRequestField, getReqLogger
@@ -19,7 +19,7 @@ import logging
 from logging import DEBUG
 import HTMLParser
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('html_browser.base_view')
 imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$",re.IGNORECASE)
 
 class BaseView(View):
@@ -44,8 +44,12 @@ class BaseView(View):
             else:
                 _dict = request.POST
 
-            for key, value in sorted(_dict.items()):
-                self.reqLogger.debug("%s: %s", key, value)
+            if self.reqLogger.isEnabledFor(DEBUG):
+                for key, value in sorted(_dict.items()):
+                    if key in ['password', 'verifyPassword']:
+                        self.reqLogger.debug("%s: ********", key)
+                    else:
+                        self.reqLogger.debug("%s: %s", key, value)
 
         self.currentFolder = getRequestField(self.request,'currentFolder')
         if self.currentFolder:
@@ -89,6 +93,17 @@ class BaseView(View):
         if self.errorHtml:
             self.context['errorHtml'] = self.errorHtml
 
+    def redirect(self, url, *args, **kwargs):
+        redirectUrl = url
+
+        separator='?'
+        for key, value in sorted(kwargs.items()):
+            if value:
+                redirectUrl += "%s%s=%s" % (separator, key, value)
+                separator='&'
+
+        return redirect(redirectUrl)
+
     @staticmethod
     def isShowHidden(request):
         if request.session.has_key('showHidden'):
@@ -131,13 +146,8 @@ class LoginView(BaseView):
                 errorText = 'Account has been disabled'
         else:
             errorText = 'Invalid login'
-            self.reqLogger.error("empty userName")
     
-        redirectUrl = const.BASE_URL
-
-        if errorText != None:
-            redirectUrl = "%s?errorText=%s" % (redirectUrl, errorText)
-        return redirect(redirectUrl)
+        return self.redirect(errorText=errorText)
 
 
 class LogoutView(BaseView):
@@ -185,14 +195,15 @@ class UploadActionView(BaseView):
             return HttpResponse("You don't have write permission on this folder")
     
         action = request.POST['action']
+        status=None
         if action == 'uploadFile':
             handleFileUpload(request.FILES['upload1'], self.folder, self.currentPath)
-            redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded" % (const.CONTENT_URL, self.currentFolder, self.currentPath)
-            return redirect(redirectUrl)           
+            status='File uploaded'
         elif action == 'uploadZip':
             handleZipUpload(request.FILES['zipupload1'], self.folder, self.currentPath)
-            redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=File uploaded and extracted" % (const.CONTENT_URL, self.currentFolder, self.currentPath)
-            return redirect(redirectUrl)         
+            status='File uploaded and extracted'
+
+        return self.redirect(const.CONTENT_URL, currentFolder=self.currentFolder, currentPath=self.currentPath, status=status)
 
 def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
     folder = Folder.objects.filter(name=currentFolder)[0]
@@ -215,7 +226,7 @@ class ImageView(BaseView):
     def get(self, request, *args, **kwargs):
         super(ImageView, self).get(request, *args, **kwargs)
 
-        fileName = getRequestField(request,'fileName')
+        fileName = request.GET['fileName']
         entries = getIndexIntoCurrentDir(request, self.currentFolder, self.currentPath, fileName)
         index = entries['index']
         currentDirEntries = entries['currentDirEntries']
@@ -263,18 +274,16 @@ class DeleteImageView(BaseView):
         if not userCanDelete:
             status = "You don't have delete permission on this folder"
         else:
-            handleDelete(self.folder, self.currentPath, getRequestField(request,'fileName'))
+            handleDelete(self.folder, self.currentPath, request.GET['fileName'])
             status = "File deleted"
 
-        redirectUrl = "%s?currentFolder=%s&currentPath=%s&status=%s" % (const.CONTENT_URL, self.currentFolder, self.currentPath, status)
-
-        return redirect(redirectUrl)
+        return self.redirect(const.CONTENT_URL, currentFolder=self.currentFolder, currentPath=self.currentPath, status=status)
 
 class GetNextImageView(BaseView):
     def get(self, request, *args, **kwargs):
         super(GetNextImageView, self).get(request, *args, **kwargs)
 
-        fileName = getRequestField(request,'fileName')
+        fileName = request.GET['fileName']
 
         result = {}
         entries = getIndexIntoCurrentDir(request, self.currentFolder, self.currentPath, fileName)

@@ -1,3 +1,10 @@
+    function deleteUser() {
+        var userName = $('#id_username').val();
+        if (confirm('Are you sure you want to delete the user ' + userName + '?')) {
+                post(baseUrl + "deleteUser/", {'userToDelete': userName});
+        }
+    }
+
     function validatePassword(formName) {
         form = document.getElementById(formName);
         var valid = false;
@@ -28,7 +35,12 @@
         $("#id_password").keyup(function() {
             validatePassword('form');
         });
+
         $("#id_verifyPassword").keyup(function() {
             validatePassword('form');
+        });
+
+        $("#button-id-deleteuser").click(function() {
+            deleteUser();
         });
     });

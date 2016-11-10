@@ -68,35 +68,43 @@ def getPath(folderPath, path):
         dirPath += '/'
     return dirPath.encode('utf8')
 
-def getCurrentDirEntriesSearch(folder, path, showHidden, search):
+'''
+def getCurrentDirEntriesSearch(folder, path, showHidden, searchRegexStr):
     if logger.isEnabledFor(DEBUG):
-        logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s search = %s", folder, path, search)
+        logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s searchRegexStr = %s", folder, path, searchRegexStr)
+    
+    searchRegex = re.compile(searchRegexStr)
     returnList = []
     thisEntry = DirEntry(True, path, 0, datetime.fromtimestamp(getmtime(getPath(folder.localPath, path))), folder, path)
-    __getCurrentDirEntriesSearch(folder, path, showHidden, search, thisEntry, returnList)
+    __getCurrentDirEntriesSearch(folder, path, showHidden, searchRegex, thisEntry, returnList)
 
     for entry in returnList:
         entry.name = "/".join([entry.currentPathOrig, entry.name])
 
     return returnList
 
-def __getCurrentDirEntriesSearch(folder, path, showHidden, search, thisEntry, returnList):
+def __getCurrentDirEntriesSearch(folder, path, showHidden, searchRegex, thisEntry, returnList):
     if logger.isEnabledFor(DEBUG):
-        logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s search = %s thisEntry = %s", folder, path, search, thisEntry)
+        logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s searchRegex = %s thisEntry = %s", folder, path, searchRegex, thisEntry)
     entries = getCurrentDirEntries(folder, path, showHidden)
 
     includeThisDir = False
 
     for entry in entries:
-        if entry.isDir:
-            __getCurrentDirEntriesSearch(folder, "/".join([path, entry.name]), showHidden, search, entry, returnList)
-        elif entry.name.find(search) != -1:
-            if logger.isEnabledFor(DEBUG):
-                logger.debug("including this dir")
-            includeThisDir = True
+        try:
+            if searchRegex.search(entry.name):
+                if logger.isEnabledFor(DEBUG):
+                    logger.debug("including this dir")
+                includeThisDir = True
+            elif entry.isDir:
+                __getCurrentDirEntriesSearch(folder, "/".join([path, entry.name]), showHidden, searchRegex, entry, returnList)
+        except UnicodeDecodeError, e:
+            logger.error('UnicodeDecodeError: %s', entry.name)
+
     
     if includeThisDir:
         returnList.append(thisEntry)
+'''
 
 def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
     dirPath = getPath(folder.localPath, path)
@@ -179,7 +187,7 @@ def handleDownloadZip(request):
     currentFolder = request.GET['currentFolder']
     currentPath = request.GET['currentPath']
     folder = Folder.objects.filter(name=currentFolder)[0]
-    entries = getRequestField(request, 'files') 
+    entries = request.GET['files'] 
         
     compression = zipfile.ZIP_DEFLATED
     
