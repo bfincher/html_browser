@@ -46,7 +46,7 @@ class UserPermissionTest(TestCase):
         
         self.userPerm3 = UserPermission()
         self.userPerm3.folder = self.folder1
-        self.userPerm3.permission = CAN_DELET
+        self.userPerm3.permission = CAN_DELETE
         self.userPerm3.user = self.user4
         self.userPerm3.save()
         
