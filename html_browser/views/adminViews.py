@@ -60,8 +60,7 @@ class DeleteFolderView(BaseView):
         Folder.objects.filter(name=request.POST['name']).delete()
         return redirect('folderAdmin')
 
-class AbstractFolderView(BaseView):
-    __metaclass__ = ABCMeta
+class AbstractFolderView(BaseView, metaclass=ABCMeta):
 
     def __init__(self, *args, **kwargs):
         super(AbstractFolderView, self).__init__(*args, **kwargs)
@@ -264,8 +263,7 @@ class UserAdminView(BaseView):
         self.context['users'] = User.objects.all()
         return render(request, 'admin/user_admin.html', self.context)
 
-class AbstractUserView(BaseView):
-    __metaclass__ = ABCMeta
+class AbstractUserView(BaseView, metaclass=ABCMeta):
 
     def __init__(self, *args, **kwargs):
         super(AbstractUserView, self).__init__(*args, **kwargs)
