@@ -70,43 +70,41 @@ def getPath(folderPath, path):
     return dirPath
 #    return dirPath.encode('utf8')
 
-'''
-def getCurrentDirEntriesSearch(folder, path, showHidden, searchRegexStr):
-    if logger.isEnabledFor(DEBUG):
-        logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s searchRegexStr = %s", folder, path, searchRegexStr)
+#def getCurrentDirEntriesSearch(folder, path, showHidden, searchRegexStr):
+#    if logger.isEnabledFor(DEBUG):
+#        logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s searchRegexStr = %s", folder, path, searchRegexStr)
     
-    searchRegex = re.compile(searchRegexStr)
-    returnList = []
-    thisEntry = DirEntry(True, path, 0, datetime.fromtimestamp(getmtime(getPath(folder.localPath, path))), folder, path)
-    __getCurrentDirEntriesSearch(folder, path, showHidden, searchRegex, thisEntry, returnList)
+#    searchRegex = re.compile(searchRegexStr)
+#    returnList = []
+#    thisEntry = DirEntry(True, path, 0, datetime.fromtimestamp(getmtime(getPath(folder.localPath, path))), folder, path)
+#    __getCurrentDirEntriesSearch(folder, path, showHidden, searchRegex, thisEntry, returnList)
 
-    for entry in returnList:
-        entry.name = "/".join([entry.currentPathOrig, entry.name])
+#    for entry in returnList:
+#        entry.name = "/".join([entry.currentPathOrig, entry.name])
 
-    return returnList
+#    return returnList
 
-def __getCurrentDirEntriesSearch(folder, path, showHidden, searchRegex, thisEntry, returnList):
-    if logger.isEnabledFor(DEBUG):
-        logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s searchRegex = %s thisEntry = %s", folder, path, searchRegex, thisEntry)
-    entries = getCurrentDirEntries(folder, path, showHidden)
+#def __getCurrentDirEntriesSearch(folder, path, showHidden, searchRegex, thisEntry, returnList):
+#    if logger.isEnabledFor(DEBUG):
+#        logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s searchRegex = %s thisEntry = %s", folder, path, searchRegex, thisEntry)
+#    entries = getCurrentDirEntries(folder, path, showHidden)
 
-    includeThisDir = False
+#    includeThisDir = False
 
-    for entry in entries:
-        try:
-            if searchRegex.search(entry.name):
-                if logger.isEnabledFor(DEBUG):
-                    logger.debug("including this dir")
-                includeThisDir = True
-            elif entry.isDir:
-                __getCurrentDirEntriesSearch(folder, "/".join([path, entry.name]), showHidden, searchRegex, entry, returnList)
-        except UnicodeDecodeError as e:
-            logger.error('UnicodeDecodeError: %s', entry.name)
+#    for entry in entries:
+#        try:
+#            if searchRegex.search(entry.name):
+#                if logger.isEnabledFor(DEBUG):
+#                    logger.debug("including this dir")
+#                includeThisDir = True
+#            elif entry.isDir:
+#                __getCurrentDirEntriesSearch(folder, "/".join([path, entry.name]), showHidden, searchRegex, entry, returnList)
+#        except UnicodeDecodeError as e:
+#            logger.error('UnicodeDecodeError: %s', entry.name)
 
     
-    if includeThisDir:
-        returnList.append(thisEntry)
-'''
+#    if includeThisDir:
+#        returnList.append(thisEntry)
 
 def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
     dirPath = getPath(folder.localPath, path)

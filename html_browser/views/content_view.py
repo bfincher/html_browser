@@ -134,11 +134,9 @@ class ContentView(BaseView):
         if self.statusError:
             self.context['statusError'] = True
 
-        '''
-        if 'search' in request.GET:
-            search = request.GET['search']
-            return self._handleSearch(request, search)
-        '''
+#        if 'search' in request.GET:
+#            search = request.GET['search']
+#            return self._handleSearch(request, search)
 
         currentDirEntries = getCurrentDirEntries(self.folder, self.currentPath, BaseView.isShowHidden(request), contentFilter)
     
@@ -172,14 +170,12 @@ class ContentView(BaseView):
             template = 'content_thumbnail.html'
         return render(request, template, self.context)       
 
-    '''
-    def _handleSearch(self, request, search):
-        currentDirEntries= getCurrentDirEntriesSearch(self.folder, self.currentPath, BaseView.isShowHidden(request), search)
+#    def _handleSearch(self, request, search):
+#        currentDirEntries= getCurrentDirEntriesSearch(self.folder, self.currentPath, BaseView.isShowHidden(request), search)
 
-        self.context['currentDirEntries'] = currentDirEntries
+#        self.context['currentDirEntries'] = currentDirEntries
 
-        return render(request, "content_search.html", self.context)
-    '''
+#        return render(request, "content_search.html", self.context)
 
     @staticmethod
     def deleteOldFiles():
