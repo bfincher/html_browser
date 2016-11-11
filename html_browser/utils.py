@@ -173,7 +173,7 @@ def replaceEscapedUrl(url):
 def handleDelete(folder, currentPath, entries):
     currentDirPath = replaceEscapedUrl(getPath(folder.localPath, currentPath))
     
-    for entry in entries.split(','):
+    for entry in entries:
         entryPath = os.path.join(currentDirPath, replaceEscapedUrl(entry)).encode("utf-8")
         
         if os.path.isdir(entryPath):

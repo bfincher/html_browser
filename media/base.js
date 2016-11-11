@@ -2,9 +2,7 @@ function setCsrf(_csrf) {
     csrf = _csrf;
 }
 
-function post(path, params) {
-    var form = $('<form></form>');
-
+function postForm(form, path, params) {
     form.attr("method", "post");
     form.attr("action", path);
 
@@ -25,6 +23,12 @@ function post(path, params) {
     console.log(form);
     form.submit();
 }
+
+function post(path, params) {
+    var form = $('<form></form>');
+    postForm(form, path, params);
+}
+
 function setBaseUrl(_baseUrl) {
     baseUrl = _baseUrl;
 }

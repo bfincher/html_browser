@@ -2,6 +2,7 @@ import collections
 from datetime import datetime, timedelta
 import json
 import os
+import re
 from shutil import copy2, copytree, move
 from urllib.parse import quote_plus
 
@@ -12,6 +13,18 @@ from html_browser.models import FilesToDelete, Folder
 from html_browser.constants import _constants as const
 from html_browser.utils import getCurrentDirEntries,\
     getPath, formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete
+
+checkBoxEntryRegex = re.compile(r'cb-(.+)')
+
+def getCheckedEntries(post):
+    entries = []
+    for key in post:
+        match = checkBoxEntryRegex.match(key)
+        if match and post[key] == 'on':
+            entries.append(match.groups(1))
+
+    return entries
+            
 
 class ContentView(BaseView):
 
@@ -34,7 +47,7 @@ class ContentView(BaseView):
         
         action = request.POST['action']
         if action == 'copyToClipboard':
-            entries = request.POST['entries']
+            entries = getCheckedEntries(request.POST)
             request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'COPY').toJson()
             self.status='Items copied to clipboard';
         elif action == 'cutToClipboard':
@@ -42,7 +55,7 @@ class ContentView(BaseView):
                 self.status="You don't have delete permission on this folder"
                 self.statusError = True
             else:
-                entries = request.POST['entries']
+                entries = getCheckedEntries(request.POST)
                 request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'CUT').toJson()
                 self.status = 'Items copied to clipboard'
         elif action == 'pasteFromClipboard':
@@ -60,7 +73,7 @@ class ContentView(BaseView):
                 self.status = "You don't have delete permission on this folder"
                 self.statusError = True
             else:
-                handleDelete(self.folder, self.currentPath, request.POST['entries'])
+                handleDelete(self.folder, self.currentPath, getCheckedEntries(request.POST))
                 self.status = 'File(s) deleted'
         elif action=='setViewType':
             viewType = request.POST['viewType']
@@ -261,11 +274,7 @@ class Clipboard():
         self.currentFolder = currentFolder
         self.currentPath = currentPath
         self.clipboardType = clipboardType
-
-        if type(entries) is list:
-            self.entries = entries
-        else:
-            self.entries = entries.split(',')    
+        self.entries = entries
 
     @staticmethod
     def fromJson(jsonStr):

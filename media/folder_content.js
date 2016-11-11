@@ -1,245 +1,232 @@
+var currentFolder = null;
+var currentPath = null;
+var userCanRead = null;
+var userCanWrite = null;
+var userCanDelete = null;
+var contentActionUrl = null;
 
-    function setContentActionUrl(_contentActionUrl) {
-        contentActionUrl = _contentActionUrl;
-    }
+function setContentActionUrl(_contentActionUrl) {
+    "use strict";
+    contentActionUrl = _contentActionUrl;
+}
 
-    function myEscape(str) {
-        str = str.replace(/,/g , "(comma)");
-        str = encodeURIComponent(str);
-        str = str.replace(/&/g , "(ampersand)");
-        return str;
-    }
-    function setCurrentFolder(_currentFolder) {
-    	currentFolder = _currentFolder;
-    }
-    
-    function setCurrentPath(_currentPath) {
-    	currentPath = _currentPath;
-    }
-    
-    function setUserCanRead(_userCanRead) {
-    	userCanRead = _userCanRead;
-    }
-    
-    function setUserCanWrite(_userCanWrite) {
-    	userCanWrite = _userCanWrite;
-    }
-    
-    function setUserCanDelete(_userCanDelete) {
-    	userCanDelete = _userCanDelete;
-    }
-    
-    function copy() {    	
-		var checkedBoxes = getCheckedBoxes();
-    	
-    	if (checkedBoxes.length == 0) {
-    	    alert("No entries selected");
-    	    return;
-    	}
-    	
-    	var checkedContent = getCheckedBoxContent();
+function myEscape(str) {
+    "use strict";
+    str = str.replace(/,/g, "(comma)");
+    str = encodeURIComponent(str);
+    str = str.replace(/&/g, "(ampersand)");
+    return str;
+}
 
-        post(contentActionUrl, {'action': 'copyToClipboard',
-            'entries': checkedContent,
-            'currentFolder': currentFolder,
-            'currentPath': currentPath});
+function setCurrentFolder(_currentFolder) {
+    "use strict";
+    currentFolder = _currentFolder;
+}
 
-    }
-    
-    function rename() {
-    	if (!userCanWrite) {
-    		alert("You do not have permission to rename files in this folder");
-    		return;
-    	}
-    	
-    	var checkedBoxes = getCheckedBoxes();
-    	
-    	if (checkedBoxes.length == 0) {
-    	    alert("No entry selected");
-    	    return;
-    	} else if (checkedBoxes.length > 1) {
-    		alert("Can only rename one file at a time");
-    		return;
-    	}
-    	
-    	var newName = prompt("Please enter new file name for " + checkedBoxes[0].id, "");
-    	
-    	if (newName != null) {    	
-            post(contentActionUrl, {'action': 'rename',
-                'file': checkedBoxes[0].id,
-                'newName': newName,
-                'currentFolder': currentFolder,
-                'currentPath': currentPath});
-    	}
-    	
-    	
-    	
-  	}
-    
-    function cut() {
-    	if (!userCanDelete) {
-			alert("You do not have permission to delete from this folder");
-			return;
-		}
-    	
-		var checkedBoxes = getCheckedBoxes();
-    	
-    	if (checkedBoxes.length == 0) {
-    	    alert("No entries selected");
-    	    return;
-    	}
-    	
-    	var checkedContent = getCheckedBoxContent();
-        post(contentActionUrl, {'action': 'cutToClipboard',
-            'entries': checkedContent,
-            'currentFolder': currentFolder,
-            'currentPath': currentPath});
-    }
-    
-    function paste() {
-    	if (!userCanWrite) {
-    		alert("You don't have write permission on this folder");
-    		return;
-    	}
-    	
-        post(contentActionUrl, {'action': 'pasteFromClipboard',
-            'currentFolder': currentFolder,
-            'currentPath': currentPath});
-    }
-    
-    function zip() {
-    	var checkedBoxes = getCheckedBoxes();
-    	
-    	if (checkedBoxes.length == 0) {
-    	    alert("No entries selected");
-    	} else {
-    	    window.location="/hb/download_zip?currentFolder="
-    	    + myEscape(currentFolder)
-    	    + "&currentPath=" + myEscape(currentPath)
-    	    + "&files=" + getCheckedBoxContent();
-    	}
-    }
-    
-    function upload() {
-    	window.location="/hb/upload/?currentFolder="
-    		+ myEscape(currentFolder)
-    	    + "&currentPath=" + myEscape(currentPath);
-    }
-    
-    function deleteImage(fileName) {
-    	if (!userCanDelete) {
-    		alert("You do not have permission to delete from this folder");
-    		return;
-    	}
+function setCurrentPath(_currentPath) {
+    "use strict";
+    currentPath = _currentPath;
+}
 
-    	var confirmMessage = "Are you sure you want to delete the selected entry?";
-	    if (confirm(confirmMessage)) {
-            post(baseUrl + "deleteImage", {'action': 'deleteImage',
-                'fileName': fileName,
-                'currentFolder': currentFolder,
-                'currentPath': currentPath});
-	}
-        
-    }
-    function del() {    	
-    	
-    	if (!userCanDelete) {
-    		alert("You do not have permission to delete from this folder");
-    		return;
-    	}
-    	var checkedBoxes = getCheckedBoxes();
-    	
-    	if (checkedBoxes.length == 0) {
-    	    alert("No entries selected");
-    	} else {
-    	    var checkedContent = getCheckedBoxContent();
-    	    
-    		if (checkedBoxes.length == 1) {
-    			var confirmMessage = "Are you sure you want to delete the selected entry?";
-    		} else {
-    			var confirmMessage = "Are you sure you want to delete the " + checkedBoxes.length + " selected entries?";
-    		}
-    			
-    		if (confirm(confirmMessage)) {
-                post(contentActionUrl, {'action': 'deleteEntry',
-                    'entries': checkedContent,
-                    'currentFolder': currentFolder,
-                    'currentPath': currentPath});
-    		}
-    	}
-    }
-    
-    function mkdir() {
-    	if (!userCanWrite) {
-    		alert("You don't have write permission on this folder");
-    		return;
-    	}
-    	
-    	var dir = prompt("Please enter the directory to create:", "");
-    	
-    	if (dir != null) {    	
-            post(contentActionUrl, {'action': 'mkDir',
-                'dir': dir,
-                'currentFolder': currentFolder,
-                'currentPath': currentPath});
-    	}
-    }
-    
-    function getCheckedBoxContent() {
-    	var checkedBoxes = getCheckedBoxes();
-    	var checkedContent = "";
-    	
-    	for (i = 0; i < checkedBoxes.length; i++) {
-    		checkedContent = checkedContent + checkedBoxes[i].id;
-    				
-    		if (i != checkedBoxes.length - 1) {
-    			checkedContent = checkedContent + ",";
-    		}
-    	}
-    	
-    	return checkedContent;
-    	
-    }
-    
-    function getCheckedBoxes() {
-    	var boxes = document.getElementsByName("cb");
-    	var checkedBoxes = new Array();
-    	
-    	for (i = 0; i < boxes.length; i++) {
-	    	if (boxes[i].checked) {
-	      	  checkedBoxes[checkedBoxes.length] = boxes[i];
-	    	}
-    	}
-    	
-    	return checkedBoxes;
-    }
-    
-    function checkAll() {    	
-    	var value = document.getElementById("checkAll").checked;
-    	var boxes = document.getElementsByName("cb");
-    	//alert("check all " + boxes.length);
-    	for (i = 0; i < boxes.length; i++) {
-    	    boxes[i].checked = value;
-    	}
-    }
-    
-    function viewTypeBoxChanged(box) {  
-    	var selectedIndex = box.selectedIndex;
-    	if (selectedIndex != -1) {
-            post(contentActionUrl, {'action': 'setViewType',
-                'viewType': box.options[selectedIndex].text,
-                'currentFolder': myEscape(currentFolder),
-                'currentPath': myEscape(currentPath)});
-    	}
+function setUserCanRead(_userCanRead) {
+    "use strict";
+    userCanRead = _userCanRead;
+}
+
+function setUserCanWrite(_userCanWrite) {
+    "use strict";
+    userCanWrite = _userCanWrite;
+}
+
+function setUserCanDelete(_userCanDelete) {
+    "use strict";
+    userCanDelete = _userCanDelete;
+}
+
+function getNumCheckedBoxes() {
+    return $(".content-checkbox:checkbox:checked").length;
+}
+
+function areBoxesChecked() {
+    return getNumCheckedBoxes() > 0;
+}
+
+function copy() {
+    "use strict";
+    if (!areBoxesChecked()) {
+        alert("No entries selected");
+        return;
     }
 
-    function diskUsageShowPopup() {
-        var el = document.getElementById("disk_usage");
-        el.style.visibility = "visible";
+    postForm($("#content-form"), contentActionUrl, {"action": "copyToClipboard",
+        "currentFolder": currentFolder,
+        "currentPath": currentPath});
+}
+
+function rename() {
+    "use strict";
+    if (!userCanWrite) {
+        alert("You do not have permission to rename files in this folder");
+        return;
     }
 
-    function diskUsageHidePopup() {
-        var el = document.getElementById("disk_usage");
-        el.style.visibility = "hidden";
+    var numChecked = getNumCheckedBoxes();
+
+    if (numChecked == 0) {
+        alert("No entry selected");
+        return;
+    } else if (numChecked > 1) {
+        alert("Can only rename one file at a time");
+        return;
     }
 
+    var newName = prompt("Please enter new file name for " + checkedBoxes[0].id, "");
+
+    if (newName != null) {
+        postForm($("#content-form"), contentActionUrl, {"action": "rename",
+            "file": checkedBoxes[0].id,
+            "newName": newName,
+            "currentFolder": currentFolder,
+            "currentPath": currentPath});
+    }
+}
+
+function cut() {
+    "use strict";
+    if (!userCanDelete) {
+        alert("You do not have permission to delete from this folder");
+        return;
+    }
+
+    if (!areBoxesChecked()) {
+        alert("No entries selected");
+        return;
+    }
+
+    postForm($("#content-form"), contentActionUrl, {"action": "cutToClipboard",
+        "currentFolder": currentFolder,
+        "currentPath": currentPath});
+}
+
+function paste() {
+    "use strict";
+    if (!userCanWrite) {
+        alert("You don't have write permission on this folder");
+        return;
+    }
+
+    postForm($("#content-form"), contentActionUrl, {"action": "pasteFromClipboard",
+        "currentFolder": currentFolder,
+        "currentPath": currentPath});
+}
+
+function zip() {
+    "use strict";
+    if (!areBoxesChecked()) {
+        alert("No entries selected");
+    } else {
+        window.location="/hb/download_zip?currentFolder="
+        + myEscape(currentFolder)
+        + "&currentPath=" + myEscape(currentPath)
+    }
+}
+
+function upload() {
+    "use strict";
+    window.location="/hb/upload/?currentFolder="
+    + myEscape(currentFolder)
+    + "&currentPath=" + myEscape(currentPath);
+}
+
+function deleteImage(fileName) {
+    "use strict";
+    if (!userCanDelete) {
+        alert("You do not have permission to delete from this folder");
+        return;
+    }
+
+    var confirmMessage = "Are you sure you want to delete the selected entry?";
+    if (confirm(confirmMessage)) {
+        postForm($("#content-form"), baseUrl + "deleteImage", {"action": "deleteImage",
+            "fileName": fileName,
+            "currentFolder": currentFolder,
+            "currentPath": currentPath});
+    }
+}
+
+function del() {
+    "use strict";
+    if (!userCanDelete) {
+        alert("You do not have permission to delete from this folder");
+        return;
+    }
+    var numChecked = getNumCheckedBoxes()
+
+    if (numChecked == 0) {
+        alert("No entries selected");
+    } else {
+        if (numChecked == 1) {
+            var confirmMessage = "Are you sure you want to delete the selected entry?";
+        } else {
+            var confirmMessage = "Are you sure you want to delete the " + numChecked + " selected entries?";
+        }
+
+        if (confirm(confirmMessage)) {
+            postForm($("#content-form"), contentActionUrl, {"action": "deleteEntry",
+                "currentFolder": currentFolder,
+                "currentPath": currentPath});
+        }
+    } 
+}
+    
+function mkdir() {
+    "use strict";
+    if (!userCanWrite) {
+        alert("You don't have write permission on this folder");
+        return;
+    }
+
+    var dir = prompt("Please enter the directory to create:", "");
+
+    if (dir != null) {
+        postForm($("#content-form"), contentActionUrl, {"action": "mkDir",
+            "dir": dir,
+            "currentFolder": currentFolder,
+            "currentPath": currentPath});
+    }
+}
+
+function viewTypeBoxChanged(box) { 
+    "use strict";
+    var selectedIndex = box.selectedIndex;
+    if (selectedIndex != -1) {
+        postForm($("#content-form"), contentActionUrl, {"action": "setViewType",
+            "viewType": box.options[selectedIndex].text,
+            "currentFolder": myEscape(currentFolder),
+            "currentPath": myEscape(currentPath)});
+    }
+}
+
+function diskUsageShowPopup() {
+    "use strict";
+    var el = document.getElementById("disk_usage");
+    el.style.visibility = "visible";
+}
+
+function diskUsageHidePopup() {
+    "use strict";
+    var el = document.getElementById("disk_usage");
+    el.style.visibility = "hidden";
+}
+
+function checkAll() {
+    "use strict";
+    var value = $("#checkAll").is(":checked");
+    $(".content-checkbox").prop("checked", value);
+}
+
+$(document).ready(function() {
+    $("#checkAll").click(function() {
+        checkAll();
+    });
+});
