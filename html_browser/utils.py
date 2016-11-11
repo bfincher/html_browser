@@ -11,7 +11,6 @@ from zipfile import ZipFile
 import zipfile
 from sendfile import sendfile
 from html_browser_site.settings import THUMBNAIL_DIR
-import sh
 import html.parser
 
 import re
@@ -218,7 +217,7 @@ def addFolderToZip(zipFile, folder):
     __addFolderToZip__(zipFile, folder, folder)    
         
 def __addFolderToZip__(zipFile, folder, basePath):
-    for f in sh.ls("-1", folder):
+    for f in os.listdir(folder):
         f = f.strip()
         f = os.path.join(folder, f)
         if os.path.isfile(f):
