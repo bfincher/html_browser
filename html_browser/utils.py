@@ -37,7 +37,6 @@ class DirEntry():
         
         if isDir:
             self.size = '&nbsp'
-            self.sizeInt = 0
         else:
             self.size = formatBytes(size)
             self.sizeNumeric = size
