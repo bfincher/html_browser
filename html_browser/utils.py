@@ -25,6 +25,8 @@ KILOBYTE = 1024.0
 MEGABYTE = KILOBYTE * KILOBYTE
 GIGABYTE = MEGABYTE * KILOBYTE
 
+checkBoxEntryRegex = re.compile(r'cb-(.+)')
+
 def getCheckedEntries(requestDict):
     entries = []
     for key in requestDict:
@@ -34,31 +36,32 @@ def getCheckedEntries(requestDict):
 
     return entries
 
-checkBoxEntryRegex = re.compile(r'cb-(.+)')
-
 class DirEntry():
-    def __init__(self, isDir, name, size, lastModifyTime, folder, currentPath):
-        self.isDir = isDir
-        self.name = name
-        self.nameUrl = name.replace('&', '&amp;')
+    def __init__(self, fileName, filePath, folder, currentPath):
+        self.isDir = os.path.isdir(filePath)
+        self.name = fileName
+        self.nameUrl = self.name.replace('&', '&amp;')
         self.nameUrl = quote_plus(self.name)
 
         self.currentPathOrig = currentPath
         self.currentPath = quote_plus(currentPath)
         
-        if isDir:
+        if self.isDir:
             self.size = '&nbsp'
         else:
+            size = getsize(filePath)
             self.size = formatBytes(size)
             self.sizeNumeric = size
+
+        lastModifyTime = datetime.fromtimestamp(getmtime(filePath))
         self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')        
         
         try:
-            thumbPath = "/".join([THUMBNAIL_DIR, folder.name, currentPath, name])
+            thumbPath = "/".join([THUMBNAIL_DIR, folder.name, currentPath, self.name])
         
             if os.path.exists(thumbPath):
                 self.hasThumbnail = True
-                self.thumbnailUrl = "/".join([const.THUMBNAIL_URL + folder.name, currentPath, name])
+                self.thumbnailUrl = "/".join([const.THUMBNAIL_URL + folder.name, currentPath, self.name])
             else:
                 self.hasThumbnail = False
                 self.thumbnailUrl = None
@@ -121,14 +124,13 @@ def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
     dirEntries = []
     fileEntries = []
     
-    os.chdir(dirPath)
-    for fileName in os.listdir("."):
+    for fileName in os.listdir(dirPath):
         if not showHidden and fileName.startswith('.'):
             continue
         try:
             filePath = dirPath + fileName
-            if os.path.isdir(fileName):
-                dirEntries.append(DirEntry(True, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
+            if os.path.isdir(filePath):
+                dirEntries.append(DirEntry(fileName, filePath, folder, path))
             else:
                 include = False
                 if contentFilter:
@@ -140,7 +142,7 @@ def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
                     include = True
 
                 if include:
-                    fileEntries.append(DirEntry(False, fileName, getsize(filePath), datetime.fromtimestamp(getmtime(filePath)), folder, path))
+                    fileEntries.append(DirEntry(fileName, filePath, folder, path))
         except OSError as ose:
             logger.exception(ose)
 
