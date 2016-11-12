@@ -125,9 +125,10 @@ function zip() {
     if (!areBoxesChecked()) {
         alert("No entries selected");
     } else {
-        window.location="/hb/download_zip?currentFolder="
-        + myEscape(currentFolder)
-        + "&currentPath=" + myEscape(currentPath)
+        postForm($("#content-form"), "/hb/download_zip",
+            {"currentFolder": currentFolder,
+             "currentPath": currentPath},
+             "get");
     }
 }
 

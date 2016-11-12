@@ -7,6 +7,7 @@ from .constants import _constants as const
 from django.contrib.auth.models import User, Group
 from html_browser.models import Folder, UserPermission, GroupPermission, FilesToDelete
 from shutil import rmtree
+import tempfile
 from zipfile import ZipFile
 import zipfile
 from sendfile import sendfile
@@ -23,6 +24,17 @@ reqLogger = None
 KILOBYTE = 1024.0
 MEGABYTE = KILOBYTE * KILOBYTE
 GIGABYTE = MEGABYTE * KILOBYTE
+
+def getCheckedEntries(requestDict):
+    entries = []
+    for key in requestDict:
+        match = checkBoxEntryRegex.match(key)
+        if match and requestDict[key] == 'on':
+            entries.append(match.group(1))
+
+    return entries
+
+checkBoxEntryRegex = re.compile(r'cb-(.+)')
 
 class DirEntry():
     def __init__(self, isDir, name, size, lastModifyTime, folder, currentPath):
@@ -185,16 +197,15 @@ def handleDownloadZip(request):
     currentFolder = request.GET['currentFolder']
     currentPath = request.GET['currentPath']
     folder = Folder.objects.filter(name=currentFolder)[0]
-    entries = request.GET['files'] 
         
     compression = zipfile.ZIP_DEFLATED
     
-    fileName = os.tempnam(None, 'download') + '.zip'    
+    fileName = tempfile.mktemp(prefix="download_", suffix=".zip")
         
     zipFile = ZipFile(fileName, mode='w', compression=compression)
     
     basePath = getPath(folder.localPath, currentPath)
-    for entry in entries.split(','):
+    for entry in getCheckedEntries(request.GET):
         path = getPath(folder.localPath, currentPath) + replaceEscapedUrl(entry)
         if os.path.isfile(path):
             __addFileToZip__(zipFile, path, basePath)

@@ -2,7 +2,6 @@ import collections
 from datetime import datetime, timedelta
 import json
 import os
-import re
 from shutil import copy2, copytree, move
 from urllib.parse import quote_plus
 
@@ -12,19 +11,8 @@ from .base_view import BaseView
 from html_browser.models import FilesToDelete, Folder
 from html_browser.constants import _constants as const
 from html_browser.utils import getCurrentDirEntries,\
-    getPath, formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete
-
-checkBoxEntryRegex = re.compile(r'cb-(.+)')
-
-def getCheckedEntries(post):
-    entries = []
-    for key in post:
-        match = checkBoxEntryRegex.match(key)
-        if match and post[key] == 'on':
-            entries.append(match.groups(1))
-
-    return entries
-            
+    getPath, formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete,\
+    getCheckedEntries
 
 class ContentView(BaseView):
 
