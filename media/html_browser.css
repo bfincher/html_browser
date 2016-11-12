@@ -56,7 +56,7 @@ TH.UploadOuterTable
 }
 
 .breadcrumbs {
-    background: white url(../img/nav-bg-reverse.gif) 0 -10px repeat-x;
+    background: white 0 -10px repeat-x;
     padding: 2px 8px 3px 8px;
     font-size: 75%;
     color: #999;
