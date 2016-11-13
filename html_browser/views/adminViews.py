@@ -212,8 +212,7 @@ class EditGroupView(BaseView):
         super(EditGroupView, self).get(request, *args, **kwargs)
         group = Group.objects.get(name=groupName)
 
-        form = EditGroupForm()
-        form.setGroup(group)
+        form = EditGroupForm(instance=group)
 
         self.context['groupName'] = groupName
         self.context['form'] = form

@@ -159,6 +159,8 @@ GroupPermissionFormSet = inlineformset_factory(Folder,
 
 
 class EditGroupForm(forms.Form):
+    groupName = forms.CharField(required=False, widget=forms.HiddenInput())
+
     users = []
     for user in User.objects.all():
         users.append((user.username, user.username))
@@ -175,16 +177,18 @@ class EditGroupForm(forms.Form):
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
         self.helper.add_input(Button('deleteGroup', 'Delete Group', css_class='btn'))
 
+        instance = kwargs.pop('instance', None)
         super(EditGroupForm, self).__init__(*args, **kwargs)
 
-    def setGroup(self, group):
-        self.form_action = '%s/editGroup/%s/' % (const.BASE_URL, group.name)
-        activeUsers = []
+        if instance:
+            self.helper.form_action = '%seditGroup/%s/' % (const.BASE_URL, instance.name)
+            activeUsers = []
 
-        for user in User.objects.filter(groups__id=group.id):
-            activeUsers.append(user.username)
+            for user in User.objects.filter(groups__id=instance.id):
+                activeUsers.append(user.username)
 
-        self.fields['users'].initial = activeUsers
+            self.fields['users'].initial = activeUsers
+            self.fields['groupName'].initial = instance.name
 
 
 class AddUserForm(forms.ModelForm):
