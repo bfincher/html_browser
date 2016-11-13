@@ -2,10 +2,11 @@ from urllib.parse import quote_plus
 import os
 from datetime import datetime
 from genericpath import getsize, getmtime
-from operator import attrgetter  
+from operator import attrgetter
 from .constants import _constants as const
 from django.contrib.auth.models import User, Group
-from html_browser.models import Folder, UserPermission, GroupPermission, FilesToDelete
+from html_browser.models import Folder, UserPermission,\
+    GroupPermission, FilesToDelete
 from shutil import rmtree
 import tempfile
 from zipfile import ZipFile
@@ -27,6 +28,7 @@ GIGABYTE = MEGABYTE * KILOBYTE
 
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
 
+
 def getCheckedEntries(requestDict):
     entries = []
     for key in requestDict:
@@ -35,6 +37,7 @@ def getCheckedEntries(requestDict):
             entries.append(match.group(1))
 
     return entries
+
 
 class DirEntry():
     def __init__(self, fileName, filePath, folder, currentPath):
@@ -45,7 +48,7 @@ class DirEntry():
 
         self.currentPathOrig = currentPath
         self.currentPath = quote_plus(currentPath)
-        
+
         if self.isDir:
             self.size = '&nbsp'
         else:
@@ -54,14 +57,20 @@ class DirEntry():
             self.sizeNumeric = size
 
         lastModifyTime = datetime.fromtimestamp(getmtime(filePath))
-        self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')        
-        
+        self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')
+
         try:
-            thumbPath = "/".join([THUMBNAIL_DIR, folder.name, currentPath, self.name])
-        
+            thumbPath = "/".join([THUMBNAIL_DIR,
+                                  folder.name,
+                                  currentPath,
+                                  self.name])
+
             if os.path.exists(thumbPath):
                 self.hasThumbnail = True
-                self.thumbnailUrl = "/".join([const.THUMBNAIL_URL + folder.name, currentPath, self.name])
+                self.thumbnailUrl = "/".join(
+                    [const.THUMBNAIL_URL + folder.name,
+                     currentPath,
+                     self.name])
             else:
                 self.hasThumbnail = False
                 self.thumbnailUrl = None
@@ -70,8 +79,13 @@ class DirEntry():
             logger.exception(de)
 
     def __str__(self):
-        return "DirEntry:  isDir = %s name = %s nameUrl = %s currentPath = %s currentPathOrig = %s size = %s lastModifyTime = %s hasThumbnail = %s thumbnailUrl = %s" % \
-        (str(self.isDir), self.name, self.nameUrl, self.currentPath, self.currentPathOrig, self.size, self.lastModifyTime, self.hasThumbnail, self.thumbnailUrl)
+        return "DirEntry:  isDir = %s name = %s nameUrl = %s " +
+        "currentPath = %s currentPathOrig = %s size = %s " +
+        "lastModifyTime = %s hasThumbnail = %s thumbnailUrl = %s" % \
+            (str(self.isDir), self.name, self.nameUrl, self.currentPath,
+                self.currentPathOrig, self.size, self.lastModifyTime,
+                self.hasThumbnail, self.thumbnailUrl)
+
 
 def getPath(folderPath, path):
     path = path.strip()
@@ -83,10 +97,10 @@ def getPath(folderPath, path):
     return dirPath
 #    return dirPath.encode('utf8')
 
-#def getCurrentDirEntriesSearch(folder, path, showHidden, searchRegexStr):
+# def getCurrentDirEntriesSearch(folder, path, showHidden, searchRegexStr):
 #    if logger.isEnabledFor(DEBUG):
-#        logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s searchRegexStr = %s", folder, path, searchRegexStr)
-    
+#        logger.debug("getCurrentDirEntriesSearch: folder = %s path = %s searchRegexStr = %s", folder, path, searchRegexStr)
+
 #    searchRegex = re.compile(searchRegexStr)
 #    returnList = []
 #    thisEntry = DirEntry(True, path, 0, datetime.fromtimestamp(getmtime(getPath(folder.localPath, path))), folder, path)
@@ -97,7 +111,7 @@ def getPath(folderPath, path):
 
 #    return returnList
 
-#def __getCurrentDirEntriesSearch(folder, path, showHidden, searchRegex, thisEntry, returnList):
+# def __getCurrentDirEntriesSearch(folder, path, showHidden, searchRegex, thisEntry, returnList):
 #    if logger.isEnabledFor(DEBUG):
 #        logger.debug("getCurrentDirEntriesSearch:  folder = %s path = %s searchRegex = %s thisEntry = %s", folder, path, searchRegex, thisEntry)
 #    entries = getCurrentDirEntries(folder, path, showHidden)
@@ -115,7 +129,7 @@ def getPath(folderPath, path):
 #        except UnicodeDecodeError as e:
 #            logger.error('UnicodeDecodeError: %s', entry.name)
 
-    
+
 #    if includeThisDir:
 #        returnList.append(thisEntry)
 
@@ -123,7 +137,7 @@ def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
     dirPath = getPath(folder.localPath, path)
     dirEntries = []
     fileEntries = []
-    
+
     for fileName in os.listdir(dirPath):
         if not showHidden and fileName.startswith('.'):
             continue
@@ -137,7 +151,7 @@ def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
                     tempFilter = contentFilter.replace('.', '\.')
                     tempFilter = tempFilter.replace('*', '.*')
                     if re.search(tempFilter, fileName):
-                        include = True 
+                        include = True
                 else:
                     include = True
 
@@ -148,64 +162,70 @@ def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
 
         except UnicodeDecodeError as de:
             logger.exception(de)
-            
+
     dirEntries.sort(key=attrgetter('name'))
     fileEntries.sort(key=attrgetter('name'))
-    
+
     dirEntries.extend(fileEntries)
-    
+
     return dirEntries
+
 
 def getUserNames():
     userNames = []
     for user in User.objects.all():
         userNames.append(user.username)
-    
+
     return userNames
+
 
 def getGroupNames():
     groupNames = []
     for group in Group.objects.all():
         groupNames.append(group.name)
-        
+
     return groupNames
+
 
 def getGroupNamesForUser(user):
     assert(isinstance(user, User))
     groupNames = []
-    
+
     for group in user.groups.all():
         groupNames.append(group.name)
-        
+
     return groupNames
+
 
 def replaceEscapedUrl(url):
     h = html.parser.HTMLParser()
     url = h.unescape(url)
     return url.replace("(comma)", ",").replace("(ampersand)", "&")
-    
+
+
 def handleDelete(folder, currentPath, entries):
     currentDirPath = replaceEscapedUrl(getPath(folder.localPath, currentPath))
-    
+
     for entry in entries:
         entryPath = os.path.join(currentDirPath, replaceEscapedUrl(entry)).encode("utf-8")
-        
+
         if os.path.isdir(entryPath):
             rmtree(entryPath)
         else:
             os.remove(entryPath)
-            
+
+
 def handleDownloadZip(request):
     currentFolder = request.GET['currentFolder']
     currentPath = request.GET['currentPath']
     folder = Folder.objects.filter(name=currentFolder)[0]
-        
+
     compression = zipfile.ZIP_DEFLATED
-    
+
     fileName = tempfile.mktemp(prefix="download_", suffix=".zip")
-        
+
     zipFile = ZipFile(fileName, mode='w', compression=compression)
-    
+
     basePath = getPath(folder.localPath, currentPath)
     for entry in getCheckedEntries(request.GET):
         path = getPath(folder.localPath, currentPath) + replaceEscapedUrl(entry)
@@ -213,22 +233,23 @@ def handleDownloadZip(request):
             __addFileToZip__(zipFile, path, basePath)
         else:
             addFolderToZip(zipFile, path)
-        
+
     zipFile.close()
-    
+
     FilesToDelete.objects.create(filePath=fileName)
-    
+
     return sendfile(request, fileName, attachment=True)
-            
-            
-            
+
+
 def __addFileToZip__(zipFile, fileToAdd, basePath):
     arcName = fileToAdd.replace(basePath, '')
     zipFile.write(fileToAdd, arcName, compress_type=zipfile.ZIP_DEFLATED)
-    
-def addFolderToZip(zipFile, folder):    
-    __addFolderToZip__(zipFile, folder, folder)    
-        
+
+
+def addFolderToZip(zipFile, folder):
+    __addFolderToZip__(zipFile, folder, folder)
+
+
 def __addFolderToZip__(zipFile, folder, basePath):
     for f in os.listdir(folder):
         f = f.strip()
@@ -238,30 +259,33 @@ def __addFolderToZip__(zipFile, folder, basePath):
             zipFile.write(f, arcName, compress_type=zipfile.ZIP_DEFLATED)
         elif os.path.isdir(f):
             __addFolderToZip__(zipFile, f, basePath)
-            
+
+
 def handleFileUpload(f, folder, currentPath):
     fileName = getPath(folder.localPath, currentPath) + f.name
     dest = open(fileName, 'w')
-    
+
     for chunk in f.chunks():
         dest.write(chunk)
-        
+
     dest.close()
     return fileName
-    
+
+
 def handleZipUpload(f, folder, currentPath):
-    fileName = handleFileUpload(f, folder, currentPath)  
+    fileName = handleFileUpload(f, folder, currentPath)
     zipFile = ZipFile(fileName, mode='r')
     entries = zipFile.infolist()
-    
+
     localPath = getPath(folder.localPath, currentPath)
-    
+
     for entry in entries:
         zipFile.extract(entry, localPath)
-        
+
     zipFile.close()
-    
+
     os.remove(fileName)
+
 
 def getRequestDict(request):
     if request.method == "GET":
@@ -269,20 +293,23 @@ def getRequestDict(request):
     else:
         return request.POST
 
+
 def getRequestField(request, field, default=None, getOrPost=None):
     if not getOrPost:
         getOrPost = getRequestDict(request)
 
-    if getOrPost.has_key(field):
+    if field in getOrPost:
         return getOrPost[field]
     else:
-        return default 
+        return default
+
 
 def getReqLogger():
     if not reqLogger:
         global reqLogger
         reqLogger = logging.getLogger('django.request')
-    return reqLogger;
+    return reqLogger
+
 
 def formatBytes(numBytes, forceUnit=None, includeUnitSuffix=True):
     if forceUnit:
@@ -304,6 +331,7 @@ def formatBytes(numBytes, forceUnit=None, includeUnitSuffix=True):
     else:
         return returnValue
 
+
 def getDiskUsageFormatted(path):
     du = getDiskUsage(path)
 
@@ -315,6 +343,7 @@ def getDiskUsageFormatted(path):
     free = formatBytes(du.free, unit, False)
 
     return _ntuple_diskusage_formatted(du.total, total, du.used, used, du.free, free, unit)
+
 
 def getDiskUsage(path):
     _ntuple_diskusage = collections.namedtuple('usage', 'total used free')
@@ -330,8 +359,7 @@ def getDiskUsage(path):
         import ctypes
         import sys
 
-        _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), \
-                       ctypes.c_ulonglong()
+        _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), ctypes.c_ulonglong()
         if sys.version_info >= (3,) or isinstance(path, str):
             fun = ctypes.windll.kernel32.GetDiskFreeSpaceExW
         else:
@@ -344,8 +372,8 @@ def getDiskUsage(path):
     else:
         raise NotImplementedError("platform not supported")
 
-def __assignGroupsToUser(user,request):
 
+def __assignGroupsToUser(user, request):
     user.groups.clear()
 
     for key in request:
@@ -357,8 +385,8 @@ def __assignGroupsToUser(user,request):
             group = Group.objects.get(name=groupName)
             user.groups.add(group)
 
-def __assignUsersToGroup(group, request):
 
+def __assignUsersToGroup(group, request):
     group.user_set.clear()
 
     for key in getRequestDict(request):
@@ -369,13 +397,14 @@ def __assignUsersToGroup(group, request):
             user = User.objects.get(username=userName)
             group.user_set.add(user)
 
+
 def handleEditFolder(request, folder=None):
-    if folder == None:
-        folderName = getRequestField(request,'name')
+    if folder is None:
+        folderName = getRequestField(request, 'name')
         folder = Folder.objects.get(name=folderName)
 
-    folder.localPath = getRequestField(request,'directory')
-    folder.viewOption = getRequestField(request,'viewOption')
+    folder.localPath = getRequestField(request, 'directory')
+    folder.viewOption = getRequestField(request, 'viewOption')
     folder.save()
 
     newUsers = {}
@@ -388,7 +417,7 @@ def handleEditFolder(request, folder=None):
             tokens = key.split('-')
             newGroups[tokens[1]] = tokens[2]
 
-    for userPerm in UserPermission.objects.filter(folder = folder):
+    for userPerm in UserPermission.objects.filter(folder=folder):
         if userPerm.user.username in newUsers:
             userPerm.permission = _permMap[newUsers[userPerm.user.username]]
             userPerm.save()
@@ -402,10 +431,10 @@ def handleEditFolder(request, folder=None):
         perm = UserPermission()
         perm.folder = folder
         perm.permission = _permMap[newUsers[key]]
-        perm.user = User.objects.get(username = key)
+        perm.user = User.objects.get(username=key)
         perm.save()
-    
-    for groupPerm in GroupPermission.objects.filter(folder = folder):
+
+    for groupPerm in GroupPermission.objects.filter(folder=folder):
         if groupPerm.group.name in newGroups:
             groupPerm.permission = _permMap[newGroups[groupPerm.group.name]]
             groupPerm.save()
@@ -419,23 +448,24 @@ def handleEditFolder(request, folder=None):
         perm = GroupPermission()
         perm.folder = folder
         perm.permission = _permMap[newGroups[key]]
-        perm.group = Group.objects.get(name = key)
+        perm.group = Group.objects.get(name=key)
         perm.save()
 
 
 def handleAddFolder(request):
-    folderName = getRequestField(request,'name')
+    folderName = getRequestField(request, 'name')
     folder = Folder()
     folder.name = folderName
     handleEditFolder(request, folder)
 
+
 def handleDeleteFolder(request):
-    folderName = getRequestField(request,'name')
+    folderName = getRequestField(request, 'name')
     folder = Folder.objects.get(name=folderName)
     folder.delete()
 
-def handleEditUser(request):
 
+def handleEditUser(request):
     userName = request['userName']
 
     if 'password' in request:
@@ -456,11 +486,12 @@ def handleEditUser(request):
 
     user.save()
 
+
 def handleAddUser(request):
     userName = request['userName']
 
     user = get_object_or_None(User, username=userName)
-    if user != None:
+    if user is not None:
         return "User %s already exists" % userName
 
     password = request['password']
@@ -468,7 +499,7 @@ def handleAddUser(request):
     isAdmin = 'isAdministrator' in request
 
     user = User()
-    user.username = userName;
+    user.username = userName
     user.set_password(password)
     user.is_staff = isAdmin
     user.is_superuser = isAdmin
@@ -480,32 +511,37 @@ def handleAddUser(request):
 
     user.save()
 
+
 def handleDeleteUser(request):
-    user = User.objects.get(username=getRequestField(request,'userToDelete'))
+    user = User.objects.get(username=getRequestField(request, 'userToDelete'))
     logger.info("Deleting user %s", user)
     user.delete()
 
+
 def handleEditGroup(request):
-    group = Group.objects.get(name = getRequestField(request,'groupName'))
+    group = Group.objects.get(name=getRequestField(request, 'groupName'))
     __assignUsersToGroup(group, request)
 
+
 def handleAddGroup(request):
-    groupName = getRequestField(request,'groupName')
+    groupName = getRequestField(request, 'groupName')
 
     group = get_object_or_None(Group, name=groupName)
 
-    if group != None:
+    if group is not None:
         return "Group %s already exists" % groupName
 
     group = Group()
     group.name = groupName
     group.save()
 
+
 def handleDeleteGroup(request):
-    groupName = getRequestField(request,'groupToDelete')
+    groupName = getRequestField(request, 'groupToDelete')
 
     group = Group.objects.get(name=groupName)
     group.delete()
+
 
 def getRequestDict(request):
     if request.method == "GET":
@@ -513,12 +549,15 @@ def getRequestDict(request):
     else:
         return request.POST
 
+
 def getRequestField(request, field, default=None, getOrPost=None):
     if not getOrPost:
         getOrPost = getRequestDict(request)
 
     if field in getOrPost:
         return getOrPost[field]
+
+
 def getBytesUnit(numBytes):
     if numBytes / GIGABYTE > 1:
         return "GB"
@@ -528,4 +567,3 @@ def getBytesUnit(numBytes):
         return "KB"
     else:
         return "Bytes"
-
