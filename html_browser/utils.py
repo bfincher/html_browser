@@ -1,12 +1,12 @@
 from urllib.parse import quote_plus
 import os
 from datetime import datetime
-from genericpath import getsize, getmtime
 from operator import attrgetter
 from .constants import _constants as const
 from django.contrib.auth.models import User, Group
 from html_browser.models import Folder, UserPermission,\
     GroupPermission, FilesToDelete
+from pathlib import Path
 from shutil import rmtree
 import tempfile
 from zipfile import ZipFile
@@ -40,23 +40,24 @@ def getCheckedEntries(requestDict):
 
 
 class DirEntry():
-    def __init__(self, fileName, filePath, folder, currentPath):
-        self.isDir = os.path.isdir(filePath)
-        self.name = fileName
+    def __init__(self, path, folder, currentPath):
+        self.isDir = path.is_dir()
+        self.name = path.name
         self.nameUrl = self.name.replace('&', '&amp;')
         self.nameUrl = quote_plus(self.name)
 
         self.currentPathOrig = currentPath
         self.currentPath = quote_plus(currentPath)
 
+        stat = path.stat()
         if self.isDir:
             self.size = '&nbsp'
         else:
-            size = getsize(filePath)
+            size = stat.st_size
             self.size = formatBytes(size)
             self.sizeNumeric = size
 
-        lastModifyTime = datetime.fromtimestamp(getmtime(filePath))
+        lastModifyTime = datetime.fromtimestamp(stat.st_mtime)
         self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')
 
         try:
@@ -138,25 +139,24 @@ def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
     dirEntries = []
     fileEntries = []
 
-    for fileName in os.listdir(dirPath):
-        if not showHidden and fileName.startswith('.'):
+    for f in Path(dirPath).iterdir():
+        if not showHidden and f.name.startswith('.'):
             continue
         try:
-            filePath = dirPath + fileName
-            if os.path.isdir(filePath):
-                dirEntries.append(DirEntry(fileName, filePath, folder, path))
+            if f.is_dir():
+                dirEntries.append(DirEntry(f, folder, path))
             else:
                 include = False
                 if contentFilter:
                     tempFilter = contentFilter.replace('.', '\.')
                     tempFilter = tempFilter.replace('*', '.*')
-                    if re.search(tempFilter, fileName):
+                    if re.search(tempFilter, f.name):
                         include = True
                 else:
                     include = True
 
                 if include:
-                    fileEntries.append(DirEntry(fileName, filePath, folder, path))
+                    fileEntries.append(DirEntry(f, folder, path))
         except OSError as ose:
             logger.exception(ose)
 
@@ -221,17 +221,15 @@ def __addFileToZip__(zipFile, fileToAdd, basePath):
 
 
 def addFolderToZip(zipFile, folder):
-    __addFolderToZip__(zipFile, folder, folder)
+    __addFolderToZip__(zipFile, Path(folder), folder)
 
 
 def __addFolderToZip__(zipFile, folder, basePath):
-    for f in os.listdir(folder):
-        f = f.strip()
-        f = os.path.join(folder, f)
-        if os.path.isfile(f):
-            arcName = f.replace(basePath, '')
+    for f in folder.iterdir():
+        if f.is_file():
+            arcName = f.as_posix().replace(basePath, '')
             zipFile.write(f, arcName, compress_type=zipfile.ZIP_DEFLATED)
-        elif os.path.isdir(f):
+        elif f.is_dir():
             __addFolderToZip__(zipFile, f, basePath)
 
 
