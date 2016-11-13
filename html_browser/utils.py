@@ -79,8 +79,8 @@ class DirEntry():
             logger.exception(de)
 
     def __str__(self):
-        return "DirEntry:  isDir = %s name = %s nameUrl = %s " +
-        "currentPath = %s currentPathOrig = %s size = %s " +
+        return "DirEntry:  isDir = %s name = %s nameUrl = %s " +\
+        "currentPath = %s currentPathOrig = %s size = %s " +\
         "lastModifyTime = %s hasThumbnail = %s thumbnailUrl = %s" % \
             (str(self.isDir), self.name, self.nameUrl, self.currentPath,
                 self.currentPathOrig, self.size, self.lastModifyTime,

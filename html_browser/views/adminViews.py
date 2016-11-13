@@ -12,18 +12,19 @@ from annoying.functions import get_object_or_None
 
 import html_browser
 from html_browser.models import Folder, UserPermission, GroupPermission,\
-CAN_READ, CAN_WRITE, CAN_DELETE
+    CAN_READ, CAN_WRITE, CAN_DELETE
 from html_browser.utils import getReqLogger
 from .adminForms import AddUserForm, EditUserForm, EditGroupForm,\
-UserPermissionFormSet, GroupPermissionFormSet, EditFolderForm, AddFolderForm
+    UserPermissionFormSet, GroupPermissionFormSet, EditFolderForm, AddFolderForm
 
 from .base_view import BaseView
 
 from html_browser.constants import _constants as const
 
 groupNameRegex = re.compile(r'^\w+$')
-_permMap = {'read' : CAN_READ, 'write' : CAN_WRITE, 'delete' : CAN_DELETE}
+_permMap = {'read': CAN_READ, 'write': CAN_WRITE, 'delete': CAN_DELETE}
 logger = logging.getLogger('html_browser.adminViews')
+
 
 class FolderViewOption():
     def __init__(self, value, display):
@@ -39,13 +40,15 @@ class FolderViewOption():
 folderViewOptions = []
 
 for choice in html_browser.models.viewableChoices:
-    option = FolderViewOption(choice[0], choice[1]) 
+    option = FolderViewOption(choice[0], choice[1])
     folderViewOptions.append(option)
+
 
 class AdminView(BaseView):
     def get(self, request, *args, **kwargs):
         super(AdminView, self).get(request, *args, **kwargs)
         return render(request, 'admin/admin.html', self.context)
+
 
 class FolderAdminView(BaseView):
     def get(self, request, *args, **kwargs):
@@ -54,20 +57,22 @@ class FolderAdminView(BaseView):
         self.context['folders'] = Folder.objects.all()
         return render(request, 'admin/folder_admin.html', self.context)
 
+
 class DeleteFolderView(BaseView):
     def post(self, request, *args, **kwargs):
         super(DeleteFolderView, self).post(request, *args, **kwargs)
         Folder.objects.filter(name=request.POST['name']).delete()
         return redirect('folderAdmin')
 
+
 class AbstractFolderView(BaseView, metaclass=ABCMeta):
 
     def __init__(self, *args, **kwargs):
         super(AbstractFolderView, self).__init__(*args, **kwargs)
-        self.folder=None
-        self.folderForm=None
-        self.userPermFormset=None
-        self.groupPermFormset=None
+        self.folder = None
+        self.folderForm = None
+        self.userPermFormset = None
+        self.groupPermFormset = None
 
     @abstractmethod
     def initForms(self, request, *args, **kwargs): pass
@@ -132,6 +137,7 @@ class AbstractFolderView(BaseView, metaclass=ABCMeta):
 
         return render(request, self.getTemplate(), self.context)
 
+
 class EditFolderView(AbstractFolderView):
     def __init__(self, *args, **kwargs):
         super(EditFolderView, self).__init__(*args, **kwargs)
@@ -152,6 +158,7 @@ class EditFolderView(AbstractFolderView):
             self.userPermFormset = UserPermissionFormSet(request.POST, instance=self.folder)
             self.groupPermFormset = GroupPermissionFormSet(request.POST, instance=self.folder)
 
+
 class AddFolderView(AbstractFolderView):
     def __init__(self, *args, **kwargs):
         super(AddFolderView, self).__init__(*args, **kwargs)
@@ -170,10 +177,11 @@ class AddFolderView(AbstractFolderView):
             self.userPermFormset = UserPermissionFormSet(request.POST)
             self.groupPermFormset = GroupPermissionFormSet(request.POST)
 
+
 class AddGroupView(BaseView):
     def post(self, request, *args, **kwargs):
         super(AddGroupView, self).post(request, *args, **kwargs)
-        errorText=None
+        errorText = None
         groupName = request.POST['groupName']
         if groupNameRegex.match(groupName):
             group = get_object_or_None(Group, name=groupName)
@@ -182,11 +190,12 @@ class AddGroupView(BaseView):
                 group.name = groupName
                 group.save()
             else:
-                errorText="%s already exists" % groupName
+                errorText = "%s already exists" % groupName
         else:
-            errorText="Invalid group name.  Must only contain letters, numbers, and underscores"
+            errorText = "Invalid group name.  Must only contain letters, numbers, and underscores"
 
         return self.redirect(const.BASE_URL + "groupAdmin/", errorText=errorText)
+
 
 class DeleteGroupView(BaseView):
     def post(self, request, *args, **kwargs):
@@ -197,10 +206,11 @@ class DeleteGroupView(BaseView):
 
         return redirect('groupAdmin')
 
+
 class EditGroupView(BaseView):
     def get(self, request, groupName, *args, **kwargs):
         super(EditGroupView, self).get(request, *args, **kwargs)
-        group = Group.objects.get(name = groupName)
+        group = Group.objects.get(name=groupName)
 
         form = EditGroupForm()
         form.setGroup(group)
@@ -224,7 +234,8 @@ class EditGroupView(BaseView):
             reqLogger = getReqLogger()
             reqLogger.error('form.errors = %s', form.errors)
 
-        return redirect('groupAdmin')           
+        return redirect('groupAdmin')
+
 
 class GroupAdminView(BaseView):
     def get(self, request, *args, **kwargs):
@@ -236,6 +247,7 @@ class GroupAdminView(BaseView):
         self.context['groups'] = groups
         return render(request, 'admin/group_admin.html', self.context)
 
+
 class DeleteUserView(BaseView):
     def post(self, request, *args, **kwargs):
         super(DeleteUserView, self).post(request, *args, **kwargs)
@@ -246,12 +258,13 @@ class DeleteUserView(BaseView):
 
         if request.user.username == request.POST['userToDelete']:
             return self.redirect(redirectUrl, errorText="Unable to delete current user")
-            
+
         user = User.objects.get(username=request.POST['userToDelete'])
         logger.info("Deleting user %s", user)
         user.delete()
 
-        return redirect(redirectUrl)           
+        return redirect(redirectUrl)
+
 
 class UserAdminView(BaseView):
     def get(self, request, *args, **kwargs):
@@ -262,6 +275,7 @@ class UserAdminView(BaseView):
 
         self.context['users'] = User.objects.all()
         return render(request, 'admin/user_admin.html', self.context)
+
 
 class AbstractUserView(BaseView, metaclass=ABCMeta):
 
@@ -300,7 +314,7 @@ class AbstractUserView(BaseView, metaclass=ABCMeta):
         with transaction.atomic():
             if self.form.is_valid():
                 user = self.form.save()
-    
+
                 user.groups.clear()
                 for group in self.form.cleaned_data['groups']:
                     user.groups.add(group)
@@ -315,7 +329,8 @@ class AbstractUserView(BaseView, metaclass=ABCMeta):
                 return self.get(request, *args, **kwargs)
 
         return self.redirect(const.BASE_URL + "userAdmin/", errorText=errorText)
-    
+
+
 class EditUserView(AbstractUserView):
     def __init__(self, *args, **kwargs):
         super(EditUserView, self).__init__(*args, **kwargs)
@@ -329,6 +344,7 @@ class EditUserView(AbstractUserView):
             user = User.objects.get(pk=request.POST['userPk'])
             self.form = EditUserForm(request.POST, instance=user)
 
+
 class AddUserView(AbstractUserView):
     def __init__(self, *args, **kwargs):
         super(AddUserView, self).__init__(*args, **kwargs)
@@ -339,10 +355,12 @@ class AddUserView(AbstractUserView):
         else:
             self.form = AddUserForm(request.POST)
 
+
 class ChangePasswordView(BaseView):
     def get(self, request, *args, **kwargs):
         super(ChangePasswordView, self).get(request, *args, **kwargs)
         return render(request, 'admin/change_password.html', self.context)
+
 
 class ChangePasswordResultView(BaseView):
     def get(self, request, *args, **kwargs):
@@ -352,7 +370,7 @@ class ChangePasswordResultView(BaseView):
         if user.check_password(request.POST['password']):
             newPw = request.POST['newPassword']
             confirmPw = request.POST['newPassword2']
-        
+
             if newPw == confirmPw:
                 user.set_password(newPw)
                 user.save()
@@ -360,8 +378,8 @@ class ChangePasswordResultView(BaseView):
                 errorMessage = "Passwords don't match"
         else:
             errorMessage = "Incorrect current password"
-        
-        if errorMessage == None:
+
+        if errorMessage is None:
             return render(request, 'admin/change_password_success.html', self.context)
         else:
             reqLogger.warn(errorMessage)

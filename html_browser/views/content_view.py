@@ -14,33 +14,34 @@ from html_browser.utils import getCurrentDirEntries,\
     getPath, formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete,\
     getCheckedEntries
 
+
 class ContentView(BaseView):
 
     def __setup__(self, request, getOrPost=None):
         request = request
         self.userCanDelete = self.folder.userCanDelete(request.user)
         self.userCanWrite = self.userCanDelete or self.folder.userCanWrite(request.user)
-        self.userCanRead = self.userCanWrite or self.folder.userCanRead(request.user)    
-    
+        self.userCanRead = self.userCanWrite or self.folder.userCanRead(request.user)
+
     def post(self, request, *args, **kwargs):
         super(ContentView, self).post(request, *args, **kwargs)
-        self.__setup__(request) 
-        
-        if self.userCanRead == False:
+        self.__setup__(request)
+
+        if self.userCanRead is False:
             self.reqLogger.warn("%s not allowed to read %s", request.user, self.currentFolder)
-            return redirect(const.BASE_URL, 'You are not authorized to view this page')   
-        
+            return redirect(const.BASE_URL, 'You are not authorized to view this page')
+
         self.status = ''
         self.statusError = False
-        
+
         action = request.POST['action']
         if action == 'copyToClipboard':
             entries = getCheckedEntries(request.POST)
             request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'COPY').toJson()
-            self.status='Items copied to clipboard';
+            self.status = 'Items copied to clipboard'
         elif action == 'cutToClipboard':
             if not self.userCanDelete:
-                self.status="You don't have delete permission on this folder"
+                self.status = "You don't have delete permission on this folder"
                 self.statusError = True
             else:
                 entries = getCheckedEntries(request.POST)
@@ -63,7 +64,7 @@ class ContentView(BaseView):
             else:
                 handleDelete(self.folder, self.currentPath, getCheckedEntries(request.POST))
                 self.status = 'File(s) deleted'
-        elif action=='setViewType':
+        elif action == 'setViewType':
             viewType = request.POST['viewType']
             request.session['viewType'] = viewType
         elif action == 'mkDir':
@@ -73,27 +74,28 @@ class ContentView(BaseView):
             self.handleRename(request.POST['file'], request.POST['newName'])
         elif action == 'changeSettings':
             if request.POST['submit'] == "Save":
-                request.session['showHidden'] = request.POST['showHidden'] != None
+                request.session['showHidden'] = request.POST['showHidden'] is not None
         else:
             raise RuntimeError('Unknown action %s' % action)
-    
-        return self.redirect(const.CONTENT_URL, currentFolder=self.currentFolder, currentPath=self.currentPath, status=self.status, statusError=self.statusError)
+
+        return self.redirect(const.CONTENT_URL, currentFolder=self.currentFolder,
+                             currentPath=self.currentPath, status=self.status, statusError=self.statusError)
 
     def handleRename(self, fileName, newName):
         source = getPath(self.folder.localPath, self.currentPath) + replaceEscapedUrl(fileName)
         dest = getPath(self.folder.localPath, self.currentPath) + replaceEscapedUrl(newName)
         move(source, dest)
-        
+
     def get(self, request, *args, **kwargs):
         super(ContentView, self).get(request, *args, **kwargs)
         self.__setup__(request)
-        
-        if self.userCanRead == False:
+
+        if not self.userCanRead:
             self.reqLogger.warn("%s not allowed to read %s", request.user, self.currentFolder)
             return redirect(const.BASE_URL, 'You are not authorized to view this page')
-        
+
         ContentView.deleteOldFiles()
-    
+
         self.status = ''
         if 'status' in request.GET:
             self.status = request.GET['status']
@@ -106,7 +108,9 @@ class ContentView(BaseView):
         crumbs = self.currentPath.split("/")
         if len(crumbs) > 1:
             self.breadcrumbs = "<a href=\"%s\">Home</a> " % const.BASE_URL
-            self.breadcrumbs = self.breadcrumbs + "&rsaquo; <a href=\"%scontent/?currentFolder=%s&currentPath=\">%s</a> " % (const.BASE_URL, self.currentFolder, self.currentFolder)
+            self.breadcrumbs = self.breadcrumbs + "&rsaquo; <a href=\"%scontent/?currentFolder=%s&currentPath=\">%s</a> " %\
+            (const.BASE_URL, self.currentFolder, self.currentFolder)
+
             crumbs = self.currentPath.split("/")
             accumulated = ""
             while len(crumbs) > 0:
@@ -115,7 +119,8 @@ class ContentView(BaseView):
                     accumulated = "/".join([accumulated, crumb])
                     self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
                     if len(crumbs) > 0:
-                        self.breadcrumbs = self.breadcrumbs + "<a href=\"%scontent/?currentFolder=%s&currentPath=%s\">%s</a> " % (const.BASE_URL, self.currentFolder, accumulated, crumb)
+                        self.breadcrumbs = self.breadcrumbs + "<a href=\"%scontent/?currentFolder=%s&currentPath=%s\">%s</a> " %\
+                        (const.BASE_URL, self.currentFolder, accumulated, crumb)
                     else:
                         self.breadcrumbs = self.breadcrumbs + crumb
 
@@ -123,7 +128,6 @@ class ContentView(BaseView):
         if 'filter' in request.GET:
             contentFilter = request.GET['filter']
             self.status = self.status + ' Filtered on %s' % contentFilter
-
 
         self.context['userCanRead'] = str(self.userCanRead).lower()
         self.context['userCanWrite'] = str(self.userCanWrite).lower()
@@ -140,11 +144,8 @@ class ContentView(BaseView):
 #            return self._handleSearch(request, search)
 
         currentDirEntries = getCurrentDirEntries(self.folder, self.currentPath, BaseView.isShowHidden(request), contentFilter)
-    
-        if request.session.has_key('viewType'):
-            viewType = request.session['viewType']
-        else:
-            viewType = const.viewTypes[0]                   
+
+        viewType = request.session.get('viewType', const.viewTypes[0])
 
         diskFreePct = getDiskPercentFree(getPath(self.folder.localPath, self.currentPath))
         diskUsage = getDiskUsageFormatted(getPath(self.folder.localPath, self.currentPath))
@@ -162,14 +163,14 @@ class ContentView(BaseView):
 
         if self.statusError:
             self.context['statusError'] = True
-    
+
         if viewType == const.detailsViewType:
             template = 'content_detail.html'
         elif viewType == const.listViewType:
             template = 'content_list.html'
         else:
             template = 'content_thumbnail.html'
-        return render(request, template, self.context)       
+        return render(request, template, self.context)
 
 #    def _handleSearch(self, request, search):
 #        currentDirEntries= getCurrentDirEntriesSearch(self.folder, self.currentPath, BaseView.isShowHidden(request), search)
@@ -195,9 +196,10 @@ def getDiskPercentFree(path):
     du = getDiskUsage(path)
     free = du.free / 1.0
     total = du.free + du.used / 1.0
-    pct = free / total;
-    pct = pct * 100.0;
-    return "%.2f" % pct + "%" 
+    pct = free / total
+    pct = pct * 100.0
+    return "%.2f" % pct + "%"
+
 
 def getDiskUsageFormatted(path):
     du = getDiskUsage(path)
@@ -210,6 +212,7 @@ def getDiskUsageFormatted(path):
     free = formatBytes(du.free, unit, False)
 
     return _ntuple_diskusage_formatted(du.total, total, du.used, used, du.free, free, unit)
+
 
 def getDiskUsage(path):
     _ntuple_diskusage = collections.namedtuple('usage', 'total used free')
@@ -225,8 +228,7 @@ def getDiskUsage(path):
         import ctypes
         import sys
 
-        _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), \
-                       ctypes.c_ulonglong()
+        _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), ctypes.c_ulonglong()
         if sys.version_info >= (3,) or isinstance(path, unicode):
             fun = ctypes.windll.kernel32.GetDiskFreeSpaceExW
         else:
@@ -239,23 +241,25 @@ def getDiskUsage(path):
     else:
         raise NotImplementedError("platform not supported")
 
+
 def getParentDirLink(path, currentFolder):
     if path == '/':
         return const.BASE_URL
-    
+
     if path.endswith('/'):
         path = path[0:-1]
-        
+
     idx = path.rfind('/')
-    
+
     path = path[0:idx]
-    
+
     if len(path) == 0:
         path = '/'
-        
+
     link = "%s?currentFolder=%s&currentPath=%s" % (const.CONTENT_URL, quote_plus(currentFolder), quote_plus(path))
-    
+
     return link
+
 
 class Clipboard():
     def __init__(self, currentFolder, currentPath, entries, clipboardType):
@@ -270,28 +274,30 @@ class Clipboard():
         return Clipboard(dictData['currentFolder'], dictData['currentPath'], dictData['entries'], dictData['clipboardType'])
 
     def toJson(self):
-        result = {'currentFolder' : self.currentFolder,
-            'currentPath' : self.currentPath,
-            'clipboardType' : self.clipboardType,
-            'entries' : self.entries}
+        result = {'currentFolder': self.currentFolder,
+                  'currentPath': self.currentPath,
+                  'clipboardType': self.clipboardType,
+                  'entries': self.entries}
 
         return json.dumps(result)
-        
+
+
 class CopyPasteException(Exception):
     pass
 
+
 def handlePaste(currentFolder, currentPath, clipboard):
-    
+
     folder = Folder.objects.filter(name=currentFolder)[0]
     clipboardFolder = Folder.objects.filter(name=clipboard.currentFolder)[0]
-    
+
     dest = getPath(folder.localPath, currentPath)
-    
+
     for entry in clipboard.entries:
         source = getPath(clipboardFolder.localPath, clipboard.currentPath) + replaceEscapedUrl(entry)
         if os.path.exists(os.path.join(dest, entry)):
             return "One or more of the items already exists in the destination"
-        
+
     for entry in clipboard.entries:
         source = getPath(clipboardFolder.localPath, clipboard.currentPath) + replaceEscapedUrl(entry)
         if clipboard.clipboardType == 'COPY':
@@ -303,4 +309,3 @@ def handlePaste(currentFolder, currentPath, clipboard):
             move(source, dest)
         else:
             raise CopyPasteException()
-        

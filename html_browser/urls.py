@@ -28,7 +28,7 @@ urlpatterns = [
     url(r'addFolder/.*', admin_views.AddFolderView.as_view()),
     url(r'groupAdmin/.*', admin_views.GroupAdminView.as_view(), name='groupAdmin'),
     url(r'addGroup/.*', admin_views.AddGroupView.as_view()),
-    url(r'deleteGroup/.*', admin_views.DeleteGroupView.as_view()), 
+    url(r'deleteGroup/.*', admin_views.DeleteGroupView.as_view()),
     url(r'hbChangePassword/.*', admin_views.ChangePasswordView.as_view()),
     url(r'hbChangePasswordResult/.*', admin_views.ChangePasswordResultView.as_view()),
     ]
