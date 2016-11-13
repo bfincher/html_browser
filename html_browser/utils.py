@@ -171,32 +171,6 @@ def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
     return dirEntries
 
 
-def getUserNames():
-    userNames = []
-    for user in User.objects.all():
-        userNames.append(user.username)
-
-    return userNames
-
-
-def getGroupNames():
-    groupNames = []
-    for group in Group.objects.all():
-        groupNames.append(group.name)
-
-    return groupNames
-
-
-def getGroupNamesForUser(user):
-    assert(isinstance(user, User))
-    groupNames = []
-
-    for group in user.groups.all():
-        groupNames.append(group.name)
-
-    return groupNames
-
-
 def replaceEscapedUrl(url):
     h = html.parser.HTMLParser()
     url = h.unescape(url)
@@ -373,176 +347,6 @@ def getDiskUsage(path):
         raise NotImplementedError("platform not supported")
 
 
-def __assignGroupsToUser(user, request):
-    user.groups.clear()
-
-    for key in request:
-        if key.startswith("isGroup"):
-            groupName = key[7:]
-            if logger.isEnabledFor(DEBUG):
-                logger.debug("processing key %s", key)
-                logger.debug("groupName = %s", groupName)
-            group = Group.objects.get(name=groupName)
-            user.groups.add(group)
-
-
-def __assignUsersToGroup(group, request):
-    group.user_set.clear()
-
-    for key in getRequestDict(request):
-        if key.startswith("isUser"):
-            if logger.isEnabledFor(DEBUG):
-                logger.debug("processing key $s", key)
-            userName = key[6:]
-            user = User.objects.get(username=userName)
-            group.user_set.add(user)
-
-
-def handleEditFolder(request, folder=None):
-    if folder is None:
-        folderName = getRequestField(request, 'name')
-        folder = Folder.objects.get(name=folderName)
-
-    folder.localPath = getRequestField(request, 'directory')
-    folder.viewOption = getRequestField(request, 'viewOption')
-    folder.save()
-
-    newUsers = {}
-    newGroups = {}
-    for key in getRequestDict(request):
-        if key.startswith('user-'):
-            tokens = key.split('-')
-            newUsers[tokens[1]] = tokens[2]
-        elif key.startswith('group-'):
-            tokens = key.split('-')
-            newGroups[tokens[1]] = tokens[2]
-
-    for userPerm in UserPermission.objects.filter(folder=folder):
-        if userPerm.user.username in newUsers:
-            userPerm.permission = _permMap[newUsers[userPerm.user.username]]
-            userPerm.save()
-
-            del newUsers[userPerm.user.username]
-
-        else:
-            userPerm.delete()
-
-    for key in newUsers:
-        perm = UserPermission()
-        perm.folder = folder
-        perm.permission = _permMap[newUsers[key]]
-        perm.user = User.objects.get(username=key)
-        perm.save()
-
-    for groupPerm in GroupPermission.objects.filter(folder=folder):
-        if groupPerm.group.name in newGroups:
-            groupPerm.permission = _permMap[newGroups[groupPerm.group.name]]
-            groupPerm.save()
-
-            del newGroups[groupPerm.group.name]
-
-        else:
-            groupPerm.delete()
-
-    for key in newGroups:
-        perm = GroupPermission()
-        perm.folder = folder
-        perm.permission = _permMap[newGroups[key]]
-        perm.group = Group.objects.get(name=key)
-        perm.save()
-
-
-def handleAddFolder(request):
-    folderName = getRequestField(request, 'name')
-    folder = Folder()
-    folder.name = folderName
-    handleEditFolder(request, folder)
-
-
-def handleDeleteFolder(request):
-    folderName = getRequestField(request, 'name')
-    folder = Folder.objects.get(name=folderName)
-    folder.delete()
-
-
-def handleEditUser(request):
-    userName = request['userName']
-
-    if 'password' in request:
-        password = request['password']
-
-    isAdmin = 'isAdministrator' in request
-
-    user = User.objects.get(username=userName)
-    if password:
-        user.set_password(password)
-    user.is_staff = isAdmin
-    user.is_superuser = isAdmin
-    user.is_active = True
-    user.save()
-
-    __assignGroupsToUser(user, request)
-    userGroups = user.groups.all()
-
-    user.save()
-
-
-def handleAddUser(request):
-    userName = request['userName']
-
-    user = get_object_or_None(User, username=userName)
-    if user is not None:
-        return "User %s already exists" % userName
-
-    password = request['password']
-
-    isAdmin = 'isAdministrator' in request
-
-    user = User()
-    user.username = userName
-    user.set_password(password)
-    user.is_staff = isAdmin
-    user.is_superuser = isAdmin
-    user.is_active = True
-    user.last_login = datetime(year=1970, month=1, day=1)
-    user.save()
-
-    __assignGroupsToUser(user, request)
-
-    user.save()
-
-
-def handleDeleteUser(request):
-    user = User.objects.get(username=getRequestField(request, 'userToDelete'))
-    logger.info("Deleting user %s", user)
-    user.delete()
-
-
-def handleEditGroup(request):
-    group = Group.objects.get(name=getRequestField(request, 'groupName'))
-    __assignUsersToGroup(group, request)
-
-
-def handleAddGroup(request):
-    groupName = getRequestField(request, 'groupName')
-
-    group = get_object_or_None(Group, name=groupName)
-
-    if group is not None:
-        return "Group %s already exists" % groupName
-
-    group = Group()
-    group.name = groupName
-    group.save()
-
-
-def handleDeleteGroup(request):
-    groupName = getRequestField(request, 'groupToDelete')
-
-    group = Group.objects.get(name=groupName)
-    group.delete()
-
-
 def getRequestDict(request):
     if request.method == "GET":
         return request.GET
@@ -554,8 +358,7 @@ def getRequestField(request, field, default=None, getOrPost=None):
     if not getOrPost:
         getOrPost = getRequestDict(request)
 
-    if field in getOrPost:
-        return getOrPost[field]
+    return getOrPost.get(field, default)
 
 
 def getBytesUnit(numBytes):

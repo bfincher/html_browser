@@ -89,12 +89,6 @@ class UserPermission(Permission):
     def __str__(self):
         return " ".join([self.folder.name, self.user.username, str(self.permission)])
 
-    def getUserOrGroup(self):
-        return "user"
-
-    def getUserOrGroupName(self):
-        return self.user.username
-
     def canRead(self):
         return self.permission >= CAN_READ
 
@@ -108,12 +102,6 @@ class GroupPermission(Permission):
 
     def __str__(self):
         return " ".join([self.folder.name, self.group.name, str(self.permission)])
-
-    def getUserOrGroup(self):
-        return "group"
-
-    def getUserOrGroupName(self):
-        return self.group.name
 
     class Meta:
         unique_together = ('folder', 'group')
