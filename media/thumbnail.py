@@ -17,6 +17,7 @@ imageTypes = {'JPG': 'JPEG',
               'BMP': 'BMP',
               'bmp': 'BMP'}
 
+
 class Thumbnail():
     def __init__(self, basePath, baseThumbsDir):
         self.basePath = basePath
@@ -51,7 +52,7 @@ class Thumbnail():
         return thumbsDir
 
     def processDir(self, dir):
-        #print "processing dir %s" % dir
+        # print "processing dir %s" % dir
         for f in os.listdir(dir):
             if not self.acceptFile(dir, f):
                 continue
@@ -91,7 +92,7 @@ class Thumbnail():
                         for i in range(zeroes):
                             newFileName = newFileName + "0"
                         newFileName = newFileName + str(count)
-                        count +=1
+                        count += 1
 
                         extension = getFileExtension(f)
                         newFileName = newFileName + extension
@@ -117,9 +118,11 @@ def deleteObsoleteThumbs(picDir, thumbDir):
             else:
                 os.remove(thumbFile)
 
+
 def getFileExtension(f):
     name, extension = os.path.splitext(f)
     return extension
+
 
 def main(argv):
     baseDir = argv[1]
@@ -138,6 +141,5 @@ def main(argv):
     deleteObsoleteThumbs(basePath, baseThumbsDir)
 
 
-    
 if __name__ == "__main__":
     main(sys.argv)
