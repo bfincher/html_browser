@@ -8,55 +8,55 @@ import shutil
 imagePattern = re.compile("(.+(\\.(?i)(jpg|png|gif|bmp))$)")
 imageExtensionPattern = re.compile("(\\.(?i)(jpg|png|gif|bmp))$")
 
-imageTypes = {'JPG' : 'JPEG',
-               'jpg' : 'JPEG',
-               'PNG' : 'PNG',
-               'png' : 'PNG',
-	       'GIF' : 'GIF',
-	       'gif' : 'GIF',
-	       'BMP' : 'BMP',
-	       'bmp' : 'BMP'}
+imageTypes = {'JPG': 'JPEG',
+              'jpg': 'JPEG',
+              'PNG': 'PNG',
+              'png': 'PNG',
+              'GIF': 'GIF',
+              'gif': 'GIF',
+              'BMP': 'BMP',
+              'bmp': 'BMP'}
 
 class Thumbnail():
     def __init__(self, basePath, baseThumbsDir):
         self.basePath = basePath
-	self.baseThumbsDir = baseThumbsDir
+        self.baseThumbsDir = baseThumbsDir
 
     def acceptFile(self, dir, name):
-	if name == "lost+found":
-	    return False
+        if name == "lost+found":
+            return False
 
         if os.path.isdir(os.path.join(dir, name)):
-	    return name != "thumbs"
-	else:
-	    if imagePattern.match(name):
-	        thumbsDir = self.getThumbsDir(dir)
-	        if os.path.exists(thumbsDir) and os.path.isdir(thumbsDir):
-		    return not os.path.exists(os.path.join(thumbsDir, name))
-		else:
-		    return True
+            return name != "thumbs"
+        else:
+            if imagePattern.match(name):
+                thumbsDir = self.getThumbsDir(dir)
+                if os.path.exists(thumbsDir) and os.path.isdir(thumbsDir):
+                    return not os.path.exists(os.path.join(thumbsDir, name))
+                else:
+                    return True
 
         return False
 
     def getThumbsDir(self, dir):
         path = dir.replace(self.basePath, "")
-	if len(path) > 0:
-	    thumbsDir = os.path.join(self.baseThumbsDir, path)
-	else:
-	    thumbsDir = self.baseThumbsDir
+        if len(path) > 0:
+            thumbsDir = os.path.join(self.baseThumbsDir, path)
+        else:
+            thumbsDir = self.baseThumbsDir
 
-	if not os.path.exists(thumbsDir):
-	    os.makedirs(thumbsDir)
+        if not os.path.exists(thumbsDir):
+            os.makedirs(thumbsDir)
 
-	return thumbsDir
+        return thumbsDir
 
     def processDir(self, dir):
         #print "processing dir %s" % dir
         for f in os.listdir(dir):
-	    if not self.acceptFile(dir, f):
-	        continue
+            if not self.acceptFile(dir, f):
+                continue
 
-	    file = os.path.join(dir, f)
+            file = os.path.join(dir, f)
             if os.path.isdir(file):
                 self.processDir(file)
             else:
@@ -101,7 +101,6 @@ class Thumbnail():
 
                     print("Renaming %s to %s" % (f, newFileName))
                     os.rename(file, os.path.join(root, newFileName))
-	        
 
 
 def deleteObsoleteThumbs(picDir, thumbDir):
@@ -109,14 +108,14 @@ def deleteObsoleteThumbs(picDir, thumbDir):
         thumbFile = os.path.join(thumbDir, file)
         picFile = os.path.join(picDir, file)
         if os.path.exists(picFile):
-	    if os.path.isdir(picFile):
-	        deleteObsoleteThumbs(picFile, thumbFile)
-	else:
-	    print("Deleting %s" % thumbFile)
-	    if os.path.isdir(thumbFile):
-	        shutil.rmtree(thumbFile)
-	    else:
-	        os.remove(thumbFile)
+            if os.path.isdir(picFile):
+                deleteObsoleteThumbs(picFile, thumbFile)
+        else:
+            print("Deleting %s" % thumbFile)
+            if os.path.isdir(thumbFile):
+                shutil.rmtree(thumbFile)
+            else:
+                os.remove(thumbFile)
 
 def getFileExtension(f):
     name, extension = os.path.splitext(f)
