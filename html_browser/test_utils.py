@@ -2,6 +2,10 @@ import unittest
 
 from html_browser.models import Folder
 from html_browser.utils import getCheckedEntries, getCurrentDirEntries
+from html_browser import utils
+
+from datetime import datetime, timedelta
+import os
 
 class UtilsTest(unittest.TestCase):
     def testGetCheckedEntries(self):
@@ -20,6 +24,15 @@ class UtilsTest(unittest.TestCase):
         folder.save()
 
         try:
+            dirA_time = datetime.now()
+            os.utime('html_browser/test_dir/dir_a', (int(dirA_time.timestamp()), int(dirA_time.timestamp())))
+
+            fileA_time = dirA_time + timedelta(seconds=1)
+            os.utime('html_browser/test_dir/file_a.txt', (int(fileA_time.timestamp()), int(fileA_time.timestamp())))
+
+            fileB_time = fileA_time + timedelta(seconds=1)
+            os.utime('html_browser/test_dir/file_b.txt', (int(fileB_time.timestamp()), int(fileB_time.timestamp())))
+
             entries = getCurrentDirEntries(folder, '/', True)
             self.assertEquals(3, len(entries))
 
@@ -28,7 +41,7 @@ class UtilsTest(unittest.TestCase):
             self.assertEquals('dir_a', entry.name)
             self.assertEquals(entry.name, entry.nameUrl)
             self.assertEquals('&nbsp', entry.size)
-            self.assertEquals('2016-11-12 03:32:33 PM', entry.lastModifyTime)
+            self.assertEquals(dirA_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
             self.assertFalse(entry.hasThumbnail)
             self.assertIsNone(entry.thumbnailUrl)
 
@@ -38,7 +51,7 @@ class UtilsTest(unittest.TestCase):
             self.assertEquals(entry.name, entry.nameUrl)
             self.assertEquals('20', entry.size)
             self.assertEquals(20, entry.sizeNumeric)
-            self.assertEquals('2016-11-12 03:32:09 PM', entry.lastModifyTime)
+            self.assertEquals(fileA_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
             self.assertFalse(entry.hasThumbnail)
             self.assertIsNone(entry.thumbnailUrl)
 
@@ -48,13 +61,27 @@ class UtilsTest(unittest.TestCase):
             self.assertEquals(entry.name, entry.nameUrl)
             self.assertEquals('26', entry.size)
             self.assertEquals(26, entry.sizeNumeric)
-            self.assertEquals('2016-11-12 03:32:24 PM', entry.lastModifyTime)
+            self.assertEquals(fileB_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
             self.assertFalse(entry.hasThumbnail)
             self.assertIsNone(entry.thumbnailUrl)
 
         finally:
             folder.delete()
 
+    def testGetCurrentDirEntries(self):
+        folder = Folder()
+        folder.name='test'
+        folder.localPath='html_browser/test_dir'
+        folder.viewOption='E'
+        folder.save()
+
+        try:
+            self.assertEquals('html_browser/test_dir/test_path/', utils.getPath(folder.localPath, 'test_path'))
+        finally:
+            folder.delete()
+
+    def testReplaceEscapedUrl(self):
+        self.assertEquals("part1,part2&", utils.replaceEscapedUrl("part1(comma)part2(ampersand)"))
 def main():
     unittest.main()
 
