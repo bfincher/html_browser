@@ -259,22 +259,6 @@ def handleZipUpload(f, folder, currentPath):
     os.remove(fileName)
 
 
-def getRequestDict(request):
-    if request.method == "GET":
-        return request.GET
-    else:
-        return request.POST
-
-
-def getRequestField(request, field, default=None, getOrPost=None):
-    if not getOrPost:
-        getOrPost = getRequestDict(request)
-
-    if field in getOrPost:
-        return getOrPost[field]
-    else:
-        return default
-
 
 def getReqLogger():
     if not reqLogger:
@@ -345,18 +329,11 @@ def getDiskUsage(path):
         raise NotImplementedError("platform not supported")
 
 
-def getRequestDict(request):
+def getRequestField(request, field, default=None):
     if request.method == "GET":
-        return request.GET
+        return request.GET.get(field, default)
     else:
-        return request.POST
-
-
-def getRequestField(request, field, default=None, getOrPost=None):
-    if not getOrPost:
-        getOrPost = getRequestDict(request)
-
-    return getOrPost.get(field, default)
+        return request.POST.get(field, default)
 
 
 def getBytesUnit(numBytes):
