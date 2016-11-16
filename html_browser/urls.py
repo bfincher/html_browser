@@ -3,7 +3,7 @@ from html_browser.views import base_view, content_view
 from html_browser.views import adminViews as admin_views
 
 urlpatterns = [
-    url(r'^$', base_view.IndexView.as_view()),
+    url(r'^$', base_view.IndexView.as_view(), name='index'),
     url(r'^hb/$', base_view.IndexView.as_view()),
     url(r'content/.*', content_view.ContentView.as_view()),
     url(r'download_zip/.*', base_view.DownloadZipView.as_view()),
