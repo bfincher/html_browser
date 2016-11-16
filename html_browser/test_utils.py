@@ -6,6 +6,12 @@ from html_browser import utils
 
 from datetime import datetime, timedelta
 import os
+from shutil import rmtree
+
+class TestRequest():
+    def __init__(self):
+        self.GET = {}
+
 
 class UtilsTest(unittest.TestCase):
     def testGetCheckedEntries(self):
@@ -82,6 +88,52 @@ class UtilsTest(unittest.TestCase):
 
     def testReplaceEscapedUrl(self):
         self.assertEquals("part1,part2&", utils.replaceEscapedUrl("part1(comma)part2(ampersand)"))
+
+    def testHandleDelete(self):
+        testDir = 'html_browser/test_dir2'
+        childDir = os.path.join(testDir, 'child_dir')
+        testFile1 = os.path.join(childDir, 'test_file1.txt')
+        testFile2 = os.path.join(childDir, 'test_file2.txt')
+        testFile3 = os.path.join(childDir, 'test_file3.txt')
+
+        folder = Folder()
+        folder.name = 'test'
+        folder.localPath = testDir
+        folder.viewOption = 'E'
+        folder.save()
+
+        try:
+            if os.path.isdir(testDir):
+                rmtree(testDir)
+
+            os.mkdir(testDir)
+            os.mkdir(childDir)
+
+            with open(testFile1, 'w') as f:
+                f.write('Hello World')
+            with open(testFile2, 'w') as f:
+                f.write('Hello World')
+            with open(testFile3, 'w') as f:
+                f.write('Hello World')
+
+            entries = ['test_file2.txt', 'test_file1.txt']
+
+            utils.handleDelete(folder, 'child_dir', entries)
+
+            self.assertFalse(os.path.exists(testFile1))
+            self.assertFalse(os.path.exists(testFile2))
+            self.assertTrue(os.path.exists(testFile3))
+
+            entries = ['child_dir']
+            utils.handleDelete(folder, '', entries)
+            self.assertFalse(os.path.exists(testFile3))
+            self.assertFalse(os.path.exists(childDir))
+        finally:
+            folder.delete()
+
+            if os.path.isdir(testDir):
+                rmtree(testDir)
+
 def main():
     unittest.main()
 
