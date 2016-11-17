@@ -7,7 +7,7 @@ urlpatterns = [
     url(r'^hb/$', base_view.IndexView.as_view()),
     url(r'content/.*', content_view.ContentView.as_view()),
     url(r'download_zip/.*', base_view.DownloadZipView.as_view()),
-    url(r'download/.*', base_view.DownloadView.as_view()),
+    url(r'download/.*', base_view.DownloadView.as_view(), name='download'),
     url(r'hbLogin/.*', base_view.LoginView.as_view(), name='login'),
     url(r'hbLogout/.*', base_view.LogoutView.as_view(), name='logout'),
     url(r'upload/.*', base_view.UploadView.as_view()),

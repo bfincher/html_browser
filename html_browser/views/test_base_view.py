@@ -141,3 +141,15 @@ class LogoutViewTest(BaseViewTest):
         response = self.logout()
         self.assertEquals(302, response.status_code)
         self.assertEquals('/hb/', response.url)
+
+class DownloadViewTest(BaseViewTest):
+    def testDownload(self):
+        self.login(self.user1)
+        response = self.client.get(reverse('download'), 
+            data={'currentFolder': self.folder1.name,
+                  'currentPath': '/',
+                  'fileName': 'file_a.txt'})
+
+        print("response = ", response)
+        context = response.context[0]
+        contextCheck(self, context)
