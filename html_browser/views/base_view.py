@@ -146,7 +146,7 @@ class LoginView(BaseView):
         else:
             errorText = 'Invalid login'
 
-        return self.redirect(errorText=errorText)
+        return self.redirect('index', errorText=errorText)
 
 
 class LogoutView(BaseView):
