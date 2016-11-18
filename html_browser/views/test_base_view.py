@@ -100,6 +100,7 @@ class IndexViewTest(BaseViewTest):
         self.assertEquals(self.folder1, context['folders'][0])
         self.assertEquals(self.folder3, context['folders'][1])
         self.assertEquals(self.folder4, context['folders'][2])
+        self.assertEquals('index.html', response.templates[0].name)
 
         self.logout()
 
@@ -111,6 +112,7 @@ class IndexViewTest(BaseViewTest):
         contextCheck(self, context)
         self.assertEquals(1, len(context['folders']))
         self.assertEquals(self.folder4, context['folders'][0])
+        self.assertEquals('index.html', response.templates[0].name)
 
         self.logout()
 
@@ -126,6 +128,7 @@ class IndexViewTest(BaseViewTest):
         self.assertEquals(self.folder2, context['folders'][0])
         self.assertEquals(self.folder3, context['folders'][1])
         self.assertEquals(self.folder4, context['folders'][2])
+        self.assertEquals('index.html', response.templates[0].name)
 
 
 class LoginViewTest(BaseViewTest):
@@ -150,6 +153,10 @@ class DownloadViewTest(BaseViewTest):
                   'currentPath': '/',
                   'fileName': 'file_a.txt'})
 
-        print("response = ", response)
-        context = response.context[0]
-        contextCheck(self, context)
+        foundAttachment = False
+        for item in list(response.items()):
+            if item[1] == 'html_browser/test_dir//file_a.txt':
+                foundAttachment = True
+                break
+        
+        self.assertTrue(foundAttachment)
