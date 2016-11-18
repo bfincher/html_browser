@@ -82,7 +82,7 @@ class UtilsTest(unittest.TestCase):
         folder.save()
 
         try:
-            self.assertEquals('html_browser/test_dir/test_path/', utils.getPath(folder.localPath, 'test_path'))
+            self.assertEquals('html_browser/test_dir/test_path/', utils.getPath(folder.localPath, '/test_path'))
         finally:
             folder.delete()
 
@@ -118,7 +118,7 @@ class UtilsTest(unittest.TestCase):
 
             entries = ['test_file2.txt', 'test_file1.txt']
 
-            utils.handleDelete(folder, 'child_dir', entries)
+            utils.handleDelete(folder, '/child_dir', entries)
 
             self.assertFalse(os.path.exists(testFile1))
             self.assertFalse(os.path.exists(testFile2))
