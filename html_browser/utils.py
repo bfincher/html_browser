@@ -92,7 +92,7 @@ def getPath(folderPath, path):
     path = path.strip()
     if path == '/':
         path = ''
-    dirPath = os.path.join(folderPath.strip(), path)
+    dirPath = folderPath.strip() + path
     if not dirPath.endswith('/'):
         dirPath += '/'
     return dirPath
