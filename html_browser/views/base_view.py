@@ -1,18 +1,23 @@
 from django.shortcuts import redirect, render
 from django.template import RequestContext
-from html_browser.models import Folder
+from html_browser.models import Folder, FilesToDelete
 from django.contrib.auth import login as auth_login, logout as auth_logout
 import html_browser
 from html_browser.utils import getCurrentDirEntries, handleDelete,\
-    getPath, handleDownloadZip,\
+    getPath,\
     handleFileUpload, handleZipUpload,\
-    getRequestField, getReqLogger
+    getRequestField, getReqLogger,\
+    getCheckedEntries, replaceEscapedUrl
 from html_browser.constants import _constants as const
 from django.contrib.auth import authenticate
 from sendfile import sendfile
 import os
+from pathlib import Path
 import re
 import json
+import tempfile
+import zipfile
+from zipfile import ZipFile
 from django.http import HttpResponse
 from django.views import View
 import logging
@@ -170,7 +175,43 @@ class DownloadView(BaseView):
 class DownloadZipView(BaseView):
     def get(self, request, *args, **kwargs):
         super(DownloadZipView, self).get(request, *args, **kwargs)
-        return handleDownloadZip(request)
+
+        currentFolder = request.GET['currentFolder']
+        currentPath = request.GET['currentPath']
+        folder = Folder.objects.filter(name=currentFolder)[0]
+
+        compression = zipfile.ZIP_DEFLATED
+
+        fileName = tempfile.mktemp(prefix="download_", suffix=".zip")
+
+        self.zipFile = ZipFile(fileName, mode='w', compression=compression)
+
+        self.basePath = getPath(folder.localPath, currentPath)
+        for entry in getCheckedEntries(request.GET):
+            path = getPath(folder.localPath, currentPath) + replaceEscapedUrl(entry)
+            if os.path.isfile(path):
+                self.__addFileToZip__(path)
+            else:
+                self.__addFolderToZip__(Path(path))
+
+        self.zipFile.close()
+
+        FilesToDelete.objects.create(filePath=fileName)
+
+        return sendfile(request, fileName, attachment=True)
+
+    def __addFileToZip__(self, fileToAdd):
+        arcName = fileToAdd.replace(self.basePath, '')
+        self.zipFile.write(fileToAdd, arcName, compress_type=zipfile.ZIP_DEFLATED)
+
+
+    def __addFolderToZip__(self, folder):
+        for f in folder.iterdir():
+            if f.is_file():
+                arcName = f.as_posix().replace(self.basePath, '')
+                self.zipFile.write(f.as_posix(), arcName, compress_type=zipfile.ZIP_DEFLATED)
+            elif f.is_dir():
+                self.__addFolderToZip__(f)
 
 
 class UploadView(BaseView):

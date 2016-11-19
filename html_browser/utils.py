@@ -5,13 +5,10 @@ from operator import attrgetter
 from .constants import _constants as const
 from django.contrib.auth.models import User, Group
 from html_browser.models import Folder, UserPermission,\
-    GroupPermission, FilesToDelete
+    GroupPermission
 from pathlib import Path
 from shutil import rmtree
-import tempfile
 from zipfile import ZipFile
-import zipfile
-from sendfile import sendfile
 from html_browser_site.settings import THUMBNAIL_DIR
 import html.parser
 
@@ -187,50 +184,6 @@ def handleDelete(folder, currentPath, entries):
             rmtree(entryPath)
         else:
             os.remove(entryPath)
-
-
-def handleDownloadZip(request):
-    currentFolder = request.GET['currentFolder']
-    currentPath = request.GET['currentPath']
-    folder = Folder.objects.filter(name=currentFolder)[0]
-
-    compression = zipfile.ZIP_DEFLATED
-
-    fileName = tempfile.mktemp(prefix="download_", suffix=".zip")
-
-    zipFile = ZipFile(fileName, mode='w', compression=compression)
-
-    basePath = getPath(folder.localPath, currentPath)
-    for entry in getCheckedEntries(request.GET):
-        path = getPath(folder.localPath, currentPath) + replaceEscapedUrl(entry)
-        if os.path.isfile(path):
-            __addFileToZip__(zipFile, path, basePath)
-        else:
-            addFolderToZip(zipFile, path)
-
-    zipFile.close()
-
-    FilesToDelete.objects.create(filePath=fileName)
-
-    return sendfile(request, fileName, attachment=True)
-
-
-def __addFileToZip__(zipFile, fileToAdd, basePath):
-    arcName = fileToAdd.replace(basePath, '')
-    zipFile.write(fileToAdd, arcName, compress_type=zipfile.ZIP_DEFLATED)
-
-
-def addFolderToZip(zipFile, folder):
-    __addFolderToZip__(zipFile, Path(folder), folder)
-
-
-def __addFolderToZip__(zipFile, folder, basePath):
-    for f in folder.iterdir():
-        if f.is_file():
-            arcName = f.as_posix().replace(basePath, '')
-            zipFile.write(f, arcName, compress_type=zipfile.ZIP_DEFLATED)
-        elif f.is_dir():
-            __addFolderToZip__(zipFile, f, basePath)
 
 
 def handleFileUpload(f, folder, currentPath):

@@ -2,7 +2,12 @@ from django.contrib.auth.models import User, Group
 from django.core.urlresolvers import reverse
 from django.test import Client
 
+import filecmp
+import os
+import re
+from shutil import rmtree
 import unittest
+from zipfile import ZipFile
 
 from  html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_WRITE, CAN_DELETE
 
@@ -160,3 +165,51 @@ class DownloadViewTest(BaseViewTest):
                 break
         
         self.assertTrue(foundAttachment)
+
+class DownloadZipViewTest(BaseViewTest):
+    def testDownloadZip(self):
+        self.login(self.user1)
+        response = self.client.get(reverse('downloadZip'),
+            data={'currentFolder': self.folder1.name,
+                  'currentPath': '/',
+                  'cb-file_a.txt': 'on',
+                  'cb-file_b.txt': 'on',
+                  'cb-dir_a': 'on'})
+
+        self.assertEquals(200, response.status_code)
+
+        attachmentRegex = re.compile(r'/tmp/download_\w+\.zip')
+        zipFileName = None
+        extractPath = "/tmp/extract"
+
+        try:
+            for item in list(response.items()):
+                if attachmentRegex.match(item[1]):
+                    zipFileName = item[1]
+                    break
+        
+            self.assertIsNotNone(zipFileName)
+
+            zipFile = ZipFile(zipFileName, mode='r')
+            entries = zipFile.infolist()
+
+            os.mkdir(extractPath)
+            for entry in entries:
+                zipFile.extract(entry, extractPath)
+
+            extractedFileA = os.path.join(extractPath, 'file_a.txt')
+            extractedFileB = os.path.join(extractPath, 'file_b.txt')
+            extractedTestFile = os.path.join(extractPath, 'dir_a/test_file.txt')
+
+            self.assertTrue(os.path.exists(extractedFileA))
+            self.assertTrue(os.path.exists(extractedFileB))
+            self.assertTrue(os.path.exists(extractedTestFile))
+
+            self.assertTrue(filecmp.cmp('html_browser/test_dir/file_a.txt', extractedFileA))
+            self.assertTrue(filecmp.cmp('html_browser/test_dir/file_b.txt', extractedFileB))
+            self.assertTrue(filecmp.cmp('html_browser/test_dir/dir_a/test_file.txt', extractedTestFile))
+        finally:
+            if os.path.exists(extractPath):
+                rmtree(extractPath)
+            if os.path.exists(zipFileName):
+                os.remove(zipFileName)
