@@ -188,7 +188,7 @@ def handleDelete(folder, currentPath, entries):
 
 def handleFileUpload(f, folder, currentPath):
     fileName = getPath(folder.localPath, currentPath) + f.name
-    dest = open(fileName, 'w')
+    dest = open(fileName, 'wb')
 
     for chunk in f.chunks():
         dest.write(chunk)
