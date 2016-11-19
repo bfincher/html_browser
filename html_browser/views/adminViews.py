@@ -5,6 +5,7 @@ from logging import DEBUG
 import re
 
 from django.contrib.auth.models import User, Group
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.shortcuts import render, redirect, render_to_response
 from django.template import RequestContext
@@ -45,6 +46,12 @@ for choice in html_browser.models.viewableChoices:
 
 
 class BaseAdminView(BaseView):
+    def _commonGetPost(self, request):
+        super(BaseAdminView, self)._commonGetPost(request)
+
+        if not request.user.is_staff:
+            raise PermissionDenied("User is not an admin")
+
     def appendFormErrors(self, form):
         if form.errors:
             for _dict in form.errors:
@@ -269,9 +276,6 @@ class DeleteUserView(BaseAdminView):
         super(DeleteUserView, self).post(request, *args, **kwargs)
         redirectUrl = const.BASE_URL + "userAdmin/"
 
-        if not request.user.is_staff:
-            raise RuntimeError("User is not an admin")
-
         if request.user.username == request.POST['userToDelete']:
             return self.redirect(redirectUrl, errorText="Unable to delete current user")
 
@@ -285,9 +289,6 @@ class DeleteUserView(BaseAdminView):
 class UserAdminView(BaseAdminView):
     def get(self, request, *args, **kwargs):
         super(UserAdminView, self).get(request, *args, **kwargs)
-
-        if not request.user.is_staff:
-            raise RuntimeError("User is not an admin")
 
         self.context['users'] = User.objects.all()
         return render(request, 'admin/user_admin.html', self.context)
@@ -305,8 +306,6 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
     def get(self, request, *args, **kwargs):
         super(AbstractUserView, self).get(request, *args, **kwargs)
         self.title = kwargs['title']
-        if not request.user.is_staff:
-            raise RuntimeError("User is not an admin")
 
         if not self.form:
             self.initForm(request)
@@ -321,8 +320,6 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
 
     def post(self, request, *args, **kwargs):
         super(AbstractUserView, self).post(request, *args, **kwargs)
-        if not request.user.is_staff:
-            raise RuntimeError("User is not an admin")
         errorText = None
 
         self.initForm(request)

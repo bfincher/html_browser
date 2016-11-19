@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template import RequestContext
@@ -86,11 +87,13 @@ class BaseView(View):
 
 
 class BaseContentView(BaseView):
-    def __init__(self):
+    def __init__(self, requireWrite=False, requireDelete=False):
         super(BaseContentView, self).__init__()
         self.folder = None
         self.currentFolder = None
         self.currentPath = None
+        self.requireWrite = requireWrite
+        self.requireDelete = requireDelete
 
     def _commonGetPost(self, request):
         super(BaseContentView, self)._commonGetPost(request)
@@ -101,13 +104,17 @@ class BaseContentView(BaseView):
             self.currentPath = h.unescape(getRequestField(self.request, 'currentPath'))
             self.folder = Folder.objects.filter(name=self.currentFolder)[0]
 
-        if self.currentFolder:
-            self.context['currentFolder'] = self.currentFolder
+            if self.requireDelete and not self.folder.userCanDelete(request.user):
+                raise PermissionDenied("Delete permission required")
+            if self.requireWrite and not self.folder.userCanWrite(request.user):
+                raise PermissionDenied("Write permission required")
+            if not self.folder.userCanRead(request.user):
+                raise PermissionDenied("Read permission required")
 
-        if self.currentPath:
+            self.context['currentFolder'] = self.currentFolder
             self.context['currentPath'] = self.currentPath
 
-class IndexView(BaseContentView):
+class IndexView(BaseView):
     def get(self, request, *args, **kwargs):
         super(IndexView, self).get(request, *args, **kwargs)
 
@@ -203,13 +210,11 @@ class DownloadZipView(BaseContentView):
 
 
 class UploadView(BaseContentView):
+    def __init__(self):
+        super(UploadView, self).__init__(requireWrite=True)
+
     def get(self, request, *args, **kwargs):
         super(UploadView, self).get(request, *args, **kwargs)
-
-        userCanWrite = self.folder.userCanWrite(request.user)
-
-        if not userCanWrite:
-            return HttpResponse("You don't have write permission on this folder")
 
         self.context['status'] = ''
         self.context['viewTypes'] = const.viewTypes
@@ -218,13 +223,11 @@ class UploadView(BaseContentView):
 
 
 class UploadActionView(BaseContentView):
+    def __init__(self):
+        super(UploadActionView, self).__init__(requireWrite=True)
+
     def post(self, request, *args, **kwargs):
         super(UploadActionView, self).post(request, *args, **kwargs)
-
-        userCanWrite = self.folder.userCanWrite(request.user)
-
-        if not userCanWrite:
-            return HttpResponse("You don't have write permission on this folder")
 
         action = request.POST['action']
         status = None
@@ -240,11 +243,6 @@ class UploadActionView(BaseContentView):
 
 def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
     folder = Folder.objects.filter(name=currentFolder)[0]
-    userCanRead = folder.userCanRead(request.user)
-
-    if not userCanRead:
-        return HttpResponse("You don't have read permission on this folder")
-
     currentDirEntries = getCurrentDirEntries(folder, currentPath, isShowHidden(request))
 
     for i in range(len(currentDirEntries)):
@@ -303,16 +301,14 @@ class ThumbView(BaseContentView):
 
 
 class DeleteImageView(BaseContentView):
+    def __init__(self):
+        super(DeleteImageView, self).__init__(requireDelete=True)
+
     def get(self, request, *args, **kwargs):
         super(DeleteImageView, self).get(request, *args, **kwargs)
 
-        userCanDelete = self.folder.userCanDelete(request.user)
-
-        if not userCanDelete:
-            status = "You don't have delete permission on this folder"
-        else:
-            handleDelete(self.folder, self.currentPath, request.GET['fileName'])
-            status = "File deleted"
+        handleDelete(self.folder, self.currentPath, request.GET['fileName'])
+        status = "File deleted"
 
         return self.redirect(const.CONTENT_URL, currentFolder=self.currentFolder, currentPath=self.currentPath, status=status)
 

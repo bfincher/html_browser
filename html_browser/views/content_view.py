@@ -5,6 +5,7 @@ import os
 from shutil import copy2, copytree, move
 from urllib.parse import quote_plus
 
+from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
 
 from .base_view import BaseContentView, isShowHidden
@@ -17,19 +18,14 @@ from html_browser.utils import getCurrentDirEntries,\
 
 class ContentView(BaseContentView):
 
-    def __setup__(self, request, getOrPost=None):
-        request = request
+    def _commonGetPost(self, request):
+        super(ContentView, self)._commonGetPost(request)
         self.userCanDelete = self.folder.userCanDelete(request.user)
         self.userCanWrite = self.userCanDelete or self.folder.userCanWrite(request.user)
         self.userCanRead = self.userCanWrite or self.folder.userCanRead(request.user)
 
     def post(self, request, *args, **kwargs):
         super(ContentView, self).post(request, *args, **kwargs)
-        self.__setup__(request)
-
-        if self.userCanRead is False:
-            self.reqLogger.warn("%s not allowed to read %s", request.user, self.currentFolder)
-            return redirect(const.BASE_URL, 'You are not authorized to view this page')
 
         self.status = ''
         self.statusError = False
@@ -88,12 +84,6 @@ class ContentView(BaseContentView):
 
     def get(self, request, *args, **kwargs):
         super(ContentView, self).get(request, *args, **kwargs)
-        self.__setup__(request)
-
-        if not self.userCanRead:
-            self.reqLogger.warn("%s not allowed to read %s", request.user, self.currentFolder)
-            return redirect(const.BASE_URL, 'You are not authorized to view this page')
-
         ContentView.deleteOldFiles()
 
         self.status = ''
