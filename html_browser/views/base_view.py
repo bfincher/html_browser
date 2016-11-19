@@ -221,13 +221,8 @@ class UploadView(BaseContentView):
 
         return render(request, 'upload.html', self.context)
 
-
-class UploadActionView(BaseContentView):
-    def __init__(self):
-        super(UploadActionView, self).__init__(requireWrite=True)
-
     def post(self, request, *args, **kwargs):
-        super(UploadActionView, self).post(request, *args, **kwargs)
+        super(UploadView, self).post(request, *args, **kwargs)
 
         action = request.POST['action']
         status = None
