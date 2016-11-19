@@ -6,7 +6,9 @@ import filecmp
 import os
 import re
 from shutil import rmtree
+import tempfile
 import unittest
+import zipfile
 from zipfile import ZipFile
 
 from  html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_WRITE, CAN_DELETE
@@ -289,3 +291,40 @@ class UploadViewTest(BaseViewTest):
         finally:
             if os.path.exists('html_browser/test_dir/dir_a/file_a.txt'):
                 os.remove('html_browser/test_dir/dir_a/file_a.txt')
+
+    def testUploadZip(self):
+        self.login(self.user1)
+
+        zipFileName = tempfile.mktemp(prefix="test_zip", suffix=".zip")
+        destFiles = []
+        try:
+            zipFile = ZipFile(zipFileName, mode='w', compression=zipfile.ZIP_DEFLATED)
+            basePath = 'html_browser/test_dir/'
+
+            entries = ['html_browser/test_dir/file_a.txt',
+                       'html_browser/test_dir/file_b.txt']
+
+            for entry in entries:
+                arcName = entry.replace(basePath, '')
+                zipFile.write(entry, arcName, compress_type=zipfile.ZIP_DEFLATED)
+
+            zipFile.close()
+
+            with open(zipFileName, 'rb') as f:
+                response = self.client.post(reverse('upload'),
+                    data={'currentFolder': self.folder1.name,
+                          'currentPath': '/dir_a',
+                          'action': 'uploadZip',
+                          'zipupload1': f})
+
+                self.assertEquals(302, response.status_code)
+                destFiles = ['html_browser/test_dir/dir_a/file_a.txt',
+                             'html_browser/test_dir/dir_a/file_b.txt']
+                for destFile in destFiles:
+                    self.assertTrue(os.path.exists(destFile))
+        finally:
+            if os.path.exists(zipFileName):
+                os.remove(zipFileName)
+            for destFile in destFiles:
+                if os.path.exists(destFile):
+                    os.remove(destFile)
