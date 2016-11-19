@@ -28,21 +28,22 @@ logger = logging.getLogger('html_browser.base_view')
 imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$", re.IGNORECASE)
 
 
+def isShowHidden(request):
+    return request.session.get('showHidden', False)
+
+
 class BaseView(View):
     def __init__(self):
         self.reqLogger = getReqLogger()
-        self.folder = None
-        self.currentFolder = None
-        self.currentPath = None
         self.errorHtml = ""
 
     def get(self, request, *args, **kwargs):
-        self.__commonGetPost(request)
+        self._commonGetPost(request)
 
     def post(self, request, *args, **kwargs):
-        self.__commonGetPost(request)
+        self._commonGetPost(request)
 
-    def __commonGetPost(self, request):
+    def _commonGetPost(self, request):
         self.reqLogger.info(self.__class__.__name__)
         if self.reqLogger.isEnabledFor(DEBUG):
             _dict = None
@@ -58,12 +59,6 @@ class BaseView(View):
                     else:
                         self.reqLogger.debug("%s: %s", key, value)
 
-        self.currentFolder = getRequestField(self.request, 'currentFolder')
-        if self.currentFolder:
-            h = HTMLParser()
-            self.currentPath = h.unescape(getRequestField(self.request, 'currentPath'))
-            self.folder = Folder.objects.filter(name=self.currentFolder)[0]
-
         self.context = {'user': request.user,
                         'const': const}
 
@@ -78,27 +73,6 @@ class BaseView(View):
             if errorHtml:
                 self.context['errorHtml'] = errorHtml
 
-        if self.currentFolder:
-            self.context['currentFolder'] = self.currentFolder
-
-        if self.currentPath:
-            self.context['currentPath'] = self.currentPath
-
-    def appendFormErrors(self, form):
-        if form.errors:
-            for _dict in form.errors:
-                self.errorHtml = self.errorHtml + _dict.as_ul()
-
-        try:
-            if form.non_form_errors:
-                for _dict in form.non_form_errors():
-                    self.errorHtml = self.errorHtml + _dict.as_ul()
-        except AttributeError as e:
-            pass
-
-        if self.errorHtml:
-            self.context['errorHtml'] = self.errorHtml
-
     def redirect(self, url, *args, **kwargs):
         redirectUrl = url
 
@@ -110,12 +84,30 @@ class BaseView(View):
 
         return redirect(redirectUrl)
 
-    @staticmethod
-    def isShowHidden(request):
-        return request.session.get('showHidden', False)
 
+class BaseContentView(BaseView):
+    def __init__(self):
+        super(BaseContentView, self).__init__()
+        self.folder = None
+        self.currentFolder = None
+        self.currentPath = None
 
-class IndexView(BaseView):
+    def _commonGetPost(self, request):
+        super(BaseContentView, self)._commonGetPost(request)
+
+        self.currentFolder = getRequestField(self.request, 'currentFolder')
+        if self.currentFolder:
+            h = HTMLParser()
+            self.currentPath = h.unescape(getRequestField(self.request, 'currentPath'))
+            self.folder = Folder.objects.filter(name=self.currentFolder)[0]
+
+        if self.currentFolder:
+            self.context['currentFolder'] = self.currentFolder
+
+        if self.currentPath:
+            self.context['currentPath'] = self.currentPath
+
+class IndexView(BaseContentView):
     def get(self, request, *args, **kwargs):
         super(IndexView, self).get(request, *args, **kwargs)
 
@@ -161,7 +153,7 @@ class LogoutView(BaseView):
         return redirect(const.BASE_URL)
 
 
-class DownloadView(BaseView):
+class DownloadView(BaseContentView):
     def get(self, request, *args, **kwargs):
         super(DownloadView, self).get(request, *args, **kwargs)
 
@@ -172,7 +164,7 @@ class DownloadView(BaseView):
         return sendfile(request, filePath, attachment=True)
 
 
-class DownloadZipView(BaseView):
+class DownloadZipView(BaseContentView):
     def get(self, request, *args, **kwargs):
         super(DownloadZipView, self).get(request, *args, **kwargs)
 
@@ -210,7 +202,7 @@ class DownloadZipView(BaseView):
                 self.__addFolderToZip__(f)
 
 
-class UploadView(BaseView):
+class UploadView(BaseContentView):
     def get(self, request, *args, **kwargs):
         super(UploadView, self).get(request, *args, **kwargs)
 
@@ -225,7 +217,7 @@ class UploadView(BaseView):
         return render(request, 'upload.html', self.context)
 
 
-class UploadActionView(BaseView):
+class UploadActionView(BaseContentView):
     def post(self, request, *args, **kwargs):
         super(UploadActionView, self).post(request, *args, **kwargs)
 
@@ -253,7 +245,7 @@ def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
     if not userCanRead:
         return HttpResponse("You don't have read permission on this folder")
 
-    currentDirEntries = getCurrentDirEntries(folder, currentPath, BaseView.isShowHidden(request))
+    currentDirEntries = getCurrentDirEntries(folder, currentPath, isShowHidden(request))
 
     for i in range(len(currentDirEntries)):
         if currentDirEntries[i].name == fileName:
@@ -263,7 +255,7 @@ def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
             return result
 
 
-class ImageView(BaseView):
+class ImageView(BaseContentView):
     def get(self, request, *args, **kwargs):
         super(ImageView, self).get(request, *args, **kwargs)
 
@@ -304,13 +296,13 @@ class ImageView(BaseView):
         return render(request, 'image_view.html', self.context)
 
 
-class ThumbView(BaseView):
+class ThumbView(BaseContentView):
     def get(self, request, *args, **kwargs):
         super(ThumbView, self).get(request, *args, **kwargs)
         return render(request, 'test_image.html')
 
 
-class DeleteImageView(BaseView):
+class DeleteImageView(BaseContentView):
     def get(self, request, *args, **kwargs):
         super(DeleteImageView, self).get(request, *args, **kwargs)
 
@@ -325,7 +317,7 @@ class DeleteImageView(BaseView):
         return self.redirect(const.CONTENT_URL, currentFolder=self.currentFolder, currentPath=self.currentPath, status=status)
 
 
-class GetNextImageView(BaseView):
+class GetNextImageView(BaseContentView):
     def get(self, request, *args, **kwargs):
         super(GetNextImageView, self).get(request, *args, **kwargs)
 

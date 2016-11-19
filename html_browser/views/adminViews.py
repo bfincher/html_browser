@@ -44,13 +44,30 @@ for choice in html_browser.models.viewableChoices:
     folderViewOptions.append(option)
 
 
-class AdminView(BaseView):
+class BaseAdminView(BaseView):
+    def appendFormErrors(self, form):
+        if form.errors:
+            for _dict in form.errors:
+                self.errorHtml = self.errorHtml + _dict.as_ul()
+
+        try:
+            if form.non_form_errors:
+                for _dict in form.non_form_errors():
+                    self.errorHtml = self.errorHtml + _dict.as_ul()
+        except AttributeError as e:
+            pass
+
+        if self.errorHtml:
+            self.context['errorHtml'] = self.errorHtml
+
+
+class AdminView(BaseAdminView):
     def get(self, request, *args, **kwargs):
         super(AdminView, self).get(request, *args, **kwargs)
         return render(request, 'admin/admin.html', self.context)
 
 
-class FolderAdminView(BaseView):
+class FolderAdminView(BaseAdminView):
     def get(self, request, *args, **kwargs):
         super(FolderAdminView, self).get(request, *args, **kwargs)
 
@@ -58,14 +75,14 @@ class FolderAdminView(BaseView):
         return render(request, 'admin/folder_admin.html', self.context)
 
 
-class DeleteFolderView(BaseView):
+class DeleteFolderView(BaseAdminView):
     def post(self, request, *args, **kwargs):
         super(DeleteFolderView, self).post(request, *args, **kwargs)
         Folder.objects.filter(name=request.POST['name']).delete()
         return redirect('folderAdmin')
 
 
-class AbstractFolderView(BaseView, metaclass=ABCMeta):
+class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
 
     def __init__(self, *args, **kwargs):
         super(AbstractFolderView, self).__init__(*args, **kwargs)
@@ -178,7 +195,7 @@ class AddFolderView(AbstractFolderView):
             self.groupPermFormset = GroupPermissionFormSet(request.POST)
 
 
-class AddGroupView(BaseView):
+class AddGroupView(BaseAdminView):
     def post(self, request, *args, **kwargs):
         super(AddGroupView, self).post(request, *args, **kwargs)
         errorText = None
@@ -197,7 +214,7 @@ class AddGroupView(BaseView):
         return self.redirect(const.BASE_URL + "groupAdmin/", errorText=errorText)
 
 
-class DeleteGroupView(BaseView):
+class DeleteGroupView(BaseAdminView):
     def post(self, request, *args, **kwargs):
         super(DeleteGroupView, self).__init__(*args, **kwargs)
         groupName = request.POST['groupToDelete']
@@ -207,7 +224,7 @@ class DeleteGroupView(BaseView):
         return redirect('groupAdmin')
 
 
-class EditGroupView(BaseView):
+class EditGroupView(BaseAdminView):
     def get(self, request, groupName, *args, **kwargs):
         super(EditGroupView, self).get(request, *args, **kwargs)
         group = Group.objects.get(name=groupName)
@@ -236,7 +253,7 @@ class EditGroupView(BaseView):
         return redirect('groupAdmin')
 
 
-class GroupAdminView(BaseView):
+class GroupAdminView(BaseAdminView):
     def get(self, request, *args, **kwargs):
         super(GroupAdminView, self).get(request, *args, **kwargs)
         groups = []
@@ -247,7 +264,7 @@ class GroupAdminView(BaseView):
         return render(request, 'admin/group_admin.html', self.context)
 
 
-class DeleteUserView(BaseView):
+class DeleteUserView(BaseAdminView):
     def post(self, request, *args, **kwargs):
         super(DeleteUserView, self).post(request, *args, **kwargs)
         redirectUrl = const.BASE_URL + "userAdmin/"
@@ -265,7 +282,7 @@ class DeleteUserView(BaseView):
         return redirect(redirectUrl)
 
 
-class UserAdminView(BaseView):
+class UserAdminView(BaseAdminView):
     def get(self, request, *args, **kwargs):
         super(UserAdminView, self).get(request, *args, **kwargs)
 
@@ -276,7 +293,7 @@ class UserAdminView(BaseView):
         return render(request, 'admin/user_admin.html', self.context)
 
 
-class AbstractUserView(BaseView, metaclass=ABCMeta):
+class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
 
     def __init__(self, *args, **kwargs):
         super(AbstractUserView, self).__init__(*args, **kwargs)
@@ -355,13 +372,13 @@ class AddUserView(AbstractUserView):
             self.form = AddUserForm(request.POST)
 
 
-class ChangePasswordView(BaseView):
+class ChangePasswordView(BaseAdminView):
     def get(self, request, *args, **kwargs):
         super(ChangePasswordView, self).get(request, *args, **kwargs)
         return render(request, 'admin/change_password.html', self.context)
 
 
-class ChangePasswordResultView(BaseView):
+class ChangePasswordResultView(BaseAdminView):
     def get(self, request, *args, **kwargs):
         super(ChangePasswordView, self).get(request, *args, **kwargs)
         user = request.user

@@ -7,7 +7,7 @@ from urllib.parse import quote_plus
 
 from django.shortcuts import redirect, render
 
-from .base_view import BaseView
+from .base_view import BaseContentView, isShowHidden
 from html_browser.models import FilesToDelete, Folder
 from html_browser.constants import _constants as const
 from html_browser.utils import getCurrentDirEntries,\
@@ -15,7 +15,7 @@ from html_browser.utils import getCurrentDirEntries,\
     getCheckedEntries
 
 
-class ContentView(BaseView):
+class ContentView(BaseContentView):
 
     def __setup__(self, request, getOrPost=None):
         request = request
@@ -134,7 +134,7 @@ class ContentView(BaseView):
         self.context['userCanDelete'] = str(self.userCanDelete).lower()
         self.context['status'] = self.status
         self.context['breadcrumbs'] = self.breadcrumbs
-        self.context['showHidden'] = BaseView.isShowHidden(request)
+        self.context['showHidden'] = isShowHidden(request)
 
         if self.statusError:
             self.context['statusError'] = True
@@ -143,7 +143,7 @@ class ContentView(BaseView):
 #            search = request.GET['search']
 #            return self._handleSearch(request, search)
 
-        currentDirEntries = getCurrentDirEntries(self.folder, self.currentPath, BaseView.isShowHidden(request), contentFilter)
+        currentDirEntries = getCurrentDirEntries(self.folder, self.currentPath, isShowHidden(request), contentFilter)
 
         viewType = request.session.get('viewType', const.viewTypes[0])
 
