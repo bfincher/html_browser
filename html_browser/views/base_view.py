@@ -1,28 +1,28 @@
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template import RequestContext
+from django.views import View
+
+from html_browser.constants import _constants as const
 from html_browser.models import Folder, FilesToDelete
-from django.contrib.auth import login as auth_login, logout as auth_logout
-import html_browser
 from html_browser.utils import getCurrentDirEntries, handleDelete,\
     getPath,\
     handleFileUpload, handleZipUpload,\
     getRequestField, getReqLogger,\
     getCheckedEntries, replaceEscapedUrl
-from html_browser.constants import _constants as const
-from django.contrib.auth import authenticate
-from sendfile import sendfile
+
+from html.parser import HTMLParser
+import json
+import logging
+from logging import DEBUG
 import os
 from pathlib import Path
 import re
-import json
+from sendfile import sendfile
 import tempfile
 import zipfile
 from zipfile import ZipFile
-from django.http import HttpResponse
-from django.views import View
-import logging
-from logging import DEBUG
-from html.parser import HTMLParser
 
 logger = logging.getLogger('html_browser.base_view')
 imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$", re.IGNORECASE)
