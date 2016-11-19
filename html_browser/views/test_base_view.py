@@ -21,6 +21,10 @@ def contextCheck(testCase, context, user=None, folder=None):
 
 class BaseViewTest(unittest.TestCase):
     def setUp(self):
+         User.objects.all().delete()
+         Group.objects.all().delete()
+         Folder.objects.all().delete()
+
          self.user1 = User()
          self.user1.username = 'user1'
          self.user1Pw = 'test_pw_1'
@@ -39,8 +43,16 @@ class BaseViewTest(unittest.TestCase):
          self.user2.groups.add(group1)
          self.user2.save()
 
+         self.user3 = User()
+         self.user3.username = 'user3'
+         self.user3Pw = 'test_pw_3'
+         self.user3.set_password(self.user3Pw)
+         self.user3.save()
+         self.user3.save()
+
          self.users = {self.user1.username: self.user1Pw,
-                       self.user2.username: self.user2Pw}
+                       self.user2.username: self.user2Pw,
+                       self.user3.username: self.user3Pw}
 
          self.folder1 = Folder()
          self.folder1.name = 'test'
@@ -48,11 +60,17 @@ class BaseViewTest(unittest.TestCase):
          self.folder1.viewOption = 'P'
          self.folder1.save()
 
-         userPerm1 = UserPermission()
-         userPerm1.folder = self.folder1
-         userPerm1.permission = CAN_DELETE
-         userPerm1.user = self.user1
-         userPerm1.save()
+         userPerm = UserPermission()
+         userPerm.folder = self.folder1
+         userPerm.permission = CAN_DELETE
+         userPerm.user = self.user1
+         userPerm.save()
+
+         userPerm = UserPermission()
+         userPerm.folder = self.folder1
+         userPerm.permission = CAN_READ
+         userPerm.user = self.user3
+         userPerm.save()
 
          self.folder2 = Folder()
          self.folder2.name = 'test2'
@@ -166,6 +184,7 @@ class DownloadViewTest(BaseViewTest):
         
         self.assertTrue(foundAttachment)
 
+
 class DownloadZipViewTest(BaseViewTest):
     def testDownloadZip(self):
         self.login(self.user1)
@@ -213,3 +232,60 @@ class DownloadZipViewTest(BaseViewTest):
                 rmtree(extractPath)
             if os.path.exists(zipFileName):
                 os.remove(zipFileName)
+
+
+class UploadViewTest(BaseViewTest):
+    def testGet(self):
+        self.login(self.user1)
+        response = self.client.get(reverse('upload'),
+            data={'currentFolder': self.folder1.name,
+                  'currentPath': '/'})
+
+        self.assertEquals(200, response.status_code)
+        context = response.context[0]
+        contextCheck(self, context)
+        self.assertEquals('upload.html', response.templates[0].name)
+
+        ### test unauthorized user
+        self.logout()
+        self.login(self.user3)
+        response = self.client.get(reverse('upload'),
+            data={'currentFolder': self.folder1.name,
+                  'currentPath': '/'})
+
+        self.assertEquals(403, response.status_code)
+
+    def testUpload(self):
+        self.login(self.user1)
+        
+        try:
+            with open('html_browser/test_dir/file_a.txt', 'r') as f:
+                response = self.client.post(reverse('upload'),
+                    data={'currentFolder': self.folder1.name,
+                          'currentPath': '/dir_a',
+                          'action': 'uploadFile',
+                          'upload1': f})
+
+            self.assertEquals(302, response.status_code)
+
+            self.assertTrue(os.path.exists('html_browser/test_dir/dir_a/file_a.txt'))
+            self.assertTrue(filecmp.cmp('html_browser/test_dir/dir_a/file_a.txt', 'html_browser/test_dir/dir_a/file_a.txt'))
+        finally:
+            if os.path.exists('html_browser/test_dir/dir_a/file_a.txt'):
+                os.remove('html_browser/test_dir/dir_a/file_a.txt')
+
+    def testUploadNoAuth(self):
+        self.login(self.user3)
+        
+        try:
+            with open('html_browser/test_dir/file_a.txt', 'r') as f:
+                response = self.client.post(reverse('upload'),
+                    data={'currentFolder': self.folder1.name,
+                          'currentPath': '/dir_a',
+                          'action': 'uploadFile',
+                          'upload1': f})
+
+            self.assertEquals(403, response.status_code)
+        finally:
+            if os.path.exists('html_browser/test_dir/dir_a/file_a.txt'):
+                os.remove('html_browser/test_dir/dir_a/file_a.txt')
