@@ -21,8 +21,8 @@ from pathlib import Path
 import re
 from sendfile import sendfile
 import tempfile
-import zipfile
-from zipfile import ZipFile
+import zipfile
+from zipfile import ZipFile
 
 logger = logging.getLogger('html_browser.base_view')
 imageRegex = re.compile("^([a-z])+.*\.(jpg|png|gif|bmp|avi)$", re.IGNORECASE)
@@ -176,42 +176,38 @@ class DownloadZipView(BaseView):
     def get(self, request, *args, **kwargs):
         super(DownloadZipView, self).get(request, *args, **kwargs)
 
-        currentFolder = request.GET['currentFolder']
-        currentPath = request.GET['currentPath']
-        folder = Folder.objects.filter(name=currentFolder)[0]
-
-        compression = zipfile.ZIP_DEFLATED
-
+        currentFolder = request.GET['currentFolder']
+        currentPath = request.GET['currentPath']
+        folder = Folder.objects.filter(name=currentFolder)[0]
+        compression = zipfile.ZIP_DEFLATED
         fileName = tempfile.mktemp(prefix="download_", suffix=".zip")
+        self.zipFile = ZipFile(fileName, mode='w', compression=compression)
 
-        self.zipFile = ZipFile(fileName, mode='w', compression=compression)
-
-        self.basePath = getPath(folder.localPath, currentPath)
+        self.basePath = getPath(folder.localPath, currentPath)
         for entry in getCheckedEntries(request.GET):
-            path = getPath(folder.localPath, currentPath) + replaceEscapedUrl(entry)
-            if os.path.isfile(path):
-                self.__addFileToZip__(path)
-            else:
-                self.__addFolderToZip__(Path(path))
+            path = getPath(folder.localPath, currentPath) + replaceEscapedUrl(entry)
+            if os.path.isfile(path):
+                self.__addFileToZip__(path)
+            else:
+                self.__addFolderToZip__(Path(path))
 
-        self.zipFile.close()
+        self.zipFile.close()
 
         FilesToDelete.objects.create(filePath=fileName)
 
-        return sendfile(request, fileName, attachment=True)
+        return sendfile(request, fileName, attachment=True)
 
-    def __addFileToZip__(self, fileToAdd):
-        arcName = fileToAdd.replace(self.basePath, '')
-        self.zipFile.write(fileToAdd, arcName, compress_type=zipfile.ZIP_DEFLATED)
+    def __addFileToZip__(self, fileToAdd):
+        arcName = fileToAdd.replace(self.basePath, '')
+        self.zipFile.write(fileToAdd, arcName, compress_type=zipfile.ZIP_DEFLATED)
 
-
-    def __addFolderToZip__(self, folder):
+    def __addFolderToZip__(self, folder):
         for f in folder.iterdir():
             if f.is_file():
                 arcName = f.as_posix().replace(self.basePath, '')
-                self.zipFile.write(f.as_posix(), arcName, compress_type=zipfile.ZIP_DEFLATED)
+                self.zipFile.write(f.as_posix(), arcName, compress_type=zipfile.ZIP_DEFLATED)
             elif f.is_dir():
-                self.__addFolderToZip__(f)
+                self.__addFolderToZip__(f)
 
 
 class UploadView(BaseView):
