@@ -175,6 +175,14 @@ class DownloadView(BaseContentView):
         return sendfile(request, filePath, attachment=True)
 
 
+class DownloadImageView(BaseContentView):
+    def get(self, request, path, *args, **kwargs):
+        super(DownloadImageView, self).get(request, *args, **kwargs)
+
+        imagePath = os.path.join(Folder.objects.get(name='Pictures').localPath, path)
+        return sendfile(request, imagePath, attachment=False)
+
+
 class DownloadZipView(BaseContentView):
     def get(self, request, *args, **kwargs):
         super(DownloadZipView, self).get(request, *args, **kwargs)

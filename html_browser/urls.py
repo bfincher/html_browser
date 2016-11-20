@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from html_browser.models import Folder
 from html_browser.views import base_view, content_view
 from html_browser.views import adminViews as admin_views
 
@@ -31,3 +32,6 @@ urlpatterns = [
     url(r'hbChangePassword/.*', admin_views.ChangePasswordView.as_view(), name='changePassword'),
     url(r'hbChangePasswordResult/.*', admin_views.ChangePasswordResultView.as_view(), name='changePasswordResult'),
     ]
+
+for folder in Folder.objects.all():
+    urlpatterns.append(url(r'__%s__/(?P<path>.*?)$' % folder.name, base_view.DownloadImageView.as_view(), name='download%sImage' % folder.name))
