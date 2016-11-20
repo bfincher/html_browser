@@ -1,3 +1,8 @@
 {% extends "admin/add_edit_folder.html" %}
 {% block title %}Edit Folder{% endblock %}
 
+{% block extra_js %}
+{{ block.super }}
+<script>setDeleteFolderUrl("{% url 'deleteFolder' folder.name %}");</script>
+{% endblock %}
+

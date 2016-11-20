@@ -1,4 +1,5 @@
 from django import forms
+from django.core.urlresolvers import reverse
 from django.forms import inlineformset_factory, BaseInlineFormSet
 from django.template.loader import render_to_string
 from django.template.context import Context
@@ -6,7 +7,6 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Button, Layout, LayoutObject, TEMPLATE_PACK, HTML
 
 from html_browser.models import Folder, UserPermission, GroupPermission, User, Group
-from html_browser.constants import _constants as const
 
 
 class Formset(LayoutObject):
@@ -69,7 +69,7 @@ class AddFolderForm(forms.ModelForm):
                                     addGroupPermHtml)
 
         self.helper.form_method = 'post'
-        self.helper.form_action = '%saddFolder/' % const.BASE_URL
+        self.helper.form_action = 'saddFolder'
 
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
@@ -82,7 +82,7 @@ class EditFolderForm(AddFolderForm):
         self.fields['name'].widget = forms.HiddenInput()
 
         instance = kwargs['instance']
-        self.helper.form_action = '%seditFolder/%s/' % (const.BASE_URL, instance.name)
+        self.helper.form_action = reverse('editFolder', args=[instance.name])
 
         self.helper.add_input(Button('delete', 'Delete Folder', css_class='btn', onclick="confirmDelete('%s')" % instance.name))
 
@@ -181,7 +181,7 @@ class EditGroupForm(forms.Form):
         super(EditGroupForm, self).__init__(*args, **kwargs)
 
         if instance:
-            self.helper.form_action = '%seditGroup/%s/' % (const.BASE_URL, instance.name)
+            self.helper.form_action = reverse('editGroup', args=[instance.name])
             activeUsers = []
 
             for user in User.objects.filter(groups__id=instance.id):

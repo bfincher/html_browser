@@ -20,8 +20,6 @@ from .adminForms import AddUserForm, EditUserForm, EditGroupForm,\
 
 from .base_view import BaseView
 
-from html_browser.constants import _constants as const
-
 groupNameRegex = re.compile(r'^\w+$')
 _permMap = {'read': CAN_READ, 'write': CAN_WRITE, 'delete': CAN_DELETE}
 logger = logging.getLogger('html_browser.adminViews')
@@ -83,9 +81,10 @@ class FolderAdminView(BaseAdminView):
 
 
 class DeleteFolderView(BaseAdminView):
-    def post(self, request, *args, **kwargs):
+    def post(self, request, folderName, *args, **kwargs):
         super(DeleteFolderView, self).post(request, *args, **kwargs)
-        Folder.objects.filter(name=request.POST['name']).delete()
+        logger.debug("BKF inside DeleteFolderView.post.  folderName = %s", folderName)
+        Folder.objects.filter(name=folderName).delete()
         return redirect('folderAdmin')
 
 
@@ -218,13 +217,12 @@ class AddGroupView(BaseAdminView):
         else:
             errorText = "Invalid group name.  Must only contain letters, numbers, and underscores"
 
-        return self.redirect(const.BASE_URL + "groupAdmin/", errorText=errorText)
+        return self.redirect("groupAdmin", errorText=errorText)
 
 
 class DeleteGroupView(BaseAdminView):
-    def post(self, request, *args, **kwargs):
+    def post(self, request, groupName, *args, **kwargs):
         super(DeleteGroupView, self).__init__(*args, **kwargs)
-        groupName = request.POST['groupToDelete']
         group = Group.objects.get(name=groupName)
         group.delete()
 
@@ -274,7 +272,7 @@ class GroupAdminView(BaseAdminView):
 class DeleteUserView(BaseAdminView):
     def post(self, request, *args, **kwargs):
         super(DeleteUserView, self).post(request, *args, **kwargs)
-        redirectUrl = const.BASE_URL + "userAdmin/"
+        redirectUrl = "userAdmin"
 
         if request.user.username == request.POST['userToDelete']:
             return self.redirect(redirectUrl, errorText="Unable to delete current user")
@@ -341,7 +339,7 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
                 reqLogger.error('form.errors = %s', self.form.errors)
                 return self.get(request, *args, **kwargs)
 
-        return self.redirect(const.BASE_URL + "userAdmin/", errorText=errorText)
+        return self.redirect("userAdmin", errorText=errorText)
 
 
 class EditUserView(AbstractUserView):

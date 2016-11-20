@@ -5,19 +5,19 @@
     <title>HTML File Explorer</title>
 
     <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
-    <script src="{{ const.MEDIA_URL }}bootstrap/js/bootstrap.min.js"></script>
+    <script src="{{ MEDIA_URL }}bootstrap/js/bootstrap.min.js"></script>
 
-    <script src="{{ const.MEDIA_URL }}base.js"></script>
+    <script src="{{ MEDIA_URL }}base.js"></script>
     <script type="text/javascript">
         setBaseUrl("{{ const.BASE_URL }}");
-        setMediaUrl("{{ const.MEDIA_URL }}");        
+        setMediaUrl("{{ MEDIA_URL }}");        
         setImageUrl("{{ const.IMAGE_URL }}");
     </script>
     {% block extra_js %} {% endblock %}
 
-    <link rel="stylesheet" href="{{ const.MEDIA_URL }}/html_browser.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}/html_browser.css" type="text/css" media="screen" title="no title" charset="utf-8">
 
-    <link rel="stylesheet" href="{{ const.MEDIA_URL }}bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}bootstrap/css/bootstrap.min.css">
     <style type="text/css">
             body {
                     padding-top: 60px;
@@ -40,13 +40,13 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{{ const.BASE_URL }}">HTML File Explorer</a>
+          <a class="navbar-brand" href="{% url 'index' %}">HTML File Explorer</a>
         </div>
       <div id="navbar" class="navbar-collapse collapse">
          <ul class="nav navbar-nav">
            {% if user.is_authenticated %}
              {% if user.is_staff %}
-               <li class="active"><a href="{{ const.BASE_URL }}hbAdmin">Administration</a></li>
+               <li class="active"><a href="{% url 'admin' %}">Administration</a></li>
              {% endif %}
 
              {% block additional_navbar %}
@@ -57,11 +57,11 @@
            {% if user.is_authenticated %}
              <ul class="nav navbar-nav navbar-right" >
                <li class="active"><a href="#" > {{ user.username }} </a> </li>
-               <li class="active"><a href="{{ const.BASE_URL }}hbChangePassword" >Change Password </a></li>
-               <li class="active"><a href="{{ const.BASE_URL }}hbLogout/" >Log Out  </a></li>
+               <li class="active"><a href="{% url 'changePassword' %}" >Change Password </a></li>
+               <li class="active"><a href="{% url 'logout'%}" >Log Out  </a></li>
              </ul>
            {% else %}
-             <form class="navbar-form navbar-right" action="{{ const.BASE_URL }}hbLogin/" method="post" > {% csrf_token %}
+             <form class="navbar-form navbar-right" action="{% url 'login' %}" method="post" > {% csrf_token %}
                <input class="form-control" name="userName" type="text" placeholder="User Name">
                <input class="form-control" name="password" type="password" placeholder="Password">
                <button type="submit" class="btn btn-success">Sign in</button>

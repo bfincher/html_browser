@@ -2,7 +2,7 @@ function setCsrf(_csrf) {
     csrf = _csrf;
 }
 
-function postForm(form, path, params, method="post", appendToDoc=false) {
+function postForm(form, path, params={}, method="post", appendToDoc=false) {
     form.attr("method", method);
     form.attr("action", path);
 
@@ -26,7 +26,7 @@ function postForm(form, path, params, method="post", appendToDoc=false) {
     form.submit();
 }
 
-function post(path, params, method="post") {
+function post(path, params={}, method="post") {
     var form = $('<form></form>');
     postForm(form, path, params, method, true);
 }

@@ -1,5 +1,5 @@
 {% extends "entry_base.html" %}
 
-{% block content_url %}{{ const.CONTENT_URL }}{% endblock %}
+{% block content_url %}{% url 'content' %}{% endblock %}
 {% block extra_args %}/{{ entry.nameUrl }}{%endblock %}
 {% block image_url %}{{ const.IMAGE_URL }}folder-blue-icon.png{% endblock %}

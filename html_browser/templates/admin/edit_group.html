@@ -31,6 +31,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ const.MEDIA_URL }}edit_group.js"></script>
+<script src="{{ MEDIA_URL }}edit_group.js"></script>
+<script>setDeleteGroupUrl("{% url 'deleteGroup' groupName %}");</script>
 {% endblock %}
 

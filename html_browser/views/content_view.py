@@ -94,12 +94,13 @@ class ContentView(BaseContentView):
         if 'statusError' in request.GET:
             self.statusError = request.GET['statusError']
 
+        contentUrl = reverse('content')
         self.breadcrumbs = None
         crumbs = self.currentPath.split("/")
         if len(crumbs) > 1:
             self.breadcrumbs = "<a href=\"%s\">Home</a> " % const.BASE_URL
-            self.breadcrumbs = self.breadcrumbs + "&rsaquo; <a href=\"%scontent/?currentFolder=%s&currentPath=\">%s</a> " %\
-            (const.BASE_URL, self.currentFolder, self.currentFolder)
+            self.breadcrumbs = self.breadcrumbs + "&rsaquo; <a href=\"%s/?currentFolder=%s&currentPath=\">%s</a> " %\
+            (contentUrl, self.currentFolder, self.currentFolder)
 
             crumbs = self.currentPath.split("/")
             accumulated = ""
@@ -109,8 +110,8 @@ class ContentView(BaseContentView):
                     accumulated = "/".join([accumulated, crumb])
                     self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
                     if len(crumbs) > 0:
-                        self.breadcrumbs = self.breadcrumbs + "<a href=\"%scontent/?currentFolder=%s&currentPath=%s\">%s</a> " %\
-                        (const.BASE_URL, self.currentFolder, accumulated, crumb)
+                        self.breadcrumbs = self.breadcrumbs + "<a href=\"%s/?currentFolder=%s&currentPath=%s\">%s</a> " %\
+                        (contentUrl, self.currentFolder, accumulated, crumb)
                     else:
                         self.breadcrumbs = self.breadcrumbs + crumb
 

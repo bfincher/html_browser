@@ -28,7 +28,7 @@
 		<tr>
 			<td>
 				<form ENCTYPE="multipart/form-data" method="POST" 
-				    action="{{ const.BASE_URL }}/upload/"> {% csrf_token %}
+				    action="{% url 'upload'%}"> {% csrf_token %}
                 <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
                 <input type="hidden" name="currentPath" value="{{ currentPath }}" />
                 <input type="hidden" name="action" value="uploadFile"/>

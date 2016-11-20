@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template import RequestContext
@@ -75,7 +76,10 @@ class BaseView(View):
                 self.context['errorHtml'] = errorHtml
 
     def redirect(self, url, *args, **kwargs):
-        redirectUrl = url
+        if url.startswith(const.BASE_URL):
+            redirectUrl = url
+        else:
+            redirectUrl = reverse(url)
 
         separator = '?'
         for key, value in sorted(kwargs.items()):

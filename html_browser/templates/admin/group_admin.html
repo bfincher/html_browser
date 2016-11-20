@@ -33,7 +33,7 @@
 		
         {% for group in groups %}
 		<tr>
-			<td><a href="{{ const.BASE_URL }}editGroup/{{ group }}">{{ group }} </a></td>
+			<td><a href="{% url 'editGroup' group %}">{{ group }} </a></td>
 		</tr>
 		{% endfor %}
 	</table>
@@ -41,5 +41,5 @@
 	<br/>
 	<center><a href="javascript:addGroup()">Add Group</a></center>
 	
-<script src="{{ const.MEDIA_URL }}group_admin.js"></script>
+<script src="{{ MEDIA_URL }}group_admin.js"></script>
 {% endblock %}

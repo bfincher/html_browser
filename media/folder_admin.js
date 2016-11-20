@@ -6,11 +6,14 @@ groupPermTotalFormId = "id_group_perm-TOTAL_FORMS";
 numUserPerms = 0;
 numGroupPerms = 0;
 
+function setDeleteFolderUrl(url) {
+    deleteFolderUrl = url;
+}
+
 function confirmDelete(folderName) {
     var r=confirm("Are you sure you want to delete " + folderName);
     if (r==true) {
-        var url = baseUrl + "/deleteFolder/";
-        post(url, {'name': folderName});
+        post(deleteFolderUrl);
     }
 }
 

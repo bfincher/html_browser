@@ -11,7 +11,7 @@
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
 		{% endif %}
 		
-		<a href="{{ const.CONTENT_URL }}?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}"><img src="{{ const.IMAGE_URL }}up_arrow.png"></a>
+		<a href="{% url 'content'%}?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}"><img src="{{ const.IMAGE_URL }}up_arrow.png"></a>
 		
 		{% if nextLink != None %}
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
@@ -36,6 +36,6 @@
 fileName = "{{ fileName }}";
 lastImage = false;
 </script>
-<script src="{{ const.MEDIA_URL }}debounce.js" ></script>
-<script src="{{ const.MEDIA_URL }}image_view.js" ></script>
+<script src="{{ MEDIA_URL }}debounce.js" ></script>
+<script src="{{ MEDIA_URL }}image_view.js" ></script>
 {% endblock %}

@@ -13,7 +13,7 @@
 		
 		{% for user in users %}
 		<tr>
-			<td> <a href="{{ const.BASE_URL }}editUser?userName={{ user.username }}">{{ user.username }}</a> </td>
+			<td> <a href="{% url 'editUser' %}?userName={{ user.username }}">{{ user.username }}</a> </td>
 			<td>
 				<ul>
 				{% for group in user.groups.all %}
@@ -32,7 +32,7 @@
 		{% endfor %}
 	</table>
 	
-	<a href="{{ const.BASE_URL }}addUser">Add User</a>
+	<a href="{% url 'addUser' %}addUser">Add User</a>
 	
 	</center>
 {% endblock %}
