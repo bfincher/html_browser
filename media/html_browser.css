@@ -1,5 +1,6 @@
 * {font-size: 12pt;}
 #error{color:red;font-size:16pt;text-align:center;}
+.error{color:red;font-size:16pt;text-align:center;}
 
 .small a {font-size: 75%;}
 

@@ -37,7 +37,6 @@ def isShowHidden(request):
 class BaseView(View):
     def __init__(self):
         self.reqLogger = getReqLogger()
-        self.errorHtml = ""
 
     def get(self, request, *args, **kwargs):
         self._commonGetPost(request)
@@ -63,17 +62,6 @@ class BaseView(View):
 
         self.context = {'user': request.user,
                         'const': const}
-
-        errorText = getRequestField(request, 'errorText')
-        if errorText:
-            self.context['errorText'] = errorText
-
-        if self.errorHtml:
-            self.context['errorHtml'] = self.errorHtml
-        else:
-            errorHtml = getRequestField(request, 'errorHtml')
-            if errorHtml:
-                self.context['errorHtml'] = errorHtml
 
     def redirect(self, url, *args, **kwargs):
         if url.startswith(const.BASE_URL):
@@ -139,10 +127,8 @@ class LoginView(BaseView):
 
         userName = request.POST['userName']
         password = request.POST['password']
-
-        errorText = None
-
         user = authenticate(username=userName, password=password)
+
         if user is not None:
             if user.is_active:
                 auth_login(request, user)
@@ -150,11 +136,11 @@ class LoginView(BaseView):
                     self.reqLogger.debug("%s authenticated", user)
             else:
                 self.reqLogger.warn("%s attempted to log in to a disabled account", user)
-                errorText = 'Account has been disabled'
+                messages.error(request, 'Account has been disabled')
         else:
-            errorText = 'Invalid login'
+            messages.error(request, 'Invalid login')
 
-        return self.redirect('index', errorText=errorText)
+        return self.redirect('index')
 
 
 class LogoutView(BaseView):

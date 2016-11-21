@@ -5,6 +5,7 @@ from logging import DEBUG
 import re
 
 from django.contrib.auth.models import User, Group
+from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.shortcuts import render, redirect, render_to_response
@@ -53,17 +54,14 @@ class BaseAdminView(BaseView):
     def appendFormErrors(self, form):
         if form.errors:
             for _dict in form.errors:
-                self.errorHtml = self.errorHtml + _dict.as_ul()
+                messages.error(request, _dict.as_ul())
 
         try:
             if form.non_form_errors:
                 for _dict in form.non_form_errors():
-                    self.errorHtml = self.errorHtml + _dict.as_ul()
+                    messages.error(request, _dict.as_ul)
         except AttributeError as e:
             pass
-
-        if self.errorHtml:
-            self.context['errorHtml'] = self.errorHtml
 
 
 class AdminView(BaseAdminView):
@@ -204,7 +202,6 @@ class AddFolderView(AbstractFolderView):
 class AddGroupView(BaseAdminView):
     def post(self, request, *args, **kwargs):
         super(AddGroupView, self).post(request, *args, **kwargs)
-        errorText = None
         groupName = request.POST['groupName']
         if groupNameRegex.match(groupName):
             group = get_object_or_None(Group, name=groupName)
@@ -213,11 +210,11 @@ class AddGroupView(BaseAdminView):
                 group.name = groupName
                 group.save()
             else:
-                errorText = "%s already exists" % groupName
+                messages.error(request, "%s already exists" % groupName)
         else:
-            errorText = "Invalid group name.  Must only contain letters, numbers, and underscores"
+            messages.error(request, "Invalid group name.  Must only contain letters, numbers, and underscores")
 
-        return self.redirect("groupAdmin", errorText=errorText)
+        return self.redirect("groupAdmin")
 
 
 class DeleteGroupView(BaseAdminView):
@@ -275,11 +272,11 @@ class DeleteUserView(BaseAdminView):
         redirectUrl = "userAdmin"
 
         if request.user.username == request.POST['userToDelete']:
-            return self.redirect(redirectUrl, errorText="Unable to delete current user")
-
-        user = User.objects.get(username=request.POST['userToDelete'])
-        logger.info("Deleting user %s", user)
-        user.delete()
+            messages.error(request, "Unable to delete current user")
+        else:
+            user = User.objects.get(username=request.POST['userToDelete'])
+            logger.info("Deleting user %s", user)
+            user.delete()
 
         return redirect(redirectUrl)
 
@@ -318,7 +315,6 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
 
     def post(self, request, *args, **kwargs):
         super(AbstractUserView, self).post(request, *args, **kwargs)
-        errorText = None
 
         self.initForm(request)
 
@@ -339,7 +335,7 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
                 reqLogger.error('form.errors = %s', self.form.errors)
                 return self.get(request, *args, **kwargs)
 
-        return self.redirect("userAdmin", errorText=errorText)
+        return self.redirect("userAdmin")
 
 
 class EditUserView(AbstractUserView):
@@ -390,9 +386,9 @@ class ChangePasswordResultView(BaseAdminView):
         else:
             errorMessage = "Incorrect current password"
 
-        if errorMessage is None:
-            return render(request, 'admin/change_password_success.html', self.context)
-        else:
+        if errorMessage:
+            messages.error(request, errorMessage)
             reqLogger.warn(errorMessage)
-            self.context['errorMessage'] = errorMessage
             return render(request, 'admin/change_password_fail.html', self.context)
+        else:
+            return render(request, 'admin/change_password_success.html', self.context)

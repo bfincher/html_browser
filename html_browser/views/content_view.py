@@ -5,6 +5,7 @@ import os
 from shutil import copy2, copytree, move
 from urllib.parse import quote_plus
 
+from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
 
@@ -27,39 +28,33 @@ class ContentView(BaseContentView):
     def post(self, request, *args, **kwargs):
         super(ContentView, self).post(request, *args, **kwargs)
 
-        self.status = ''
-        self.statusError = False
-
         action = request.POST['action']
         if action == 'copyToClipboard':
             entries = getCheckedEntries(request.POST)
             request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'COPY').toJson()
-            self.status = 'Items copied to clipboard'
+            messages.success(request, 'Items copied to clipboard')
         elif action == 'cutToClipboard':
             if not self.userCanDelete:
-                self.status = "You don't have delete permission on this folder"
-                self.statusError = True
+                messages.error(request, "You don't have delete permission on this folder")
             else:
                 entries = getCheckedEntries(request.POST)
                 request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'CUT').toJson()
-                self.status = 'Items copied to clipboard'
+                messages.success(request, 'Items copied to clipboard')
         elif action == 'pasteFromClipboard':
             if not self.userCanWrite:
-                self.status = "You don't have write permission on this folder"
-                self.statusError = True
+                messages.error(request, "You don't have write permission on this folder")
             else:
-                self.status = handlePaste(self.currentFolder, self.currentPath, Clipboard.fromJson(request.session['clipboard']))
-                if self.status:
-                    self.statusError = True
+                status = handlePaste(self.currentFolder, self.currentPath, Clipboard.fromJson(request.session['clipboard']))
+                if status:
+                    messages.error(request, status)
                 else:
-                    self.status = 'Items pasted'
+                    messages.success(request, 'Items pasted')
         elif action == 'deleteEntry':
             if not self.userCanDelete:
-                self.status = "You don't have delete permission on this folder"
-                self.statusError = True
+                messages.error(request, "You don't have delete permission on this folder")
             else:
                 handleDelete(self.folder, self.currentPath, getCheckedEntries(request.POST))
-                self.status = 'File(s) deleted'
+                messages.success(request, 'File(s) deleted')
         elif action == 'setViewType':
             viewType = request.POST['viewType']
             request.session['viewType'] = viewType
@@ -75,7 +70,7 @@ class ContentView(BaseContentView):
             raise RuntimeError('Unknown action %s' % action)
 
         return self.redirect('content', currentFolder=self.currentFolder,
-                             currentPath=self.currentPath, status=self.status, statusError=self.statusError)
+                             currentPath=self.currentPath)
 
     def handleRename(self, fileName, newName):
         source = getPath(self.folder.localPath, self.currentPath) + replaceEscapedUrl(fileName)
@@ -85,14 +80,6 @@ class ContentView(BaseContentView):
     def get(self, request, *args, **kwargs):
         super(ContentView, self).get(request, *args, **kwargs)
         ContentView.deleteOldFiles()
-
-        self.status = ''
-        if 'status' in request.GET:
-            self.status = request.GET['status']
-
-        self.statusError = None
-        if 'statusError' in request.GET:
-            self.statusError = request.GET['statusError']
 
         contentUrl = reverse('content')
         self.breadcrumbs = None
@@ -118,17 +105,13 @@ class ContentView(BaseContentView):
         contentFilter = None
         if 'filter' in request.GET:
             contentFilter = request.GET['filter']
-            self.status = self.status + ' Filtered on %s' % contentFilter
+            messages.info(request, 'Filtered on %s' % contentFilter)
 
         self.context['userCanRead'] = str(self.userCanRead).lower()
         self.context['userCanWrite'] = str(self.userCanWrite).lower()
         self.context['userCanDelete'] = str(self.userCanDelete).lower()
-        self.context['status'] = self.status
         self.context['breadcrumbs'] = self.breadcrumbs
         self.context['showHidden'] = isShowHidden(request)
-
-        if self.statusError:
-            self.context['statusError'] = True
 
 #        if 'search' in request.GET:
 #            search = request.GET['search']
@@ -151,9 +134,6 @@ class ContentView(BaseContentView):
         self.context['diskUsed'] = diskUsage.usedformatted
         self.context['diskTotal'] = diskUsage.totalformatted
         self.context['diskUnit'] = diskUsage.unit
-
-        if self.statusError:
-            self.context['statusError'] = True
 
         if viewType == const.detailsViewType:
             template = 'content_detail.html'
