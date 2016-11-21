@@ -39,12 +39,9 @@
 </div>
 {% endblock %}
 
-{% block navbar3 %}
-{% include "content_bar.html" %}
-{% endblock %}
-
 
 {% block body %}
+    {% include "content_bar.html" %}
     <form id="content-form" method="post">
     {% block content %}{% endblock %}
     </form>

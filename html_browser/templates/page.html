@@ -1,7 +1,9 @@
 <html>
 {% block header %} 
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatable" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 maximum-scale=1">
     <title>HTML File Explorer</title>
 
     <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
@@ -84,9 +86,6 @@
     {% endif %}
     {% endblock %}
 
-    {% block navbar3 %}
-    {% endblock %}
-
 
     {% if messages %}
     <ul class="messages">
@@ -98,9 +97,11 @@
     </ul>
     {% endif %}
 
+<div class="container-fluid">
 {% block body %} {% endblock %}
 
 {% block body2 %} {% endblock %}
+</div>
 
 </body>
 </html>
