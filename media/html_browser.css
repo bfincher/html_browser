@@ -70,13 +70,31 @@ TH.UploadOuterTable
     font-size: 75%;
 }
 
-/*
-table-noborder td {
-     border-top: none; 
+.dropdown-menu {
+    padding: 15px;
+    padding-bottom: 0px;
 }
 
-.table-noborder td,
-.table-noborder th {
-    border: 0;
+.container-narrow {
+    margin: 0 auto;
+    max-width: 700px;
 }
-*/
+
+.center-table {
+    margin: 0 auto !important;
+    float: none !important;
+}
+
+.center-table td {
+    text-align: center;
+}
+
+.center-table th {
+    text-align: center;
+}
+
+
+body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+}

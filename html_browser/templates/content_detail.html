@@ -8,7 +8,7 @@
              {% block additional_navbar %}
                <li class="dropdown">
                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Filter <span class="caret"></span></a>
-                 <span class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                 <span class="dropdown-menu">
                    <center>
                      <h3>Apply a filter</h3>
                      <form method="get" action="{% url 'content' %}"> 
@@ -23,7 +23,7 @@
 <!--
                <li class="dropdown" data-dropdown="dropdown">
                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Search <b class="caret"></b></a>
-                 <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                 <div class="dropdown-menu">
                    <center>
                      <h3>Search for filenames (use regular expressions)</h3>
                      <form method="get" action="{% url 'content' %}"> 
@@ -38,7 +38,7 @@
 -->
                <li class="dropdown" data-dropdown="dropdown">
                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Settings <b class="caret"></b></a>
-                 <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                 <div class="dropdown-menu">
                    <center>
                      <h3>Settings</h3>
                      <form action="post" action="{% url 'content' %}"> {% csrf_token %}
