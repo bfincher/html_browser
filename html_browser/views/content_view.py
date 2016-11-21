@@ -225,7 +225,7 @@ def getParentDirLink(path, currentFolder):
     path = path[0:idx]
 
     if len(path) == 0:
-        path = '/'
+        path = ''
 
     link = "%s?currentFolder=%s&currentPath=%s" % (reverse('content'), quote_plus(currentFolder), quote_plus(path))
 
