@@ -161,7 +161,7 @@ class LogoutView(BaseView):
     def get(self, request, *args, **kwargs):
         super(LogoutView, self).get(request, *args, **kwargs)
         auth_logout(request)
-        return redirect(const.BASE_URL)
+        return redirect('index')
 
 
 class DownloadView(BaseContentView):
@@ -245,7 +245,7 @@ class UploadView(BaseContentView):
             handleZipUpload(request.FILES['zipupload1'], self.folder, self.currentPath)
             status = 'File uploaded and extracted'
 
-        return self.redirect(const.CONTENT_URL, currentFolder=self.currentFolder, currentPath=self.currentPath, status=status)
+        return self.redirect('index', currentFolder=self.currentFolder, currentPath=self.currentPath, status=status)
 
 
 def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
@@ -273,17 +273,17 @@ class ImageView(BaseContentView):
             prevLink = None
         else:
             prevLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %\
-            (const.IMAGE_VIEW_URL, self.currentFolder, self.currentPath, currentDirEntries[index-1].name)
+            (reverse('imageView'), self.currentFolder, self.currentPath, currentDirEntries[index-1].name)
 
         if index == len(currentDirEntries) - 1:
             nextLink = None
         else:
             nextLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %\
-            (const.IMAGE_VIEW_URL, self.currentFolder, self.currentPath, currentDirEntries[index+1].name)
+            (reverse('imageView'), self.currentFolder, self.currentPath, currentDirEntries[index+1].name)
 
-        parentDirLink = "%s?currentFolder=%s&currentPath=%s" % (const.CONTENT_URL, self.currentFolder, self.currentPath)
+        parentDirLink = "%s?currentFolder=%s&currentPath=%s" % (reverse('content'), self.currentFolder, self.currentPath)
 
-        imageUrl = '%s__%s__%s/%s' % (const.BASE_URL, self.currentFolder, self.currentPath, fileName)
+        imageUrl = '%s__%s__%s/%s' % (reverse('index'), self.currentFolder, self.currentPath, fileName)
         imageUrl = imageUrl.replace('//', '/')
 
         userCanDelete = self.folder.userCanDelete(request.user)
@@ -317,7 +317,7 @@ class DeleteImageView(BaseContentView):
         handleDelete(self.folder, self.currentPath, request.GET['fileName'])
         status = "File deleted"
 
-        return self.redirect(const.CONTENT_URL, currentFolder=self.currentFolder, currentPath=self.currentPath, status=status)
+        return self.redirect(reverse('content'), currentFolder=self.currentFolder, currentPath=self.currentPath, status=status)
 
 
 class GetNextImageView(BaseContentView):
@@ -339,7 +339,7 @@ class GetNextImageView(BaseContentView):
                     result['hasNextImage'] = True
                     nextFileName = currentDirEntries[i].name
 
-                    imageUrl = '%s__%s__%s/%s' % (const.BASE_URL, self.currentFolder, self.currentPath, nextFileName)
+                    imageUrl = '%s__%s__%s/%s' % (reverse('index'), self.currentFolder, self.currentPath, nextFileName)
                     imageUrl = imageUrl.replace('//', '/')
                     result['imageUrl'] = imageUrl
                     result['fileName'] = nextFileName

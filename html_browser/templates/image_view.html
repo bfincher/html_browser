@@ -7,15 +7,15 @@
         </script>
 	<center>
 		{% if prevLink != None %}
-			<a href="{{ prevLink }}"><img src="{{ const.IMAGE_URL }}left_arrow.png"/></a>
+			<a href="{{ prevLink }}"><img src="{{ IMAGE_URL }}left_arrow.png"/></a>
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
 		{% endif %}
 		
-		<a href="{% url 'content'%}?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}"><img src="{{ const.IMAGE_URL }}up_arrow.png"></a>
+		<a href="{% url 'content'%}?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}"><img src="{{ IMAGE_URL }}up_arrow.png"></a>
 		
 		{% if nextLink != None %}
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-			<a href="{{ nextLink }}"><img src="{{ const.IMAGE_URL }}right_arrow.png"/></a>
+			<a href="{{ nextLink }}"><img src="{{ IMAGE_URL }}right_arrow.png"/></a>
 		{% endif %}
 		
 		<br><br>

@@ -74,7 +74,7 @@ class ContentView(BaseContentView):
         else:
             raise RuntimeError('Unknown action %s' % action)
 
-        return self.redirect(const.CONTENT_URL, currentFolder=self.currentFolder,
+        return self.redirect('content', currentFolder=self.currentFolder,
                              currentPath=self.currentPath, status=self.status, statusError=self.statusError)
 
     def handleRename(self, fileName, newName):
@@ -98,7 +98,7 @@ class ContentView(BaseContentView):
         self.breadcrumbs = None
         crumbs = self.currentPath.split("/")
         if len(crumbs) > 1:
-            self.breadcrumbs = "<a href=\"%s\">Home</a> " % const.BASE_URL
+            self.breadcrumbs = "<a href=\"%s\">Home</a> " % reverse('index')
             self.breadcrumbs = self.breadcrumbs + "&rsaquo; <a href=\"%s/?currentFolder=%s&currentPath=\">%s</a> " %\
             (contentUrl, self.currentFolder, self.currentFolder)
 
@@ -234,8 +234,8 @@ def getDiskUsage(path):
 
 
 def getParentDirLink(path, currentFolder):
-    if path == '/':
-        return const.BASE_URL
+    if path == '/' or path == '':
+        return reverse('index')
 
     if path.endswith('/'):
         path = path[0:-1]
@@ -247,7 +247,7 @@ def getParentDirLink(path, currentFolder):
     if len(path) == 0:
         path = '/'
 
-    link = "%s?currentFolder=%s&currentPath=%s" % (const.CONTENT_URL, quote_plus(currentFolder), quote_plus(path))
+    link = "%s?currentFolder=%s&currentPath=%s" % (reverse('content'), quote_plus(currentFolder), quote_plus(path))
 
     return link
 
