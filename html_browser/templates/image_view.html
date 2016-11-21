@@ -1,10 +1,5 @@
 {% extends "page.html" %}
 {% block body %}
-       <script>
-                setCurrentFolder('{{ currentFolder }}')
-                setCurrentPath('{{ currentPath }}')
-                setUserCanDelete('{{ userCanDelete }}')
-        </script>
 	<center>
 		{% if prevLink != None %}
 			<a href="{{ prevLink }}"><img src="{{ IMAGE_URL }}left_arrow.png"/></a>
@@ -36,6 +31,12 @@
 fileName = "{{ fileName }}";
 lastImage = false;
 </script>
+
 <script src="{{ MEDIA_URL }}debounce.js" ></script>
 <script src="{{ MEDIA_URL }}image_view.js" ></script>
+
+<script>
+    setCurrentFolder('{{ currentFolder }}');
+    setCurrentPath('{{ currentPath }}');
+</script>
 {% endblock %}

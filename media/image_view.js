@@ -1,4 +1,20 @@
-scrollEnabled = true;
+var scrollEnabled = true;
+var currentFolder = null;
+var currentPath = null;
+
+function setCurrentFolder(_currentFolder) {
+    "use strict";
+    currentFolder = _currentFolder;
+}
+
+function setCurrentPath(_currentPath) {
+    "use strict";
+    if (_currentPath == "") {
+        currentPath = "/";
+    } else {
+        currentPath = _currentPath;
+    }
+}
 
 function isScrolledToBottom() {
     var old = $('body').scrollTop();
