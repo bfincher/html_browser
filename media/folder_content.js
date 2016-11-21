@@ -25,7 +25,11 @@ function setCurrentFolder(_currentFolder) {
 
 function setCurrentPath(_currentPath) {
     "use strict";
-    currentPath = _currentPath;
+    if (_currentPath == "") {
+        currentPath = "/";
+    } else {
+        currentPath = _currentPath;
+    }
 }
 
 function setUserCanRead(_userCanRead) {

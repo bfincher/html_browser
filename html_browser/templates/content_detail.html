@@ -56,10 +56,12 @@
                  </div>
                </li>
              {% endblock %}
-{% block body %}
+{% block additional_header %}
     <link rel="stylesheet" href="{{ MEDIA_URL }}/bootstrap-sortable.css" type="text/css" charset="utf-8">
+    {{ block.super }}
+{% endblock %}
 
-        <form id="content-form" method="post">
+{% block content %}
 	<table class="table table-striped table-bordered table-hover table-condensed sortable" id="content-table"> 
         <thead>
 		<tr>
@@ -89,6 +91,5 @@
 		{% endfor %}
         </tbody>
 	</table>
-        </form>
 			
 {% endblock %}

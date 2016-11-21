@@ -44,9 +44,16 @@
 {% endblock %}
 
 
-{% block body2 %} 
+{% block body %}
+    <form id="content-form" method="post">
+    {% block content %}{% endblock %}
+    </form>
+
     {% if currentDirEntries|length > 20 %}
         {% include "content_bar.html" %}
     {% endif %}
+{% endblock %}
+
+{% block body2 %} 
 {% endblock %}
 
