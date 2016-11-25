@@ -14,7 +14,6 @@ from html_browser.utils import getCurrentDirEntries, handleDelete,\
     getRequestField, getReqLogger,\
     getCheckedEntries, replaceEscapedUrl
 
-from html.parser import HTMLParser
 import json
 import logging
 from logging import DEBUG
@@ -23,6 +22,7 @@ from pathlib import Path
 import re
 from sendfile import sendfile
 import tempfile
+from urllib.parse import quote_plus, unquote_plus
 import zipfile
 from zipfile import ZipFile
 
@@ -76,7 +76,7 @@ class BaseContentView(BaseView):
         super(BaseContentView, self).__init__()
         self.folder = None
         self.currentFolder = None
-        self.currentPath = None
+        self.currentPath = ''
         self.requireWrite = requireWrite
         self.requireDelete = requireDelete
 
@@ -85,10 +85,9 @@ class BaseContentView(BaseView):
 
         self.currentFolder = kwargs['currentFolder']
         if self.currentFolder:
-            h = HTMLParser()
             self.currentPath = kwargs.get('currentPath', '')
             if self.currentPath:
-                self.currentPath = h.unescape(self.currentPath)
+                self.currentPath = unquote_plus(self.currentPath)
             self.folder = Folder.objects.filter(name=self.currentFolder)[0]
 
             if self.requireDelete and not self.folder.userCanDelete(request.user):
@@ -152,7 +151,6 @@ class DownloadView(BaseContentView):
 
         filePath = "/".join([self.folder.localPath,  path])
 
-        logger.info("BKF filePath = %s", filePath)
         return sendfile(request, filePath, attachment=True)
 
 

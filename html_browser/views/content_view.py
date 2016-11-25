@@ -30,8 +30,7 @@ class ContentView(BaseContentView):
     def post(self, request, currentFolder, currentPath=None, *args, **kwargs):
         super(ContentView, self).post(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
 
-        self.currentFolder = currentFolder
-        self.currentPath = currentPath or ''
+        self.currentPath = self.currentPath or ''
         action = request.POST['action']
         if action == 'copyToClipboard':
             entries = getCheckedEntries(request.POST)
@@ -82,8 +81,8 @@ class ContentView(BaseContentView):
 
     def get(self, request, currentFolder, currentPath=None, *args, **kwargs):
         super(ContentView, self).get(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
-        self.currentFolder = currentFolder
-        self.currentPath = currentPath or ''
+        #self.currentFolder = currentFolder
+        self.currentPath = self.currentPath or ''
         ContentView.deleteOldFiles()
 
         contentUrl = reverseContentUrl(self.currentFolder, self.currentPath)
