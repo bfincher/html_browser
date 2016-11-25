@@ -1,4 +1,5 @@
 {% extends "page.html" %}
+{% load url_resolver %}
 {% block body %}
 	<center>
 		{% if prevLink != None %}
@@ -6,7 +7,7 @@
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
 		{% endif %}
 		
-		<a href="{% url 'content'%}?currentFolder={{ currentFolder }}&currentPath={{ currentPath }}"><img src="{{ IMAGE_URL }}up_arrow.png"></a>
+		<a href="{% get_content_url %}"><img src="{{ IMAGE_URL }}up_arrow.png"></a>
 		
 		{% if nextLink != None %}
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp

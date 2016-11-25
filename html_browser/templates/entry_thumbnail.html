@@ -1,5 +1,5 @@
 {% extends "entry_base.html" %}
 
 {% block content_url %}{{ const.IMAGE_VIEW_URL }}{% endblock %}
-{% block extra_args %}&fileName={{ entry.name }}{% endblock %}
+{% block extra_args %}{{ entry.name }}{% endblock %}
 {% block image_url %}{{ entry.thumbnailUrl }}{% endblock %}

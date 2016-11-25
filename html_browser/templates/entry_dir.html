@@ -1,5 +1,6 @@
 {% extends "entry_base.html" %}
+{% load url_resolver %}
 
-{% block content_url %}{% url 'content' %}{% endblock %}
-{% block extra_args %}/{{ entry.nameUrl }}{%endblock %}
+{% block content_url %}{% get_content_url %}{% endblock %}
+{% block extra_args %}{{ entry.nameUrl }}{%endblock %}
 {% block image_url %}{{ IMAGE_URL }}folder-blue-icon.png{% endblock %}

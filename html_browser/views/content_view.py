@@ -1,6 +1,7 @@
 import collections
 from datetime import datetime, timedelta
 import json
+import logging
 import os
 from shutil import copy2, copytree, move
 from urllib.parse import quote_plus
@@ -9,25 +10,28 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
 
-from .base_view import BaseContentView, isShowHidden
+from .base_view import BaseContentView, isShowHidden, reverseContentUrl
 from html_browser.models import FilesToDelete, Folder
 from html_browser.constants import _constants as const
 from html_browser.utils import getCurrentDirEntries,\
     getPath, formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete,\
     getCheckedEntries
 
+logger = logging.getLogger('html_browser.content_view')
 
 class ContentView(BaseContentView):
 
-    def _commonGetPost(self, request):
-        super(ContentView, self)._commonGetPost(request)
+    def _commonGetPost(self, request, *args, **kwargs):
+        super(ContentView, self)._commonGetPost(request, *args, **kwargs)
         self.userCanDelete = self.folder.userCanDelete(request.user)
         self.userCanWrite = self.userCanDelete or self.folder.userCanWrite(request.user)
         self.userCanRead = self.userCanWrite or self.folder.userCanRead(request.user)
 
-    def post(self, request, *args, **kwargs):
-        super(ContentView, self).post(request, *args, **kwargs)
+    def post(self, request, currentFolder, currentPath=None, *args, **kwargs):
+        super(ContentView, self).post(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
 
+        self.currentFolder = currentFolder
+        self.currentPath = currentPath or ''
         action = request.POST['action']
         if action == 'copyToClipboard':
             entries = getCheckedEntries(request.POST)
@@ -69,25 +73,25 @@ class ContentView(BaseContentView):
         else:
             raise RuntimeError('Unknown action %s' % action)
 
-        return self.redirect('content', currentFolder=self.currentFolder,
-                             currentPath=self.currentPath)
+        return redirect(reverseContentUrl(self.currentFolder, self.currentPath))
 
     def handleRename(self, fileName, newName):
         source = getPath(self.folder.localPath, self.currentPath) + replaceEscapedUrl(fileName)
         dest = getPath(self.folder.localPath, self.currentPath) + replaceEscapedUrl(newName)
         move(source, dest)
 
-    def get(self, request, *args, **kwargs):
-        super(ContentView, self).get(request, *args, **kwargs)
+    def get(self, request, currentFolder, currentPath=None, *args, **kwargs):
+        super(ContentView, self).get(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
+        self.currentFolder = currentFolder
+        self.currentPath = currentPath or ''
         ContentView.deleteOldFiles()
 
-        contentUrl = reverse('content')
+        contentUrl = reverseContentUrl(self.currentFolder, self.currentPath)
         self.breadcrumbs = None
         crumbs = self.currentPath.split("/")
         if len(crumbs) > 1:
             self.breadcrumbs = "<a href=\"%s\">Home</a> " % reverse('index')
-            self.breadcrumbs = self.breadcrumbs + "&rsaquo; <a href=\"%s/?currentFolder=%s&currentPath=\">%s</a> " %\
-            (contentUrl, self.currentFolder, self.currentFolder)
+            self.breadcrumbs = self.breadcrumbs + "&rsaquo; <a href=\"%s\">%s</a> " % (contentUrl, currentFolder)
 
             crumbs = self.currentPath.split("/")
             accumulated = ""
@@ -97,8 +101,8 @@ class ContentView(BaseContentView):
                     accumulated = "/".join([accumulated, crumb])
                     self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
                     if len(crumbs) > 0:
-                        self.breadcrumbs = self.breadcrumbs + "<a href=\"%s/?currentFolder=%s&currentPath=%s\">%s</a> " %\
-                        (contentUrl, self.currentFolder, accumulated, crumb)
+                        self.breadcrumbs = self.breadcrumbs + "<a href=\"%s\">%s</a> ".format(reverseContentUrl(self.currentFolder, accumulated), crumb)
+                                                                                         
                     else:
                         self.breadcrumbs = self.breadcrumbs + crumb
 
@@ -221,13 +225,12 @@ def getParentDirLink(path, currentFolder):
         path = path[0:-1]
 
     idx = path.rfind('/')
-
-    path = path[0:idx]
-
-    if len(path) == 0:
+    if idx == -1:
         path = ''
+    else:
+        path = path[0:idx]
 
-    link = "%s?currentFolder=%s&currentPath=%s" % (reverse('content'), quote_plus(currentFolder), quote_plus(path))
+    link = reverseContentUrl(currentFolder, path)
 
     return link
 

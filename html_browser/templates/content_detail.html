@@ -1,4 +1,5 @@
 {% extends "content_page.html" %}
+{% load url_resolver %}
 {% block extra_js %}
     <script src="{{ MEDIA_URL }}moment.min.js"></script> <!-- used by bootstrap-sortable -->
     <script src="{{ MEDIA_URL }}bootstrap-sortable.js"></script>
@@ -11,7 +12,7 @@
                  <span class="dropdown-menu">
                    <center>
                      <h3>Apply a filter</h3>
-                     <form method="get" action="{% url 'content' %}"> 
+                     <form method="get" action="{% get_content_url %}"> 
                        <input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
                        <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
                        <input type="hidden" name="currentPath" value="{{ currentPath }}" />
@@ -26,7 +27,7 @@
                  <div class="dropdown-menu">
                    <center>
                      <h3>Search for filenames (use regular expressions)</h3>
-                     <form method="get" action="{% url 'content' %}"> 
+                     <form method="get" action="{% get_content_url %}"> 
                        <input type="text" name="search" value="{{ search }}" maxlength="20" size="10" />
                        <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
                        <input type="hidden" name="currentPath" value="{{ currentPath }}" />
@@ -41,7 +42,7 @@
                  <div class="dropdown-menu">
                    <center>
                      <h3>Settings</h3>
-                     <form action="post" action="{% url 'content' %}"> {% csrf_token %}
+                     <form action="post" action="{% get_content_url %}"> {% csrf_token %}
                        <input type="hidden" name="action" value="changeSettings" />
                        <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
                        <input type="hidden" name="currentPath" value="{{ currentPath }}" />

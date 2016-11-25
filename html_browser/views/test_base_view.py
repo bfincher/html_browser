@@ -106,7 +106,7 @@ class BaseViewTest(unittest.TestCase):
         Folder.objects.all().delete()
 
     def login(self, user):
-        return self.client.post(reverse('login'), data={'userName': user.username, 'password': self.users[user.username]})
+        return self.client.post(reverse('login'), args={'userName': user.username, 'password': self.users[user.username]})
 
     def logout(self):
         return self.client.get(reverse('logout'))
@@ -158,7 +158,7 @@ class IndexViewTest(BaseViewTest):
 
 class LoginViewTest(BaseViewTest):
     def testLogin(self):
-        response = self.client.post(reverse('login'), data={'userName': self.user1.username, 'password': self.user1Pw})
+        response = self.client.post(reverse('login'), args={'userName': self.user1.username, 'password': self.user1Pw})
         self.assertEquals(302, response.status_code)
         self.assertEquals('/', response.url)
 
@@ -174,7 +174,7 @@ class DownloadViewTest(BaseViewTest):
     def testDownload(self):
         self.login(self.user1)
         response = self.client.get(reverse('download'), 
-            data={'currentFolder': self.folder1.name,
+            args={'currentFolder': self.folder1.name,
                   'currentPath': '/',
                   'fileName': 'file_a.txt'})
 
@@ -191,7 +191,7 @@ class DownloadZipViewTest(BaseViewTest):
     def testDownloadZip(self):
         self.login(self.user1)
         response = self.client.get(reverse('downloadZip'),
-            data={'currentFolder': self.folder1.name,
+            args={'currentFolder': self.folder1.name,
                   'currentPath': '/',
                   'cb-file_a.txt': 'on',
                   'cb-file_b.txt': 'on',
@@ -240,7 +240,7 @@ class UploadViewTest(BaseViewTest):
     def testGet(self):
         self.login(self.user1)
         response = self.client.get(reverse('upload'),
-            data={'currentFolder': self.folder1.name,
+            args={'currentFolder': self.folder1.name,
                   'currentPath': '/'})
 
         self.assertEquals(200, response.status_code)
@@ -252,7 +252,7 @@ class UploadViewTest(BaseViewTest):
         self.logout()
         self.login(self.user3)
         response = self.client.get(reverse('upload'),
-            data={'currentFolder': self.folder1.name,
+            args={'currentFolder': self.folder1.name,
                   'currentPath': '/'})
 
         self.assertEquals(403, response.status_code)
@@ -263,7 +263,7 @@ class UploadViewTest(BaseViewTest):
         try:
             with open('html_browser/test_dir/file_a.txt', 'r') as f:
                 response = self.client.post(reverse('upload'),
-                    data={'currentFolder': self.folder1.name,
+                    args={'currentFolder': self.folder1.name,
                           'currentPath': '/dir_a',
                           'action': 'uploadFile',
                           'upload1': f})
@@ -282,7 +282,7 @@ class UploadViewTest(BaseViewTest):
         try:
             with open('html_browser/test_dir/file_a.txt', 'r') as f:
                 response = self.client.post(reverse('upload'),
-                    data={'currentFolder': self.folder1.name,
+                    args={'currentFolder': self.folder1.name,
                           'currentPath': '/dir_a',
                           'action': 'uploadFile',
                           'upload1': f})
@@ -312,7 +312,7 @@ class UploadViewTest(BaseViewTest):
 
             with open(zipFileName, 'rb') as f:
                 response = self.client.post(reverse('upload'),
-                    data={'currentFolder': self.folder1.name,
+                    args={'currentFolder': self.folder1.name,
                           'currentPath': '/dir_a',
                           'action': 'uploadZip',
                           'zipupload1': f})

@@ -1,10 +1,11 @@
 {% extends "page.html" %}
+{% load url_resolver %}
 
 {% block additional_header %} 
         <script type="text/javascript" src="{{ MEDIA_URL }}folder_content.js"></script>
 
         <script>
-                setContentActionUrl("{% url 'content' %}");
+                setContentActionUrl("{% get_content_url %}");
                 setCsrf("{% csrf_token %}");
                 setCurrentFolder('{{ currentFolder }}')
                 setCurrentPath('{{ currentPath }}')

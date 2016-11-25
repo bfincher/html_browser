@@ -81,7 +81,6 @@ class FolderAdminView(BaseAdminView):
 class DeleteFolderView(BaseAdminView):
     def post(self, request, folderName, *args, **kwargs):
         super(DeleteFolderView, self).post(request, *args, **kwargs)
-        logger.debug("BKF inside DeleteFolderView.post.  folderName = %s", folderName)
         Folder.objects.filter(name=folderName).delete()
         return redirect('folderAdmin')
 

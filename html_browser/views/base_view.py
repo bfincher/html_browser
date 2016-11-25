@@ -34,17 +34,24 @@ def isShowHidden(request):
     return request.session.get('showHidden', False)
 
 
+def reverseContentUrl(currentFolder, currentPath, viewName='content'):
+    if currentPath:
+        return reverse(viewName, kwargs={'currentFolder': currentFolder, 'currentPath': currentPath})
+    else:
+        return reverse(viewName, kwargs={'currentFolder': currentFolder})
+
+
 class BaseView(View):
     def __init__(self):
         self.reqLogger = getReqLogger()
 
     def get(self, request, *args, **kwargs):
-        self._commonGetPost(request)
+        self._commonGetPost(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        self._commonGetPost(request)
+        self._commonGetPost(request, *args, **kwargs)
 
-    def _commonGetPost(self, request):
+    def _commonGetPost(self, request, *args, **kwargs):
         self.reqLogger.info(self.__class__.__name__)
         if self.reqLogger.isEnabledFor(DEBUG):
             _dict = None
@@ -63,20 +70,6 @@ class BaseView(View):
         self.context = {'user': request.user,
                         'const': const}
 
-    def redirect(self, url, *args, **kwargs):
-        if url.startswith(const.BASE_URL):
-            redirectUrl = url
-        else:
-            redirectUrl = reverse(url)
-
-        separator = '?'
-        for key, value in sorted(kwargs.items()):
-            if value:
-                redirectUrl += "%s%s=%s" % (separator, key, value)
-                separator = '&'
-
-        return redirect(redirectUrl)
-
 
 class BaseContentView(BaseView):
     def __init__(self, requireWrite=False, requireDelete=False):
@@ -87,13 +80,15 @@ class BaseContentView(BaseView):
         self.requireWrite = requireWrite
         self.requireDelete = requireDelete
 
-    def _commonGetPost(self, request):
-        super(BaseContentView, self)._commonGetPost(request)
+    def _commonGetPost(self, request, *args, **kwargs):
+        super(BaseContentView, self)._commonGetPost(request, *args, **kwargs)
 
-        self.currentFolder = getRequestField(self.request, 'currentFolder')
+        self.currentFolder = kwargs['currentFolder']
         if self.currentFolder:
             h = HTMLParser()
-            self.currentPath = h.unescape(getRequestField(self.request, 'currentPath'))
+            self.currentPath = kwargs.get('currentPath', '')
+            if self.currentPath:
+                self.currentPath = h.unescape(self.currentPath)
             self.folder = Folder.objects.filter(name=self.currentFolder)[0]
 
             if self.requireDelete and not self.folder.userCanDelete(request.user):
@@ -105,6 +100,7 @@ class BaseContentView(BaseView):
 
             self.context['currentFolder'] = self.currentFolder
             self.context['currentPath'] = self.currentPath
+
 
 class IndexView(BaseView):
     def get(self, request, *args, **kwargs):
@@ -140,7 +136,7 @@ class LoginView(BaseView):
         else:
             messages.error(request, 'Invalid login')
 
-        return self.redirect('index')
+        return redirect('index')
 
 
 class LogoutView(BaseView):
@@ -151,13 +147,12 @@ class LogoutView(BaseView):
 
 
 class DownloadView(BaseContentView):
-    def get(self, request, *args, **kwargs):
-        super(DownloadView, self).get(request, *args, **kwargs)
+    def get(self, request, currentFolder, path, *args, **kwargs):
+        super(DownloadView, self).get(request, currentFolder=currentFolder, currentPath=path, *args, **kwargs)
 
-        fileName = request.GET['fileName']
+        filePath = "/".join([self.folder.localPath,  path])
 
-        filePath = "/".join([self.folder.localPath + self.currentPath, fileName])
-
+        logger.info("BKF filePath = %s", filePath)
         return sendfile(request, filePath, attachment=True)
 
 
@@ -170,19 +165,16 @@ class DownloadImageView(BaseContentView):
 
 
 class DownloadZipView(BaseContentView):
-    def get(self, request, *args, **kwargs):
-        super(DownloadZipView, self).get(request, *args, **kwargs)
+    def get(self, request, currentFolder, currentPath, *args, **kwargs):
+        super(DownloadZipView, self).get(request, currentFolder, currentPath, *args, **kwargs)
 
-        currentFolder = request.GET['currentFolder']
-        currentPath = request.GET['currentPath']
-        folder = Folder.objects.filter(name=currentFolder)[0]
         compression = zipfile.ZIP_DEFLATED
         fileName = tempfile.mktemp(prefix="download_", suffix=".zip")
         self.zipFile = ZipFile(fileName, mode='w', compression=compression)
 
-        self.basePath = getPath(folder.localPath, currentPath)
+        self.basePath = getPath(self.folder.localPath, self.currentPath)
         for entry in getCheckedEntries(request.GET):
-            path = getPath(folder.localPath, currentPath) + replaceEscapedUrl(entry)
+            path = getPath(self.folder.localPath, self.currentPath) + replaceEscapedUrl(entry)
             if os.path.isfile(path):
                 self.__addFileToZip__(path)
             else:
@@ -211,27 +203,25 @@ class UploadView(BaseContentView):
     def __init__(self):
         super(UploadView, self).__init__(requireWrite=True)
 
-    def get(self, request, *args, **kwargs):
-        super(UploadView, self).get(request, *args, **kwargs)
+    def get(self, request, currentFolder, currentPath, *args, **kwargs):
+        super(UploadView, self).get(request, currentFolder, currentPath, *args, **kwargs)
 
-        self.context['status'] = ''
         self.context['viewTypes'] = const.viewTypes
 
         return render(request, 'upload.html', self.context)
 
-    def post(self, request, *args, **kwargs):
-        super(UploadView, self).post(request, *args, **kwargs)
+    def post(self, request, currentFolder, currentPath, *args, **kwargs):
+        super(UploadView, self).post(request, currentFolder, currentPath, *args, **kwargs)
 
         action = request.POST['action']
-        status = None
         if action == 'uploadFile':
             handleFileUpload(request.FILES['upload1'], self.folder, self.currentPath)
-            status = 'File uploaded'
+            message.success(request, 'File uploaded')
         elif action == 'uploadZip':
             handleZipUpload(request.FILES['zipupload1'], self.folder, self.currentPath)
-            status = 'File uploaded and extracted'
+            message.success(request, 'File uploaded and extracted')
 
-        return self.redirect('index', currentFolder=self.currentFolder, currentPath=self.currentPath, status=status)
+        return redirect('index')
 
 
 def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
@@ -247,7 +237,7 @@ def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
 
 
 class ImageView(BaseContentView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request, currentFolder, currentPath, *args, **kwargs):
         super(ImageView, self).get(request, *args, **kwargs)
 
         fileName = request.GET['fileName']
@@ -258,23 +248,25 @@ class ImageView(BaseContentView):
         if index == 0:
             prevLink = None
         else:
-            prevLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %\
-            (reverse('imageView'), self.currentFolder, self.currentPath, currentDirEntries[index-1].name)
+            prevLink = reverseContentUrl(self.currentFolder, 
+                                         self.currentPath + '/' + currentDirEntries[index-1].name,
+                                         'imageView')
 
         if index == len(currentDirEntries) - 1:
             nextLink = None
         else:
-            nextLink = "%s?currentFolder=%s&currentPath=%s&fileName=%s" %\
-            (reverse('imageView'), self.currentFolder, self.currentPath, currentDirEntries[index+1].name)
+            nextLink = reverseContentUrl(self.currentFolder,
+                                         self.currentPath + "/" + currentDirEntries[index+1].name,
+                                         'imageView')
 
-        parentDirLink = "%s?currentFolder=%s&currentPath=%s" % (reverse('content'), self.currentFolder, self.currentPath)
+        parentDirLink = reverseContentUrl(self.currentFolder, self.currentPath)
 
-        imageUrl = '%s__%s__%s/%s' % (reverse('index'), self.currentFolder, self.currentPath, fileName)
-        imageUrl = imageUrl.replace('//', '/')
+        imageUr = reverseContentUrl(self.currentFolder,
+                                    self.currentPath + "/" + fileName,
+                                    'download%sImage' % self.folder.name)
 
         userCanDelete = self.folder.userCanDelete(request.user)
 
-        self.context['status'] = ''
         self.context['viewTypes'] = const.viewTypes
         self.context['fileName'] = fileName
         self.context['parentDirLink'] = parentDirLink
@@ -288,8 +280,8 @@ class ImageView(BaseContentView):
 
 
 class ThumbView(BaseContentView):
-    def get(self, request, *args, **kwargs):
-        super(ThumbView, self).get(request, *args, **kwargs)
+    def get(self, request, currentFolder, currentPath, *args, **kwargs):
+        super(ThumbView, self).get(request, currentFolder, currentPath, *args, **kwargs)
         return render(request, 'test_image.html')
 
 
@@ -297,18 +289,18 @@ class DeleteImageView(BaseContentView):
     def __init__(self):
         super(DeleteImageView, self).__init__(requireDelete=True)
 
-    def get(self, request, *args, **kwargs):
-        super(DeleteImageView, self).get(request, *args, **kwargs)
+    def get(self, request, currentFolder, currentPath, *args, **kwargs):
+        super(DeleteImageView, self).get(request, currentFolder, currentPath, *args, **kwargs)
 
         handleDelete(self.folder, self.currentPath, request.GET['fileName'])
-        status = "File deleted"
+        messages.success(request, 'File deleted')
 
-        return self.redirect(reverse('content'), currentFolder=self.currentFolder, currentPath=self.currentPath, status=status)
+        return redirect(reverseContentUrl(self.currentFolder, self.currentPath))
 
 
 class GetNextImageView(BaseContentView):
-    def get(self, request, *args, **kwargs):
-        super(GetNextImageView, self).get(request, *args, **kwargs)
+    def get(self, request, currentFolder, currentPath, *args, **kwargs):
+        super(GetNextImageView, self).get(request, currentFolder, currentPath, *args, **kwargs)
 
         fileName = request.GET['fileName']
 
@@ -325,7 +317,9 @@ class GetNextImageView(BaseContentView):
                     result['hasNextImage'] = True
                     nextFileName = currentDirEntries[i].name
 
-                    imageUrl = '%s__%s__%s/%s' % (reverse('index'), self.currentFolder, self.currentPath, nextFileName)
+                    imageUrl = reverseContentUrl(self.currentFolder,
+                                                 self.currentPath + "/" + nextFileName,
+                                                 'download%sImage' % self.folder.name)
                     imageUrl = imageUrl.replace('//', '/')
                     result['imageUrl'] = imageUrl
                     result['fileName'] = nextFileName
