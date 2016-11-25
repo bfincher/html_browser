@@ -148,6 +148,7 @@ class LogoutView(BaseView):
 class DownloadView(BaseContentView):
     def get(self, request, currentFolder, path, *args, **kwargs):
         super(DownloadView, self).get(request, currentFolder=currentFolder, currentPath=path, *args, **kwargs)
+        path = unquote_plus(path)
 
         filePath = "/".join([self.folder.localPath,  path])
 
@@ -157,6 +158,7 @@ class DownloadView(BaseContentView):
 class DownloadImageView(BaseContentView):
     def get(self, request, path, *args, **kwargs):
         super(DownloadImageView, self).get(request, *args, **kwargs)
+        path = unquote_plus(path)
 
         imagePath = os.path.join(Folder.objects.get(name='Pictures').localPath, path)
         return sendfile(request, imagePath, attachment=False)
