@@ -69,8 +69,7 @@ class BaseView(View):
                     else:
                         self.reqLogger.debug("%s: %s", key, value)
 
-        self.context = {'user': request.user,
-                        'const': const}
+        self.context = {'user': request.user}
 
 
 class BaseContentView(BaseView):
