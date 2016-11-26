@@ -2,6 +2,11 @@ var scrollEnabled = true;
 var currentFolder = null;
 var currentPath = null;
 var deleteImageUrl = null;
+var imageUrl = null;
+
+function setImageUrl(_imageUrl) {
+    imageUrl = _imageUrl;
+}
 
 function setDeleteImageUrl(_url) {
     deleteImageUrl = _url;
@@ -21,12 +26,10 @@ function getNextImage() {
 
     var body = $('body');
     body.scrollTop(body.scrollTop() - 2);
-    var url = "/getNextImage/" + currentFolder + "/" + currentPath + "/" + fileName;
+    var url = reverse('getNextImage', {'currentFolder': currentFolder,
+                                       'path': currentPath + "/" + fileName});
     $("<img id='loading' src='" + imageUrl + "loading.gif' height='42' width='42' />").appendTo('#loadingDiv');
     $.ajax({url:url, 
-//    done:function() {
-//        scrollEnabled = true;
-//    },
     success:function(result) {
         $('#loading').remove();
 

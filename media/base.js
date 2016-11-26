@@ -2,6 +2,25 @@ function setCsrf(_csrf) {
     csrf = _csrf;
 }
 
+function reverse(viewName, kwargs) {
+    Object.entries(kwargs).forEach(([key, value]) => {
+        if (value == "None") {
+            delete kwargs[key];
+        }
+    });
+
+    return Urls[viewName](kwargs);
+}
+
+function reverseWithFolderAndPath(viewName, kwargs=null) {
+    if (kwargs == null) {
+        var kwargs = {};
+    }
+    kwargs['currentFolder'] = currentFolder;
+    kwargs['currentPath'] = currentPath;
+    return reverse(viewName, kwargs);
+}
+
 function postForm(form, path, params={}, method="post", appendToDoc=false) {
     console.log('posting to url ' + path + ".  method = " + method);
     form.attr("method", method);

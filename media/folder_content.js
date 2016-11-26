@@ -3,12 +3,6 @@ var currentPath = null;
 var userCanRead = null;
 var userCanWrite = null;
 var userCanDelete = null;
-var contentActionUrl = null;
-
-function setContentActionUrl(_contentActionUrl) {
-    "use strict";
-    contentActionUrl = _contentActionUrl;
-}
 
 function myEscape(str) {
     "use strict";
@@ -62,7 +56,8 @@ function copy() {
         return;
     }
 
-    postForm($("#content-form"), contentActionUrl, {"action": "copyToClipboard"});
+    postForm($("#content-form"), reverseWithFolderAndPath('content'), 
+              {"action": "copyToClipboard"});
 }
 
 function rename() {
@@ -85,7 +80,8 @@ function rename() {
     var newName = prompt("Please enter new file name for " + checkedBoxes[0].id, "");
 
     if (newName != null) {
-        postForm($("#content-form"), contentActionUrl, {"action": "rename",
+        postForm($("#content-form"), reverseWithFolderAndPath('content'), 
+           {"action": "rename",
             "file": checkedBoxes[0].id,
             "newName": newName});
     }
@@ -103,7 +99,8 @@ function cut() {
         return;
     }
 
-    postForm($("#content-form"), contentActionUrl, {"action": "cutToClipboard"});
+    postForm($("#content-form"), reverseWithFolderAndPath('content'),
+        {"action": "cutToClipboard"});
 }
 
 function paste() {
@@ -113,7 +110,8 @@ function paste() {
         return;
     }
 
-    postForm($("#content-form"), contentActionUrl, {"action": "pasteFromClipboard"});
+    postForm($("#content-form"), reverseWithFolderAndPath('content'), 
+        {"action": "pasteFromClipboard"});
 }
 
 function zip() {
@@ -150,7 +148,8 @@ function del() {
         }
 
         if (confirm(confirmMessage)) {
-            postForm($("#content-form"), contentActionUrl, {"action": "deleteEntry"});
+            postForm($("#content-form"), reverseWithFolderAndPath('content'), 
+                {"action": "deleteEntry"});
         }
     } 
 }
@@ -165,7 +164,8 @@ function mkdir() {
     var dir = prompt("Please enter the directory to create:", "");
 
     if (dir != null) {
-        postForm($("#content-form"), contentActionUrl, {"action": "mkDir",
+        postForm($("#content-form"), reverseWithFolderAndPath('content'), 
+           {"action": "mkDir",
             "dir": dir});
     }
 }
@@ -174,7 +174,8 @@ function viewTypeBoxChanged(box) {
     "use strict";
     var selectedIndex = box.selectedIndex;
     if (selectedIndex != -1) {
-        postForm($("#content-form"), contentActionUrl, {"action": "setViewType",
+        postForm($("#content-form"), reverseWithFolderAndPath('content'), 
+           {"action": "setViewType",
             "viewType": box.options[selectedIndex].text});
     }
 }

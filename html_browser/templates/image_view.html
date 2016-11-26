@@ -38,7 +38,6 @@ lastImage = false;
 <script src="{{ MEDIA_URL }}image_view.js" ></script>
 
 <script>
-    setContentActionUrl("{% get_content_url %}");
     setCsrf("{% csrf_token %}");
     setCurrentFolder("{{ currentFolder }}");
     setCurrentPath("{{ currentPath }}");
@@ -46,5 +45,6 @@ lastImage = false;
     setUserCanWrite("{{ userCanWrite }}");
     setUserCanDelete("{{ userCanDelete }}");
     setDeleteImageUrl("{{ deleteImageUrl }}");
+    setImageUrl("{{ IMAGE_URL }}");
 </script>
 {% endblock %}

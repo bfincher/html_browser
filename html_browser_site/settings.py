@@ -130,6 +130,8 @@ ROOT_URLCONF = 'html_browser_site.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'html_browser_site.wsgi.application'
 
+JS_REVERSE_JS_MINIFY = True
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
