@@ -62,9 +62,7 @@ function copy() {
         return;
     }
 
-    postForm($("#content-form"), contentActionUrl, {"action": "copyToClipboard",
-        "currentFolder": currentFolder,
-        "currentPath": currentPath});
+    postForm($("#content-form"), contentActionUrl, {"action": "copyToClipboard"});
 }
 
 function rename() {
@@ -89,9 +87,7 @@ function rename() {
     if (newName != null) {
         postForm($("#content-form"), contentActionUrl, {"action": "rename",
             "file": checkedBoxes[0].id,
-            "newName": newName,
-            "currentFolder": currentFolder,
-            "currentPath": currentPath});
+            "newName": newName});
     }
 }
 
@@ -107,9 +103,7 @@ function cut() {
         return;
     }
 
-    postForm($("#content-form"), contentActionUrl, {"action": "cutToClipboard",
-        "currentFolder": currentFolder,
-        "currentPath": currentPath});
+    postForm($("#content-form"), contentActionUrl, {"action": "cutToClipboard"});
 }
 
 function paste() {
@@ -119,9 +113,7 @@ function paste() {
         return;
     }
 
-    postForm($("#content-form"), contentActionUrl, {"action": "pasteFromClipboard",
-        "currentFolder": currentFolder,
-        "currentPath": currentPath});
+    postForm($("#content-form"), contentActionUrl, {"action": "pasteFromClipboard"});
 }
 
 function zip() {
@@ -129,10 +121,7 @@ function zip() {
     if (!areBoxesChecked()) {
         alert("No entries selected");
     } else {
-        postForm($("#content-form"), "/hb/download_zip",
-            {"currentFolder": currentFolder,
-             "currentPath": currentPath},
-             "get");
+        postForm($("#content-form"), "/hb/download_zip", "get");
     }
 }
 
@@ -161,9 +150,7 @@ function del() {
         }
 
         if (confirm(confirmMessage)) {
-            postForm($("#content-form"), contentActionUrl, {"action": "deleteEntry",
-                "currentFolder": currentFolder,
-                "currentPath": currentPath});
+            postForm($("#content-form"), contentActionUrl, {"action": "deleteEntry"});
         }
     } 
 }
@@ -179,9 +166,7 @@ function mkdir() {
 
     if (dir != null) {
         postForm($("#content-form"), contentActionUrl, {"action": "mkDir",
-            "dir": dir,
-            "currentFolder": currentFolder,
-            "currentPath": currentPath});
+            "dir": dir});
     }
 }
 
@@ -190,9 +175,7 @@ function viewTypeBoxChanged(box) {
     var selectedIndex = box.selectedIndex;
     if (selectedIndex != -1) {
         postForm($("#content-form"), contentActionUrl, {"action": "setViewType",
-            "viewType": box.options[selectedIndex].text,
-            "currentFolder": myEscape(currentFolder),
-            "currentPath": myEscape(currentPath)});
+            "viewType": box.options[selectedIndex].text});
     }
 }
 

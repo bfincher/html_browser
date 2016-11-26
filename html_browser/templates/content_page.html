@@ -6,7 +6,6 @@
 
         <script>
                 setContentActionUrl("{% get_content_url %}");
-                setCsrf("{% csrf_token %}");
                 setCurrentFolder('{{ currentFolder }}')
                 setCurrentPath('{{ currentPath }}')
                 setUserCanRead({{ userCanRead }})
@@ -44,6 +43,9 @@
 {% block body %}
     {% include "content_bar.html" %}
     <form id="content-form" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
+        <input type="hidden" name="currentPath" value="{{ currentPath }}" />
     {% block content %}{% endblock %}
     </form>
 

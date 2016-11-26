@@ -7,7 +7,6 @@ function postForm(form, path, params={}, method="post", appendToDoc=false) {
     form.attr("method", method);
     form.attr("action", path);
 
-    form.append(csrf);
 
     $.each(params, function(key, value) {
         var field = $('<input></input>');
@@ -29,5 +28,6 @@ function postForm(form, path, params={}, method="post", appendToDoc=false) {
 
 function post(path, params={}, method="post") {
     var form = $('<form></form>');
+    form.append(csrf);
     postForm(form, path, params, method, true);
 }
