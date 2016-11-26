@@ -1,15 +1,11 @@
 var scrollEnabled = true;
 var currentFolder = null;
 var currentPath = null;
-var deleteImageUrl = null;
 var imageUrl = null;
+var deleteImageUrl = null;
 
 function setImageUrl(_imageUrl) {
     imageUrl = _imageUrl;
-}
-
-function setDeleteImageUrl(_url) {
-    deleteImageUrl = _url;
 }
 
 function isScrolledToBottom() {
@@ -98,4 +94,6 @@ $(document).ready(function() {
         // has scrollbar
         getNextImage();
     }
+
+    deleteImageUrl = reverseWithFolderAndPath('deleteImage');
 });

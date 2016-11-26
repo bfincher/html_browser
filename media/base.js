@@ -12,9 +12,10 @@ function reverse(viewName, kwargs) {
     return Urls[viewName](kwargs);
 }
 
-function reverseWithFolderAndPath(viewName, kwargs=null) {
+function reverseWithFolderAndPath(viewName, _kwargs=null) {
+    var kwargs = _kwargs;
     if (kwargs == null) {
-        var kwargs = {};
+        kwargs = {};
     }
     kwargs['currentFolder'] = currentFolder;
     kwargs['currentPath'] = currentPath;

@@ -269,9 +269,6 @@ class ImageView(BaseContentView):
                            kwargs={'currentFolder': self.currentFolder,
                                    'path': '%s/%s' % (self.currentPath, fileName)})
 
-        deleteImageUrl = reverse('deleteImage', kwargs={ 'currentFolder': self.currentFolder,
-                                 'currentPath': self.currentPath})
-
         userCanDelete = self.folder.userCanDelete(request.user)
 
         self.context['viewTypes'] = const.viewTypes
@@ -282,7 +279,6 @@ class ImageView(BaseContentView):
         self.context['imageUrl'] = imageUrl
         self.context['fileName'] = fileName
         self.context['userCanDelete'] = userCanDelete
-        self.context['deleteImageUrl'] = deleteImageUrl
 
         return render(request, 'image_view.html', self.context)
 
