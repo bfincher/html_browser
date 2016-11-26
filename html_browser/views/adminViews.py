@@ -53,13 +53,13 @@ class BaseAdminView(BaseView):
 
     def appendFormErrors(self, form):
         if form.errors:
-            for _dict in form.errors:
-                messages.error(request, _dict.as_ul())
+            for error in form.errors:
+                messages.error(self.request, error)
 
         try:
             if form.non_form_errors:
-                for _dict in form.non_form_errors():
-                    messages.error(request, _dict.as_ul)
+                for error in form.non_form_errors():
+                    messages.error(self.request, error)
         except AttributeError as e:
             pass
 
@@ -162,12 +162,19 @@ class EditFolderView(AbstractFolderView):
     def __init__(self, *args, **kwargs):
         super(EditFolderView, self).__init__(*args, **kwargs)
 
+    def get(self, request, folderName, *args, **kwargs):
+        self.folderName = folderName
+        return super(EditFolderView, self).get(request, *args, **kwargs)
+
+    def post(self, request, folderName, *args, **kwargs):
+        self.folderName = folderName
+        return super(EditFolderView, self).post(request, *args, **kwargs)
+
     def getTemplate(self):
         return 'admin/edit_folder.html'
 
     def initForms(self, request, *args, **kwargs):
-        folderName = kwargs['folderName']
-        self.folder = Folder.objects.get(name=folderName)
+        self.folder = Folder.objects.get(name=self.folderName)
 
         if request.method == "GET":
             self.folderForm = EditFolderForm(instance=self.folder)

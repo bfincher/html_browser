@@ -54,6 +54,7 @@ class BaseView(View):
 
     def _commonGetPost(self, request, *args, **kwargs):
         self.reqLogger.info(self.__class__.__name__)
+        self.request = request
         if self.reqLogger.isEnabledFor(DEBUG):
             _dict = None
             if request.method == "GET":

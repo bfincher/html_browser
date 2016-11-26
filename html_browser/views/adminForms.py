@@ -69,7 +69,7 @@ class AddFolderForm(forms.ModelForm):
                                     addGroupPermHtml)
 
         self.helper.form_method = 'post'
-        self.helper.form_action = 'saddFolder'
+        self.helper.form_action = 'addFolder'
 
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
