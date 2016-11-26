@@ -162,6 +162,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'crispy_forms',
     'debug_toolbar',
+    'django_js_reverse',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
