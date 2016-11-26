@@ -14,8 +14,6 @@
                      <h3>Apply a filter</h3>
                      <form method="get" action="{% get_content_url %}"> 
                        <input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
-                       <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
-                       <input type="hidden" name="currentPath" value="{{ currentPath }}" />
                        <input class="btn btn-default" type="submit" value="Filter" name="Filter" />
                      </form>
                    </center>
@@ -29,8 +27,6 @@
                      <h3>Search for filenames (use regular expressions)</h3>
                      <form method="get" action="{% get_content_url %}"> 
                        <input type="text" name="search" value="{{ search }}" maxlength="20" size="10" />
-                       <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
-                       <input type="hidden" name="currentPath" value="{{ currentPath }}" />
                        <input class="btn btn-default" type="submit" value="Search" name="Search" />
                      </form>
                    </center>
@@ -44,8 +40,6 @@
                      <h3>Settings</h3>
                      <form action="post" action="{% get_content_url %}"> {% csrf_token %}
                        <input type="hidden" name="action" value="changeSettings" />
-                       <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
-                       <input type="hidden" name="currentPath" value="{{ currentPath }}" />
                        <input type="checkbox" name="showHidden" 
                        {% if showHidden %}checked="checked" {% endif %}
                        />&nbsp;Show Hidden Files / Folders
