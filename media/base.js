@@ -3,6 +3,7 @@ function setCsrf(_csrf) {
 }
 
 function postForm(form, path, params={}, method="post", appendToDoc=false) {
+    console.log('posting to url ' + path + ".  method = " + method);
     form.attr("method", method);
     form.attr("action", path);
 

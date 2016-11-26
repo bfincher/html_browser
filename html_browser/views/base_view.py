@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
@@ -268,6 +269,9 @@ class ImageView(BaseContentView):
                            kwargs={'currentFolder': self.currentFolder,
                                    'path': '%s/%s' % (self.currentPath, fileName)})
 
+        deleteImageUrl = reverse('deleteImage', kwargs={ 'currentFolder': self.currentFolder,
+                                 'currentPath': self.currentPath})
+
         userCanDelete = self.folder.userCanDelete(request.user)
 
         self.context['viewTypes'] = const.viewTypes
@@ -278,6 +282,7 @@ class ImageView(BaseContentView):
         self.context['imageUrl'] = imageUrl
         self.context['fileName'] = fileName
         self.context['userCanDelete'] = userCanDelete
+        self.context['deleteImageUrl'] = deleteImageUrl
 
         return render(request, 'image_view.html', self.context)
 
@@ -292,10 +297,11 @@ class DeleteImageView(BaseContentView):
     def __init__(self):
         super(DeleteImageView, self).__init__(requireDelete=True)
 
-    def get(self, request, currentFolder, currentPath, *args, **kwargs):
-        super(DeleteImageView, self).get(request, currentFolder, currentPath, *args, **kwargs)
+    def post(self, request, currentFolder, currentPath, *args, **kwargs):
+        super(DeleteImageView, self).post(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
+        fileName = request.POST['fileName']
 
-        handleDelete(self.folder, self.currentPath, request.GET['fileName'])
+        handleDelete(self.folder, self.currentPath, [fileName])
         messages.success(request, 'File deleted')
 
         return redirect(reverseContentUrl(self.currentFolder, self.currentPath))

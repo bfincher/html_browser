@@ -34,10 +34,17 @@ lastImage = false;
 </script>
 
 <script src="{{ MEDIA_URL }}debounce.js" ></script>
+<script src="{{ MEDIA_URL }}folder_content.js" ></script>
 <script src="{{ MEDIA_URL }}image_view.js" ></script>
 
 <script>
-    setCurrentFolder('{{ currentFolder }}');
-    setCurrentPath('{{ currentPath }}');
+    setContentActionUrl("{% get_content_url %}");
+    setCsrf("{% csrf_token %}");
+    setCurrentFolder("{{ currentFolder }}");
+    setCurrentPath("{{ currentPath }}");
+    setUserCanRead("{{ userCanRead }}");
+    setUserCanWrite("{{ userCanWrite }}");
+    setUserCanDelete("{{ userCanDelete }}");
+    setDeleteImageUrl("{{ deleteImageUrl }}");
 </script>
 {% endblock %}

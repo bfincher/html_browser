@@ -1,19 +1,10 @@
 var scrollEnabled = true;
 var currentFolder = null;
 var currentPath = null;
+var deleteImageUrl = null;
 
-function setCurrentFolder(_currentFolder) {
-    "use strict";
-    currentFolder = _currentFolder;
-}
-
-function setCurrentPath(_currentPath) {
-    "use strict";
-    if (_currentPath == "") {
-        currentPath = "/";
-    } else {
-        currentPath = _currentPath;
-    }
+function setDeleteImageUrl(_url) {
+    deleteImageUrl = _url;
 }
 
 function isScrolledToBottom() {
@@ -65,6 +56,19 @@ function getNextImage() {
         }
     }
     });
+}
+
+function deleteImage(fileName) {
+    "use strict";
+    if (!userCanDelete) {
+        alert("You do not have permission to delete from this folder");
+        return;
+    }
+
+    var confirmMessage = "Are you sure you want to delete the selected entry?";
+    if (confirm(confirmMessage)) {
+        post(deleteImageUrl, {"fileName": fileName});
+    }
 }
 
 $(document).ready(function() {

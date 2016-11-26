@@ -143,22 +143,6 @@ function upload() {
     + "&currentPath=" + myEscape(currentPath);
 }
 
-function deleteImage(fileName) {
-    "use strict";
-    if (!userCanDelete) {
-        alert("You do not have permission to delete from this folder");
-        return;
-    }
-
-    var confirmMessage = "Are you sure you want to delete the selected entry?";
-    if (confirm(confirmMessage)) {
-        postForm($("#content-form"), baseUrl + "deleteImage", {"action": "deleteImage",
-            "fileName": fileName,
-            "currentFolder": currentFolder,
-            "currentPath": currentPath});
-    }
-}
-
 function del() {
     "use strict";
     if (!userCanDelete) {

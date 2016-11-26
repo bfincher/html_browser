@@ -35,6 +35,9 @@ def get_imageview_url(context, fileName):
     currentFolder = context['currentFolder']
     currentPath = context['currentPath']
 
-    path = os.path.join(currentPath.encode('utf-8'), fileName.encode('utf-8'))
+    if currentPath:
+        path = os.path.join(currentPath.encode('utf-8'), fileName.encode('utf-8'))
+    else:
+        path = fileName.encode('utf-8')
     return reverse('imageView', kwargs={'currentFolder': currentFolder, 'currentPath': path}) 
     
