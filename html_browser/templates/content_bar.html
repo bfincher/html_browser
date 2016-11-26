@@ -13,7 +13,7 @@
 				
 		<div class="col-md-4">
 			<h5>
-				{{ currentFolder }}{{ currentPath }} &nbsp;&nbsp;&nbsp; 
+				{{ currentFolder }}{% if currentPath %}/{{ currentPath }}{% endif %} &nbsp;&nbsp;&nbsp; 
                                 <a href="javascript:diskUsageShowPopup()">{{ diskFreePct }} free</a>
 			</h5>
 		</div>
