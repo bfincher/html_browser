@@ -16,9 +16,9 @@ class _constants():
     IMAGE_URL = MEDIA_URL + 'images/'
     IMAGE_VIEW_URL = BASE_URL + "image_view/"
     THUMBNAIL_URL = MEDIA_URL + "/thumbs/"
-    
+
     detailsViewType = 'details'
     listViewType = 'list'
     thumbnailsViewType = 'thumbnails'
-    
+
     viewTypes = [detailsViewType, listViewType, thumbnailsViewType]

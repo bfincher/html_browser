@@ -10,9 +10,10 @@ of a DjangoTemplates backend and used by RequestContext.
 from .constants import _constants as const
 from django.conf import settings
 
+
 def images(request):
     return {'IMAGE_URL': const.IMAGE_URL}
 
+
 def media(request):
     return {'MEDIA_URL': const.MEDIA_URL}
-
