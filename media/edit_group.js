@@ -1,11 +1,7 @@
-function setDeleteGroupUrl(url) {
-    deleteGroupUrl = url;
-}
-
 function deleteGroup() {
     var groupName = $('#id_groupName').val();
     if (confirm('Are you sure you want to delete the group ' + groupName + '?')) {
-        post(deleteGroupUrl);
+        post(Urls.deleteGroup(groupName));
     }
 }
 
