@@ -10,7 +10,7 @@
     
 <div class="container-narrow">
 <br>
-<h1>{% block title %}{% endblock %}</h1> 
+<h1>{{ title }}<h1> 
 {% if folder %}<h2>{{ folder.name }}</h2>{% endif %}
 <br>
     {% crispy form %}

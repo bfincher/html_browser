@@ -97,9 +97,6 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
     @abstractmethod
     def initForms(self, request, *args, **kwargs): pass
 
-    @abstractmethod
-    def getTemplate(self): pass
-
     def post(self, request, *args, **kwargs):
         super(AbstractFolderView, self).post(request, *args, **kwargs)
         self.initForms(request, *args, **kwargs)
@@ -154,24 +151,24 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
         self.context['form'] = self.folderForm
         self.context['userPermFormset'] = self.userPermFormset
         self.context['groupPermFormset'] = self.groupPermFormset
+        self.context['title'] = self.title
 
-        return render(request, self.getTemplate(), self.context)
+        return render(request, 'admin/add_edit_folder.html', self.context)
 
 
 class EditFolderView(AbstractFolderView):
     def __init__(self, *args, **kwargs):
         super(EditFolderView, self).__init__(*args, **kwargs)
 
-    def get(self, request, folderName, *args, **kwargs):
+    def get(self, request, title, folderName, *args, **kwargs):
+        self.title = title
         self.folderName = folderName
         return super(EditFolderView, self).get(request, *args, **kwargs)
 
-    def post(self, request, folderName, *args, **kwargs):
+    def post(self, request, title, folderName, *args, **kwargs):
+        self.title = title
         self.folderName = folderName
         return super(EditFolderView, self).post(request, *args, **kwargs)
-
-    def getTemplate(self):
-        return 'admin/edit_folder.html'
 
     def initForms(self, request, *args, **kwargs):
         self.folder = Folder.objects.get(name=self.folderName)
@@ -190,8 +187,13 @@ class AddFolderView(AbstractFolderView):
     def __init__(self, *args, **kwargs):
         super(AddFolderView, self).__init__(*args, **kwargs)
 
-    def getTemplate(self):
-        return 'admin/add_folder.html'
+    def get(self, request, title, *args, **kwargs):
+        self.title = title
+        return super(AddFolderView, self).get(request, *args, **kwargs)
+
+    def post(self, request, title, *args, **kwargs):
+        self.title = title
+        return super(AddFolderView, self).post(request, *args, **kwargs)
 
     def initForms(self, request, *args, **kwargs):
         if request.method == "GET":
