@@ -30,7 +30,7 @@ function getNextImage() {
 
     var body = $('body');
     body.scrollTop(body.scrollTop() - 2);
-    var url = baseUrl + "getNextImage?currentFolder=" + currentFolder + "&currentPath=" + currentPath + "&fileName=" + fileName;
+    var url = "/getNextImage/" + currentFolder + "/" + currentPath + "/" + fileName;
     $("<img id='loading' src='" + imageUrl + "loading.gif' height='42' width='42' />").appendTo('#loadingDiv');
     $.ajax({url:url, 
 //    done:function() {

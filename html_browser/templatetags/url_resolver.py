@@ -29,3 +29,12 @@ def get_download_url(context, fileName):
         path = fileName
 
     return reverse('download', kwargs={'currentFolder': currentFolder, 'path': path})
+
+@register.simple_tag(takes_context=True)
+def get_imageview_url(context, fileName):
+    currentFolder = context['currentFolder']
+    currentPath = context['currentPath']
+
+    path = os.path.join(currentPath.encode('utf-8'), fileName.encode('utf-8'))
+    return reverse('imageView', kwargs={'currentFolder': currentFolder, 'currentPath': path}) 
+    

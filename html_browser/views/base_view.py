@@ -156,8 +156,10 @@ class DownloadView(BaseContentView):
 
 
 class DownloadImageView(BaseContentView):
-    def get(self, request, path, *args, **kwargs):
-        super(DownloadImageView, self).get(request, *args, **kwargs)
+    def get(self, request, currentFolder, path, *args, **kwargs):
+        currentPath = os.path.dirname(path)
+        super(DownloadImageView, self).get(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
+
         path = unquote_plus(path)
 
         imagePath = os.path.join(Folder.objects.get(name='Pictures').localPath, path)
@@ -238,9 +240,10 @@ def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
 
 class ImageView(BaseContentView):
     def get(self, request, currentFolder, currentPath, *args, **kwargs):
-        super(ImageView, self).get(request, *args, **kwargs)
+        fileName = os.path.basename(currentPath)
+        currentPath = os.path.dirname(currentPath)
+        super(ImageView, self).get(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
 
-        fileName = request.GET['fileName']
         entries = getIndexIntoCurrentDir(request, self.currentFolder, self.currentPath, fileName)
         index = entries['index']
         currentDirEntries = entries['currentDirEntries']
@@ -261,9 +264,9 @@ class ImageView(BaseContentView):
 
         parentDirLink = reverseContentUrl(self.currentFolder, self.currentPath)
 
-        imageUr = reverseContentUrl(self.currentFolder,
-                                    self.currentPath + "/" + fileName,
-                                    'download%sImage' % self.folder.name)
+        imageUrl = reverse('download%sImage' % self.folder.name,
+                           kwargs={'currentFolder': self.currentFolder,
+                                   'path': '%s/%s' % (self.currentPath, fileName)})
 
         userCanDelete = self.folder.userCanDelete(request.user)
 
@@ -299,10 +302,10 @@ class DeleteImageView(BaseContentView):
 
 
 class GetNextImageView(BaseContentView):
-    def get(self, request, currentFolder, currentPath, *args, **kwargs):
-        super(GetNextImageView, self).get(request, currentFolder, currentPath, *args, **kwargs)
-
-        fileName = request.GET['fileName']
+    def get(self, request, currentFolder, path, *args, **kwargs):
+        currentPath = os.path.dirname(path)
+        fileName = os.path.basename(path)
+        super(GetNextImageView, self).get(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
 
         result = {}
         entries = getIndexIntoCurrentDir(request, self.currentFolder, self.currentPath, fileName)
@@ -317,9 +320,9 @@ class GetNextImageView(BaseContentView):
                     result['hasNextImage'] = True
                     nextFileName = currentDirEntries[i].name
 
-                    imageUrl = reverseContentUrl(self.currentFolder,
-                                                 self.currentPath + "/" + nextFileName,
-                                                 'download%sImage' % self.folder.name)
+                    imageUrl = reverse('download%sImage' % self.folder.name,
+                                       kwargs={'currentFolder': self.currentFolder,
+                                               'path': self.currentPath + "/" + nextFileName})
                     imageUrl = imageUrl.replace('//', '/')
                     result['imageUrl'] = imageUrl
                     result['fileName'] = nextFileName

@@ -13,10 +13,10 @@ urlpatterns = [
     url(r'hbLogin/.*', base_view.LoginView.as_view(), name='login'),
     url(r'hbLogout/.*', base_view.LogoutView.as_view(), name='logout'),
     url(r'upload/.*', base_view.UploadView.as_view(), name='upload'),
-    url(r'image_view/.*', base_view.ImageView.as_view(), name='imageView'),
+    url(r'image_view/(?P<currentFolder>\w+)/(?P<currentPath>.+?)/$', base_view.ImageView.as_view(), name='imageView'),
     url(r'thumb/', base_view.ThumbView.as_view(), name='thumb'),
     url(r'deleteImage', base_view.DeleteImageView.as_view(), name='deleteImage'),
-    url(r'getNextImage', base_view.GetNextImageView.as_view(), name='getNextImage'),
+    url(r'getNextImage/(?P<currentFolder>\w+)/(?P<path>.+?)/$', base_view.GetNextImageView.as_view(), name='getNextImage'),
     url(r'hbAdmin/.*', admin_views.AdminView.as_view(), name='admin'),
     url(r'userAdmin/.*', admin_views.UserAdminView.as_view(), name='userAdmin'),
     url(r'deleteUser/.*', admin_views.DeleteUserView.as_view(), name='deleteUser'),
@@ -35,4 +35,4 @@ urlpatterns = [
     ]
 
 for folder in Folder.objects.all():
-    urlpatterns.append(url(r'__%s__/(?P<path>.*?)$' % folder.name, base_view.DownloadImageView.as_view(), name='download%sImage' % folder.name))
+    urlpatterns.append(url(r'__%s__/(?P<currentFolder>\w+)/(?P<path>.+?)/$' % folder.name, base_view.DownloadImageView.as_view(), name='download%sImage' % folder.name))
