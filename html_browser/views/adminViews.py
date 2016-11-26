@@ -213,7 +213,7 @@ class AddGroupView(BaseAdminView):
         else:
             messages.error(request, "Invalid group name.  Must only contain letters, numbers, and underscores")
 
-        return self.redirect("groupAdmin")
+        return redirect("groupAdmin")
 
 
 class DeleteGroupView(BaseAdminView):
@@ -297,9 +297,9 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
     @abstractmethod
     def initForm(self, request): pass
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, title, *args, **kwargs):
+        self.title = title
         super(AbstractUserView, self).get(request, *args, **kwargs)
-        self.title = kwargs['title']
 
         if not self.form:
             self.initForm(request)
@@ -312,7 +312,8 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
         self.context['title'] = self.title
         return render(request, 'admin/add_edit_user.html', self.context)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, title, *args, **kwargs):
+        self.title = title
         super(AbstractUserView, self).post(request, *args, **kwargs)
 
         self.initForm(request)
@@ -334,7 +335,7 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
                 reqLogger.error('form.errors = %s', self.form.errors)
                 return self.get(request, *args, **kwargs)
 
-        return self.redirect("userAdmin")
+        return redirect("userAdmin")
 
 
 class EditUserView(AbstractUserView):
