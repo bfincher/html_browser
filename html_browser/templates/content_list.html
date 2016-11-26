@@ -15,7 +15,7 @@
 		<tr>
 			{% endif %}
 			<td>
-				<input name="cb-{{ entry.name }}" type="checkbox" />
+				<input class="content-checkbox" name="cb-{{ entry.name }}" type="checkbox" />
 				{% block list_entry %}
 				{% if entry.isDir %}
 					{% include "entry_dir.html" %}
