@@ -11,9 +11,8 @@ logger = logging.getLogger('html_browser.base_view')
 register = template.Library()
 
 @register.simple_tag(takes_context=True)
-def get_content_url(context, currentFolder=None):
-    if currentFolder is None:
-        currentFolder = context['currentFolder']
+def get_content_url(context, *args, **kwargs):
+    currentFolder = kwargs.get('currentFolder', None) or context['currentFolder']
     currentPath = context.get('currentPath', None)
 
     return reverseContentUrl(currentFolder, currentPath)

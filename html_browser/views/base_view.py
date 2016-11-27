@@ -206,14 +206,14 @@ class UploadView(BaseContentView):
     def __init__(self):
         super(UploadView, self).__init__(requireWrite=True)
 
-    def get(self, request, currentFolder, currentPath, *args, **kwargs):
-        super(UploadView, self).get(request, currentFolder, currentPath, *args, **kwargs)
+    def get(self, request, currentFolder, currentPath='', *args, **kwargs):
+        super(UploadView, self).get(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
 
         self.context['viewTypes'] = const.viewTypes
 
         return render(request, 'upload.html', self.context)
 
-    def post(self, request, currentFolder, currentPath, *args, **kwargs):
+    def post(self, request, currentFolder, currentPath='', *args, **kwargs):
         super(UploadView, self).post(request, currentFolder, currentPath, *args, **kwargs)
 
         action = request.POST['action']

@@ -16,7 +16,7 @@
 					<td> <a href="{% url 'content' folder.getNameAsHtml %}"/> {{ folder.name }} </a></td>
 				{% endif %}
 		{% else %}
-			<td> <a href="{% get_content_url folder.getNameAsHtml %}"/> {{ folder.name }} </a></td>
+			<td> <a href="{% url 'content' folder.getNameAsHtml %}"/> {{ folder.name }} </a></td>
 			</tr>
 		{% endif %}
 	{% endfor %}
