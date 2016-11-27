@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'download/(?P<currentFolder>\w+)/(?P<path>.+?)/$', base_view.DownloadView.as_view(), name='download'),
     url(r'hbLogin/.*', base_view.LoginView.as_view(), name='login'),
     url(r'hbLogout/.*', base_view.LogoutView.as_view(), name='logout'),
+    url(r'upload/(?P<currentFolder>\w+)/$', base_view.UploadView.as_view(), name='upload'),
     url(r'upload/(?P<currentFolder>\w+)/(?P<currentPath>.+?)/$', base_view.UploadView.as_view(), name='upload'),
     url(r'image_view/(?P<currentFolder>\w+)/(?P<currentPath>.+?)/$', base_view.ImageView.as_view(), name='imageView'),
     url(r'thumb/', base_view.ThumbView.as_view(), name='thumb'),

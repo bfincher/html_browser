@@ -11,11 +11,11 @@ logger = logging.getLogger('html_browser.base_view')
 register = template.Library()
 
 @register.simple_tag(takes_context=True)
-def get_content_url(context, *args, **kwargs):
+def get_content_url(context, viewName='content', *args, **kwargs):
     currentFolder = kwargs.get('currentFolder', None) or context['currentFolder']
     currentPath = context.get('currentPath', None)
 
-    return reverseContentUrl(currentFolder, currentPath)
+    return reverseContentUrl(currentFolder, currentPath, viewName)
 
 @register.simple_tag(takes_context=True)
 def get_download_url(context, fileName):

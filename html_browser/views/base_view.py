@@ -214,17 +214,17 @@ class UploadView(BaseContentView):
         return render(request, 'upload.html', self.context)
 
     def post(self, request, currentFolder, currentPath='', *args, **kwargs):
-        super(UploadView, self).post(request, currentFolder, currentPath, *args, **kwargs)
+        super(UploadView, self).post(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
 
         action = request.POST['action']
         if action == 'uploadFile':
             handleFileUpload(request.FILES['upload1'], self.folder, self.currentPath)
-            message.success(request, 'File uploaded')
+            messages.success(request, 'File uploaded')
         elif action == 'uploadZip':
             handleZipUpload(request.FILES['zipupload1'], self.folder, self.currentPath)
-            message.success(request, 'File uploaded and extracted')
+            messages.success(request, 'File uploaded and extracted')
 
-        return redirect('index')
+        return redirect(reverseContentUrl(self.currentFolder, self.currentPath))
 
 
 def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):

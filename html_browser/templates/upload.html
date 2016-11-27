@@ -1,4 +1,5 @@
 {% extends "page.html" %}
+{% load url_resolver %}
 
 {% block additional_header %}
     <script language="javascript" type="text/javascript">
@@ -28,9 +29,7 @@
 		<tr>
 			<td>
 				<form ENCTYPE="multipart/form-data" method="POST" 
-				    action="{% url 'upload'%}"> {% csrf_token %}
-                <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
-                <input type="hidden" name="currentPath" value="{{ currentPath }}" />
+				    action="{% get_content_url viewName='upload' %}"> {% csrf_token %}
                 <input type="hidden" name="action" value="uploadFile"/>
 				<table align="center">				
 					<caption>File upload</caption>					

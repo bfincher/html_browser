@@ -3,6 +3,11 @@ var currentPath = null;
 var userCanRead = null;
 var userCanWrite = null;
 var userCanDelete = null;
+var uploadUrl = null;
+
+function setUploadUrl(url) {
+    uploadUrl = url;
+}
 
 function myEscape(str) {
     "use strict";
@@ -125,9 +130,7 @@ function zip() {
 
 function upload() {
     "use strict";
-    window.location="/hb/upload/?currentFolder="
-    + myEscape(currentFolder)
-    + "&currentPath=" + myEscape(currentPath);
+    window.location=uploadUrl;
 }
 
 function del() {
