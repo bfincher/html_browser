@@ -1,7 +1,7 @@
 {% extends "page.html" %}
 {% block additional_header %}
 <script>
-    setCsrf("{% csrf_token %}");
+	setCsrf("{% csrf_token %}");
 </script>
 {% endblock %}
 {% block body %}
@@ -13,7 +13,7 @@
 			<th>Group Name</th>
 		</tr>
 		
-        {% for group in groups %}
+		{% for group in groups %}
 		<tr>
 			<td><a href="{% url 'editGroup' group %}">{{ group }} </a></td>
 		</tr>

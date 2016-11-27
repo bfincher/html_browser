@@ -2,22 +2,22 @@
 {% load url_resolver %}
 
 {% block additional_header %}
-    <script language="javascript" type="text/javascript">
-    
-    currentFolder="{{ currentFolder }}";
-    currentPath="{{ currentPath }}";
-    
-    function verifyZip(fieldName) {    	
-    	var field = document.getElementById(fieldName);
-    	if (field.value != "") {
-    		if (field.value.lastIndexOf(".zip") != field.value.length - 4) {
-    			alert("Only zip files are accepted in this field");
-    			field.value = "";
-    		}
-    	}
-    }       
+	<script language="javascript" type="text/javascript">
+	
+	currentFolder="{{ currentFolder }}";
+	currentPath="{{ currentPath }}";
+	
+	function verifyZip(fieldName) {		
+		var field = document.getElementById(fieldName);
+		if (field.value != "") {
+			if (field.value.lastIndexOf(".zip") != field.value.length - 4) {
+				alert("Only zip files are accepted in this field");
+				field.value = "";
+			}
+		}
+	}		
 
-    </script>
+	</script>
 {% endblock %}
 
 {% block body %}
@@ -29,8 +29,8 @@
 		<tr>
 			<td>
 				<form ENCTYPE="multipart/form-data" method="POST" 
-				    action="{% get_content_url viewName='upload' %}"> {% csrf_token %}
-                <input type="hidden" name="action" value="uploadFile"/>
+					action="{% get_content_url viewName='upload' %}"> {% csrf_token %}
+				<input type="hidden" name="action" value="uploadFile"/>
 				<table align="center">				
 					<caption>File upload</caption>					
 					<tr><td align="center"><input type="file" size="30" name="upload1"></td></tr>
@@ -46,10 +46,10 @@
 			</td>
 			<td>
 				<form ENCTYPE="multipart/form-data" method="POST" 
-				    action="/hb/upload/"> {% csrf_token %}			
-                <input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
-                <input type="hidden" name="currentPath" value="{{ currentPath }}" />
-                <input type="hidden" name="action" value="uploadZip"/>
+					action="/hb/upload/"> {% csrf_token %}			
+				<input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
+				<input type="hidden" name="currentPath" value="{{ currentPath }}" />
+				<input type="hidden" name="action" value="uploadZip"/>
 				<table align="center">
 					<caption>Zip Upload</caption>
 					<tr><td align="center"><input type="file" size="30" name="zipupload1" id="zipupload1" onchange="verifyZip('zipupload1')"></td></tr>

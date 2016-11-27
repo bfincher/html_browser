@@ -3,17 +3,17 @@
 {% load crispy_forms_tags %}
 
 <script>
-    setCsrf("{% csrf_token %}");
+	setCsrf("{% csrf_token %}");
 </script>
 {% endblock %}
 {% block body %}
-    
+	
 <div class="container-narrow">
 <br>
 <h1>{{ title }}<h1> 
 {% if folder %}<h2>{{ folder.name }}</h2>{% endif %}
 <br>
-    {% crispy form %}
+	{% crispy form %}
 
 </div>
 {% endblock %}

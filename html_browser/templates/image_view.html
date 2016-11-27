@@ -18,13 +18,13 @@
 
 	</center>
 
-    <table id="imageTable">
-        <tr><td><a href='javascript:deleteImage("{{ fileName }}")'>Delete File</a></td></tr>
-        <tr><td><img src="{{ imageUrl }}" /></td></tr>
-    </table>
+	<table id="imageTable">
+		<tr><td><a href='javascript:deleteImage("{{ fileName }}")'>Delete File</a></td></tr>
+		<tr><td><img src="{{ imageUrl }}" /></td></tr>
+	</table>
 
-    <br>
-    <div id="loadingDiv"></div>
+	<br>
+	<div id="loadingDiv"></div>
 {% endblock %}
 
 {% block extra_js %}
@@ -38,12 +38,12 @@ lastImage = false;
 <script src="{{ MEDIA_URL }}image_view.js" ></script>
 
 <script>
-    setCsrf("{% csrf_token %}");
-    setCurrentFolder("{{ currentFolder }}");
-    setCurrentPath("{{ currentPath }}");
-    setUserCanRead("{{ userCanRead }}");
-    setUserCanWrite("{{ userCanWrite }}");
-    setUserCanDelete("{{ userCanDelete }}");
-    setImageUrl("{{ IMAGE_URL }}");
+	setCsrf("{% csrf_token %}");
+	setCurrentFolder("{{ currentFolder }}");
+	setCurrentPath("{{ currentPath }}");
+	setUserCanRead("{{ userCanRead }}");
+	setUserCanWrite("{{ userCanWrite }}");
+	setUserCanDelete("{{ userCanDelete }}");
+	setImageUrl("{{ IMAGE_URL }}");
 </script>
 {% endblock %}

@@ -3,16 +3,16 @@
 {% block additional_header %}
 {% load crispy_forms_tags %}
 <script>
-    setCsrf("{% csrf_token %}");
+	setCsrf("{% csrf_token %}");
 </script>
 {% endblock %}
 
 {% block body %}
-<div class="container-narrow">    
+<div class="container-narrow">	  
 	<h1 style="margin-top: 50px;">Edit Group</h1>
 	<h2>{{ groupName }}</h2>
 	
-    {% crispy form %}
+	{% crispy form %}
 
 </div>
 {% endblock %}

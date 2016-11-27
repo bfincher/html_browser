@@ -1,73 +1,73 @@
 {% extends "content_page.html" %}
 {% load url_resolver %}
 {% block extra_js %}
-    <script src="{{ MEDIA_URL }}moment.min.js"></script> <!-- used by bootstrap-sortable -->
-    <script src="{{ MEDIA_URL }}bootstrap-sortable.js"></script>
+	<script src="{{ MEDIA_URL }}moment.min.js"></script> <!-- used by bootstrap-sortable -->
+	<script src="{{ MEDIA_URL }}bootstrap-sortable.js"></script>
 {% endblock %}
 
 
-             {% block additional_navbar %}
-               <li class="dropdown">
-                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Filter <span class="caret"></span></a>
-                 <span class="dropdown-menu">
-                   <center>
-                     <h3>Apply a filter</h3>
-                     <form method="get" action="{% get_content_url %}"> 
-                       <input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
-                       <input class="btn btn-default" type="submit" value="Filter" name="Filter" />
-                     </form>
-                   </center>
-                 </span>
-               </li>
+				{% block additional_navbar %}
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Filter <span class="caret"></span></a>
+						<span class="dropdown-menu">
+							<center>
+								<h3>Apply a filter</h3>
+								<form method="get" action="{% get_content_url %}"> 
+									<input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
+									<input class="btn btn-default" type="submit" value="Filter" name="Filter" />
+								</form>
+							</center>
+						</span>
+				</li>
 <!--
-               <li class="dropdown" data-dropdown="dropdown">
-                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Search <b class="caret"></b></a>
-                 <div class="dropdown-menu">
-                   <center>
-                     <h3>Search for filenames (use regular expressions)</h3>
-                     <form method="get" action="{% get_content_url %}"> 
-                       <input type="text" name="search" value="{{ search }}" maxlength="20" size="10" />
-                       <input class="btn btn-default" type="submit" value="Search" name="Search" />
-                     </form>
-                   </center>
-                 </div>
-               </li>
+			   <li class="dropdown" data-dropdown="dropdown">
+				 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Search <b class="caret"></b></a>
+				 <div class="dropdown-menu">
+				   <center>
+					 <h3>Search for filenames (use regular expressions)</h3>
+					 <form method="get" action="{% get_content_url %}"> 
+					   <input type="text" name="search" value="{{ search }}" maxlength="20" size="10" />
+					   <input class="btn btn-default" type="submit" value="Search" name="Search" />
+					 </form>
+				   </center>
+				 </div>
+			   </li>
 -->
-               <li class="dropdown" data-dropdown="dropdown">
-                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Settings <b class="caret"></b></a>
-                 <div class="dropdown-menu">
-                   <center>
-                     <h3>Settings</h3>
-                     <form action="post" action="{% get_content_url %}"> {% csrf_token %}
-                       <input type="hidden" name="action" value="changeSettings" />
-                       <input type="checkbox" name="showHidden" 
-                       {% if showHidden %}checked="checked" {% endif %}
-                       />&nbsp;Show Hidden Files / Folders
-                       <br>
-                       <input class="btn-default" id="Save" name="submit" type="submit" value="Save" />
-                       <input class="btn" id="Cancel" name="submit" type="submit" value="Cancel" />
-                     </form>
-                   </center>
-                 </div>
-               </li>
-             {% endblock %}
+				<li class="dropdown" data-dropdown="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Settings <b class="caret"></b></a>
+					<div class="dropdown-menu">
+						<center>
+							<h3>Settings</h3>
+							<form action="post" action="{% get_content_url %}"> {% csrf_token %}
+								<input type="hidden" name="action" value="changeSettings" />
+								<input type="checkbox" name="showHidden" 
+								{% if showHidden %}checked="checked" {% endif %}
+								/>&nbsp;Show Hidden Files / Folders
+								<br>
+								<input class="btn-default" id="Save" name="submit" type="submit" value="Save" />
+								<input class="btn" id="Cancel" name="submit" type="submit" value="Cancel" />
+							</form>
+						</center>
+					</div>
+			   </li>
+			{% endblock %}
 {% block additional_header %}
-    <link rel="stylesheet" href="{{ MEDIA_URL }}/bootstrap-sortable.css" type="text/css" charset="utf-8">
-    {{ block.super }}
+	<link rel="stylesheet" href="{{ MEDIA_URL }}/bootstrap-sortable.css" type="text/css" charset="utf-8">
+	{{ block.super }}
 {% endblock %}
 
 {% block content %}
 	<table class="table table-striped table-bordered table-hover table-condensed sortable" id="content-table"> 
-        <thead>
+		<thead>
 		<tr>
 			<th style="width: 1%" data-defaultsort='disabled'><input id="checkAll" type="checkbox" /> </th>
 			<th style="width: 20%">Name</th>
 			<th style="width: 5%" class="hidden-xs">Size</th>
 			<th style="width: 10%" class="hidden-xs">Last Modified</th>
 		</tr>
-        </thead>
+		</thead>
 		
-        <tbody>
+		<tbody>
 		{% for entry in currentDirEntries %}
 		<tr>
 			<td><input class="content-checkbox" name="cb-{{ entry.name }}" type="checkbox" /></td>
@@ -84,7 +84,7 @@
 			{% endautoescape %}
 		</tr>			
 		{% endfor %}
-        </tbody>
+		</tbody>
 	</table>
 			
 {% endblock %}
