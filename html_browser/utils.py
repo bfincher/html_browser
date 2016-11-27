@@ -79,10 +79,9 @@ class DirEntry():
     def __str__(self):
         _str = """DirEntry:  isDir = {} name = {} nameUrl = {}
                   currentPath = {} currentPathOrig = {} size = {}
-                  lastModifyTime = {} hasThumbnail = {} thumbnailUrl = {}"""
-        .format(str(self.isDir), self.name, self.nameUrl, self.currentPath,
-                self.currentPathOrig, self.size, self.lastModifyTime,
-                self.hasThumbnail, self.thumbnailUrl)
+                  lastModifyTime = {} hasThumbnail = {} thumbnailUrl = {}""".format(str(self.isDir), self.name, self.nameUrl, self.currentPath,
+                                                                                    self.currentPathOrig, self.size, self.lastModifyTime,
+                                                                                    self.hasThumbnail, self.thumbnailUrl)
 
 
 def getPath(folderPath, path):
