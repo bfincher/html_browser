@@ -11,7 +11,8 @@ import unittest
 import zipfile
 from zipfile import ZipFile
 
-from  html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_WRITE, CAN_DELETE
+from html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_WRITE, CAN_DELETE
+
 
 def contextCheck(testCase, context, user=None, folder=None):
     testCase.assertTrue('csrf_token' in context)
@@ -19,86 +20,86 @@ def contextCheck(testCase, context, user=None, folder=None):
 
     if user:
         self.assertEquals(user, context['user'])
-    
+
 
 class BaseViewTest(unittest.TestCase):
     def setUp(self):
-         User.objects.all().delete()
-         Group.objects.all().delete()
-         Folder.objects.all().delete()
+        User.objects.all().delete()
+        Group.objects.all().delete()
+        Folder.objects.all().delete()
 
-         self.user1 = User()
-         self.user1.username = 'user1'
-         self.user1Pw = 'test_pw_1'
-         self.user1.set_password(self.user1Pw)
-         self.user1.save()
+        self.user1 = User()
+        self.user1.username = 'user1'
+        self.user1Pw = 'test_pw_1'
+        self.user1.set_password(self.user1Pw)
+        self.user1.save()
 
-         group1 = Group()
-         group1.name = 'test group1'
-         group1.save()
+        group1 = Group()
+        group1.name = 'test group1'
+        group1.save()
 
-         self.user2 = User()
-         self.user2.username = 'user2'
-         self.user2Pw = 'test_pw_2'
-         self.user2.set_password(self.user2Pw)
-         self.user2.save()
-         self.user2.groups.add(group1)
-         self.user2.save()
+        self.user2 = User()
+        self.user2.username = 'user2'
+        self.user2Pw = 'test_pw_2'
+        self.user2.set_password(self.user2Pw)
+        self.user2.save()
+        self.user2.groups.add(group1)
+        self.user2.save()
 
-         self.user3 = User()
-         self.user3.username = 'user3'
-         self.user3Pw = 'test_pw_3'
-         self.user3.set_password(self.user3Pw)
-         self.user3.save()
-         self.user3.save()
+        self.user3 = User()
+        self.user3.username = 'user3'
+        self.user3Pw = 'test_pw_3'
+        self.user3.set_password(self.user3Pw)
+        self.user3.save()
+        self.user3.save()
 
-         self.users = {self.user1.username: self.user1Pw,
-                       self.user2.username: self.user2Pw,
-                       self.user3.username: self.user3Pw}
+        self.users = {self.user1.username: self.user1Pw,
+                      self.user2.username: self.user2Pw,
+                      self.user3.username: self.user3Pw}
 
-         self.folder1 = Folder()
-         self.folder1.name = 'test'
-         self.folder1.localPath = 'html_browser/test_dir'
-         self.folder1.viewOption = 'P'
-         self.folder1.save()
+        self.folder1 = Folder()
+        self.folder1.name = 'test'
+        self.folder1.localPath = 'html_browser/test_dir'
+        self.folder1.viewOption = 'P'
+        self.folder1.save()
 
-         userPerm = UserPermission()
-         userPerm.folder = self.folder1
-         userPerm.permission = CAN_DELETE
-         userPerm.user = self.user1
-         userPerm.save()
+        userPerm = UserPermission()
+        userPerm.folder = self.folder1
+        userPerm.permission = CAN_DELETE
+        userPerm.user = self.user1
+        userPerm.save()
 
-         userPerm = UserPermission()
-         userPerm.folder = self.folder1
-         userPerm.permission = CAN_READ
-         userPerm.user = self.user3
-         userPerm.save()
+        userPerm = UserPermission()
+        userPerm.folder = self.folder1
+        userPerm.permission = CAN_READ
+        userPerm.user = self.user3
+        userPerm.save()
 
-         self.folder2 = Folder()
-         self.folder2.name = 'test2'
-         self.folder2.localPath = 'test2'
-         self.folder2.viewOption = 'P'
-         self.folder2.save()
+        self.folder2 = Folder()
+        self.folder2.name = 'test2'
+        self.folder2.localPath = 'test2'
+        self.folder2.viewOption = 'P'
+        self.folder2.save()
 
-         self.folder3 = Folder()
-         self.folder3.name = 'test3'
-         self.folder3.localPath = 'test3'
-         self.folder3.viewOption = 'E'
-         self.folder3.save()
+        self.folder3 = Folder()
+        self.folder3.name = 'test3'
+        self.folder3.localPath = 'test3'
+        self.folder3.viewOption = 'E'
+        self.folder3.save()
 
-         self.folder4 = Folder()
-         self.folder4.name = 'test4'
-         self.folder4.localPath = 'test4'
-         self.folder4.viewOption = 'A'
-         self.folder4.save()
+        self.folder4 = Folder()
+        self.folder4.name = 'test4'
+        self.folder4.localPath = 'test4'
+        self.folder4.viewOption = 'A'
+        self.folder4.save()
 
-         groupPerm1 = GroupPermission()
-         groupPerm1.folder = self.folder2
-         groupPerm1.permission = CAN_DELETE
-         groupPerm1.group = group1
-         groupPerm1.save()
+        groupPerm1 = GroupPermission()
+        groupPerm1.folder = self.folder2
+        groupPerm1.permission = CAN_DELETE
+        groupPerm1.group = group1
+        groupPerm1.save()
 
-         self.client = Client()
+        self.client = Client()
 
     def tearDown(self):
         User.objects.all().delete()
@@ -114,7 +115,7 @@ class BaseViewTest(unittest.TestCase):
 
 class IndexViewTest(BaseViewTest):
     def test(self):
-        ### test user1
+        # test user1
         self.login(self.user1)
         response = self.client.get(reverse('index'))
         self.assertEquals(200, response.status_code)
@@ -129,7 +130,7 @@ class IndexViewTest(BaseViewTest):
 
         self.logout()
 
-        ### test anonymous
+        # test anonymous
         response = self.client.get(reverse('index'))
         self.assertEquals(200, response.status_code)
 
@@ -141,7 +142,7 @@ class IndexViewTest(BaseViewTest):
 
         self.logout()
 
-        ## test user2
+        # test user2
         self.login(self.user2)
         self.client.force_login(self.user2)
         response = self.client.get(reverse('index'))
@@ -170,20 +171,21 @@ class LogoutViewTest(BaseViewTest):
         self.assertEquals(302, response.status_code)
         self.assertEquals('/hb/', response.url)
 
+
 class DownloadViewTest(BaseViewTest):
     def testDownload(self):
         self.login(self.user1)
-        response = self.client.get(reverse('download'), 
-            args={'currentFolder': self.folder1.name,
-                  'currentPath': '/',
-                  'fileName': 'file_a.txt'})
+        response = self.client.get(reverse('download'),
+                                   args={'currentFolder': self.folder1.name,
+                                         'currentPath': '/',
+                                         'fileName': 'file_a.txt'})
 
         foundAttachment = False
         for item in list(response.items()):
             if item[1] == 'html_browser/test_dir//file_a.txt':
                 foundAttachment = True
                 break
-        
+
         self.assertTrue(foundAttachment)
 
 
@@ -191,11 +193,11 @@ class DownloadZipViewTest(BaseViewTest):
     def testDownloadZip(self):
         self.login(self.user1)
         response = self.client.get(reverse('downloadZip'),
-            args={'currentFolder': self.folder1.name,
-                  'currentPath': '/',
-                  'cb-file_a.txt': 'on',
-                  'cb-file_b.txt': 'on',
-                  'cb-dir_a': 'on'})
+                                   args={'currentFolder': self.folder1.name,
+                                         'currentPath': '/',
+                                         'cb-file_a.txt': 'on',
+                                         'cb-file_b.txt': 'on',
+                                         'cb-dir_a': 'on'})
 
         self.assertEquals(200, response.status_code)
 
@@ -208,7 +210,7 @@ class DownloadZipViewTest(BaseViewTest):
                 if attachmentRegex.match(item[1]):
                     zipFileName = item[1]
                     break
-        
+
             self.assertIsNotNone(zipFileName)
 
             zipFile = ZipFile(zipFileName, mode='r')
@@ -240,33 +242,33 @@ class UploadViewTest(BaseViewTest):
     def testGet(self):
         self.login(self.user1)
         response = self.client.get(reverse('upload'),
-            args={'currentFolder': self.folder1.name,
-                  'currentPath': '/'})
+                                   args={'currentFolder': self.folder1.name,
+                                         'currentPath': '/'})
 
         self.assertEquals(200, response.status_code)
         context = response.context[0]
         contextCheck(self, context)
         self.assertEquals('upload.html', response.templates[0].name)
 
-        ### test unauthorized user
+        # test unauthorized user
         self.logout()
         self.login(self.user3)
         response = self.client.get(reverse('upload'),
-            args={'currentFolder': self.folder1.name,
-                  'currentPath': '/'})
+                                   args={'currentFolder': self.folder1.name,
+                                         'currentPath': '/'})
 
         self.assertEquals(403, response.status_code)
 
     def testUpload(self):
         self.login(self.user1)
-        
+
         try:
             with open('html_browser/test_dir/file_a.txt', 'r') as f:
                 response = self.client.post(reverse('upload'),
-                    args={'currentFolder': self.folder1.name,
-                          'currentPath': '/dir_a',
-                          'action': 'uploadFile',
-                          'upload1': f})
+                                            args={'currentFolder': self.folder1.name,
+                                                  'currentPath': '/dir_a',
+                                                  'action': 'uploadFile',
+                                                  'upload1': f})
 
             self.assertEquals(302, response.status_code)
 
@@ -278,14 +280,14 @@ class UploadViewTest(BaseViewTest):
 
     def testUploadNoAuth(self):
         self.login(self.user3)
-        
+
         try:
             with open('html_browser/test_dir/file_a.txt', 'r') as f:
                 response = self.client.post(reverse('upload'),
-                    args={'currentFolder': self.folder1.name,
-                          'currentPath': '/dir_a',
-                          'action': 'uploadFile',
-                          'upload1': f})
+                                            args={'currentFolder': self.folder1.name,
+                                                  'currentPath': '/dir_a',
+                                                  'action': 'uploadFile',
+                                                  'upload1': f})
 
             self.assertEquals(403, response.status_code)
         finally:
@@ -312,10 +314,10 @@ class UploadViewTest(BaseViewTest):
 
             with open(zipFileName, 'rb') as f:
                 response = self.client.post(reverse('upload'),
-                    args={'currentFolder': self.folder1.name,
-                          'currentPath': '/dir_a',
-                          'action': 'uploadZip',
-                          'zipupload1': f})
+                                            args={'currentFolder': self.folder1.name,
+                                                  'currentPath': '/dir_a',
+                                                  'action': 'uploadZip',
+                                                  'zipupload1': f})
 
                 self.assertEquals(302, response.status_code)
                 destFiles = ['html_browser/test_dir/dir_a/file_a.txt',

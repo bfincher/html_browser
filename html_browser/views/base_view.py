@@ -252,7 +252,7 @@ class ImageView(BaseContentView):
         if index == 0:
             prevLink = None
         else:
-            prevLink = reverseContentUrl(self.currentFolder, 
+            prevLink = reverseContentUrl(self.currentFolder,
                                          self.currentPath + '/' + currentDirEntries[index-1].name,
                                          'imageView')
 

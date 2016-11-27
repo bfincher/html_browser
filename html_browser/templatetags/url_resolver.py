@@ -10,12 +10,14 @@ logger = logging.getLogger('html_browser.base_view')
 
 register = template.Library()
 
+
 @register.simple_tag(takes_context=True)
 def get_content_url(context, viewName='content', *args, **kwargs):
     currentFolder = kwargs.get('currentFolder', None) or context['currentFolder']
     currentPath = context.get('currentPath', None)
 
     return reverseContentUrl(currentFolder, currentPath, viewName)
+
 
 @register.simple_tag(takes_context=True)
 def get_download_url(context, fileName):
@@ -29,6 +31,7 @@ def get_download_url(context, fileName):
 
     return reverse('download', kwargs={'currentFolder': currentFolder, 'path': path})
 
+
 @register.simple_tag(takes_context=True)
 def get_imageview_url(context, fileName):
     currentFolder = context['currentFolder']
@@ -38,5 +41,4 @@ def get_imageview_url(context, fileName):
         path = os.path.join(currentPath.encode('utf-8'), fileName.encode('utf-8'))
     else:
         path = fileName.encode('utf-8')
-    return reverse('imageView', kwargs={'currentFolder': currentFolder, 'currentPath': path}) 
-    
+    return reverse('imageView', kwargs={'currentFolder': currentFolder, 'currentPath': path})

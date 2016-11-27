@@ -36,4 +36,6 @@ urlpatterns = [
     ]
 
 for folder in Folder.objects.all():
-    urlpatterns.append(url(r'__%s__/(?P<currentFolder>\w+)/(?P<path>.+?)/$' % folder.name, base_view.DownloadImageView.as_view(), name='download%sImage' % folder.name))
+    urlpatterns.append(url(r'__%s__/(?P<currentFolder>\w+)/(?P<path>.+?)/$' % folder.name,
+                           base_view.DownloadImageView.as_view(),
+                           name='download%sImage' % folder.name))

@@ -77,10 +77,10 @@ class DirEntry():
             logger.exception(de)
 
     def __str__(self):
-        return "DirEntry:  isDir = %s name = %s nameUrl = %s " +\
-        "currentPath = %s currentPathOrig = %s size = %s " +\
-        "lastModifyTime = %s hasThumbnail = %s thumbnailUrl = %s" % \
-            (str(self.isDir), self.name, self.nameUrl, self.currentPath,
+        _str = """DirEntry:  isDir = {} name = {} nameUrl = {}
+                  currentPath = {} currentPathOrig = {} size = {}
+                  lastModifyTime = {} hasThumbnail = {} thumbnailUrl = {}"""
+        .format(str(self.isDir), self.name, self.nameUrl, self.currentPath,
                 self.currentPathOrig, self.size, self.lastModifyTime,
                 self.hasThumbnail, self.thumbnailUrl)
 
@@ -214,7 +214,6 @@ def handleZipUpload(f, folder, currentPath):
     zipFile.close()
 
     os.remove(fileName)
-
 
 
 def getReqLogger():

@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import os
 from shutil import rmtree
 
+
 class TestRequest():
     def __init__(self):
         self.GET = {}
@@ -16,17 +17,17 @@ class TestRequest():
 class UtilsTest(unittest.TestCase):
     def testGetCheckedEntries(self):
         dic = {'cb-checkbox_1': 'on',
-            'cb-checkbox_2': 'off',
-            'cb-checkbox_3': 'on'}
+               'cb-checkbox_2': 'off',
+               'cb-checkbox_3': 'on'}
 
         checkedEntries = getCheckedEntries(dic)
         self.assertEquals(2, len(checkedEntries))
 
     def testGetCurrentDirEntries(self):
         folder = Folder()
-        folder.name='test'
-        folder.localPath='html_browser/test_dir'
-        folder.viewOption='E'
+        folder.name = 'test'
+        folder.localPath = 'html_browser/test_dir'
+        folder.viewOption = 'E'
         folder.save()
 
         try:
@@ -76,9 +77,9 @@ class UtilsTest(unittest.TestCase):
 
     def testGetCurrentDirEntries(self):
         folder = Folder()
-        folder.name='test'
-        folder.localPath='html_browser/test_dir'
-        folder.viewOption='E'
+        folder.name = 'test'
+        folder.localPath = 'html_browser/test_dir'
+        folder.viewOption = 'E'
         folder.save()
 
         try:
@@ -134,8 +135,9 @@ class UtilsTest(unittest.TestCase):
             if os.path.isdir(testDir):
                 rmtree(testDir)
 
+
 def main():
     unittest.main()
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()

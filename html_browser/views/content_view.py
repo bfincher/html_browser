@@ -19,6 +19,7 @@ from html_browser.utils import getCurrentDirEntries,\
 
 logger = logging.getLogger('html_browser.content_view')
 
+
 class ContentView(BaseContentView):
 
     def _commonGetPost(self, request, *args, **kwargs):
@@ -81,7 +82,7 @@ class ContentView(BaseContentView):
 
     def get(self, request, currentFolder, currentPath=None, *args, **kwargs):
         super(ContentView, self).get(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
-        #self.currentFolder = currentFolder
+        # self.currentFolder = currentFolder
         self.currentPath = self.currentPath or ''
         ContentView.deleteOldFiles()
 
@@ -101,7 +102,7 @@ class ContentView(BaseContentView):
                     self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
                     if len(crumbs) > 0:
                         self.breadcrumbs = self.breadcrumbs + "<a href=\"{!s}\">{!s}</a> ".format(reverseContentUrl(self.currentFolder, accumulated), crumb)
-                                                                                         
+
                     else:
                         self.breadcrumbs = self.breadcrumbs + crumb
 
