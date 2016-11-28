@@ -62,12 +62,11 @@ class BaseView(View):
             else:
                 _dict = request.POST
 
-            if self.reqLogger.isEnabledFor(DEBUG):
-                for key, value in sorted(_dict.items()):
-                    if key in ['password', 'verifyPassword']:
-                        self.reqLogger.debug("%s: ********", key)
-                    else:
-                        self.reqLogger.debug("%s: %s", key, value)
+            for key, value in sorted(_dict.items()):
+                if key in ['password', 'verifyPassword']:
+                    self.reqLogger.debug("%s: ********", key)
+                else:
+                    self.reqLogger.debug("%s: %s", key, value)
 
         self.context = {'user': request.user}
 
