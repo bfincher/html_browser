@@ -12,11 +12,11 @@ import zipfile
 from zipfile import ZipFile
 
 from html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_WRITE, CAN_DELETE
+from html_browser.views.base_view import reverseContentUrl
 
 
 def contextCheck(testCase, context, user=None, folder=None):
     testCase.assertTrue('csrf_token' in context)
-    testCase.assertTrue('const' in context)
 
     if user:
         self.assertEquals(user, context['user'])
@@ -107,7 +107,7 @@ class BaseViewTest(unittest.TestCase):
         Folder.objects.all().delete()
 
     def login(self, user):
-        return self.client.post(reverse('login'), args={'userName': user.username, 'password': self.users[user.username]})
+        return self.client.post(reverse('login'), data={'userName': user.username, 'password': self.users[user.username]})
 
     def logout(self):
         return self.client.get(reverse('logout'))
@@ -159,7 +159,7 @@ class IndexViewTest(BaseViewTest):
 
 class LoginViewTest(BaseViewTest):
     def testLogin(self):
-        response = self.client.post(reverse('login'), args={'userName': self.user1.username, 'password': self.user1Pw})
+        response = self.client.post(reverse('login'), data={'userName': self.user1.username, 'password': self.user1Pw})
         self.assertEquals(302, response.status_code)
         self.assertEquals('/', response.url)
 
@@ -169,16 +169,13 @@ class LogoutViewTest(BaseViewTest):
         self.login(self.user1)
         response = self.logout()
         self.assertEquals(302, response.status_code)
-        self.assertEquals('/hb/', response.url)
+        self.assertEquals('/', response.url)
 
 
 class DownloadViewTest(BaseViewTest):
     def testDownload(self):
         self.login(self.user1)
-        response = self.client.get(reverse('download'),
-                                   args={'currentFolder': self.folder1.name,
-                                         'currentPath': '/',
-                                         'fileName': 'file_a.txt'})
+        response = self.client.get(reverseContentUrl(self.folder1.name, '/file_a.txt', 'download'))
 
         foundAttachment = False
         for item in list(response.items()):
@@ -192,10 +189,8 @@ class DownloadViewTest(BaseViewTest):
 class DownloadZipViewTest(BaseViewTest):
     def testDownloadZip(self):
         self.login(self.user1)
-        response = self.client.get(reverse('downloadZip'),
-                                   args={'currentFolder': self.folder1.name,
-                                         'currentPath': '/',
-                                         'cb-file_a.txt': 'on',
+        response = self.client.get(reverseContentUrl(self.folder1.name, '/', 'downloadZip'),
+                                   data={'cb-file_a.txt': 'on',
                                          'cb-file_b.txt': 'on',
                                          'cb-dir_a': 'on'})
 
@@ -241,9 +236,7 @@ class DownloadZipViewTest(BaseViewTest):
 class UploadViewTest(BaseViewTest):
     def testGet(self):
         self.login(self.user1)
-        response = self.client.get(reverse('upload'),
-                                   args={'currentFolder': self.folder1.name,
-                                         'currentPath': '/'})
+        response = self.client.get(reverseContentUrl(self.folder1.name, '/', 'upload'))
 
         self.assertEquals(200, response.status_code)
         context = response.context[0]
@@ -253,9 +246,7 @@ class UploadViewTest(BaseViewTest):
         # test unauthorized user
         self.logout()
         self.login(self.user3)
-        response = self.client.get(reverse('upload'),
-                                   args={'currentFolder': self.folder1.name,
-                                         'currentPath': '/'})
+        response = self.client.get(reverseContentUrl(self.folder1.name, '/', 'upload'))
 
         self.assertEquals(403, response.status_code)
 
@@ -264,10 +255,8 @@ class UploadViewTest(BaseViewTest):
 
         try:
             with open('html_browser/test_dir/file_a.txt', 'r') as f:
-                response = self.client.post(reverse('upload'),
-                                            args={'currentFolder': self.folder1.name,
-                                                  'currentPath': '/dir_a',
-                                                  'action': 'uploadFile',
+                response = self.client.post(reverseContentUrl(self.folder1.name, 'dir_a', 'upload'),
+                                            data={'action': 'uploadFile',
                                                   'upload1': f})
 
             self.assertEquals(302, response.status_code)
@@ -283,10 +272,8 @@ class UploadViewTest(BaseViewTest):
 
         try:
             with open('html_browser/test_dir/file_a.txt', 'r') as f:
-                response = self.client.post(reverse('upload'),
-                                            args={'currentFolder': self.folder1.name,
-                                                  'currentPath': '/dir_a',
-                                                  'action': 'uploadFile',
+                response = self.client.post(reverseContentUrl(self.folder1.name, '/dir_a', 'upload'),
+                                            data={'action': 'uploadFile',
                                                   'upload1': f})
 
             self.assertEquals(403, response.status_code)
@@ -313,10 +300,8 @@ class UploadViewTest(BaseViewTest):
             zipFile.close()
 
             with open(zipFileName, 'rb') as f:
-                response = self.client.post(reverse('upload'),
-                                            args={'currentFolder': self.folder1.name,
-                                                  'currentPath': '/dir_a',
-                                                  'action': 'uploadZip',
+                response = self.client.post(reverseContentUrl(self.folder1.name, 'dir_a', 'upload'),
+                                            data={'action': 'uploadZip',
                                                   'zipupload1': f})
 
                 self.assertEquals(302, response.status_code)
