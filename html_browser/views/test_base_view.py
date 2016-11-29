@@ -179,7 +179,7 @@ class DownloadViewTest(BaseViewTest):
 
         foundAttachment = False
         for item in list(response.items()):
-            if item[1] == 'html_browser/test_dir//file_a.txt':
+            if item[1] == 'attachment; filename="file_a.txt"':
                 foundAttachment = True
                 break
 
@@ -196,19 +196,20 @@ class DownloadZipViewTest(BaseViewTest):
 
         self.assertEquals(200, response.status_code)
 
-        attachmentRegex = re.compile(r'/tmp/download_\w+\.zip')
+        attachmentRegex = re.compile(r'attachment; filename="(download_\w+\.zip)"')
         zipFileName = None
         extractPath = "/tmp/extract"
 
         try:
             for item in list(response.items()):
-                if attachmentRegex.match(item[1]):
-                    zipFileName = item[1]
+                match = attachmentRegex.match(item[1])
+                if match:
+                    zipFileName = match.group(1)
                     break
 
             self.assertIsNotNone(zipFileName)
 
-            zipFile = ZipFile(zipFileName, mode='r')
+            zipFile = ZipFile(os.path.join('/tmp', zipFileName), mode='r')
             entries = zipFile.infolist()
 
             os.mkdir(extractPath)
@@ -229,7 +230,7 @@ class DownloadZipViewTest(BaseViewTest):
         finally:
             if os.path.exists(extractPath):
                 rmtree(extractPath)
-            if os.path.exists(zipFileName):
+            if zipFileName and os.path.exists(zipFileName):
                 os.remove(zipFileName)
 
 
