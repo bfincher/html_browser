@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
 
-from .base_view import BaseContentView, isShowHidden, reverseContentUrl
+from .base_view import BaseContentView, isShowHidden, reverseUrl
 from html_browser.models import FilesToDelete, Folder
 from html_browser.constants import _constants as const
 from html_browser.utils import getCurrentDirEntries,\
@@ -73,7 +73,7 @@ class ContentView(BaseContentView):
         else:
             raise RuntimeError('Unknown action %s' % action)
 
-        return redirect(reverseContentUrl(self.currentFolder, self.currentPath))
+        return redirect(reverseUrl(currentFolder=self.currentFolder, currentPath=self.currentPath))
 
     def handleRename(self, fileName, newName):
         source = getPath(self.folder.localPath, self.currentPath) + replaceEscapedUrl(fileName)
@@ -86,12 +86,12 @@ class ContentView(BaseContentView):
         self.currentPath = self.currentPath or ''
         ContentView.deleteOldFiles()
 
-        contentUrl = reverseContentUrl(self.currentFolder, self.currentPath)
+        contentUrl = reverseUrl(currentFolder=self.currentFolder, currentPath=self.currentPath)
         self.breadcrumbs = None
         crumbs = self.currentPath.split("/")
         if len(crumbs) > 1:
             self.breadcrumbs = "<a href=\"%s\">Home</a> " % reverse('index')
-            self.breadcrumbs = self.breadcrumbs + "&rsaquo; <a href=\"%s\">%s</a> " % (reverseContentUrl(self.currentFolder, None), currentFolder)
+            self.breadcrumbs = self.breadcrumbs + "&rsaquo; <a href=\"%s\">%s</a> " % (reverseUrl(currentFolder=self.currentFolder), currentFolder)
 
             crumbs = self.currentPath.split("/")
             accumulated = ""
@@ -101,7 +101,7 @@ class ContentView(BaseContentView):
                     accumulated = "/".join([accumulated, crumb])
                     self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
                     if len(crumbs) > 0:
-                        self.breadcrumbs = self.breadcrumbs + "<a href=\"{!s}\">{!s}</a> ".format(reverseContentUrl(self.currentFolder, accumulated), crumb)
+                        self.breadcrumbs = self.breadcrumbs + "<a href=\"{!s}\">{!s}</a> ".format(reverseUrl(currentFolder=self.currentFolder, currentPath=accumulated), crumb)
 
                     else:
                         self.breadcrumbs = self.breadcrumbs + crumb
@@ -230,7 +230,7 @@ def getParentDirLink(path, currentFolder):
     else:
         path = path[0:idx]
 
-    link = reverseContentUrl(currentFolder, path)
+    link = reverseUrl(currentFolder=currentFolder, currentPath=path)
 
     return link
 

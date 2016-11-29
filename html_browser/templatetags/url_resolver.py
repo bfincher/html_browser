@@ -1,7 +1,7 @@
 from django import template
 from django.core.urlresolvers import reverse
 
-from html_browser.views.base_view import reverseContentUrl
+from html_browser.views.base_view import reverseUrl
 
 import logging
 import os
@@ -16,7 +16,7 @@ def get_content_url(context, viewName='content', *args, **kwargs):
     currentFolder = kwargs.get('currentFolder', None) or context['currentFolder']
     currentPath = context.get('currentPath', None)
 
-    return reverseContentUrl(currentFolder, currentPath, viewName)
+    return reverseUrl(viewName=viewName, currentFolder=currentFolder, currentPath=currentPath)
 
 
 @register.simple_tag(takes_context=True)

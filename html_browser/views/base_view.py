@@ -35,11 +35,12 @@ def isShowHidden(request):
     return request.session.get('showHidden', False)
 
 
-def reverseContentUrl(currentFolder, currentPath, viewName='content'):
-    if currentPath:
-        return reverse(viewName, kwargs={'currentFolder': currentFolder, 'currentPath': currentPath})
-    else:
-        return reverse(viewName, kwargs={'currentFolder': currentFolder})
+def reverseUrl(viewName='content', *args, **kwargs):
+    for key, value in kwargs.items():
+        if value is None:
+            del kwargs[key]
+
+    return reverse(viewName, kwargs=kwargs)
 
 
 class BaseView(View):
@@ -223,7 +224,7 @@ class UploadView(BaseContentView):
             handleZipUpload(request.FILES['zipupload1'], self.folder, self.currentPath)
             messages.success(request, 'File uploaded and extracted')
 
-        return redirect(reverseContentUrl(self.currentFolder, self.currentPath))
+        return redirect(reverseUrl(currentFolder=self.currentFolder, currentPath=self.currentPath))
 
 
 def getIndexIntoCurrentDir(request, currentFolder, currentPath, fileName):
@@ -251,18 +252,18 @@ class ImageView(BaseContentView):
         if index == 0:
             prevLink = None
         else:
-            prevLink = reverseContentUrl(self.currentFolder,
-                                         self.currentPath + '/' + currentDirEntries[index-1].name,
-                                         'imageView')
+            prevLink = reverseUrl(viewName='imageView',
+                                         currentFolder=self.currentFolder,
+                                         currentPath=self.currentPath + '/' + currentDirEntries[index-1].name)
 
         if index == len(currentDirEntries) - 1:
             nextLink = None
         else:
-            nextLink = reverseContentUrl(self.currentFolder,
-                                         self.currentPath + "/" + currentDirEntries[index+1].name,
-                                         'imageView')
+            nextLink = reverseUrl(viewName='imageView',
+                                         currentFolder=self.currentFolder,
+                                         currentPath=self.currentPath + "/" + currentDirEntries[index+1].name)
 
-        parentDirLink = reverseContentUrl(self.currentFolder, self.currentPath)
+        parentDirLink = reverseUrl(currentFolder=self.currentFolder, currentPath=self.currentPath)
 
         imageUrl = reverse('download%sImage' % self.folder.name,
                            kwargs={'currentFolder': self.currentFolder,
@@ -299,7 +300,7 @@ class DeleteImageView(BaseContentView):
         handleDelete(self.folder, self.currentPath, [fileName])
         messages.success(request, 'File deleted')
 
-        return redirect(reverseContentUrl(self.currentFolder, self.currentPath))
+        return redirect(reverseUrl(currentFolder=self.currentFolder, currentPath=self.currentPath))
 
 
 class GetNextImageView(BaseContentView):
