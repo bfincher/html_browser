@@ -21,7 +21,7 @@ from logging import DEBUG
 import os
 from pathlib import Path
 import re
-from sendfile import sendfile
+from django_downloadview import sendfile
 import tempfile
 from urllib.parse import quote_plus, unquote_plus
 import zipfile

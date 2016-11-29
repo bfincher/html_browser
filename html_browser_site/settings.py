@@ -3,7 +3,7 @@ import os
 import platform
 
 URL_PREFIX = r''
-SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
+DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
 DEBUG = True
 
@@ -120,7 +120,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware'
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+#    'django_downloadview.SmartDownloadMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -165,6 +166,7 @@ INSTALLED_APPS = (
     'crispy_forms',
     'debug_toolbar',
     'django_js_reverse',
+    'django_downloadview',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
