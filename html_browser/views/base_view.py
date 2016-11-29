@@ -36,11 +36,8 @@ def isShowHidden(request):
 
 
 def reverseUrl(viewName='content', *args, **kwargs):
-    for key, value in kwargs.items():
-        if value is None:
-            del kwargs[key]
-
-    return reverse(viewName, kwargs=kwargs)
+    newKwargs = {k: v for k,v in kwargs.items() if v}
+    return reverse(viewName, kwargs=newKwargs)
 
 
 class BaseView(View):
