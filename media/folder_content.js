@@ -4,9 +4,14 @@ var userCanRead = null;
 var userCanWrite = null;
 var userCanDelete = null;
 var uploadUrl = null;
+var downloadZipUrl = null;
 
 function setUploadUrl(url) {
     uploadUrl = url;
+}
+
+function setDownloadZipUrl(url) {
+    downloadZipUrl = url;
 }
 
 function myEscape(str) {
@@ -124,7 +129,7 @@ function zip() {
     if (!areBoxesChecked()) {
         alert("No entries selected");
     } else {
-        postForm($("#content-form"), "/hb/download_zip", "get");
+        postForm($("#content-form"), downloadZipUrl, {}, "get");
     }
 }
 

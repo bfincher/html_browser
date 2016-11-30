@@ -165,7 +165,7 @@ class DownloadImageView(BaseContentView):
 
 
 class DownloadZipView(BaseContentView):
-    def get(self, request, currentFolder, currentPath, *args, **kwargs):
+    def get(self, request, currentFolder, currentPath='', *args, **kwargs):
         super(DownloadZipView, self).get(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
 
         compression = zipfile.ZIP_DEFLATED

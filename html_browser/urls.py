@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^hb/$', base_view.IndexView.as_view()),
     url(r'content/(?P<currentFolder>\w+)/$', content_view.ContentView.as_view(), name='content'),
     url(r'content/(?P<currentFolder>\w+)/(?P<currentPath>.+?)/$', content_view.ContentView.as_view(), name='content'),
+    url(r'download_zip/(?P<currentFolder>\w+)/$', base_view.DownloadZipView.as_view(), name='downloadZip'),
     url(r'download_zip/(?P<currentFolder>\w+)/(?P<currentPath>.+?)/$', base_view.DownloadZipView.as_view(), name='downloadZip'),
     url(r'download/(?P<currentFolder>\w+)/(?P<path>.+?)/$', base_view.DownloadView.as_view(), name='download'),
     url(r'hbLogin/.*', base_view.LoginView.as_view(), name='login'),
