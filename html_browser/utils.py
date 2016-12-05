@@ -11,9 +11,10 @@ from shutil import rmtree
 from html_browser_site.settings import THUMBNAIL_DIR
 import html.parser
 
-import re
+import json
 import logging
 from logging import DEBUG
+import re
 
 logger = logging.getLogger('html_browser.utils')
 reqLogger = None
