@@ -235,7 +235,10 @@ def getDiskUsage(path):
 
 def getParentDirLink(folderAndPath):
     path = os.path.dirname(folderAndPath.relativePath)
-    return reverseContentUrl(FolderAndPath(folderName=folderAndPath.folder.name, path=path))
+    if path:
+        return reverseContentUrl(FolderAndPath(folderName=folderAndPath.folder.name, path=path))
+
+    return reverse('index')
 
 
 class Clipboard():
