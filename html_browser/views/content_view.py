@@ -103,7 +103,7 @@ class ContentView(BaseContentView):
 
         self.breadcrumbs = None
         crumbs = self.folderAndPath.relativePath.split("/")
-        if len(crumbs) > 1:
+        if len(crumbs) >= 1:
             self.breadcrumbs = "<a href=\"%s\">Home</a> " % reverse('index')
             self.breadcrumbs += "&rsaquo; <a href=\"%s\">%s</a> " % (reverseContentUrl(FolderAndPath(folder=self.folderAndPath.folder,
                                                                                                      path='')),
@@ -116,9 +116,8 @@ class ContentView(BaseContentView):
                     accumulated = "/".join([accumulated, crumb])
                     self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
                     if len(crumbs) > 0:
-                        self.breadcrumbs += "<a href=\"{!s}\">{!s}</a> ".format(reverseContentUrl(FolderAndPath(folder=self.folderAndPath.folder,
-                                                                                                                path=accumulated)),
-                                                                                crumb)
+                        url = reverseContentUrl(FolderAndPath(folder=self.folderAndPath.folder, path=accumulated))
+                        self.breadcrumbs += "<a href=\"{!s}\">{!s}</a> ".format(url,crumb)
 
                     else:
                         self.breadcrumbs = self.breadcrumbs + crumb

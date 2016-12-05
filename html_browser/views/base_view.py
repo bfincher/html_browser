@@ -34,13 +34,7 @@ def isShowHidden(request):
 
 
 def reverseContentUrl(folderAndPath, viewName='content', extraPath=None, extraArgs=None):
-    path = os.path.join(folderAndPath.folder.name, folderAndPath.relativePath)
-    if path.endswith('/'):
-        path = path[:-1]
-    if extraPath:
-        path = os.path.join(path, extraPath)
-
-    args = [path, ]
+    args = [folderAndPath.url, ]
     if extraArgs:
         args.extend(extraArgs)
     return reverse(viewName, args=args)
