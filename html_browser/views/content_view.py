@@ -233,8 +233,9 @@ def getDiskUsage(path):
 
 
 def getParentDirLink(folderAndPath):
-    path = os.path.dirname(folderAndPath.relativePath)
+    path = folderAndPath.relativePath
     if path:
+        path = os.path.dirname(path)
         return reverseContentUrl(FolderAndPath(folderName=folderAndPath.folder.name, path=path))
 
     return reverse('index')
