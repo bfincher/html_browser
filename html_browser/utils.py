@@ -8,7 +8,6 @@ from html_browser.models import Folder, UserPermission,\
     GroupPermission
 from pathlib import Path
 from shutil import rmtree
-from zipfile import ZipFile
 from html_browser_site.settings import THUMBNAIL_DIR
 import html.parser
 
@@ -24,6 +23,65 @@ MEGABYTE = KILOBYTE * KILOBYTE
 GIGABYTE = MEGABYTE * KILOBYTE
 
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
+folderAndPathRegex = re.compile(r'^(\w+)(/(.*))?$')
+
+class NoParentException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(NoParentException, self).__init__(*args, **kwargs)
+
+
+class ArgumentException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(ArgumentException, self).__init__(*args, **kwargs)
+
+
+class FolderAndPathArgumentException(Exception):
+    def __init__(self, **kwargs):
+        super(FolderAndPathArgumentException, self).__init__("Expected kwargs are (url)|(folderName, path).  Instead found %s" % kwargs)
+
+
+class FolderAndPath:
+    def __init__(self, *args, **kwargs):
+        # options for kwargs are (url)|(folderName, path)
+
+        if 'url' in kwargs and len(kwargs) == 1:
+            match = folderAndPathRegex.match(kwargs['url'])
+            folderName = match.groups()[0]
+            self.folder = Folder.objects.get(name=folderName)
+            self.relativePath = unquote_plus(match.groups()[2] or '')
+            self.absPath = os.path.join(self.folder.localPath, self.relativePath)
+            self.url = kwargs['url']
+        elif 'path' in kwargs and len(kwargs) == 2:
+            if 'folderName' in kwargs:
+                self.folder = Folder.objects.get(name=kwargs['folderName'])
+            elif 'folder' in kwargs:
+                self.folder = kwargs['folder']
+            else:
+                raise FolderAndPathArgumentException(**kwargs)
+
+            # just in case the path argument already has the folder localpath appended, try to replace the folder.localpath prefix
+            self.relativePath = re.sub(r'^%s' % self.folder.localPath, '', kwargs['path'])
+
+            self.absPath = os.path.join(self.folder.localPath, self.relativePath)
+            self.url = "%s/%s" % (self.folder.name, self.relativePath)
+        else:
+            raise FolderAndPathArgumentException(**kwargs)
+
+    def getParent(self):
+        if self.relativePath == '':
+            raise NoParentException()
+
+        return FolderAndPath(folderName=self.folder.name, path=os.path.dirname(self.relativePath))
+
+    @staticmethod
+    def fromJson(jsonStr):
+        dictData = json.loads(jsonStr)
+        return FolderAndPath(**dictData)
+
+    def toJson(self):
+        result = {'folderName': self.folder.name,
+                  'path': self.relativePath}
+        return json.dumps(result)
 
 
 def getCheckedEntries(requestDict):
@@ -37,14 +95,11 @@ def getCheckedEntries(requestDict):
 
 
 class DirEntry():
-    def __init__(self, path, folder, currentPath):
+    def __init__(self, path, folderAndPath):
         self.isDir = path.is_dir()
         self.name = path.name
         self.nameUrl = self.name.replace('&', '&amp;')
         self.nameUrl = quote_plus(self.name)
-
-        self.currentPathOrig = currentPath
-        self.currentPath = quote_plus(currentPath)
 
         stat = path.stat()
         if self.isDir:
@@ -59,15 +114,15 @@ class DirEntry():
 
         try:
             thumbPath = "/".join([THUMBNAIL_DIR,
-                                  folder.name,
-                                  currentPath,
+                                  folderAndPath.folder.name,
+                                  folderAndPath.relativePath,
                                   self.name])
 
             if os.path.exists(thumbPath):
                 self.hasThumbnail = True
                 self.thumbnailUrl = "/".join(
-                    [const.THUMBNAIL_URL + folder.name,
-                     currentPath,
+                    [const.THUMBNAIL_URL + folderAndPath.folder.name,
+                     folderAndPath.relativePath,
                      self.name])
             else:
                 self.hasThumbnail = False
@@ -78,24 +133,17 @@ class DirEntry():
 
     def __str__(self):
         _str = """DirEntry:  isDir = {} name = {} nameUrl = {}
-                  currentPath = {} currentPathOrig = {} size = {}
-                  lastModifyTime = {} hasThumbnail = {} thumbnailUrl = {}""".format(str(self.isDir), self.name, self.nameUrl, self.currentPath,
-                                                                                    self.currentPathOrig, self.size, self.lastModifyTime,
-                                                                                    self.hasThumbnail, self.thumbnailUrl)
+                  size = {} lastModifyTime = {} hasThumbnail = {}
+                  thumbnailUrl = {}""".format(str(self.isDir),
+                                              self.name,
+                                              self.nameUrl,
+                                              self.size,
+                                              self.lastModifyTime,
+                                              self.hasThumbnail,
+                                              self.thumbnailUrl)
+        return _str
 
 
-def getPath(folderPath, path):
-    path = path.strip()
-    if path == '/':
-        path = ''
-
-    if path.startswith('/'):
-        path = path[1:]
-    dirPath = os.path.join(folderPath.strip(), path)
-
-    if not dirPath.endswith('/'):
-        dirPath += '/'
-    return dirPath
 #    return dirPath.encode('utf8')
 
 # def getCurrentDirEntriesSearch(folder, path, showHidden, searchRegexStr):
@@ -134,17 +182,20 @@ def getPath(folderPath, path):
 #    if includeThisDir:
 #        returnList.append(thisEntry)
 
-def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
-    dirPath = getPath(folder.localPath, path)
+def getCurrentDirEntries(folderAndPath, showHidden, contentFilter=None):
+    _dir = folderAndPath.absPath
+    if os.path.isfile(_dir):
+        _dir = path.dirname(_dir)
+
     dirEntries = []
     fileEntries = []
 
-    for f in Path(dirPath).iterdir():
+    for f in Path(_dir).iterdir():
         if not showHidden and f.name.startswith('.'):
             continue
         try:
             if f.is_dir():
-                dirEntries.append(DirEntry(f, folder, path))
+                dirEntries.append(DirEntry(f, folderAndPath))
             else:
                 include = False
                 if contentFilter:
@@ -156,7 +207,7 @@ def getCurrentDirEntries(folder, path, showHidden, contentFilter=None):
                     include = True
 
                 if include:
-                    fileEntries.append(DirEntry(f, folder, path))
+                    fileEntries.append(DirEntry(f, folderAndPath))
         except OSError as ose:
             logger.exception(ose)
 
@@ -177,42 +228,14 @@ def replaceEscapedUrl(url):
     return url.replace("(comma)", ",").replace("(ampersand)", "&")
 
 
-def handleDelete(folder, currentPath, entries):
-    currentDirPath = replaceEscapedUrl(getPath(folder.localPath, currentPath))
-
+def handleDelete(folderAndPath, entries):
     for entry in entries:
-        entryPath = os.path.join(currentDirPath, replaceEscapedUrl(entry)).encode("utf-8")
+        entryPath = os.path.join(folderAndPath.absPath, replaceEscapedUrl(entry)).encode("utf-8")
 
         if os.path.isdir(entryPath):
             rmtree(entryPath)
         else:
             os.remove(entryPath)
-
-
-def handleFileUpload(f, folder, currentPath):
-    fileName = getPath(folder.localPath, currentPath) + f.name
-    dest = open(fileName, 'wb')
-
-    for chunk in f.chunks():
-        dest.write(chunk)
-
-    dest.close()
-    return fileName
-
-
-def handleZipUpload(f, folder, currentPath):
-    fileName = handleFileUpload(f, folder, currentPath)
-    zipFile = ZipFile(fileName, mode='r')
-    entries = zipFile.infolist()
-
-    localPath = getPath(folder.localPath, currentPath)
-
-    for entry in entries:
-        zipFile.extract(entry, localPath)
-
-    zipFile.close()
-
-    os.remove(fileName)
 
 
 def getReqLogger():
@@ -282,13 +305,6 @@ def getDiskUsage(path):
         return _ntuple_diskusage(total.value, used, free.value)
     else:
         raise NotImplementedError("platform not supported")
-
-
-def getRequestField(request, field, default=None):
-    if request.method == "GET":
-        return request.GET.get(field, default)
-    else:
-        return request.POST.get(field, default)
 
 
 def getBytesUnit(numBytes):

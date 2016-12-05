@@ -12,7 +12,7 @@ import zipfile
 from zipfile import ZipFile
 
 from html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_WRITE, CAN_DELETE
-from html_browser.views.base_view import reverseUrl
+from html_browser.views.base_view import reverseContentUrl, FolderAndPath
 
 
 def contextCheck(testCase, context, user=None, folder=None):
@@ -175,7 +175,9 @@ class LogoutViewTest(BaseViewTest):
 class DownloadViewTest(BaseViewTest):
     def testDownload(self):
         self.login(self.user1)
-        response = self.client.get(reverseUrl(viewName='download', currentFolder=self.folder1.name, path='/file_a.txt'))
+        url = reverseContentUrl(FolderAndPath(folder=self.folder1, path=''), extraArgs=['file_a.txt'],
+                                              viewName='download')
+        response = self.client.get(url)
 
         foundAttachment = False
         for item in list(response.items()):
@@ -189,7 +191,8 @@ class DownloadViewTest(BaseViewTest):
 class DownloadZipViewTest(BaseViewTest):
     def testDownloadZip(self):
         self.login(self.user1)
-        response = self.client.get(reverseUrl(viewName='downloadZip', currentFolder=self.folder1.name, currentPath='/'),
+        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path=''),
+                                                     viewName='downloadZip'),
                                    data={'cb-file_a.txt': 'on',
                                          'cb-file_b.txt': 'on',
                                          'cb-dir_a': 'on'})
@@ -237,7 +240,8 @@ class DownloadZipViewTest(BaseViewTest):
 class UploadViewTest(BaseViewTest):
     def testGet(self):
         self.login(self.user1)
-        response = self.client.get(reverseUrl(viewName='upload', currentFolder=self.folder1.name, currentPath='/'))
+        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path=''),
+                                                     viewName='upload'))
 
         self.assertEquals(200, response.status_code)
         context = response.context[0]
@@ -247,7 +251,8 @@ class UploadViewTest(BaseViewTest):
         # test unauthorized user
         self.logout()
         self.login(self.user3)
-        response = self.client.get(reverseUrl(viewName='upload', currentFolder=self.folder1.name, currentPath='/'))
+        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path=''),
+                                                     viewName='upload'))
 
         self.assertEquals(403, response.status_code)
 
@@ -256,7 +261,7 @@ class UploadViewTest(BaseViewTest):
 
         try:
             with open('html_browser/test_dir/file_a.txt', 'r') as f:
-                response = self.client.post(reverseUrl(viewName='upload', currentFolder=self.folder1.name, currentPath='dir_a'),
+                response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='dir_a'), viewName='upload'),
                                             data={'action': 'uploadFile',
                                                   'upload1': f})
 
@@ -273,7 +278,7 @@ class UploadViewTest(BaseViewTest):
 
         try:
             with open('html_browser/test_dir/file_a.txt', 'r') as f:
-                response = self.client.post(reverseUrl(viewName='upload', currentFolder=self.folder1.name, currentPath='/dir_a'),
+                response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='dir_a'), viewName='upload'),
                                             data={'action': 'uploadFile',
                                                   'upload1': f})
 
@@ -301,7 +306,7 @@ class UploadViewTest(BaseViewTest):
             zipFile.close()
 
             with open(zipFileName, 'rb') as f:
-                response = self.client.post(reverseUrl(viewName='upload', currentFolder=self.folder1.name, currentPath='dir_a'),
+                response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='dir_a'), viewName='upload'),
                                             data={'action': 'uploadZip',
                                                   'zipupload1': f})
 

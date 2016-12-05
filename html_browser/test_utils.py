@@ -1,7 +1,7 @@
 import unittest
 
 from html_browser.models import Folder
-from html_browser.utils import getCheckedEntries, getCurrentDirEntries
+from html_browser.utils import getCheckedEntries, getCurrentDirEntries, FolderAndPath
 from html_browser import utils
 
 from datetime import datetime, timedelta
@@ -13,6 +13,36 @@ class TestRequest():
     def __init__(self):
         self.GET = {}
 
+
+class FolderAndPathTest(unittest.TestCase):
+    def test(self):
+        testDir = 'html_browser/test_dir'
+
+        testDirAbsPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_dir/')
+
+        folder = Folder()
+        folder.name = 'test'
+        folder.localPath = testDirAbsPath
+        folder.viewOption = 'E'
+        folder.save()
+
+        try:
+            folderAndPath = FolderAndPath(folder=folder, path='')
+            self.assertEquals('test', folderAndPath.folder.name)
+            self.assertEquals(testDirAbsPath, folderAndPath.absPath)
+            self.assertEquals('', folderAndPath.relativePath)
+
+            folderAndPath = FolderAndPath(folderName=folder.name, path='')
+            self.assertEquals('test', folderAndPath.folder.name)
+            self.assertEquals(testDirAbsPath, folderAndPath.absPath)
+            self.assertEquals('', folderAndPath.relativePath)
+
+            folderAndPath = FolderAndPath(url='%s/' % folder.name)
+            self.assertEquals('test', folderAndPath.folder.name)
+            self.assertEquals(testDirAbsPath, folderAndPath.absPath)
+            self.assertEquals('', folderAndPath.relativePath)
+        finally:
+            folder.delete()
 
 class UtilsTest(unittest.TestCase):
     def testGetCheckedEntries(self):
@@ -40,7 +70,7 @@ class UtilsTest(unittest.TestCase):
             fileB_time = fileA_time + timedelta(seconds=1)
             os.utime('html_browser/test_dir/file_b.txt', (int(fileB_time.timestamp()), int(fileB_time.timestamp())))
 
-            entries = getCurrentDirEntries(folder, '/', True)
+            entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), True)
             self.assertEquals(3, len(entries))
 
             entry = entries[0]
@@ -72,18 +102,6 @@ class UtilsTest(unittest.TestCase):
             self.assertFalse(entry.hasThumbnail)
             self.assertIsNone(entry.thumbnailUrl)
 
-        finally:
-            folder.delete()
-
-    def testGetCurrentDirEntries(self):
-        folder = Folder()
-        folder.name = 'test'
-        folder.localPath = 'html_browser/test_dir'
-        folder.viewOption = 'E'
-        folder.save()
-
-        try:
-            self.assertEquals('html_browser/test_dir/test_path/', utils.getPath(folder.localPath, '/test_path'))
         finally:
             folder.delete()
 
@@ -119,14 +137,14 @@ class UtilsTest(unittest.TestCase):
 
             entries = ['test_file2.txt', 'test_file1.txt']
 
-            utils.handleDelete(folder, '/child_dir', entries)
+            utils.handleDelete(FolderAndPath(folder=folder, path='child_dir'), entries)
 
             self.assertFalse(os.path.exists(testFile1))
             self.assertFalse(os.path.exists(testFile2))
             self.assertTrue(os.path.exists(testFile3))
 
             entries = ['child_dir']
-            utils.handleDelete(folder, '', entries)
+            utils.handleDelete(FolderAndPath(folder=folder, path=''), entries)
             self.assertFalse(os.path.exists(testFile3))
             self.assertFalse(os.path.exists(childDir))
         finally:

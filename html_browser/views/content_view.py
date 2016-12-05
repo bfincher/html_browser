@@ -10,12 +10,12 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
 
-from .base_view import BaseContentView, isShowHidden, reverseUrl
+from .base_view import BaseContentView, isShowHidden, reverseContentUrl
 from html_browser.models import FilesToDelete, Folder
 from html_browser.constants import _constants as const
 from html_browser.utils import getCurrentDirEntries,\
-    getPath, formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete,\
-    getCheckedEntries
+    formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete,\
+    getCheckedEntries, FolderAndPath
 
 logger = logging.getLogger('html_browser.content_view')
 
@@ -24,47 +24,42 @@ class ContentView(BaseContentView):
 
     def _commonGetPost(self, request, *args, **kwargs):
         super(ContentView, self)._commonGetPost(request, *args, **kwargs)
-        self.userCanDelete = self.folder.userCanDelete(request.user)
-        self.userCanWrite = self.userCanDelete or self.folder.userCanWrite(request.user)
-        self.userCanRead = self.userCanWrite or self.folder.userCanRead(request.user)
+        self.userCanDelete = self.folderAndPath.folder.userCanDelete(request.user)
+        self.userCanWrite = self.userCanDelete or self.folderAndPath.folder.userCanWrite(request.user)
+        self.userCanRead = self.userCanWrite or self.folderAndPath.folder.userCanRead(request.user)
 
-    def post(self, request, currentFolder, currentPath=None, *args, **kwargs):
-        super(ContentView, self).post(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
+    def post(self, request, folderAndPathUrl, *args, **kwargs):
+        super(ContentView, self).post(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
 
-        self.currentPath = self.currentPath or ''
         action = request.POST['action']
         if action == 'copyToClipboard':
             entries = getCheckedEntries(request.POST)
-            request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'COPY').toJson()
+            request.session['clipboard'] = Clipboard(self.folderAndPath, entries, 'COPY').toJson()
             messages.success(request, 'Items copied to clipboard')
         elif action == 'cutToClipboard':
             if not self.userCanDelete:
                 messages.error(request, "You don't have delete permission on this folder")
             else:
                 entries = getCheckedEntries(request.POST)
-                request.session['clipboard'] = Clipboard(self.currentFolder, self.currentPath, entries, 'CUT').toJson()
+                request.session['clipboard'] = Clipboard(self.folderAndPath, entries, 'CUT').toJson()
                 messages.success(request, 'Items copied to clipboard')
         elif action == 'pasteFromClipboard':
             if not self.userCanWrite:
                 messages.error(request, "You don't have write permission on this folder")
             else:
-                status = handlePaste(self.currentFolder, self.currentPath, Clipboard.fromJson(request.session['clipboard']))
-                if status:
-                    messages.error(request, status)
-                else:
-                    messages.success(request, 'Items pasted')
+                self.__handlePaste(Clipboard.fromJson(request.session['clipboard']))
         elif action == 'deleteEntry':
             if not self.userCanDelete:
                 messages.error(request, "You don't have delete permission on this folder")
             else:
-                handleDelete(self.folder, self.currentPath, getCheckedEntries(request.POST))
+                handleDelete(self.folderAndPath, getCheckedEntries(request.POST))
                 messages.success(request, 'File(s) deleted')
         elif action == 'setViewType':
             viewType = request.POST['viewType']
             request.session['viewType'] = viewType
         elif action == 'mkDir':
             dirName = request.POST['dir']
-            os.makedirs(getPath(self.folder.localPath, self.currentPath) + dirName)
+            os.makedirs(os.path.join(self.folderAndPath.absPath, dirName))
         elif action == 'rename':
             self.handleRename(request.POST['file'], request.POST['newName'])
         elif action == 'changeSettings':
@@ -73,27 +68,47 @@ class ContentView(BaseContentView):
         else:
             raise RuntimeError('Unknown action %s' % action)
 
-        return redirect(reverseUrl(currentFolder=self.currentFolder, currentPath=self.currentPath))
+        return redirect(reverseContentUrl(self.folderAndPath))
 
     def handleRename(self, fileName, newName):
-        source = getPath(self.folder.localPath, self.currentPath) + replaceEscapedUrl(fileName)
-        dest = getPath(self.folder.localPath, self.currentPath) + replaceEscapedUrl(newName)
+        source = os.path.join(self.folderAndPath.absPath, replaceEscapedUrl(fileName))
+        dest = os.path.join(self.folderAndPath.absPath, replaceEscapedUrl(newName))
         move(source, dest)
 
-    def get(self, request, currentFolder, currentPath=None, *args, **kwargs):
-        super(ContentView, self).get(request, currentFolder=currentFolder, currentPath=currentPath, *args, **kwargs)
-        # self.currentFolder = currentFolder
-        self.currentPath = self.currentPath or ''
+    def __handlePaste(self, clipboard):
+        dest = self.folderAndPath.absPath
+
+        for entry in clipboard.entries:
+            if os.path.exists(os.path.join(dest, entry)):
+                messages.error("One or more of the items already exists in the destination")
+                return
+
+        for entry in clipboard.entries:
+            source = os.path.join(clipboard.folderAndPath.absPath,  replaceEscapedUrl(entry))
+            if clipboard.clipboardType == 'COPY':
+                if os.path.isdir(source):
+                    copytree(source, dest + entry)
+                else:
+                    copy2(source, dest)
+            elif clipboard.clipboardType == 'CUT':
+                move(source, dest)
+            else:
+                raise CopyPasteException()
+
+        messages.success(request, 'Items pasted')
+
+    def get(self, request, folderAndPathUrl, *args, **kwargs):
+        super(ContentView, self).get(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
         ContentView.deleteOldFiles()
 
-        contentUrl = reverseUrl(currentFolder=self.currentFolder, currentPath=self.currentPath)
         self.breadcrumbs = None
-        crumbs = self.currentPath.split("/")
+        crumbs = self.folderAndPath.relativePath.split("/")
         if len(crumbs) > 1:
             self.breadcrumbs = "<a href=\"%s\">Home</a> " % reverse('index')
-            self.breadcrumbs = self.breadcrumbs + "&rsaquo; <a href=\"%s\">%s</a> " % (reverseUrl(currentFolder=self.currentFolder), currentFolder)
+            self.breadcrumbs += "&rsaquo; <a href=\"%s\">%s</a> " % (reverseContentUrl(FolderAndPath(folder=self.folderAndPath.folder,
+                                                                                                     path='')),
+                                                                     self.folderAndPath.folder.name)
 
-            crumbs = self.currentPath.split("/")
             accumulated = ""
             while len(crumbs) > 0:
                 crumb = crumbs.pop(0)
@@ -101,7 +116,9 @@ class ContentView(BaseContentView):
                     accumulated = "/".join([accumulated, crumb])
                     self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
                     if len(crumbs) > 0:
-                        self.breadcrumbs = self.breadcrumbs + "<a href=\"{!s}\">{!s}</a> ".format(reverseUrl(currentFolder=self.currentFolder, currentPath=accumulated), crumb)
+                        self.breadcrumbs += "<a href=\"{!s}\">{!s}</a> ".format(reverseContentUrl(FolderAndPath(folder=self.folderAndPath.folder,
+                                                                                                                path=accumulated)),
+                                                                                crumb)
 
                     else:
                         self.breadcrumbs = self.breadcrumbs + crumb
@@ -121,14 +138,13 @@ class ContentView(BaseContentView):
 #            search = request.GET['search']
 #            return self._handleSearch(request, search)
 
-        currentDirEntries = getCurrentDirEntries(self.folder, self.currentPath, isShowHidden(request), contentFilter)
-
+        currentDirEntries = getCurrentDirEntries(self.folderAndPath, isShowHidden(request), contentFilter)
         viewType = request.session.get('viewType', const.viewTypes[0])
 
-        diskFreePct = getDiskPercentFree(getPath(self.folder.localPath, self.currentPath))
-        diskUsage = getDiskUsageFormatted(getPath(self.folder.localPath, self.currentPath))
+        diskFreePct = getDiskPercentFree(self.folderAndPath.absPath)
+        diskUsage = getDiskUsageFormatted(self.folderAndPath.absPath)
 
-        parentDirLink = getParentDirLink(self.currentPath, self.currentFolder)
+        parentDirLink = getParentDirLink(self.folderAndPath)
         self.context['parentDirLink'] = parentDirLink
         self.context['viewTypes'] = const.viewTypes
         self.context['selectedViewType'] = viewType
@@ -217,39 +233,24 @@ def getDiskUsage(path):
         raise NotImplementedError("platform not supported")
 
 
-def getParentDirLink(path, currentFolder):
-    if path == '/' or path == '':
-        return reverse('index')
-
-    if path.endswith('/'):
-        path = path[0:-1]
-
-    idx = path.rfind('/')
-    if idx == -1:
-        path = ''
-    else:
-        path = path[0:idx]
-
-    link = reverseUrl(currentFolder=currentFolder, currentPath=path)
-
-    return link
+def getParentDirLink(folderAndPath):
+    path = os.path.dirname(folderAndPath.relativePath)
+    return reverseContentUrl(FolderAndPath(folderName=folderAndPath.folder.name, path=path))
 
 
 class Clipboard():
-    def __init__(self, currentFolder, currentPath, entries, clipboardType):
-        self.currentFolder = currentFolder
-        self.currentPath = currentPath
+    def __init__(self, folderAndPath, entries, clipboardType):
+        self.folderAndPath = folderAndPath
         self.clipboardType = clipboardType
         self.entries = entries
 
     @staticmethod
     def fromJson(jsonStr):
         dictData = json.loads(jsonStr)
-        return Clipboard(dictData['currentFolder'], dictData['currentPath'], dictData['entries'], dictData['clipboardType'])
+        return Clipboard(FolderAndPath.fromJson(dictData['folderAndPath']), dictData['entries'], dictData['clipboardType'])
 
     def toJson(self):
-        result = {'currentFolder': self.currentFolder,
-                  'currentPath': self.currentPath,
+        result = {'folderAndPath': self.folderAndPath.toJson(),
                   'clipboardType': self.clipboardType,
                   'entries': self.entries}
 
@@ -258,28 +259,3 @@ class Clipboard():
 
 class CopyPasteException(Exception):
     pass
-
-
-def handlePaste(currentFolder, currentPath, clipboard):
-
-    folder = Folder.objects.filter(name=currentFolder)[0]
-    clipboardFolder = Folder.objects.filter(name=clipboard.currentFolder)[0]
-
-    dest = getPath(folder.localPath, currentPath)
-
-    for entry in clipboard.entries:
-        source = getPath(clipboardFolder.localPath, clipboard.currentPath) + replaceEscapedUrl(entry)
-        if os.path.exists(os.path.join(dest, entry)):
-            return "One or more of the items already exists in the destination"
-
-    for entry in clipboard.entries:
-        source = getPath(clipboardFolder.localPath, clipboard.currentPath) + replaceEscapedUrl(entry)
-        if clipboard.clipboardType == 'COPY':
-            if os.path.isdir(source):
-                copytree(source, dest + entry)
-            else:
-                copy2(source, dest)
-        elif clipboard.clipboardType == 'CUT':
-            move(source, dest)
-        else:
-            raise CopyPasteException()

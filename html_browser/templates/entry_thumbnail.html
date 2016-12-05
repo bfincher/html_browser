@@ -1,4 +1,3 @@
 {% extends "entry_base.html" %}
-{% load url_resolver %}
-{% block content_url %}{% get_imageview_url entry.name %}{% endblock %}
+{% block content_url %}{% url 'imageView' folderAndPath.url entry.name %}{% endblock %}
 {% block image_url %}{{ entry.thumbnailUrl }}{% endblock %}

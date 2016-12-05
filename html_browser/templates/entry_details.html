@@ -1,5 +1,4 @@
 {% extends "entry_base.html" %}
-{% load url_resolver %}
 
-{% block content_url %}{% get_download_url entry.nameUrl %}{% endblock %}
+{% block content_url %}{% url 'download' folderAndPath.url entry.name %}{% endblock %}
 {% block image_url %}{{ IMAGE_URL }}Document-icon.png{% endblock %}

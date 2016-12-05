@@ -1,5 +1,4 @@
 {% extends "content_page.html" %}
-{% load url_resolver %}
 {% block extra_js %}
 	<script src="{{ MEDIA_URL }}moment.min.js"></script> <!-- used by bootstrap-sortable -->
 	<script src="{{ MEDIA_URL }}bootstrap-sortable.js"></script>
@@ -12,7 +11,7 @@
 						<span class="dropdown-menu">
 							<center>
 								<h3>Apply a filter</h3>
-								<form method="get" action="{% get_content_url %}"> 
+								<form method="get" action="{% url 'content' folderAndPath.url %}"> 
 									<input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
 									<input class="btn btn-default" type="submit" value="Filter" name="Filter" />
 								</form>
@@ -25,7 +24,7 @@
 				 <div class="dropdown-menu">
 				   <center>
 					 <h3>Search for filenames (use regular expressions)</h3>
-					 <form method="get" action="{% get_content_url %}"> 
+					 <form method="get" action="{% url 'content' folderAndPath.url %}"> 
 					   <input type="text" name="search" value="{{ search }}" maxlength="20" size="10" />
 					   <input class="btn btn-default" type="submit" value="Search" name="Search" />
 					 </form>
@@ -38,7 +37,7 @@
 					<div class="dropdown-menu">
 						<center>
 							<h3>Settings</h3>
-							<form action="post" action="{% get_content_url %}"> {% csrf_token %}
+							<form action="post" action="{% url 'content' folderAndPath.url %}"> {% csrf_token %}
 								<input type="hidden" name="action" value="changeSettings" />
 								<input type="checkbox" name="showHidden" 
 								{% if showHidden %}checked="checked" {% endif %}

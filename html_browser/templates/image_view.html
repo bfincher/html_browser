@@ -1,5 +1,4 @@
 {% extends "page.html" %}
-{% load url_resolver %}
 {% block body %}
 	<center>
 		{% if prevLink != None %}
@@ -7,7 +6,7 @@
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
 		{% endif %}
 		
-		<a href="{% get_content_url %}"><img src="{{ IMAGE_URL }}up_arrow.png"></a>
+		<a href="{% url 'content' folderAndPath.url %}"><img src="{{ IMAGE_URL }}up_arrow.png"></a>
 		
 		{% if nextLink != None %}
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
@@ -39,11 +38,10 @@ lastImage = false;
 
 <script>
 	setCsrf("{% csrf_token %}");
-	setCurrentFolder("{{ currentFolder }}");
-	setCurrentPath("{{ currentPath }}");
 	setUserCanRead("{{ userCanRead }}");
 	setUserCanWrite("{{ userCanWrite }}");
 	setUserCanDelete("{{ userCanDelete }}");
 	setImageUrl("{{ IMAGE_URL }}");
+	setFolderAndPathUrl("{{ folderAndPath.url }}");
 </script>
 {% endblock %}

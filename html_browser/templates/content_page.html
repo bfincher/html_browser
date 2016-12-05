@@ -1,17 +1,13 @@
 {% extends "page.html" %}
-{% load url_resolver %}
 
 {% block additional_header %} 
 		<script type="text/javascript" src="{{ MEDIA_URL }}folder_content.js"></script>
 
 		<script>
-				setCurrentFolder('{{ currentFolder }}')
-				setCurrentPath('{{ currentPath }}')
 				setUserCanRead({{ userCanRead }})
 				setUserCanWrite({{ userCanWrite }})
 				setUserCanDelete({{ userCanDelete }})
-				setUploadUrl("{% get_content_url viewName='upload' %}");
-				setDownloadZipUrl("{% get_content_url viewName='downloadZip' %}");
+				setFolderAndPathUrl("{{ folderAndPath.url }}");
 		</script>
 
 		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -26,7 +22,7 @@
 			]);
 
 			var options = {
-			  title: 'Disk Usage for {{ currentFolder }} in {{ diskUnit }}'
+			  title: 'Disk Usage for {{ folderAndPath.folder.name }} in {{ diskUnit }}'
 			};
 
 			var chart = new google.visualization.PieChart(document.getElementById('disk_usage_content'));
@@ -45,8 +41,6 @@
 	{% include "content_bar.html" %}
 	<form id="content-form" method="post">
 		{% csrf_token %}
-		<input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
-		<input type="hidden" name="currentPath" value="{{ currentPath }}" />
 	{% block content %}{% endblock %}
 	</form>
 

@@ -1,8 +1,5 @@
 var scrollEnabled = true;
-var currentFolder = null;
-var currentPath = null;
 var imageUrl = null;
-var deleteImageUrl = null;
 
 function setImageUrl(_imageUrl) {
     imageUrl = _imageUrl;
@@ -22,8 +19,7 @@ function getNextImage() {
 
     var body = $('body');
     body.scrollTop(body.scrollTop() - 2);
-    var url = reverse('getNextImage', {'currentFolder': currentFolder,
-                                       'path': currentPath + "/" + fileName});
+    var url = Urls.getNextImage(folderAndPathUrl, fileName);
     $("<img id='loading' src='" + imageUrl + "loading.gif' height='42' width='42' />").appendTo('#loadingDiv');
     $.ajax({url:url, 
     success:function(result) {
@@ -66,7 +62,7 @@ function deleteImage(fileName) {
 
     var confirmMessage = "Are you sure you want to delete the selected entry?";
     if (confirm(confirmMessage)) {
-        post(deleteImageUrl, {"fileName": fileName});
+        post(Urls.deleteImage(folderAndPathUrl), {"fileName": fileName});
     }
 }
 
@@ -95,5 +91,4 @@ $(document).ready(function() {
         getNextImage();
     }
 
-    deleteImageUrl = reverseWithFolderAndPath('deleteImage');
 });

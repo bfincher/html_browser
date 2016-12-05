@@ -1,11 +1,7 @@
 {% extends "page.html" %}
-{% load url_resolver %}
 
 {% block additional_header %}
 	<script language="javascript" type="text/javascript">
-	
-	currentFolder="{{ currentFolder }}";
-	currentPath="{{ currentPath }}";
 	
 	function verifyZip(fieldName) {		
 		var field = document.getElementById(fieldName);
@@ -23,13 +19,13 @@
 {% block body %}
 	
 	<center>
-	<h3>Upload file to {{ currentFolder }} {{currentPath }}</h3>
+	<h3>Upload file to {{ folderAndPath.url }} h3>
 		
 	<table class="UploadOuterTable">
 		<tr>
 			<td>
 				<form ENCTYPE="multipart/form-data" method="POST" 
-					action="{% get_content_url viewName='upload' %}"> {% csrf_token %}
+					action="{% url 'upload' folderAndPath.url %}"> {% csrf_token %}
 				<input type="hidden" name="action" value="uploadFile"/>
 				<table align="center">				
 					<caption>File upload</caption>					
@@ -47,8 +43,6 @@
 			<td>
 				<form ENCTYPE="multipart/form-data" method="POST" 
 					action="/hb/upload/"> {% csrf_token %}			
-				<input type="hidden" name="currentFolder" value="{{ currentFolder }}" />
-				<input type="hidden" name="currentPath" value="{{ currentPath }}" />
 				<input type="hidden" name="action" value="uploadZip"/>
 				<table align="center">
 					<caption>Zip Upload</caption>

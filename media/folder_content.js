@@ -1,17 +1,10 @@
-var currentFolder = null;
-var currentPath = null;
 var userCanRead = null;
 var userCanWrite = null;
 var userCanDelete = null;
-var uploadUrl = null;
-var downloadZipUrl = null;
+var folderAndPathUrl = null;
 
-function setUploadUrl(url) {
-    uploadUrl = url;
-}
-
-function setDownloadZipUrl(url) {
-    downloadZipUrl = url;
+function setFolderAndPathUrl(url) {
+    folderAndPathUrl = url;
 }
 
 function myEscape(str) {
@@ -22,19 +15,6 @@ function myEscape(str) {
     return str;
 }
 
-function setCurrentFolder(_currentFolder) {
-    "use strict";
-    currentFolder = _currentFolder;
-}
-
-function setCurrentPath(_currentPath) {
-    "use strict";
-    if (_currentPath == "") {
-        currentPath = "/";
-    } else {
-        currentPath = _currentPath;
-    }
-}
 
 function setUserCanRead(_userCanRead) {
     "use strict";
@@ -66,7 +46,7 @@ function copy() {
         return;
     }
 
-    postForm($("#content-form"), reverseWithFolderAndPath('content'), 
+    postForm($("#content-form"), Urls.content(folderAndPathUrl),
               {"action": "copyToClipboard"});
 }
 
@@ -90,7 +70,7 @@ function rename() {
     var newName = prompt("Please enter new file name for " + checkedBoxes[0].id, "");
 
     if (newName != null) {
-        postForm($("#content-form"), reverseWithFolderAndPath('content'), 
+        postForm($("#content-form"), Urls.content(folderAndPathUrl), 
            {"action": "rename",
             "file": checkedBoxes[0].id,
             "newName": newName});
@@ -109,7 +89,7 @@ function cut() {
         return;
     }
 
-    postForm($("#content-form"), reverseWithFolderAndPath('content'),
+    postForm($("#content-form"), Urls.content(folderAndPathUrl),
         {"action": "cutToClipboard"});
 }
 
@@ -120,7 +100,7 @@ function paste() {
         return;
     }
 
-    postForm($("#content-form"), reverseWithFolderAndPath('content'), 
+    postForm($("#content-form"), Urls.content(folderAndPathUrl), 
         {"action": "pasteFromClipboard"});
 }
 
@@ -129,13 +109,13 @@ function zip() {
     if (!areBoxesChecked()) {
         alert("No entries selected");
     } else {
-        postForm($("#content-form"), downloadZipUrl, {}, "get");
+        postForm($("#content-form"), Urls.downloadZip(folderAndPathUrl), {}, "get");
     }
 }
 
 function upload() {
     "use strict";
-    window.location=uploadUrl;
+    window.location=Urls.upload(folderAndPathUrl);
 }
 
 function del() {
@@ -156,7 +136,7 @@ function del() {
         }
 
         if (confirm(confirmMessage)) {
-            postForm($("#content-form"), reverseWithFolderAndPath('content'), 
+            postForm($("#content-form"), Urls.content(folderAndPathUrl), 
                 {"action": "deleteEntry"});
         }
     } 
@@ -172,7 +152,7 @@ function mkdir() {
     var dir = prompt("Please enter the directory to create:", "");
 
     if (dir != null) {
-        postForm($("#content-form"), reverseWithFolderAndPath('content'), 
+        postForm($("#content-form"), Urls.content(folderAndPathUrl), 
            {"action": "mkDir",
             "dir": dir});
     }
@@ -182,7 +162,7 @@ function viewTypeBoxChanged(box) {
     "use strict";
     var selectedIndex = box.selectedIndex;
     if (selectedIndex != -1) {
-        postForm($("#content-form"), reverseWithFolderAndPath('content'), 
+        postForm($("#content-form"), Urls.content(folderAndPathUrl), 
            {"action": "setViewType",
             "viewType": box.options[selectedIndex].text});
     }
