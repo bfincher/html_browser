@@ -15,7 +15,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='folder',
             name='viewOption',
-            field=models.CharField(choices=[('P', 'View authorization set by user and group permissions'), ('E', 'Viewable by any registered user'), ('A', 'Viewable by anonymous users')], default='P', max_length=1),
+            field=models.CharField(choices=[('P', 'View authorization set by user and group permissions'),
+                                            ('E', 'Viewable by any registered user'), ('A', 'Viewable by anonymous users')],
+                                   default='P', max_length=1),
         ),
         migrations.AlterField(
             model_name='grouppermission',

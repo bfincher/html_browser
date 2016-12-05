@@ -17,6 +17,7 @@ def convertPerm(permModel):
             raise Exception('Unexpected perm: %s' % perm.tempOldpermission[1])
         perm.save()
 
+
 class Migration(migrations.Migration):
 
     def postMigrate(apps, schema_editor):
@@ -25,7 +26,6 @@ class Migration(migrations.Migration):
 
         groupPermModel = apps.get_model('html_browser', 'GroupPermission')
         convertPerm(groupPermModel)
-
 
     dependencies = [
         ('html_browser', '0004_auto_20161022_1631'),
