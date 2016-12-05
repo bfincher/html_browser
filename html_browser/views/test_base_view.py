@@ -12,7 +12,7 @@ import zipfile
 from zipfile import ZipFile
 
 from html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_WRITE, CAN_DELETE
-from html_browser.views.base_view import reverseContentUrl, FolderAndPath
+from html_browser.views.base_view import reverseContentUrl, FolderAndPath, getIndexIntoCurrentDir
 
 
 def contextCheck(testCase, context, user=None, folder=None):
@@ -321,3 +321,26 @@ class UploadViewTest(BaseViewTest):
             for destFile in destFiles:
                 if os.path.exists(destFile):
                     os.remove(destFile)
+
+
+class TestGetIndexIntoCurrentDir(BaseViewTest):
+
+    class TestRequest():
+        def __init__(self):
+            self.session = {'showHidden': False}
+
+    def test(self):
+        request = self.TestRequest()
+        folderAndPath = FolderAndPath(folder=self.folder1, path='dir_a')
+
+        result = getIndexIntoCurrentDir(request, folderAndPath, 'test_file.txt')
+        self.assertEquals(0, result['index'])
+        self.assertEquals(3, len(result['currentDirEntries']))
+
+        expectedFiles = ['test_file.txt', 'test_file_2.txt', 'test_file_3.txt']
+
+        for i in range(len(expectedFiles)):
+            self.assertFalse(result['currentDirEntries'][i].isDir)
+            self.assertFalse(result['currentDirEntries'][i].hasThumbnail)
+            self.assertEquals(expectedFiles[i], result['currentDirEntries'][i].name)
+            self.assertEquals(expectedFiles[i], result['currentDirEntries'][i].nameUrl)
