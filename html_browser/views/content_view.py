@@ -95,7 +95,7 @@ class ContentView(BaseContentView):
             else:
                 raise CopyPasteException()
 
-        messages.success(request, 'Items pasted')
+        messages.success(self.request, 'Items pasted')
 
     def get(self, request, folderAndPathUrl, *args, **kwargs):
         super(ContentView, self).get(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
