@@ -117,7 +117,7 @@ class ContentView(BaseContentView):
                     self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
                     if len(crumbs) > 0:
                         url = reverseContentUrl(FolderAndPath(folder=self.folderAndPath.folder, path=accumulated))
-                        self.breadcrumbs += "<a href=\"{!s}\">{!s}</a> ".format(url,crumb)
+                        self.breadcrumbs += "<a href=\"{!s}\">{!s}</a> ".format(url, crumb)
 
                     else:
                         self.breadcrumbs = self.breadcrumbs + crumb
