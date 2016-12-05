@@ -33,13 +33,13 @@ def isShowHidden(request):
     return request.session.get('showHidden', False)
 
 
-def reverseContentUrl(folderAndPath, viewName='content', extraPath=None, extraArgs=None):
+def reverseContentUrl(folderAndPath, viewName='content', extraPath=None):
+    folderAndPathUrl = folderAndPath.url
+    if folderAndPathUrl.endswith('/'):
+        folderAndPathUrl = folderAndPathUrl[:-1]
+    args = [folderAndPathUrl]
     if extraPath:
-        args = [os.path.join(folderAndPath.url, extraPath)]
-    else:
-        args = [folderAndPath.url]
-    if extraArgs:
-        args.extend(extraArgs)
+        args.append(extraPath)
     return reverse(viewName, args=args)
 
 

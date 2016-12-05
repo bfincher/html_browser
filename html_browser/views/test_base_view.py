@@ -175,7 +175,7 @@ class LogoutViewTest(BaseViewTest):
 class DownloadViewTest(BaseViewTest):
     def testDownload(self):
         self.login(self.user1)
-        url = reverseContentUrl(FolderAndPath(folder=self.folder1, path=''), extraArgs=['file_a.txt'],
+        url = reverseContentUrl(FolderAndPath(folder=self.folder1, path=''), extraPath='file_a.txt',
                                 viewName='download')
         response = self.client.get(url)
 
