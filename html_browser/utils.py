@@ -68,6 +68,9 @@ class FolderAndPath:
         else:
             raise FolderAndPathArgumentException(**kwargs)
 
+    def __str__(self):
+        return "folder_name = %s, relativePath = %s, absPath = %s, url = %s" % (self.folder.name, self.relativePath, self.absPath, self.url)
+
     def getParent(self):
         if self.relativePath == '':
             raise NoParentException()
