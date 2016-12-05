@@ -44,6 +44,7 @@ class FolderAndPathTest(unittest.TestCase):
         finally:
             folder.delete()
 
+
 class UtilsTest(unittest.TestCase):
     def testGetCheckedEntries(self):
         dic = {'cb-checkbox_1': 'on',

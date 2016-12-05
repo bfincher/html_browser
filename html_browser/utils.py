@@ -25,6 +25,7 @@ GIGABYTE = MEGABYTE * KILOBYTE
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
 folderAndPathRegex = re.compile(r'^(\w+)(/(.*))?$')
 
+
 class NoParentException(Exception):
     def __init__(self, *args, **kwargs):
         super(NoParentException, self).__init__(*args, **kwargs)

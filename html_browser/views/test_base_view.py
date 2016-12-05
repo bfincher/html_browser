@@ -176,7 +176,7 @@ class DownloadViewTest(BaseViewTest):
     def testDownload(self):
         self.login(self.user1)
         url = reverseContentUrl(FolderAndPath(folder=self.folder1, path=''), extraArgs=['file_a.txt'],
-                                              viewName='download')
+                                viewName='download')
         response = self.client.get(url)
 
         foundAttachment = False

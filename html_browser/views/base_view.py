@@ -40,7 +40,7 @@ def reverseContentUrl(folderAndPath, viewName='content', extraPath=None, extraAr
     if extraPath:
         path = os.path.join(path, extraPath)
 
-    args = [path,]
+    args = [path, ]
     if extraArgs:
         args.extend(extraArgs)
     return reverse(viewName, args=args)
@@ -149,8 +149,8 @@ class LogoutView(BaseView):
 class DownloadView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
         super(DownloadView, self).get(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
-        return sendfile(request, 
-                        os.path.join(self.folderAndPath.absPath, fileName), 
+        return sendfile(request,
+                        os.path.join(self.folderAndPath.absPath, fileName),
                         attachment=True)
 
 
