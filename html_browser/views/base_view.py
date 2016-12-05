@@ -87,7 +87,7 @@ class BaseContentView(BaseView):
         elif 'folderAndPath' in kwargs:
             self.folderAndPath = kwargs['folderAndPath']
         else:
-            raise ArgumentException("One of folderandPathStr or folderAndPath params must be specified")
+            raise ArgumentException("One of folderandPathUrl or folderAndPath params must be specified")
 
         if self.requireDelete and not self.folderAndPath.folder.userCanDelete(request.user):
             raise PermissionDenied("Delete permission required")
