@@ -31,6 +31,9 @@ DATABASES_CYGWIN = {
 DATABASES_LINUX = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
         'NAME': 'hb',                      # Or path to database file if using sqlite3.
         'USER': 'hb',                      # Not used with sqlite3.
         'PASSWORD': 'hb',                  # Not used with sqlite3.
