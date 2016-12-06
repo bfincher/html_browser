@@ -152,9 +152,10 @@ class DownloadView(BaseContentView):
 
 
 class DownloadImageView(BaseContentView):
-    def get(self, request, folderAndPathUrl, *args, **kwargs):
+    def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
         super(DownloadImageView, self).get(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
-        return sendfile(request, self.folderAndPath.absPath, attachment=False)
+        logger.info("folderAndPath.absPath = %s", self.folderAndPath.absPath)
+        return sendfile(request, os.path.join(self.folderAndPath.absPath, fileName), attachment=False)
 
 
 class DownloadZipView(BaseContentView):
@@ -265,7 +266,7 @@ class ImageView(BaseContentView):
         if index == len(currentDirEntries) - 1:
             nextLink = None
         else:
-            nextLink = reverse(self.folderAndPath, viewName='imageView', extraPath=currentDirEntries[index+1].name)
+            nextLink = reverseContentUrl(self.folderAndPath, viewName='imageView', extraPath=currentDirEntries[index+1].name)
 
         parentDirLink = reverseContentUrl(self.folderAndPath)
         imageUrl = reverseContentUrl(self.folderAndPath, viewName='download%sImage' % self.folderAndPath.folder.name, extraPath=fileName)
@@ -319,7 +320,7 @@ class GetNextImageView(BaseContentView):
                     result['hasNextImage'] = True
                     nextFileName = currentDirEntries[i].name
 
-                    imageUrl = reverseContentUrl(self.folderAndPath, viewName='download%sImage' % self.folder.name, extraPath=nextFileName)
+                    imageUrl = reverseContentUrl(self.folderAndPath, viewName='download%sImage' % self.folderAndPath.folder.name, extraPath=nextFileName)
                     imageUrl = imageUrl.replace('//', '/')
                     result['imageUrl'] = imageUrl
                     result['fileName'] = nextFileName
