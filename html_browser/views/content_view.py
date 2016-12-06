@@ -19,6 +19,12 @@ from html_browser.utils import getCurrentDirEntries,\
 
 logger = logging.getLogger('html_browser.content_view')
 
+_viewTypeToTemplateMap = {
+    const.detailsViewType: 'content_detail.html',
+    const.listViewType: 'content_list.html',
+    const.thumbnailsViewType: 'content_thumbnail.html',
+}
+
 
 class ContentView(BaseContentView):
 
@@ -154,12 +160,7 @@ class ContentView(BaseContentView):
         self.context['diskTotal'] = diskUsage.totalformatted
         self.context['diskUnit'] = diskUsage.unit
 
-        if viewType == const.detailsViewType:
-            template = 'content_detail.html'
-        elif viewType == const.listViewType:
-            template = 'content_list.html'
-        else:
-            template = 'content_thumbnail.html'
+        template = _viewTypeToTemplateMap[viewType]
         return render(request, template, self.context)
 
 #    def _handleSearch(self, request, search):
