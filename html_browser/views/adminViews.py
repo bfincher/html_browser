@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 from datetime import datetime
 import logging
 from logging import DEBUG
+import os
 import re
 
 from django.contrib.auth.models import User, Group
@@ -15,7 +16,7 @@ from annoying.functions import get_object_or_None
 import html_browser
 from html_browser.models import Folder, UserPermission, GroupPermission,\
     CAN_READ, CAN_WRITE, CAN_DELETE
-from html_browser.utils import getReqLogger
+from html_browser.utils import getReqLogger, getFolderLinkDir
 from .adminForms import AddUserForm, EditUserForm, EditGroupForm,\
     UserPermissionFormSet, GroupPermissionFormSet, EditFolderForm, AddFolderForm
 
@@ -81,7 +82,10 @@ class FolderAdminView(BaseAdminView):
 class DeleteFolderView(BaseAdminView):
     def post(self, request, folderName, *args, **kwargs):
         super(DeleteFolderView, self).post(request, *args, **kwargs)
-        Folder.objects.filter(name=folderName).delete()
+        folder = Folder.objects.get(name=folderName)
+        folderLinkDir = getFolderLinkDir(folder.name)
+        os.remove(folderLinkDir)
+        folder.delete()
         return redirect('folderAdmin')
 
 
@@ -96,6 +100,8 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
 
     @abstractmethod
     def initForms(self, request, *args, **kwargs): pass
+
+    def postSaveAction(self, folder): pass
 
     def post(self, request, *args, **kwargs):
         super(AbstractFolderView, self).post(request, *args, **kwargs)
@@ -135,6 +141,8 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
                         instance.folder = folder
                         instance.save()
 
+            self.postSaveAction(folder)
+
         return redirect('folderAdmin')
 
     def get(self, request, *args, **kwargs):
@@ -168,7 +176,16 @@ class EditFolderView(AbstractFolderView):
     def post(self, request, title, folderName, *args, **kwargs):
         self.title = title
         self.folderName = folderName
+        self.origLocalPath = Folder.objects.get(name=folderName).localPath
+
         return super(EditFolderView, self).post(request, *args, **kwargs)
+
+    def postSaveAction(self, folder):
+        modifiedLocalPath = folder.localPath
+        if self.origLocalPath != modifiedLocalPath:
+            folderLinkDir = getFolderLinkDir(folder.name)
+            os.remove(folderLinkDir)
+            os.symlink(modifiedLocalPath, folderLinkDir)
 
     def initForms(self, request, *args, **kwargs):
         self.folder = Folder.objects.get(name=self.folderName)
@@ -194,6 +211,13 @@ class AddFolderView(AbstractFolderView):
     def post(self, request, title, *args, **kwargs):
         self.title = title
         return super(AddFolderView, self).post(request, *args, **kwargs)
+
+    def postSaveAction(self, folder):
+        folderLinkDir = getFolderLinkDir(folder.name)
+        if os.path.exists(folderLinkDir):
+            os.remove(folderLinkDir)
+
+        os.symlink(folder.localPath, folderLinkDir)
 
     def initForms(self, request, *args, **kwargs):
         if request.method == "GET":
