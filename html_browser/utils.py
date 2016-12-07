@@ -1,20 +1,23 @@
-from urllib.parse import quote_plus, unquote_plus
-import os
+from django.contrib.auth.models import User, Group
+from django.core.urlresolvers import reverse
+
+from .constants import _constants as const
+from html_browser.models import Folder, UserPermission, GroupPermission
+from html_browser_site import settings
+
 from datetime import datetime
 from operator import attrgetter
-from .constants import _constants as const
-from django.contrib.auth.models import User, Group
-from html_browser.models import Folder, UserPermission,\
-    GroupPermission
-from pathlib import Path
-from shutil import rmtree
-from html_browser_site.settings import THUMBNAIL_DIR
 import html.parser
+from pathlib import Path
 
 import json
 import logging
 from logging import DEBUG
+import os
 import re
+from shutil import rmtree
+from sorl.thumbnail import get_thumbnail
+from urllib.parse import quote_plus, unquote_plus
 
 logger = logging.getLogger('html_browser.utils')
 reqLogger = None
@@ -25,6 +28,7 @@ GIGABYTE = MEGABYTE * KILOBYTE
 
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
 folderAndPathRegex = re.compile(r'^(\w+)(/(.*))?$')
+imageRegex = re.compile(r'.+\.(?i)((jpg)|(png)|(gif)|(bmp))')
 
 
 class NoParentException(Exception):
@@ -100,7 +104,7 @@ def getCheckedEntries(requestDict):
 
 
 class DirEntry():
-    def __init__(self, path, folderAndPath):
+    def __init__(self, path, folderAndPath, viewType):
         self.isDir = path.is_dir()
         self.name = path.name
         self.nameUrl = self.name.replace('&', '&amp;')
@@ -117,24 +121,14 @@ class DirEntry():
         lastModifyTime = datetime.fromtimestamp(stat.st_mtime)
         self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')
 
-        try:
-            thumbPath = "/".join([THUMBNAIL_DIR,
-                                  folderAndPath.folder.name,
-                                  folderAndPath.relativePath,
-                                  self.name])
-
-            if os.path.exists(thumbPath):
-                self.hasThumbnail = True
-                self.thumbnailUrl = "/".join(
-                    [const.THUMBNAIL_URL + folderAndPath.folder.name,
-                     folderAndPath.relativePath,
-                     self.name])
-            else:
-                self.hasThumbnail = False
-                self.thumbnailUrl = None
-
-        except UnicodeDecodeError as de:
-            logger.exception(de)
+        if not self.isDir and viewType == const.thumbnailsViewType and imageRegex.match(self.name):
+            self.hasThumbnail = True
+            imageLinkPath = os.path.join(settings.FOLDER_LINK_DIR, folderAndPath.relativePath, self.name)
+            im = get_thumbnail(imageLinkPath, '150x150')
+            self.thumbnailUrl = reverse('thumb', args=[im.name])
+        else:
+            self.hasThumbnail = False
+            self.thumbnailUrl = None
 
     def __str__(self):
         _str = """DirEntry:  isDir = {} name = {} nameUrl = {}
@@ -190,7 +184,7 @@ class DirEntry():
 #    if includeThisDir:
 #        returnList.append(thisEntry)
 
-def getCurrentDirEntries(folderAndPath, showHidden, contentFilter=None):
+def getCurrentDirEntries(folderAndPath, showHidden, viewType, contentFilter=None):
     _dir = folderAndPath.absPath
     if os.path.isfile(_dir):
         _dir = path.dirname(_dir)
@@ -203,7 +197,7 @@ def getCurrentDirEntries(folderAndPath, showHidden, contentFilter=None):
             continue
         try:
             if f.is_dir():
-                dirEntries.append(DirEntry(f, folderAndPath))
+                dirEntries.append(DirEntry(f, folderAndPath, viewType))
             else:
                 include = False
                 if contentFilter:
@@ -215,7 +209,7 @@ def getCurrentDirEntries(folderAndPath, showHidden, contentFilter=None):
                     include = True
 
                 if include:
-                    fileEntries.append(DirEntry(f, folderAndPath))
+                    fileEntries.append(DirEntry(f, folderAndPath, viewType))
         except OSError as ose:
             logger.exception(ose)
 

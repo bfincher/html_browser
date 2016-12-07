@@ -143,8 +143,8 @@ class ContentView(BaseContentView):
 #            search = request.GET['search']
 #            return self._handleSearch(request, search)
 
-        currentDirEntries = getCurrentDirEntries(self.folderAndPath, isShowHidden(request), contentFilter)
         viewType = request.session.get('viewType', const.viewTypes[0])
+        currentDirEntries = getCurrentDirEntries(self.folderAndPath, isShowHidden(request), viewType, contentFilter)
 
         diskFreePct = getDiskPercentFree(self.folderAndPath.absPath)
         diskUsage = getDiskUsageFormatted(self.folderAndPath.absPath)

@@ -6,8 +6,11 @@ URL_PREFIX = r''
 DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
 DEBUG = True
+#THUMBNAIL_DEBUG = True
 
 BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../', __file__))))
+
+FOLDER_LINK_DIR = os.path.join(BASE_DIR, 'folder_links')
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -170,6 +173,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'django_js_reverse',
     'django_downloadview',
+    'sorl.thumbnail',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )

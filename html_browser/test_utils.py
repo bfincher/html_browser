@@ -2,6 +2,7 @@ import unittest
 
 from html_browser.models import Folder
 from html_browser.utils import getCheckedEntries, getCurrentDirEntries, FolderAndPath
+from html_browser import _constants as const
 from html_browser import utils
 
 from datetime import datetime, timedelta
@@ -71,7 +72,7 @@ class UtilsTest(unittest.TestCase):
             fileB_time = fileA_time + timedelta(seconds=1)
             os.utime('html_browser/test_dir/file_b.txt', (int(fileB_time.timestamp()), int(fileB_time.timestamp())))
 
-            entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), True)
+            entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), True, const.detailsViewType)
             self.assertEquals(3, len(entries))
 
             entry = entries[0]

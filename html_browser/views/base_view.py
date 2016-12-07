@@ -13,6 +13,7 @@ from html_browser.utils import getCurrentDirEntries, handleDelete,\
     getReqLogger,\
     getCheckedEntries, replaceEscapedUrl,\
     FolderAndPath
+from html_browser_site import settings
 
 import json
 import logging
@@ -154,8 +155,13 @@ class DownloadView(BaseContentView):
 class DownloadImageView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
         super(DownloadImageView, self).get(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
-        logger.info("folderAndPath.absPath = %s", self.folderAndPath.absPath)
         return sendfile(request, os.path.join(self.folderAndPath.absPath, fileName), attachment=False)
+
+
+class ThumbView(BaseView):
+    def get(self, request, path, *args, **kwargs):
+        super(ThumbView, self).get(request, *args, **kwargs)
+        return sendfile(request, os.path.join(settings.BASE_DIR, path), attachment=False)
 
 
 class DownloadZipView(BaseContentView):
@@ -240,7 +246,8 @@ class UploadView(BaseContentView):
 
 
 def getIndexIntoCurrentDir(request, folderAndPath, fileName):
-    currentDirEntries = getCurrentDirEntries(folderAndPath, isShowHidden(request))
+    viewType = request.session.get('viewType', const.viewTypes[0])
+    currentDirEntries = getCurrentDirEntries(folderAndPath, isShowHidden(request), viewType)
 
     for i in range(len(currentDirEntries)):
         if currentDirEntries[i].name == fileName:
@@ -281,12 +288,6 @@ class ImageView(BaseContentView):
         self.context['userCanDelete'] = userCanDelete
 
         return render(request, 'image_view.html', self.context)
-
-
-class ThumbView(BaseContentView):
-    def get(self, request, folderAndPathUrl, *args, **kwargs):
-        super(ThumbView, self).get(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
-        return render(request, 'test_image.html')
 
 
 class DeleteImageView(BaseContentView):
