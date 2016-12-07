@@ -51,8 +51,6 @@ if platform.system().startswith("CYG"):
 else:
     DATABASES=DATABASES_LINUX
 
-THUMBNAIL_DIR = '/srv/www/hb/media/thumbs'
-
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
