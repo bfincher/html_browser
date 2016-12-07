@@ -1,2 +1,5 @@
 *.pyc
 *.sql
+*.db
+cache
+folder_links

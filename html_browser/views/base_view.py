@@ -161,6 +161,7 @@ class DownloadImageView(BaseContentView):
 class ThumbView(BaseView):
     def get(self, request, path, *args, **kwargs):
         super(ThumbView, self).get(request, *args, **kwargs)
+        file = os.path.join(settings.BASE_DIR, path)
         return sendfile(request, os.path.join(settings.BASE_DIR, path), attachment=False)
 
 

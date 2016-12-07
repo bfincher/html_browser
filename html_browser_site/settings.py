@@ -6,7 +6,7 @@ URL_PREFIX = r''
 DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
 DEBUG = True
-#THUMBNAIL_DEBUG = True
+THUMBNAIL_DEBUG = True
 
 BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../', __file__))))
 
@@ -243,6 +243,11 @@ LOGGING = {
             'handlers': ['request_handler'],
             'level': 'DEBUG',
             'propagate': False,
+        },
+        'sorl.thumbnail' : {
+            'handlers': ['default'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
     }
 }

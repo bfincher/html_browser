@@ -123,7 +123,7 @@ class DirEntry():
 
         if not self.isDir and viewType == const.thumbnailsViewType and imageRegex.match(self.name):
             self.hasThumbnail = True
-            imageLinkPath = os.path.join(settings.FOLDER_LINK_DIR, folderAndPath.relativePath, self.name)
+            imageLinkPath = os.path.join(settings.FOLDER_LINK_DIR, folderAndPath.folder.name, folderAndPath.relativePath, self.name)
             im = get_thumbnail(imageLinkPath, '150x150')
             self.thumbnailUrl = reverse('thumb', args=[im.name])
         else:
