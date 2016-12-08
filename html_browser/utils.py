@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User, Group
+from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse
 
 from .constants import _constants as const
@@ -29,6 +30,11 @@ GIGABYTE = MEGABYTE * KILOBYTE
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
 folderAndPathRegex = re.compile(r'^(\w+)(/(.*))?$')
 imageRegex = re.compile(r'.+\.(?i)((jpg)|(png)|(gif)|(bmp))')
+
+
+class ThumbnailStorage(FileSystemStorage):
+    def __init__(self, **kwargs):
+        super(ThumbnailStorage, self).__init__(location=settings.FOLDER_LINK_DIR)
 
 
 class NoParentException(Exception):
