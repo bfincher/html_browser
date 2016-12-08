@@ -1,8 +1,9 @@
 import unittest
 
 from html_browser.models import Folder
-from html_browser.utils import getCheckedEntries, getCurrentDirEntries, FolderAndPath
-from html_browser import _constants as const
+from html_browser.utils import getCheckedEntries, getCurrentDirEntries, FolderAndPath,\
+    FolderAndPathArgumentException
+from html_browser.constants import _constants as const
 from html_browser import utils
 
 from datetime import datetime, timedelta
@@ -16,7 +17,21 @@ class TestRequest():
 
 
 class FolderAndPathTest(unittest.TestCase):
-    def test(self):
+    def __testConstruct(self, folder, path):
+        expectedAbsPath = os.path.join(folder.localPath, path)
+        expectedUrl = os.path.join(folder.name, path)
+
+        objs = [FolderAndPath(folder=folder, path=path),
+                FolderAndPath(folderName=folder.name, path=path),
+                FolderAndPath(url=expectedUrl)]
+
+        for folderAndPath in objs:
+            self.assertEquals(folder.name, folderAndPath.folder.name)
+            self.assertEquals(expectedAbsPath, folderAndPath.absPath)
+            self.assertEquals(path, folderAndPath.relativePath)
+            self.assertEquals(expectedUrl, folderAndPath.url)
+
+    def testConstruct(self):
         testDir = 'html_browser/test_dir'
 
         testDirAbsPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_dir/')
@@ -28,22 +43,34 @@ class FolderAndPathTest(unittest.TestCase):
         folder.save()
 
         try:
-            folderAndPath = FolderAndPath(folder=folder, path='')
-            self.assertEquals('test', folderAndPath.folder.name)
-            self.assertEquals(testDirAbsPath, folderAndPath.absPath)
-            self.assertEquals('', folderAndPath.relativePath)
-
-            folderAndPath = FolderAndPath(folderName=folder.name, path='')
-            self.assertEquals('test', folderAndPath.folder.name)
-            self.assertEquals(testDirAbsPath, folderAndPath.absPath)
-            self.assertEquals('', folderAndPath.relativePath)
-
-            folderAndPath = FolderAndPath(url='%s/' % folder.name)
-            self.assertEquals('test', folderAndPath.folder.name)
-            self.assertEquals(testDirAbsPath, folderAndPath.absPath)
-            self.assertEquals('', folderAndPath.relativePath)
+            self.__testConstruct(folder, '')
+            self.__testConstruct(folder, 'test_path')
         finally:
             folder.delete()
+
+        try:
+            FolderAndPath(unknownArg='')
+            self.fail('ExpectedFolderAndPathArgumentException')
+        except FolderAndPathArgumentException:
+            pass
+
+        try:
+            FolderAndPath(url='url', unknownArg='')
+            self.fail('ExpectedFolderAndPathArgumentException')
+        except FolderAndPathArgumentException:
+            pass
+
+        try:
+            FolderAndPath(folder=None, path='path', unknownArg='')
+            self.fail('ExpectedFolderAndPathArgumentException')
+        except FolderAndPathArgumentException:
+            pass
+
+        try:
+            FolderAndPath(path='path', unknownArg='')
+            self.fail('ExpectedFolderAndPathArgumentException')
+        except FolderAndPathArgumentException:
+            pass
 
 
 class UtilsTest(unittest.TestCase):
