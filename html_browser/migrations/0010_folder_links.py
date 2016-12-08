@@ -14,6 +14,7 @@ def linkFolder(folder):
     link = os.path.join(settings.FOLDER_LINK_DIR, folder.name)
     os.symlink(folder.localPath, link)
 
+
 class Migration(migrations.Migration):
 
     def postMigrate(apps, schema_editor):
