@@ -98,6 +98,9 @@ class FolderAndPath:
                   'path': self.relativePath}
         return json.dumps(result)
 
+    def __eq__(self, other):
+        return self.url == other.url
+
 
 def getCheckedEntries(requestDict):
     entries = []
