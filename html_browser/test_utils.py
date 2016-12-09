@@ -4,6 +4,7 @@ from html_browser.models import Folder
 from html_browser.utils import *
 from html_browser.constants import _constants as const
 from html_browser import utils
+from html_browser_site import settings
 
 from datetime import datetime, timedelta
 import os
@@ -154,8 +155,11 @@ class UtilsTest(unittest.TestCase):
             fileB_time = fileA_time + timedelta(seconds=1)
             os.utime('html_browser/test_dir/file_b.txt', (int(fileB_time.timestamp()), int(fileB_time.timestamp())))
 
-            entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), True, const.detailsViewType)
-            self.assertEquals(3, len(entries))
+            img_time = fileB_time + timedelta(seconds=1)
+            os.utime('html_browser/test_dir/test_image.jpg', (int(img_time.timestamp()), int(img_time.timestamp())))
+
+            entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), True, const.thumbnailsViewType)
+            self.assertEquals(4, len(entries))
 
             entry = entries[0]
             self.assertTrue(entry.isDir)
@@ -185,6 +189,16 @@ class UtilsTest(unittest.TestCase):
             self.assertEquals(fileB_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
             self.assertFalse(entry.hasThumbnail)
             self.assertIsNone(entry.thumbnailUrl)
+
+            entry = entries[3]
+            self.assertFalse(entry.isDir)
+            self.assertEquals('test_image.jpg', entry.name)
+            self.assertEquals(entry.name, entry.nameUrl)
+            self.assertEquals('826.11 KB', entry.size)
+            self.assertEquals(845941, entry.sizeNumeric)
+            self.assertEquals(img_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
+            self.assertTrue(entry.hasThumbnail)
+            self.assertRegexpMatches(entry.thumbnailUrl, r'^/thumb/cache/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg$')
 
         finally:
             folder.delete()
