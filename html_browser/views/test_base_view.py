@@ -59,7 +59,7 @@ class BaseViewTest(unittest.TestCase):
 
         self.folder1 = Folder()
         self.folder1.name = 'test'
-        self.folder1.localPath = 'html_browser/test_dir'
+        self.folder1.localPath = 'media'
         self.folder1.viewOption = 'P'
         self.folder1.save()
 
@@ -175,13 +175,13 @@ class LogoutViewTest(BaseViewTest):
 class DownloadViewTest(BaseViewTest):
     def testDownload(self):
         self.login(self.user1)
-        url = reverseContentUrl(FolderAndPath(folder=self.folder1, path=''), extraPath='file_a.txt',
+        url = reverseContentUrl(FolderAndPath(folder=self.folder1, path=''), extraPath='add_user.js',
                                 viewName='download')
         response = self.client.get(url)
 
         foundAttachment = False
         for item in list(response.items()):
-            if item[1] == 'attachment; filename="file_a.txt"':
+            if item[1] == 'attachment; filename="add_user.js"':
                 foundAttachment = True
                 break
 
@@ -193,9 +193,9 @@ class DownloadZipViewTest(BaseViewTest):
         self.login(self.user1)
         response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path=''),
                                                      viewName='downloadZip'),
-                                   data={'cb-file_a.txt': 'on',
-                                         'cb-file_b.txt': 'on',
-                                         'cb-dir_a': 'on'})
+                                   data={'cb-add_user.js': 'on',
+                                         'cb-base.js': 'on',
+                                         'cb-images': 'on'})
 
         self.assertEquals(200, response.status_code)
 
@@ -219,17 +219,17 @@ class DownloadZipViewTest(BaseViewTest):
             for entry in entries:
                 zipFile.extract(entry, extractPath)
 
-            extractedFileA = os.path.join(extractPath, 'file_a.txt')
-            extractedFileB = os.path.join(extractPath, 'file_b.txt')
-            extractedTestFile = os.path.join(extractPath, 'dir_a/test_file.txt')
+            extractedFileA = os.path.join(extractPath, 'add_user.js')
+            extractedFileB = os.path.join(extractPath, 'base.js')
+            extractedTestFile = os.path.join(extractPath, 'images/Add-Folder-icon.png')
 
             self.assertTrue(os.path.exists(extractedFileA))
             self.assertTrue(os.path.exists(extractedFileB))
             self.assertTrue(os.path.exists(extractedTestFile))
 
-            self.assertTrue(filecmp.cmp('html_browser/test_dir/file_a.txt', extractedFileA))
-            self.assertTrue(filecmp.cmp('html_browser/test_dir/file_b.txt', extractedFileB))
-            self.assertTrue(filecmp.cmp('html_browser/test_dir/dir_a/test_file.txt', extractedTestFile))
+            self.assertTrue(filecmp.cmp('media/add_user.js', extractedFileA))
+            self.assertTrue(filecmp.cmp('media/base.js', extractedFileB))
+            self.assertTrue(filecmp.cmp('media/images/Add-Folder-icon.png', extractedTestFile))
         finally:
             if os.path.exists(extractPath):
                 rmtree(extractPath)
@@ -260,32 +260,32 @@ class UploadViewTest(BaseViewTest):
         self.login(self.user1)
 
         try:
-            with open('html_browser/test_dir/file_a.txt', 'r') as f:
-                response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='dir_a'), viewName='upload'),
+            with open('media/base.js', 'r') as f:
+                response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'), viewName='upload'),
                                             data={'action': 'uploadFile',
                                                   'upload1': f})
 
             self.assertEquals(302, response.status_code)
 
-            self.assertTrue(os.path.exists('html_browser/test_dir/dir_a/file_a.txt'))
-            self.assertTrue(filecmp.cmp('html_browser/test_dir/dir_a/file_a.txt', 'html_browser/test_dir/dir_a/file_a.txt'))
+            self.assertTrue(os.path.exists('media/base.js'))
+            self.assertTrue(filecmp.cmp('media/base.js', 'media/images/base.js'))
         finally:
-            if os.path.exists('html_browser/test_dir/dir_a/file_a.txt'):
-                os.remove('html_browser/test_dir/dir_a/file_a.txt')
+            if os.path.exists('media/images/base.js'):
+                os.remove('media/images/base.js')
 
     def testUploadNoAuth(self):
         self.login(self.user3)
 
         try:
-            with open('html_browser/test_dir/file_a.txt', 'r') as f:
+            with open('media/base.js', 'r') as f:
                 response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='dir_a'), viewName='upload'),
                                             data={'action': 'uploadFile',
                                                   'upload1': f})
 
             self.assertEquals(403, response.status_code)
         finally:
-            if os.path.exists('html_browser/test_dir/dir_a/file_a.txt'):
-                os.remove('html_browser/test_dir/dir_a/file_a.txt')
+            if os.path.exists('media/images/base.js'):
+                os.remove('media/images/base.js')
 
     def testUploadZip(self):
         self.login(self.user1)
@@ -294,10 +294,10 @@ class UploadViewTest(BaseViewTest):
         destFiles = []
         try:
             zipFile = ZipFile(zipFileName, mode='w', compression=zipfile.ZIP_DEFLATED)
-            basePath = 'html_browser/test_dir/'
+            basePath = 'media'
 
-            entries = ['html_browser/test_dir/file_a.txt',
-                       'html_browser/test_dir/file_b.txt']
+            entries = ['media/base.js',
+                       'media/add_user.js']
 
             for entry in entries:
                 arcName = entry.replace(basePath, '')
@@ -306,13 +306,13 @@ class UploadViewTest(BaseViewTest):
             zipFile.close()
 
             with open(zipFileName, 'rb') as f:
-                response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='dir_a'), viewName='upload'),
+                response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'), viewName='upload'),
                                             data={'action': 'uploadZip',
                                                   'zipupload1': f})
 
                 self.assertEquals(302, response.status_code)
-                destFiles = ['html_browser/test_dir/dir_a/file_a.txt',
-                             'html_browser/test_dir/dir_a/file_b.txt']
+                destFiles = ['media/images/base.js',
+                             'media/images/add_user.js']
                 for destFile in destFiles:
                     self.assertTrue(os.path.exists(destFile))
         finally:
@@ -331,13 +331,13 @@ class TestGetIndexIntoCurrentDir(BaseViewTest):
 
     def test(self):
         request = self.TestRequest()
-        folderAndPath = FolderAndPath(folder=self.folder1, path='dir_a')
+        folderAndPath = FolderAndPath(folder=self.folder1, path='images')
 
-        result = getIndexIntoCurrentDir(request, folderAndPath, 'test_file.txt')
+        result = getIndexIntoCurrentDir(request, folderAndPath, 'Add-Folder-icon.png')
         self.assertEquals(0, result['index'])
-        self.assertEquals(3, len(result['currentDirEntries']))
+        self.assertEquals(20, len(result['currentDirEntries']))
 
-        expectedFiles = ['test_file.txt', 'test_file_2.txt', 'test_file_3.txt']
+        expectedFiles = ['Add-Folder-icon.png', 'Copy-icon.png', 'Document-icon.png']
 
         for i in range(len(expectedFiles)):
             self.assertFalse(result['currentDirEntries'][i].isDir)
