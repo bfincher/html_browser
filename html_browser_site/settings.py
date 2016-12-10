@@ -47,7 +47,7 @@ DATABASES_LINUX = {
     }
 }
 
-if platform.system().startswith("CYG"):
+if 'TRAVIS' in os.environ or platform.system().startswith("CYG"):
     DATABASES=DATABASES_CYGWIN
     DATABASES['default']['NAME'] = os.path.dirname(os.path.abspath(__file__)) + "/../hb.db"
 else:
