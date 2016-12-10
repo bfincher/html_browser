@@ -1,8 +1,0 @@
-django https://bitbucket.org/django/django branch releases/1.4.X
-xsendfile-1.0a2
-https://github.com/nmaier/mod_xsendfile.git tag 0.12
-https://github.com/johnsensible/django-sendfile.git
-
-http://code.google.com/p/django-dynamic-media-serve
-	download, extract, rename dir to dynamic_media_serve, and move to /usr/local/python2.7/dist_packages
-
