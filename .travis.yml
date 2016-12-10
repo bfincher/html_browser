@@ -1,11 +1,12 @@
 language: python
 python:
   - "3.5"
+sudo: required
 # command to install dependencies
 install: 
   - "pip install -r requirements.txt"
-  - mkdir /var/log/hb
-  - chown $USER /var/log/hb
+  - sudo mkdir /var/log/hb
+  - sudo chown $USER /var/log/hb
 
 # command to run tests
 script: 
