@@ -3,3 +3,4 @@
 *.db
 cache
 folder_links
+.coverage
