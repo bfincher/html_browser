@@ -97,7 +97,6 @@ class FolderAndPathTest(unittest.TestCase):
         fp2 = FolderAndPath(folder=FolderAndPathTest.folder2, path='test_path1/test_path2')
         self.assertFalse(fp1 == fp2)
 
-
     def testJson(self):
         fp = FolderAndPath(folder=FolderAndPathTest.folder, path='test_path1/test_path2')
         jsonStr = fp.toJson()
@@ -143,6 +142,7 @@ class FileEntry:
     def restoreMTime(self):
         os.utime(self.path.__str__(), (int(self.origTime), int(self.origTime)))
 
+
 class UtilsTest(unittest.TestCase):
     def testGetCheckedEntries(self):
         dic = {'cb-checkbox_1': 'on',
@@ -164,14 +164,13 @@ class UtilsTest(unittest.TestCase):
             testFiles = [FileEntry(os.path.join(mediaDir, 'bootstrap'), '&nbsp'),
                          FileEntry(os.path.join(mediaDir, 'images'), '&nbsp'),
                          FileEntry(os.path.join(mediaDir, 'add_user.js'), '1.89 KB'),
-                        ]
+                         ]
 
             try:
                 nextTime = datetime.now()
                 for entry in testFiles:
                     entry.setMTime(nextTime)
                     nextTime = nextTime + timedelta(seconds=1)
-
 
                 entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), False, const.thumbnailsViewType)
                 self.assertEquals(15, len(entries))
@@ -254,13 +253,13 @@ class UtilsTest(unittest.TestCase):
                 rmtree(testDir)
 
     def testFormatBytes(self):
-       self.assertEquals("1.15 GB", formatBytes(1234567890))
-       self.assertEquals("117.74 MB", formatBytes(123456789))
-       self.assertEquals("120.56 KB", formatBytes(123456))
-       self.assertEquals("123", formatBytes(123))
+        self.assertEquals("1.15 GB", formatBytes(1234567890))
+        self.assertEquals("117.74 MB", formatBytes(123456789))
+        self.assertEquals("120.56 KB", formatBytes(123456))
+        self.assertEquals("123", formatBytes(123))
 
-       self.assertEquals("1205632.71 KB", formatBytes(1234567890, forceUnit='KB'))
-       self.assertEquals("1205632.71", formatBytes(1234567890, forceUnit='KB', includeUnitSuffix=False))
+        self.assertEquals("1205632.71 KB", formatBytes(1234567890, forceUnit='KB'))
+        self.assertEquals("1205632.71", formatBytes(1234567890, forceUnit='KB', includeUnitSuffix=False))
 
 
 def main():
