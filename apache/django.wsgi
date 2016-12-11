@@ -1,5 +1,8 @@
 import os
 import sys
+import site
+
+site.addsitedir('/var/www/.virtualenvs/html_browser/lib/python3.5/site-packages')
  
 path = '/srv/www/hb'
 if path not in sys.path:
