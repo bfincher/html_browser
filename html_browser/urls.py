@@ -3,7 +3,7 @@ from html_browser.models import Folder
 from html_browser.views import base_view, content_view
 from html_browser.views import adminViews as admin_views
 
-fileNameChars = r'[\w \-!@#$%^&*\(\)\+-,\.]'
+fileNameChars = r'[\w \-!@#$%^&*\(\)\+,\.]'
 folderAndPathRegex = r'(?P<folderAndPathUrl>\w+(/%s+?)*)/' % fileNameChars
 
 urlpatterns = [
