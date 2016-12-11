@@ -322,6 +322,27 @@ class UploadViewTest(BaseViewTest):
                 if os.path.exists(destFile):
                     os.remove(destFile)
 
+    def testImageView(self):
+        self.login(self.user1)
+        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'), viewName='imageView', extraPath='folder-blue-icon.png'))
+
+        context = response.context[0]
+        contextCheck(self, context)
+
+        self.assertEquals('/content/test/images/', context['parentDirLink'])
+        self.assertEquals('/image_view/test/images/folder-blue-icon-128.png/', context['prevLink'])
+        self.assertEquals('/image_view/test/images/folder-blue-parent-icon.png/', context['nextLink'])
+        self.assertEquals('/__test__/test/images/folder-blue-icon.png', context['imageUrl'])
+        self.assertEquals('folder-blue-icon.png', context['fileName'])
+        self.assertTrue(context['userCanDelete'])
+        self.assertEquals('image_view.html', response.templates[0].name)
+
+        # test unauthorized user
+        self.logout()
+        self.login(self.user2)
+        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'), viewName='imageView', extraPath='folder-blue-icon.png'))
+        self.assertEquals(403, response.status_code)
+
 
 class TestGetIndexIntoCurrentDir(BaseViewTest):
 
