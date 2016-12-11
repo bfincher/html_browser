@@ -254,8 +254,8 @@ def handleDelete(folderAndPath, entries):
 
 
 def getReqLogger():
+    global reqLogger
     if not reqLogger:
-        global reqLogger
         reqLogger = logging.getLogger('django.request')
     return reqLogger
 
