@@ -11,11 +11,6 @@ import os
 from shutil import rmtree
 
 
-class TestRequest():
-    def __init__(self):
-        self.GET = {}
-
-
 class FolderAndPathTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
