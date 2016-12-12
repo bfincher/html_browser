@@ -42,6 +42,6 @@ lastImage = false;
 	setUserCanWrite("{{ userCanWrite }}");
 	setUserCanDelete("{{ userCanDelete }}");
 	setImageUrl("{{ IMAGE_URL }}");
-	setFolderAndPathUrl("{{ folderAndPath.url }}");
+	setFolderAndPathUrl("{{ folderAndPath.url|safe }}");
 </script>
 {% endblock %}
