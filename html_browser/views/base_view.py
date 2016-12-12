@@ -48,13 +48,7 @@ class BaseView(View):
     def __init__(self):
         self.reqLogger = getReqLogger()
 
-    def get(self, request, *args, **kwargs):
-        self._commonGetPost(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        self._commonGetPost(request, *args, **kwargs)
-
-    def _commonGetPost(self, request, *args, **kwargs):
+    def _setup(self, request, *args, **kwargs):
         self.reqLogger.info(self.__class__.__name__)
         self.request = request
         if self.reqLogger.isEnabledFor(DEBUG):
@@ -80,8 +74,8 @@ class BaseContentView(BaseView):
         self.requireWrite = requireWrite
         self.requireDelete = requireDelete
 
-    def _commonGetPost(self, request, *args, **kwargs):
-        super(BaseContentView, self)._commonGetPost(request, *args, **kwargs)
+    def _setup(self, request, *args, **kwargs):
+        super(BaseContentView, self)._setup(request, *args, **kwargs)
 
         if 'folderAndPathUrl' in kwargs:
             self.folderAndPath = FolderAndPath(url=kwargs['folderAndPathUrl'])
@@ -106,7 +100,7 @@ class BaseContentView(BaseView):
 
 class IndexView(BaseView):
     def get(self, request, *args, **kwargs):
-        super(IndexView, self).get(request, *args, **kwargs)
+        self._setup(request, *args, **kwargs)
 
         allFolders = Folder.objects.all()
         folders = []
@@ -121,7 +115,7 @@ class IndexView(BaseView):
 
 class LoginView(BaseView):
     def post(self, request, *args, **kwargs):
-        super(LoginView, self).post(request, *args, **kwargs)
+        self._setup(request, *args, **kwargs)
 
         userName = request.POST['userName']
         password = request.POST['password']
@@ -143,14 +137,14 @@ class LoginView(BaseView):
 
 class LogoutView(BaseView):
     def get(self, request, *args, **kwargs):
-        super(LogoutView, self).get(request, *args, **kwargs)
+        self._setup(request, *args, **kwargs)
         auth_logout(request)
         return redirect('index')
 
 
 class DownloadView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
-        super(DownloadView, self).get(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
+        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
         return sendfile(request,
                         os.path.join(self.folderAndPath.absPath, fileName),
                         attachment=True)
@@ -158,20 +152,20 @@ class DownloadView(BaseContentView):
 
 class DownloadImageView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
-        super(DownloadImageView, self).get(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
+        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
         return sendfile(request, os.path.join(self.folderAndPath.absPath, fileName), attachment=False)
 
 
 class ThumbView(BaseView):
     def get(self, request, path, *args, **kwargs):
-        super(ThumbView, self).get(request, *args, **kwargs)
+        self._setup(request, *args, **kwargs)
         file = os.path.join(settings.THUMBNAIL_CACHE_DIR, path)
         return sendfile(request, file, attachment=False)
 
 
 class DownloadZipView(BaseContentView):
     def get(self, request, folderAndPathUrl, *args, **kwargs):
-        super(DownloadZipView, self).get(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
+        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
 
         compression = zipfile.ZIP_DEFLATED
         fileName = tempfile.mktemp(prefix="download_", suffix=".zip")
@@ -208,14 +202,14 @@ class UploadView(BaseContentView):
         super(UploadView, self).__init__(requireWrite=True)
 
     def get(self, request, folderAndPathUrl, *args, **kwargs):
-        super(UploadView, self).get(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
+        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
 
         self.context['viewTypes'] = const.viewTypes
 
         return render(request, 'upload.html', self.context)
 
     def post(self, request, folderAndPathUrl, *args, **kwargs):
-        super(UploadView, self).post(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
+        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
 
         action = request.POST['action']
         if action == 'uploadFile':
@@ -264,7 +258,7 @@ def getIndexIntoCurrentDir(request, folderAndPath, fileName):
 
 class ImageView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
-        super(ImageView, self).get(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
+        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
 
         entries = getIndexIntoCurrentDir(request, self.folderAndPath, fileName)
         index = entries['index']
@@ -299,7 +293,7 @@ class DeleteImageView(BaseContentView):
         super(DeleteImageView, self).__init__(requireDelete=True)
 
     def post(self, request, folderAndPathUrl, *args, **kwargs):
-        super(DeleteImageView, self).post(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
+        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
         fileName = request.POST['fileName']
 
         handleDelete(self.folderAndPath, [fileName])
@@ -310,7 +304,7 @@ class DeleteImageView(BaseContentView):
 
 class GetNextImageView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
-        super(GetNextImageView, self).get(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
+        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
 
         result = {}
         entries = getIndexIntoCurrentDir(request, self.folderAndPath, fileName)
