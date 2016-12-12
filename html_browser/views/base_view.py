@@ -90,11 +90,15 @@ class BaseContentView(BaseView):
         else:
             raise ArgumentException("One of folderandPathUrl or folderAndPath params must be specified")
 
-        if self.requireDelete and not self.folderAndPath.folder.userCanDelete(request.user):
+        self.userCanDelete = self.folderAndPath.folder.userCanDelete(request.user)
+        self.userCanWrite = self.userCanDelete or self.folderAndPath.folder.userCanWrite(request.user)
+        self.userCanRead = self.userCanWrite or self.folderAndPath.folder.userCanRead(request.user)
+
+        if self.requireDelete and not self.userCanDelete:
             raise PermissionDenied("Delete permission required")
-        if self.requireWrite and not self.folderAndPath.folder.userCanWrite(request.user):
+        if self.requireWrite and not self.userCanWrite:
             raise PermissionDenied("Write permission required")
-        if not self.folderAndPath.folder.userCanRead(request.user):
+        if not self.userCanRead:
             raise PermissionDenied("Read permission required")
 
         self.context['folderAndPath'] = self.folderAndPath
@@ -278,7 +282,6 @@ class ImageView(BaseContentView):
 
         parentDirLink = reverseContentUrl(self.folderAndPath)
         imageUrl = reverseContentUrl(self.folderAndPath, viewName='download%sImage' % self.folderAndPath.folder.name, extraPath=fileName)
-        userCanDelete = self.folderAndPath.folder.userCanDelete(request.user)
 
         self.context['viewTypes'] = const.viewTypes
         self.context['parentDirLink'] = parentDirLink
@@ -286,7 +289,7 @@ class ImageView(BaseContentView):
         self.context['nextLink'] = nextLink
         self.context['imageUrl'] = imageUrl
         self.context['fileName'] = fileName
-        self.context['userCanDelete'] = userCanDelete
+        self.context['userCanDelete'] = self.userCanDelete
 
         return render(request, 'image_view.html', self.context)
 

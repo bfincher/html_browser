@@ -27,13 +27,6 @@ _viewTypeToTemplateMap = {
 
 
 class ContentView(BaseContentView):
-
-    def _commonGetPost(self, request, *args, **kwargs):
-        super(ContentView, self)._commonGetPost(request, *args, **kwargs)
-        self.userCanDelete = self.folderAndPath.folder.userCanDelete(request.user)
-        self.userCanWrite = self.userCanDelete or self.folderAndPath.folder.userCanWrite(request.user)
-        self.userCanRead = self.userCanWrite or self.folderAndPath.folder.userCanRead(request.user)
-
     def post(self, request, folderAndPathUrl, *args, **kwargs):
         super(ContentView, self).post(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
 
