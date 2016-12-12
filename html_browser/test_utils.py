@@ -198,11 +198,11 @@ class UtilsTest(unittest.TestCase):
 
             entry = entries[3]
             self.assertFalse(entry.isDir)
-            self.assertEquals('test_image.jpg', entry.name)
+            self.assertEquals('Paste-icon.png', entry.name)
             self.assertEquals(entry.name, entry.nameUrl)
-            self.assertEquals('826.11 KB', entry.size)
-            self.assertEquals(845941, entry.sizeNumeric)
-            self.assertEquals(img_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
+            self.assertEquals('1.80 KB', entry.size)
+            self.assertEquals(1844, entry.sizeNumeric)
+            #self.assertEquals(img_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
             self.assertTrue(entry.hasThumbnail)
             self.assertRegexpMatches(entry.thumbnailUrl, r'^/thumb/cache/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg$')
 
