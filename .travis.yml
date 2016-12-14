@@ -7,6 +7,7 @@ install:
   - "pip install -r requirements.txt"
   - sudo mkdir /var/log/hb
   - sudo chown $USER /var/log/hb
+  - cp html_browser_site/local_settings_cygwin.py html_browser_site/local_settings.py
 
 # command to run tests
 script: 
