@@ -1,6 +1,7 @@
 # Django settings for html_browser_site project.
 import os
 import platform
+from .local_settings import *
 
 URL_PREFIX = r''
 DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
@@ -14,44 +15,9 @@ BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../', __f
 FOLDER_LINK_DIR = os.path.join(BASE_DIR, 'folder_links')
 THUMBNAIL_CACHE_DIR = FOLDER_LINK_DIR
 
-ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-)
-
 MANAGERS = ADMINS
 
 DATABASES=None
-
-DATABASES_CYGWIN = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/home/n86538/tmp/html_browser_python/hb.db',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    }
-}
-
-DATABASES_LINUX = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
-        'NAME': 'hb',                      # Or path to database file if using sqlite3.
-        'USER': 'hb',                      # Not used with sqlite3.
-        'PASSWORD': 'hb',                  # Not used with sqlite3.
-        'HOST': 'DB_HOST',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    }
-}
-
-if 'TRAVIS' in os.environ or platform.system().startswith("CYG"):
-    DATABASES=DATABASES_CYGWIN
-    DATABASES['default']['NAME'] = os.path.dirname(os.path.abspath(__file__)) + "/../hb.db"
-else:
-    DATABASES=DATABASES_LINUX
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -90,23 +56,6 @@ MEDIA_URL = None
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = ''
-
-if platform.system().startswith("CYG"):
-    # URL prefix for static files.
-    # Example: "http://media.lawrence.com/static/"
-    STATIC_URL = '/hbmedia/'
-
-    # Additional locations of static files
-    STATICFILES_DIRS = (
-        '/home/n86538/tmp/html_browser_python/media',
-        # Put strings here, like "/home/html/static" or "C:/www/django/static".
-        # Always use forward slashes, even on Windows.
-        # Don't forget to use absolute paths, not relative paths.
-)
-else:
-    STATIC_URL = None
-    STATICFILES_DIRS = ()
-
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -213,7 +162,7 @@ LOGGING = {
         'default': {
             'level' : 'DEBUG',
 	    'class' : 'logging.handlers.RotatingFileHandler',
-	    'filename' : '/var/log/hb/hb.log',
+	    'filename' : os.path.join(LOG_DIR, 'hb.log'),
 	    'maxBytes' : 1024*1024*10, # 10 MB
 	    'backupCount' : 5,
 	    'formatter' : 'standard',
@@ -221,7 +170,7 @@ LOGGING = {
 	'request_handler' : {
 	    'level' : 'DEBUG',
 	    'class' : 'logging.handlers.RotatingFileHandler',
-	    'filename' : '/var/log/hb/request.log',
+	    'filename' : os.path.join(LOG_DIR, '/var/log/hb/request.log'),
 	    'maxBytes' : 1024*1024*10, # 10 MB
 	    'backupCount' : 5,
 	    'formatter' : 'standard',
