@@ -1,3 +1,5 @@
+BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../', __file__))))
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )

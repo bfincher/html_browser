@@ -1,5 +1,7 @@
 import os
 
+BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../', __file__))))
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -18,4 +20,4 @@ DATABASES = {
 STATIC_URL = '/hbmedia/'
 STATICFILES_DIRS = ('/home/n86538/tmp/html_browser_python/media',)
 
-LOG_DIR = 'var/log'
+LOG_DIR = '/var/log'
