@@ -20,4 +20,4 @@ DATABASES = {
 STATIC_URL = '/hbmedia/'
 STATICFILES_DIRS = ('/home/n86538/tmp/html_browser_python/media',)
 
-LOG_DIR = '/var/log'
+LOG_DIR = '/var/log/hb'
