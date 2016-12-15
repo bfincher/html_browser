@@ -202,7 +202,7 @@ class UtilsTest(unittest.TestCase):
             self.assertEquals(entry.name, entry.nameUrl)
             self.assertEquals('1.80 KB', entry.size)
             self.assertEquals(1844, entry.sizeNumeric)
-            #self.assertEquals(img_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
+            # self.assertEquals(img_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
             self.assertTrue(entry.hasThumbnail)
             self.assertRegexpMatches(entry.thumbnailUrl, r'^/thumb/cache/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg$')
 
