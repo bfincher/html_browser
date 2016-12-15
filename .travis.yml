@@ -4,11 +4,14 @@ python:
 sudo: required
 # command to install dependencies
 install: 
+  - "pip install flake8"
   - "pip install -r requirements.txt"
   - sudo mkdir /var/log/hb
   - sudo chown $USER /var/log/hb
   - cp html_browser_site/local_settings_cygwin.py html_browser_site/local_settings.py
 
+before_script
+  - ".flake8 ."
 # command to run tests
 script: 
   - python manage.py test
