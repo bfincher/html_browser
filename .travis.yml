@@ -11,7 +11,7 @@ install:
   - cp html_browser_site/local_settings_cygwin.py html_browser_site/local_settings.py
 
 before_script:
-  - ".flake8 ."
+  - "flake8 ."
 # command to run tests
 script: 
   - python manage.py test
