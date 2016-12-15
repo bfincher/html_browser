@@ -1,11 +1,11 @@
-from django.contrib.auth.models import User, Group
 from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse
 
 from .constants import _constants as const
-from html_browser.models import Folder, UserPermission, GroupPermission
+from html_browser.models import Folder
 from html_browser_site import settings
 
+import collections
 from datetime import datetime
 from operator import attrgetter
 import html.parser
@@ -13,7 +13,6 @@ from pathlib import Path
 
 import json
 import logging
-from logging import DEBUG
 import os
 import re
 from shutil import rmtree
@@ -200,7 +199,7 @@ class DirEntry():
 def getCurrentDirEntries(folderAndPath, showHidden, viewType, contentFilter=None):
     _dir = folderAndPath.absPath
     if os.path.isfile(_dir):
-        _dir = path.dirname(_dir)
+        _dir = os.path.dirname(_dir)
 
     dirEntries = []
     fileEntries = []

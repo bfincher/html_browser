@@ -4,14 +4,13 @@ import json
 import logging
 import os
 from shutil import copy2, copytree, move
-from urllib.parse import quote_plus
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
 
 from .base_view import BaseContentView, isShowHidden, reverseContentUrl
-from html_browser.models import FilesToDelete, Folder
+from html_browser.models import FilesToDelete
 from html_browser.constants import _constants as const
 from html_browser.utils import getCurrentDirEntries,\
     formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete,\
@@ -83,7 +82,7 @@ class ContentView(BaseContentView):
                 return
 
         for entry in clipboard.entries:
-            source = os.path.join(clipboard.folderAndPath.absPath,  replaceEscapedUrl(entry))
+            source = os.path.join(clipboard.folderAndPath.absPath, replaceEscapedUrl(entry))
             if clipboard.clipboardType == 'COPY':
                 if os.path.isdir(source):
                     copytree(source, dest + entry)
@@ -213,7 +212,7 @@ def getDiskUsage(path):
         import sys
 
         _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), ctypes.c_ulonglong()
-        if sys.version_info >= (3,) or isinstance(path, unicode):
+        if sys.version_info >= (3,) or isinstance(path, str):
             fun = ctypes.windll.kernel32.GetDiskFreeSpaceExW
         else:
             fun = ctypes.windll.kernel32.GetDiskFreeSpaceExA

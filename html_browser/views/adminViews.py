@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 import logging
-from logging import DEBUG
 import os
 import re
 
@@ -9,13 +8,11 @@ from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.shortcuts import render, redirect, render_to_response
-from django.template import RequestContext
+from django.shortcuts import render, redirect
 from annoying.functions import get_object_or_None
 
 import html_browser
-from html_browser.models import Folder, UserPermission, GroupPermission,\
-    CAN_READ, CAN_WRITE, CAN_DELETE
+from html_browser.models import Folder, CAN_READ, CAN_WRITE, CAN_DELETE
 from html_browser.utils import getReqLogger, getFolderLinkDir
 from .adminForms import AddUserForm, EditUserForm, EditGroupForm,\
     UserPermissionFormSet, GroupPermissionFormSet, EditFolderForm, AddFolderForm
@@ -37,6 +34,7 @@ class FolderViewOption():
 
     def __repr__(self):
         return self.__str__()
+
 
 folderViewOptions = []
 
@@ -99,9 +97,11 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
         self.groupPermFormset = None
 
     @abstractmethod
-    def initForms(self, request, *args, **kwargs): pass
+    def initForms(self, request, *args, **kwargs):
+        pass
 
-    def postSaveAction(self, folder): pass
+    def postSaveAction(self, folder):
+        pass
 
     def post(self, request, *args, **kwargs):
         self._setup(request, *args, **kwargs)
@@ -328,7 +328,8 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
         self.form = None
 
     @abstractmethod
-    def initForm(self, request): pass
+    def initForm(self, request):
+        pass
 
     def get(self, request, title, *args, **kwargs):
         self.title = title
@@ -421,7 +422,7 @@ class ChangePasswordResultView(BaseAdminView):
 
         if errorMessage:
             messages.error(request, errorMessage)
-            reqLogger.warn(errorMessage)
+            self.reqLogger.warn(errorMessage)
             return render(request, 'admin/change_password_fail.html', self.context)
         else:
             return render(request, 'admin/change_password_success.html', self.context)

@@ -13,6 +13,7 @@ class UserPermissionAdmin(admin.ModelAdmin):
 class GroupPermissionAdmin(admin.ModelAdmin):
     pass
 
+
 admin.site.register(Folder, FolderAdmin)
 admin.site.register(UserPermission, UserPermissionAdmin)
 admin.site.register(GroupPermission, GroupPermissionAdmin)

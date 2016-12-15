@@ -34,7 +34,7 @@ urlpatterns = [
     url(r'upload/%s/$' % folderAndPathRegex, base_view.UploadView.as_view(), name='upload'),
     url(r'userAdmin/.*', admin_views.UserAdminView.as_view(), name='userAdmin'),
     url(r'thumb/(?P<path>.*)', base_view.ThumbView.as_view(), name='thumb'),
-    ]
+]
 
 for folder in Folder.objects.all():
     urlpatterns.append(url(r'__%s__/%s(?P<fileName>%s+)$' % (folder.name, folderAndPathRegex, fileNameChars),

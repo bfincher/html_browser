@@ -11,7 +11,7 @@ import unittest
 import zipfile
 from zipfile import ZipFile
 
-from html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_WRITE, CAN_DELETE
+from html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_DELETE
 from html_browser.views.base_view import reverseContentUrl, FolderAndPath, getIndexIntoCurrentDir
 
 
@@ -19,7 +19,7 @@ def contextCheck(testCase, context, user=None, folder=None):
     testCase.assertTrue('csrf_token' in context)
 
     if user:
-        self.assertEquals(user, context['user'])
+        testCase.assertEquals(user, context['user'])
 
 
 class BaseViewTest(unittest.TestCase):
@@ -306,7 +306,8 @@ class UploadViewTest(BaseViewTest):
             zipFile.close()
 
             with open(zipFileName, 'rb') as f:
-                response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'), viewName='upload'),
+                response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'),
+                                                              viewName='upload'),
                                             data={'action': 'uploadZip',
                                                   'zipupload1': f})
 
@@ -324,7 +325,8 @@ class UploadViewTest(BaseViewTest):
 
     def testImageView(self):
         self.login(self.user1)
-        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'), viewName='imageView', extraPath='folder-blue-icon.png'))
+        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'),
+                                                     viewName='imageView', extraPath='folder-blue-icon.png'))
 
         context = response.context[0]
         contextCheck(self, context)
@@ -340,7 +342,8 @@ class UploadViewTest(BaseViewTest):
         # test unauthorized user
         self.logout()
         self.login(self.user2)
-        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'), viewName='imageView', extraPath='folder-blue-icon.png'))
+        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'),
+                                                     viewName='imageView', extraPath='folder-blue-icon.png'))
         self.assertEquals(403, response.status_code)
 
 

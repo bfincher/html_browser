@@ -6,7 +6,7 @@ from django.template.context import Context
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Button, Layout, LayoutObject, TEMPLATE_PACK, HTML
 
-from html_browser.models import Folder, UserPermission, GroupPermission, User, Group
+from html_browser.models import Folder, UserPermission, GroupPermission, User
 
 
 class Formset(LayoutObject):
@@ -131,6 +131,7 @@ class BaseUserPermissionFormSet(BaseInlineFormSet):
         pass
         # TODO implement
 
+
 UserPermissionFormSet = inlineformset_factory(Folder,
                                               UserPermission,
                                               formset=BaseUserPermissionFormSet,
@@ -148,6 +149,7 @@ class BaseGroupPermissionFormSet(BaseInlineFormSet):
     def clean(self):
         pass
         # TODO implement
+
 
 GroupPermissionFormSet = inlineformset_factory(Folder,
                                                GroupPermission,
@@ -202,7 +204,9 @@ class AddUserForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
 
-        self.helper.layout = Layout('username', 'password', 'verifyPassword', 'groups', 'first_name', 'last_name', 'email', 'is_superuser', 'is_active')
+        self.helper.layout = Layout('username', 'password', 'verifyPassword',
+                                    'groups', 'first_name', 'last_name', 'email',
+                                    'is_superuser', 'is_active')
 
         super(AddUserForm, self).__init__(*args, **kwargs)
 

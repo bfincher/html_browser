@@ -4,7 +4,6 @@ from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
-from django.template import RequestContext
 from django.views import View
 
 from html_browser.constants import _constants as const
@@ -12,7 +11,7 @@ from html_browser.models import Folder, FilesToDelete
 from html_browser.utils import getCurrentDirEntries, handleDelete,\
     getReqLogger,\
     getCheckedEntries, replaceEscapedUrl,\
-    FolderAndPath
+    FolderAndPath, ArgumentException
 from html_browser_site import settings
 
 import json
@@ -250,7 +249,6 @@ def getIndexIntoCurrentDir(request, folderAndPath, fileName):
 
     for i in range(len(currentDirEntries)):
         if currentDirEntries[i].name == fileName:
-            index = i
             result = {'currentDirEntries': currentDirEntries,
                       'index': i}
             return result
@@ -267,12 +265,12 @@ class ImageView(BaseContentView):
         if index == 0:
             prevLink = None
         else:
-            prevLink = reverseContentUrl(self.folderAndPath, viewName='imageView', extraPath=currentDirEntries[index-1].name)
+            prevLink = reverseContentUrl(self.folderAndPath, viewName='imageView', extraPath=currentDirEntries[index - 1].name)
 
         if index == len(currentDirEntries) - 1:
             nextLink = None
         else:
-            nextLink = reverseContentUrl(self.folderAndPath, viewName='imageView', extraPath=currentDirEntries[index+1].name)
+            nextLink = reverseContentUrl(self.folderAndPath, viewName='imageView', extraPath=currentDirEntries[index + 1].name)
 
         parentDirLink = reverseContentUrl(self.folderAndPath)
         imageUrl = reverseContentUrl(self.folderAndPath, viewName='download%sImage' % self.folderAndPath.folder.name, extraPath=fileName)
@@ -314,12 +312,14 @@ class GetNextImageView(BaseContentView):
 
             result['hasNextImage'] = False
 
-            for i in range(index+1, len(currentDirEntries)):
+            for i in range(index + 1, len(currentDirEntries)):
                 if imageRegex.match(currentDirEntries[i].name):
                     result['hasNextImage'] = True
                     nextFileName = currentDirEntries[i].name
 
-                    imageUrl = reverseContentUrl(self.folderAndPath, viewName='download%sImage' % self.folderAndPath.folder.name, extraPath=nextFileName)
+                    imageUrl = reverseContentUrl(self.folderAndPath,
+                                                 viewName='download%sImage' % self.folderAndPath.folder.name,
+                                                 extraPath=nextFileName)
                     imageUrl = imageUrl.replace('//', '/')
                     result['imageUrl'] = imageUrl
                     result['fileName'] = nextFileName

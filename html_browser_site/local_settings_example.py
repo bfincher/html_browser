@@ -1,5 +1,5 @@
 import os
-BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../', __file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../', __file__))))
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -7,7 +7,7 @@ ADMINS = (
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },

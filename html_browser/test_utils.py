@@ -45,8 +45,6 @@ class FolderAndPathTest(unittest.TestCase):
             self.assertEquals(expectedUrl, folderAndPath.url)
 
     def testConstruct(self):
-        testDir = 'html_browser/test_dir'
-
         self.__testConstruct(FolderAndPathTest.folder, '')
         self.__testConstruct(FolderAndPathTest.folder, 'test_path')
 
@@ -269,6 +267,7 @@ class UtilsTest(unittest.TestCase):
 
 def main():
     unittest.main()
+
 
 if __name__ == "__main__":
     main()

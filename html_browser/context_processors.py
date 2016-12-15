@@ -8,7 +8,6 @@ of a DjangoTemplates backend and used by RequestContext.
 """
 
 from .constants import _constants as const
-from django.conf import settings
 
 
 def images(request):

@@ -1,4 +1,3 @@
-from django import template
 from django.db import models
 from django.contrib.auth.models import User, Group
 from urllib.parse import quote_plus

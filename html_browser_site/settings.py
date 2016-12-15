@@ -1,6 +1,5 @@
 # Django settings for html_browser_site project.
 import os
-import platform
 from .local_settings import *
 
 URL_PREFIX = r''
@@ -58,7 +57,7 @@ STATIC_ROOT = ''
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -72,7 +71,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-#    'django_downloadview.SmartDownloadMiddleware',
+    # 'django_downloadview.SmartDownloadMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -89,7 +88,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'html_browser/templates'),
                  os.path.join(BASE_DIR, 'html_browser_site/templates'),
-        ],
+                 ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -123,7 +122,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
-CRISPY_TEMPLATE_PACK='bootstrap3'
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.versions.VersionsPanel',
@@ -156,27 +155,22 @@ LOGGING = {
     },
     'handlers': {
         'default': {
-            'level' : 'DEBUG',
-	    'class' : 'logging.handlers.RotatingFileHandler',
-	    'filename' : os.path.join(LOG_DIR, 'hb.log'),
-	    'maxBytes' : 1024*1024*10, # 10 MB
-	    'backupCount' : 5,
-	    'formatter' : 'standard',
-	},
-	'request_handler' : {
-	    'level' : 'DEBUG',
-	    'class' : 'logging.handlers.RotatingFileHandler',
-	    'filename' : os.path.join(LOG_DIR, '/var/log/hb/request.log'),
-	    'maxBytes' : 1024*1024*10, # 10 MB
-	    'backupCount' : 5,
-	    'formatter' : 'standard',
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, 'hb.log'),
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
+        'request_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, '/var/log/hb/request.log'),
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'standard',
 
-	},
-#        'mail_admins': {
-#            'level': 'ERROR',
-#            'filters': ['require_debug_false'],
-#            'class': 'django.utils.log.AdminEmailHandler'
-#        }
+        },
     },
     'loggers': {
         'html_browser': {
@@ -189,7 +183,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-        'sorl.thumbnail' : {
+        'sorl.thumbnail': {
             'handlers': ['default'],
             'level': 'DEBUG',
             'propagate': True,
