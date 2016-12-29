@@ -31,7 +31,7 @@ urlpatterns = [
     url(r'hbLogout/.*', base_view.LogoutView.as_view(), name='logout'),
     url(r'image_view/%s(?P<fileName>%s+)/$' % (folderAndPathRegex, fileNameChars), base_view.ImageView.as_view(), name='imageView'),
     url(r'groupAdmin/.*', admin_views.GroupAdminView.as_view(), name='groupAdmin'),
-    url(r'upload/%s/$' % folderAndPathRegex, base_view.UploadView.as_view(), name='upload'),
+    url(r'upload/%s$' % folderAndPathRegex, base_view.UploadView.as_view(), name='upload'),
     url(r'userAdmin/.*', admin_views.UserAdminView.as_view(), name='userAdmin'),
     url(r'thumb/(?P<path>.*)', base_view.ThumbView.as_view(), name='thumb'),
 ]
