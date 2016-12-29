@@ -254,7 +254,8 @@ class UploadViewTest(BaseViewTest):
         response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path=''),
                                                      viewName='upload'))
 
-        self.assertEquals(403, response.status_code)
+        self.assertEquals(302, response.status_code)
+        self.assertEquals('/?next=/upload/test/', response.url)
 
     def testUpload(self):
         self.login(self.user1)
@@ -282,7 +283,8 @@ class UploadViewTest(BaseViewTest):
                                             data={'action': 'uploadFile',
                                                   'upload1': f})
 
-            self.assertEquals(403, response.status_code)
+            self.assertEquals(302, response.status_code)
+            self.assertEquals('/?next=/upload/test/dir_a/', response.url)
         finally:
             if os.path.exists('media/images/base.js'):
                 os.remove('media/images/base.js')
@@ -344,7 +346,8 @@ class UploadViewTest(BaseViewTest):
         self.login(self.user2)
         response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'),
                                                      viewName='imageView', extraPath='folder-blue-icon.png'))
-        self.assertEquals(403, response.status_code)
+        self.assertEquals(302, response.status_code)
+        self.assertEquals('/?next=/image_view/test/images/folder-blue-icon.png/', response.url)
 
 
 class TestGetIndexIntoCurrentDir(BaseViewTest):
