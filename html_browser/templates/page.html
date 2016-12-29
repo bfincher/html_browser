@@ -58,6 +58,7 @@
 			   <input class="form-control" name="password" type="password" placeholder="Password">
 			   <button type="submit" class="btn btn-success">Sign in</button>
 			   <input name="action" type="hidden" value="login" >
+               {% if next %}<input name="next" type="hidden" value="{{ next }}">{% endif %}
 			</form>
 		   {% endif %}
 		 </div>

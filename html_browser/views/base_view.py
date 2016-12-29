@@ -113,6 +113,8 @@ class IndexView(BaseView):
             if folder.userCanRead(request.user):
                 folders.append(folder)
 
+        if 'next' in request.GET:
+            self.context['next'] = request.GET['next']
         self.context['folders'] = folders
 
         return render(request, 'index.html', self.context)
@@ -135,7 +137,8 @@ class LoginView(BaseView):
         else:
             messages.error(request, 'Invalid login')
 
-        return redirect('index')
+        redirectUrl = request.POST.get('next', 'index')
+        return redirect(redirectUrl)
 
 
 class LogoutView(BaseView):
