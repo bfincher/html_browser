@@ -3,6 +3,7 @@ import os
 from .local_settings import *
 
 URL_PREFIX = r''
+LOGIN_URL = '/'
 DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
 DEBUG = True

@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
@@ -46,8 +47,9 @@ def reverseContentUrl(folderAndPath, viewName='content', extraPath=None):
 class BaseView(View):
     def __init__(self):
         self.reqLogger = getReqLogger()
+        self.context = {}
 
-    def _setup(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
         self.reqLogger.info(self.__class__.__name__)
         self.request = request
         if self.reqLogger.isEnabledFor(DEBUG):
@@ -63,19 +65,18 @@ class BaseView(View):
                 else:
                     self.reqLogger.debug("%s: %s", key, value)
 
-        self.context = {'user': request.user}
+        self.context['user'] = request.user
+        return super(BaseView, self).dispatch(request, *args, **kwargs)
 
 
-class BaseContentView(BaseView):
+class BaseContentView(UserPassesTestMixin, BaseView):
     def __init__(self, requireWrite=False, requireDelete=False):
         super(BaseContentView, self).__init__()
         self.folderAndPath = None
         self.requireWrite = requireWrite
         self.requireDelete = requireDelete
 
-    def _setup(self, request, *args, **kwargs):
-        super(BaseContentView, self)._setup(request, *args, **kwargs)
-
+    def dispatch(self, request, *args, **kwargs):
         if 'folderAndPathUrl' in kwargs:
             self.folderAndPath = FolderAndPath(url=kwargs['folderAndPathUrl'])
         elif 'folderAndPath' in kwargs:
@@ -87,20 +88,25 @@ class BaseContentView(BaseView):
         self.userCanWrite = self.userCanDelete or self.folderAndPath.folder.userCanWrite(request.user)
         self.userCanRead = self.userCanWrite or self.folderAndPath.folder.userCanRead(request.user)
 
-        if self.requireDelete and not self.userCanDelete:
-            raise PermissionDenied("Delete permission required")
-        if self.requireWrite and not self.userCanWrite:
-            raise PermissionDenied("Write permission required")
-        if not self.userCanRead:
-            raise PermissionDenied("Read permission required")
-
         self.context['folderAndPath'] = self.folderAndPath
+        return super(BaseContentView, self).dispatch(request, *args, **kwargs)
+
+    def test_func(self):
+        if self.requireDelete and not self.userCanDelete:
+            messages.error(self.request, "Delete permission required")
+            return False
+        if self.requireWrite and not self.userCanWrite:
+            messages.error(self.request, "Write permission required")
+            return False
+        if not self.userCanRead:
+            messages.error(self.request, "Read permission required")
+            return False
+
+        return True
 
 
 class IndexView(BaseView):
     def get(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
-
         allFolders = Folder.objects.all()
         folders = []
         for folder in allFolders:
@@ -114,8 +120,6 @@ class IndexView(BaseView):
 
 class LoginView(BaseView):
     def post(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
-
         userName = request.POST['userName']
         password = request.POST['password']
         user = authenticate(username=userName, password=password)
@@ -136,14 +140,12 @@ class LoginView(BaseView):
 
 class LogoutView(BaseView):
     def get(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
         auth_logout(request)
         return redirect('index')
 
 
 class DownloadView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
-        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
         return sendfile(request,
                         os.path.join(self.folderAndPath.absPath, fileName),
                         attachment=True)
@@ -151,21 +153,17 @@ class DownloadView(BaseContentView):
 
 class DownloadImageView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
-        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
         return sendfile(request, os.path.join(self.folderAndPath.absPath, fileName), attachment=False)
 
 
 class ThumbView(BaseView):
     def get(self, request, path, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
         file = os.path.join(settings.THUMBNAIL_CACHE_DIR, path)
         return sendfile(request, file, attachment=False)
 
 
 class DownloadZipView(BaseContentView):
     def get(self, request, folderAndPathUrl, *args, **kwargs):
-        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
-
         compression = zipfile.ZIP_DEFLATED
         fileName = tempfile.mktemp(prefix="download_", suffix=".zip")
         self.zipFile = ZipFile(fileName, mode='w', compression=compression)
@@ -201,15 +199,11 @@ class UploadView(BaseContentView):
         super(UploadView, self).__init__(requireWrite=True)
 
     def get(self, request, folderAndPathUrl, *args, **kwargs):
-        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
-
         self.context['viewTypes'] = const.viewTypes
 
         return render(request, 'upload.html', self.context)
 
     def post(self, request, folderAndPathUrl, *args, **kwargs):
-        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
-
         action = request.POST['action']
         if action == 'uploadFile':
             self._handleFileUpload(request.FILES['upload1'])
@@ -256,8 +250,6 @@ def getIndexIntoCurrentDir(request, folderAndPath, fileName):
 
 class ImageView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
-        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
-
         entries = getIndexIntoCurrentDir(request, self.folderAndPath, fileName)
         index = entries['index']
         currentDirEntries = entries['currentDirEntries']
@@ -291,7 +283,6 @@ class DeleteImageView(BaseContentView):
         super(DeleteImageView, self).__init__(requireDelete=True)
 
     def post(self, request, folderAndPathUrl, *args, **kwargs):
-        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
         fileName = request.POST['fileName']
 
         handleDelete(self.folderAndPath, [fileName])
@@ -302,8 +293,6 @@ class DeleteImageView(BaseContentView):
 
 class GetNextImageView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
-        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
-
         result = {}
         entries = getIndexIntoCurrentDir(request, self.folderAndPath, fileName)
         if entries:

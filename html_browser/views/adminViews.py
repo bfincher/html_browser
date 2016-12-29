@@ -4,6 +4,7 @@ import logging
 import os
 import re
 
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
@@ -43,12 +44,13 @@ for choice in html_browser.models.viewableChoices:
     folderViewOptions.append(option)
 
 
-class BaseAdminView(BaseView):
-    def _setup(self, request):
-        super(BaseAdminView, self)._setup(request)
+class BaseAdminView(UserPassesTestMixin, BaseView):
+    def test_func(self):
+        if not self.request.user.is_staff:
+            messages.error(self.request, "User is not an admin")
+            return False
 
-        if not request.user.is_staff:
-            raise PermissionDenied("User is not an admin")
+        return True
 
     def appendFormErrors(self, form):
         if form.errors:
@@ -65,21 +67,17 @@ class BaseAdminView(BaseView):
 
 class AdminView(BaseAdminView):
     def get(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
         return render(request, 'admin/admin.html', self.context)
 
 
 class FolderAdminView(BaseAdminView):
     def get(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
-
         self.context['folders'] = Folder.objects.all()
         return render(request, 'admin/folder_admin.html', self.context)
 
 
 class DeleteFolderView(BaseAdminView):
     def post(self, request, folderName, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
         folder = Folder.objects.get(name=folderName)
         folderLinkDir = getFolderLinkDir(folder.name)
         os.remove(folderLinkDir)
@@ -104,7 +102,6 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
         pass
 
     def post(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
         self.initForms(request, *args, **kwargs)
 
         reqLogger = getReqLogger()
@@ -146,7 +143,6 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
         return redirect('folderAdmin')
 
     def get(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
         self.initForms(request, *args, **kwargs)
         return self.render(request)
 
@@ -233,7 +229,6 @@ class AddFolderView(AbstractFolderView):
 
 class AddGroupView(BaseAdminView):
     def post(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
         groupName = request.POST['groupName']
         if groupNameRegex.match(groupName):
             group = get_object_or_None(Group, name=groupName)
@@ -260,7 +255,6 @@ class DeleteGroupView(BaseAdminView):
 
 class EditGroupView(BaseAdminView):
     def get(self, request, groupName, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
         group = Group.objects.get(name=groupName)
 
         form = EditGroupForm(instance=group)
@@ -289,7 +283,6 @@ class EditGroupView(BaseAdminView):
 
 class GroupAdminView(BaseAdminView):
     def get(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
         groups = []
         for group in Group.objects.all():
             groups.append(group.name)
@@ -300,7 +293,6 @@ class GroupAdminView(BaseAdminView):
 
 class DeleteUserView(BaseAdminView):
     def post(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
         redirectUrl = "userAdmin"
 
         if request.user.username == request.POST['userToDelete']:
@@ -315,8 +307,6 @@ class DeleteUserView(BaseAdminView):
 
 class UserAdminView(BaseAdminView):
     def get(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
-
         self.context['users'] = User.objects.all()
         return render(request, 'admin/user_admin.html', self.context)
 
@@ -333,8 +323,6 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
 
     def get(self, request, title, *args, **kwargs):
         self.title = title
-        self._setup(request, *args, **kwargs)
-
         if not self.form:
             self.initForm(request)
 
@@ -348,8 +336,6 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
 
     def post(self, request, title, *args, **kwargs):
         self.title = title
-        self._setup(request, *args, **kwargs)
-
         self.initForm(request)
 
         with transaction.atomic():
@@ -399,13 +385,11 @@ class AddUserView(AbstractUserView):
 
 class ChangePasswordView(BaseAdminView):
     def get(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
         return render(request, 'admin/change_password.html', self.context)
 
 
 class ChangePasswordResultView(BaseAdminView):
     def get(self, request, *args, **kwargs):
-        self._setup(request, *args, **kwargs)
         user = request.user
         errorMessage = None
         if user.check_password(request.POST['password']):

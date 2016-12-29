@@ -27,8 +27,6 @@ _viewTypeToTemplateMap = {
 
 class ContentView(BaseContentView):
     def post(self, request, folderAndPathUrl, *args, **kwargs):
-        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
-
         action = request.POST['action']
         if action == 'copyToClipboard':
             entries = getCheckedEntries(request.POST)
@@ -96,7 +94,6 @@ class ContentView(BaseContentView):
         messages.success(self.request, 'Items pasted')
 
     def get(self, request, folderAndPathUrl, *args, **kwargs):
-        self._setup(request, folderAndPathUrl=folderAndPathUrl, *args, **kwargs)
         ContentView.deleteOldFiles()
 
         self.breadcrumbs = None
