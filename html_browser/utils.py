@@ -33,22 +33,22 @@ imageRegex = re.compile(r'.+\.(?i)((jpg)|(png)|(gif)|(bmp))')
 
 class ThumbnailStorage(FileSystemStorage):
     def __init__(self, **kwargs):
-        super(ThumbnailStorage, self).__init__(location=settings.FOLDER_LINK_DIR)
+        super().__init__(location=settings.FOLDER_LINK_DIR)
 
 
 class NoParentException(Exception):
     def __init__(self, *args, **kwargs):
-        super(NoParentException, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class ArgumentException(Exception):
     def __init__(self, *args, **kwargs):
-        super(ArgumentException, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class FolderAndPathArgumentException(Exception):
     def __init__(self, **kwargs):
-        super(FolderAndPathArgumentException, self).__init__("Expected kwargs are (url)|(folderName, path).  Instead found %s" % kwargs)
+        super().__init__("Expected kwargs are (url)|(folderName, path).  Instead found %s" % kwargs)
 
 
 class FolderAndPath:

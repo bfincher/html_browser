@@ -48,7 +48,7 @@ class AddFolderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_show_errors = True
-        super(AddFolderForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['name'].label = 'Folder Name'
         self.fields['localPath'].label = 'Local Path'
         self.fields['viewOption'].label = 'View Option'
@@ -78,7 +78,7 @@ class AddFolderForm(forms.ModelForm):
 class EditFolderForm(AddFolderForm):
 
     def __init__(self, *args, **kwargs):
-        super(EditFolderForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['name'].widget = forms.HiddenInput()
 
         instance = kwargs['instance']
@@ -89,7 +89,7 @@ class EditFolderForm(AddFolderForm):
 
 class UserPermissionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(UserPermissionForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['folder'].widget = forms.HiddenInput()
 
         self.helper = FormHelper()
@@ -107,7 +107,7 @@ class UserPermissionForm(forms.ModelForm):
 
 class GroupPermissionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(GroupPermissionForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['folder'].widget = forms.HiddenInput()
         self.helper = FormHelper()
         self.helper.form_show_errors = True
@@ -125,7 +125,7 @@ class GroupPermissionForm(forms.ModelForm):
 class BaseUserPermissionFormSet(BaseInlineFormSet):
     def __init__(self, *args, **kwargs):
         kwargs['prefix'] = 'user_perm'
-        super(BaseUserPermissionFormSet, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def clean(self):
         pass
@@ -144,7 +144,7 @@ UserPermissionFormSet = inlineformset_factory(Folder,
 class BaseGroupPermissionFormSet(BaseInlineFormSet):
     def __init__(self, *args, **kwargs):
         kwargs['prefix'] = 'group_perm'
-        super(BaseGroupPermissionFormSet, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def clean(self):
         pass
@@ -180,7 +180,7 @@ class EditGroupForm(forms.Form):
         self.helper.add_input(Button('deleteGroup', 'Delete Group', css_class='btn'))
 
         instance = kwargs.pop('instance', None)
-        super(EditGroupForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if instance:
             self.helper.form_action = reverse('editGroup', args=[instance.name])
@@ -208,12 +208,12 @@ class AddUserForm(forms.ModelForm):
                                     'groups', 'first_name', 'last_name', 'email',
                                     'is_superuser', 'is_active')
 
-        super(AddUserForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.fields['password'].widget = forms.PasswordInput()
 
     def save(self, commit=True):
-        user = super(AddUserForm, self).save(commit=False)
+        user = super().save(commit=False)
 
         password = self.cleaned_data['password']
         if password:
@@ -232,7 +232,7 @@ class EditUserForm(AddUserForm):
     userPk = forms.CharField(required=False, widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
-        super(EditUserForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.helper.form_action = "editUser"
         self.helper.add_input(Button('deleteUser', 'Delete User', css_class='btn'))
         self.fields['username'].required = False

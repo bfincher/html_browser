@@ -87,7 +87,7 @@ class DeleteFolderView(BaseAdminView):
 class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
 
     def __init__(self, *args, **kwargs):
-        super(AbstractFolderView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.folder = None
         self.folderForm = None
         self.userPermFormset = None
@@ -161,19 +161,19 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
 
 class EditFolderView(AbstractFolderView):
     def __init__(self, *args, **kwargs):
-        super(EditFolderView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get(self, request, title, folderName, *args, **kwargs):
         self.title = title
         self.folderName = folderName
-        return super(EditFolderView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def post(self, request, title, folderName, *args, **kwargs):
         self.title = title
         self.folderName = folderName
         self.origLocalPath = Folder.objects.get(name=folderName).localPath
 
-        return super(EditFolderView, self).post(request, *args, **kwargs)
+        return super().post(request, *args, **kwargs)
 
     def postSaveAction(self, folder):
         modifiedLocalPath = folder.localPath
@@ -197,15 +197,15 @@ class EditFolderView(AbstractFolderView):
 
 class AddFolderView(AbstractFolderView):
     def __init__(self, *args, **kwargs):
-        super(AddFolderView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get(self, request, title, *args, **kwargs):
         self.title = title
-        return super(AddFolderView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def post(self, request, title, *args, **kwargs):
         self.title = title
-        return super(AddFolderView, self).post(request, *args, **kwargs)
+        return super().post(request, *args, **kwargs)
 
     def postSaveAction(self, folder):
         folderLinkDir = getFolderLinkDir(folder.name)
@@ -245,7 +245,7 @@ class AddGroupView(BaseAdminView):
 
 class DeleteGroupView(BaseAdminView):
     def post(self, request, groupName, *args, **kwargs):
-        super(DeleteGroupView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         group = Group.objects.get(name=groupName)
         group.delete()
 
@@ -263,7 +263,7 @@ class EditGroupView(BaseAdminView):
         return render(request, 'admin/edit_group.html', self.context)
 
     def post(self, request, groupName, *args, **kwargs):
-        super(EditGroupView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         form = EditGroupForm(request.POST)
         if form.is_valid():
             group = Group.objects.get(name=groupName)
@@ -313,7 +313,7 @@ class UserAdminView(BaseAdminView):
 class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
 
     def __init__(self, *args, **kwargs):
-        super(AbstractUserView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.form = None
 
     @abstractmethod
@@ -359,7 +359,7 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
 
 class EditUserView(AbstractUserView):
     def __init__(self, *args, **kwargs):
-        super(EditUserView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def initForm(self, request):
         if request.method == "GET":
@@ -373,7 +373,7 @@ class EditUserView(AbstractUserView):
 
 class AddUserView(AbstractUserView):
     def __init__(self, *args, **kwargs):
-        super(AddUserView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def initForm(self, request):
         if request.method == "GET":

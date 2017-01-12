@@ -65,12 +65,12 @@ class BaseView(View):
                     self.reqLogger.debug("%s: %s", key, value)
 
         self.context['user'] = request.user
-        return super(BaseView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
 
 class BaseContentView(UserPassesTestMixin, BaseView):
     def __init__(self, requireWrite=False, requireDelete=False):
-        super(BaseContentView, self).__init__()
+        super().__init__()
         self.folderAndPath = None
         self.requireWrite = requireWrite
         self.requireDelete = requireDelete
@@ -88,7 +88,7 @@ class BaseContentView(UserPassesTestMixin, BaseView):
         self.userCanRead = self.userCanWrite or self.folderAndPath.folder.userCanRead(request.user)
 
         self.context['folderAndPath'] = self.folderAndPath
-        return super(BaseContentView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def test_func(self):
         if self.requireDelete and not self.userCanDelete:
@@ -198,7 +198,7 @@ class DownloadZipView(BaseContentView):
 
 class UploadView(BaseContentView):
     def __init__(self):
-        super(UploadView, self).__init__(requireWrite=True)
+        super().__init__(requireWrite=True)
 
     def get(self, request, folderAndPathUrl, *args, **kwargs):
         self.context['viewTypes'] = const.viewTypes
@@ -282,7 +282,7 @@ class ImageView(BaseContentView):
 
 class DeleteImageView(BaseContentView):
     def __init__(self):
-        super(DeleteImageView, self).__init__(requireDelete=True)
+        super().__init__(requireDelete=True)
 
     def post(self, request, folderAndPathUrl, *args, **kwargs):
         fileName = request.POST['fileName']
