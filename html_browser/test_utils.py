@@ -145,6 +145,46 @@ class UtilsTest(unittest.TestCase):
         checkedEntries = getCheckedEntries(dic)
         self.assertEquals(2, len(checkedEntries))
 
+    def testGetCurrentDirEntriesContentFilter(self):
+        folder = Folder()
+        folder.name = 'test'
+        folder.localPath = '.'
+        folder.viewOption = 'E'
+        folder.save()
+
+        try:
+            entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), False, const.thumbnailsViewType, '*.py')
+            self.assertTrue(len(entries) > 0)
+            for entry in entries:
+                self.assertTrue(entry.isDir or entry.name.endswith('.py'))
+        finally:
+            folder.delete()
+
+    def testGetCurrentDirEntriesHidden(self):
+        folder = Folder()
+        folder.name = 'test'
+        folder.localPath = '.'
+        folder.viewOption = 'E'
+        folder.save()
+
+        try:
+            entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), False, const.thumbnailsViewType)
+            for entry in entries:
+                self.assertFalse(entry.name.startswith('.'))
+
+            entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), True, const.thumbnailsViewType)
+            foundHiddenEntry = False
+
+            for entry in entries:
+                if entry.name.startswith('.'):
+                    foundHiddenEntry = True
+                    break
+
+            self.assertTrue(foundHiddenEntry)
+
+        finally:
+            folder.delete()
+
     def testGetCurrentDirEntries(self):
         folder = Folder()
         folder.name = 'test'
