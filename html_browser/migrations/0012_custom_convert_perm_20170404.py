@@ -7,7 +7,7 @@ from django.db import migrations
 
 def convertPerm(permModel):
     for perm in permModel.objects.all():
-        perm.p2=int(perm.permission)
+        perm.p2 = int(perm.permission)
         perm.save()
 
 
