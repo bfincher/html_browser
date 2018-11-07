@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+    web:
+        build: .
+        command: bash -c "python manage.py makemigrations && python manage.py migrate && pytyon manage.py runserver 0.0.0.0:8000"
+        container_name: html_browser
+        volumes:
+            - .:/config
+            - .:/data
+        ports:
+            - "8000:8000
+
