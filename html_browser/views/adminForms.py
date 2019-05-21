@@ -163,13 +163,17 @@ GroupPermissionFormSet = inlineformset_factory(Folder,
 class EditGroupForm(forms.Form):
     groupName = forms.CharField(required=False, widget=forms.HiddenInput())
 
-    users = []
-    for user in User.objects.all():
-        users.append((user.username, user.username))
+    users = None
 
-    users = forms.MultipleChoiceField(choices=users,
-                                      required=False,
-                                      widget=forms.CheckboxSelectMultiple)
+    def createUsers():
+        users = []
+        for user in User.objects.all():
+            users.append((user.username, user.username))
+
+        users = forms.MultipleChoiceField(choices=users,
+                                          required=False,
+                                          widget=forms.CheckboxSelectMultiple)
+        return users
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
@@ -178,6 +182,7 @@ class EditGroupForm(forms.Form):
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
         self.helper.add_input(Button('deleteGroup', 'Delete Group', css_class='btn'))
+        self.users = createUsers()
 
         instance = kwargs.pop('instance', None)
         super().__init__(*args, **kwargs)
@@ -189,7 +194,7 @@ class EditGroupForm(forms.Form):
             for user in User.objects.filter(groups__id=instance.id):
                 activeUsers.append(user.username)
 
-            self.fields['users'].initial = activeUsers
+            self.users.initial = activeUsers
             self.fields['groupName'].initial = instance.name
 
 

@@ -2,6 +2,8 @@ from django.conf.urls import url
 from html_browser.models import Folder
 from html_browser.views import base_view, content_view
 from html_browser.views import adminViews as admin_views
+import sqlite3
+from django.db import utils as django_db_utils
 
 fileNameChars = r'[\w \-~!@#$%^&*\(\)\+,\.\'\[\]]'
 folderAndPathRegex = r'(?P<folderAndPathUrl>\w+(/%s+?)*)/' % fileNameChars
@@ -36,7 +38,12 @@ urlpatterns = [
     url(r'thumb/(?P<path>.*)', base_view.ThumbView.as_view(), name='thumb'),
 ]
 
-for folder in Folder.objects.all():
-    urlpatterns.append(url(r'__%s__/%s(?P<fileName>%s+)$' % (folder.name, folderAndPathRegex, fileNameChars),
-                           base_view.DownloadImageView.as_view(),
-                           name='download%sImage' % folder.name))
+try:
+    for folder in Folder.objects.all():
+        urlpatterns.append(url(r'__%s__/%s(?P<fileName>%s+)$' % (folder.name, folderAndPathRegex, fileNameChars),
+                               base_view.DownloadImageView.as_view(),
+                               name='download%sImage' % folder.name))
+except sqlite3.OperationalError:
+    pass
+except django_db_utils.OperationalError:
+    pass
