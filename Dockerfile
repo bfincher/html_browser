@@ -13,7 +13,9 @@ copy media/ /hb/media/
 copy manage.py /hb
 copy requirements.txt /hb
 
-run pip install -r requirements.txt 
+run pip install -r requirements.txt && \
+    apt-get update && \
+    apt-get install -y cron
 
 ENV APP_CONFIG="/config"
 copy entrypoint.sh /
