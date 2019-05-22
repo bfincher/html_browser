@@ -182,7 +182,7 @@ class EditGroupForm(forms.Form):
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
         self.helper.add_input(Button('deleteGroup', 'Delete Group', css_class='btn'))
-        self.users = createUsers()
+        self.users = EditGroupForm.createUsers()
 
         instance = kwargs.pop('instance', None)
         super().__init__(*args, **kwargs)
