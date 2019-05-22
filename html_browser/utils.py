@@ -112,6 +112,8 @@ def getCheckedEntries(requestDict):
 
 
 def getFolderLinkDir(folderName):
+    if not os.path.exists(settings.FOLDER_LINK_DIR):
+        os.makedirs(settings.FOLDER_LINK_DIR)
     return os.path.join(settings.FOLDER_LINK_DIR, folderName)
 
 
