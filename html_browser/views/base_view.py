@@ -26,7 +26,7 @@ import zipfile
 from zipfile import ZipFile
 
 logger = logging.getLogger('html_browser.base_view')
-imageRegex = re.compile("^.*?\.(jpg|png|gif|bmp|avi)$", re.IGNORECASE)
+imageRegex = re.compile(r"^.*?\.(jpg|png|gif|bmp|avi)$", re.IGNORECASE)
 
 
 def isShowHidden(request):
@@ -267,7 +267,8 @@ class ImageView(BaseContentView):
             nextLink = reverseContentUrl(self.folderAndPath, viewName='imageView', extraPath=currentDirEntries[index + 1].name)
 
         parentDirLink = reverseContentUrl(self.folderAndPath)
-        imageUrl = reverseContentUrl(self.folderAndPath, viewName='download%sImage' % self.folderAndPath.folder.name, extraPath=fileName)
+
+        imageUrl = reverseContentUrl(self.folderAndPath, viewName='download', extraPath=fileName)
 
         self.context['viewTypes'] = const.viewTypes
         self.context['parentDirLink'] = parentDirLink
