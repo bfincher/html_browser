@@ -21,6 +21,10 @@ if [ ! -d ${APP_CONFIG}/logs/hb ]; then
     su ${USER} -c "mkdir -p ${APP_CONFIG}/logs/hb"
 fi
 
+if [ ! -f ${APP_CONFIG}/local_settings.json ]; then
+    su ${USER} -c "cp /hb/html_browser_site/local_settings_docker.json ${APP_CONFIG}/local_settings.json"
+fi
+
 if [ ! -f ${APP_CONFIG}/hb.db ]; then
     su ${USER} -c "python manage.py migrate"
     echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'pass')" | python manage.py shell

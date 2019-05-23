@@ -1,0 +1,22 @@
+{
+	"ADMIN_NAME": "Your Name",
+	"ADMIN_EMAIL": "your_email@example.com",
+	"DATABASES": {
+		"default": {
+			"ENGINE": "django.db.backends.sqlite3",
+			"NAME": "/config/hb.db",
+			"USER": "",
+			"PASSWORD": "",
+			"HOST": "",
+			"PORT": ""
+		}
+	},
+
+	"STATIC_URL": "/hbmedia",
+	"STATICFILES_DIRS": ["/hb/media"],
+	"LOG_DIR": "/config/logs/hb",
+	"ALLOWED_HOSTS": [
+		"userver",
+		"localhost"
+	]
+}
