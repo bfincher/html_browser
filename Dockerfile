@@ -2,7 +2,7 @@ from python:3.5
 
 env PYTHONBUFFERED 1
 
-RUN mkdir -p /hb/folder_links
+RUN mkdir /hb
 workdir /hb
 
 copy html_browser/ /hb/html_browser/
