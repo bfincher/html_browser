@@ -79,7 +79,12 @@ class DeleteFolderView(BaseAdminView):
     def post(self, request, folderName, *args, **kwargs):
         folder = Folder.objects.get(name=folderName)
         folderLinkDir = getFolderLinkDir(folder.name)
-        os.remove(folderLinkDir)
+
+        try:
+            os.remove(folderLinkDir)
+        except FileNotFoundError as e:
+            self.reqLogger.exception(e)
+            
         folder.delete()
         return redirect('folderAdmin')
 
