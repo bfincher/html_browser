@@ -23,3 +23,5 @@ STATIC_URL = None
 STATICFILES_DIRS = ()
 
 LOG_DIR = '/var/log/hb'
+
+FOLDER_LINK_DIR = os.path.join(BASE_DIR, 'folder_links')
