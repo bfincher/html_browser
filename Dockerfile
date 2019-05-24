@@ -8,6 +8,7 @@ workdir /hb
 copy html_browser/ /hb/html_browser/
 copy html_browser_site/ /hb/html_browser_site/
 copy html_browser_site/local_settings_docker.py /hb/html_browser_site/local_settings.py
+copy html_browser_site/local_settings_docker.json /hb/html_browser_site/local_settings.json
 copy media/ /hb/media/
 
 copy manage.py /hb
