@@ -267,7 +267,7 @@ class ImageView(BaseContentView):
             nextLink = reverseContentUrl(self.folderAndPath, viewName='imageView', extraPath=currentDirEntries[index + 1].name)
 
         parentDirLink = reverseContentUrl(self.folderAndPath)
-        imageUrl = reverseContentUrl(self.folderAndPath, viewName='download%sImage' % self.folderAndPath.folder.name, extraPath=fileName)
+        imageUrl = reverseContentUrl(self.folderAndPath, viewName='download', extraPath=fileName)
 
         self.context['viewTypes'] = const.viewTypes
         self.context['parentDirLink'] = parentDirLink
@@ -308,9 +308,7 @@ class GetNextImageView(BaseContentView):
                     result['hasNextImage'] = True
                     nextFileName = currentDirEntries[i].name
 
-                    imageUrl = reverseContentUrl(self.folderAndPath,
-                                                 viewName='download%sImage' % self.folderAndPath.folder.name,
-                                                 extraPath=nextFileName)
+                    imageUrl = reverseContentUrl(self.folderAndPath, viewName='download', extraPath=nextFileName)
                     imageUrl = imageUrl.replace('//', '/')
                     result['imageUrl'] = imageUrl
                     result['fileName'] = nextFileName
