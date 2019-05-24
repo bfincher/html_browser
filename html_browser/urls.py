@@ -33,4 +33,4 @@ urlpatterns = [
     url(r'upload/%s$' % folderAndPathRegex, base_view.UploadView.as_view(), name='upload'),
     url(r'userAdmin/.*', admin_views.UserAdminView.as_view(), name='userAdmin'),
     url(r'thumb/(?P<path>.*)', base_view.ThumbView.as_view(), name='thumb'),
-] 
+]

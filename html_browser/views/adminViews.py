@@ -84,7 +84,7 @@ class DeleteFolderView(BaseAdminView):
             os.remove(folderLinkDir)
         except FileNotFoundError as e:
             self.reqLogger.exception(e)
-            
+
         folder.delete()
         return redirect('folderAdmin')
 
