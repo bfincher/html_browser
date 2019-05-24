@@ -1,25 +1,18 @@
 import os
+import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../', __file__))))
 
-ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-)
+with open('/config/local_settings.json') as f:
+    configs = json.loads(f.read())
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/config/hb.db',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    }
-}
+ADMINS = (configs['ADMIN_NAME'], configs['ADMIN_EMAIL'])
 
-STATIC_URL = '/hbmedia/'
-STATICFILES_DIRS = ('/hb/media',)
+DATABASES = configs['DATABASES']
 
-LOG_DIR = '/config/logs/hb'
+STATIC_URL = configs['STATIC_URL']
+STATICFILES_DIRS = tuple(configs['STATICFILES_DIRS'])
 
-ALLOWED_HOSTS = ['userver']
+LOG_DIR = configs['LOG_DIR']
+
+ALLOWED_HOSTS = configs['ALLOWED_HOSTS']

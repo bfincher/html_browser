@@ -26,7 +26,7 @@ import zipfile
 from zipfile import ZipFile
 
 logger = logging.getLogger('html_browser.base_view')
-imageRegex = re.compile("^.*?\.(jpg|png|gif|bmp|avi)$", re.IGNORECASE)
+imageRegex = re.compile(r"^.*?\.(jpg|png|gif|bmp|avi)$", re.IGNORECASE)
 
 
 def isShowHidden(request):

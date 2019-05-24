@@ -215,7 +215,7 @@ def getCurrentDirEntries(folderAndPath, showHidden, viewType, contentFilter=None
             else:
                 include = False
                 if contentFilter:
-                    tempFilter = contentFilter.replace('.', '\.')
+                    tempFilter = contentFilter.replace('.', r'\.')
                     tempFilter = tempFilter.replace('*', '.*')
                     if re.search(tempFilter, f.name):
                         include = True

@@ -60,7 +60,7 @@ class BaseAdminView(UserPassesTestMixin, BaseView):
             if form.non_form_errors:
                 for error in form.non_form_errors():
                     messages.error(self.request, error)
-        except AttributeError as e:
+        except AttributeError:
             pass
 
 
