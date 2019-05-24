@@ -10,8 +10,8 @@ install:
   - sudo mkdir /config/
   - sudo chown $USER /var/log/hb
   - sudo chown $USER /config
-  - cp html_browser_site/local_settings_docker.py html_browser_site/local_settings.py
-  - cp html_browser_site/local_settings_docker.json html_browser_site/local_settings.json
+  - cp html_browser_site/local_settings_docker.py /config/local_settings.py
+  - cp html_browser_site/local_settings_docker.json /config/local_settings.json
 
 before_script:
   - "flake8 ."
