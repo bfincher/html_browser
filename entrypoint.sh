@@ -33,12 +33,10 @@ if [ $(stat -c "%u:%g" ${APP_CONFIG}) != "${APP_CONFIG_UIDGID}" ]; then
     chown -R ${APP_CONFIG_UIDGID} "$APP_CONFIG"
 fi
 
-chown -R ${USER}:g_${APP_GID} /hb/folder_links
-
 CRON_CMD="cd /hb/ && bash -l -c 'python manage.py thumbnail cleanup > /dev/null'"
 
 CRON_PERIOD="0 0 * * *"
-su ${USER} -c '(crontab -l ; echo "${CRON_PERIOD}   ${CRON_CMD}") | sort - | uniq - | crontab -'
+(crontab -u $USER -l ; echo "${CRON_PERIOD}   ${CRON_CMD}") | sort - | uniq - | crontab -u $USER -
 
 su ${USER} -c 'python manage.py runserver 0.0.0.0:8000'
 
