@@ -1,2 +1,2 @@
 #!/bin/bash
-$WORKON_HOME/html_browser/bin/python3 manage.py $@
+$WORKON_HOME/hb/bin/python3 manage.py $@
