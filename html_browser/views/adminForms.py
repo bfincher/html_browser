@@ -2,7 +2,6 @@ from django import forms
 from django.core.urlresolvers import reverse
 from django.forms import inlineformset_factory, BaseInlineFormSet
 from django.template.loader import render_to_string
-from django.template.context import Context
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Button, Layout, LayoutObject, TEMPLATE_PACK, HTML
 
@@ -34,9 +33,9 @@ class Formset(LayoutObject):
     def render(self, form, form_style, context, template_pack=TEMPLATE_PACK):
         formset = context[self.formset_name_in_context]
         return render_to_string(self.template,
-                                Context({'wrapper': self,
-                                         'formset': formset,
-                                         'form_id': self.formset_id}))
+                                {'wrapper': self,
+                                 'formset': formset,
+                                 'form_id': self.formset_id})
 
 
 class AddFolderForm(forms.ModelForm):
