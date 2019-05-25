@@ -12,11 +12,12 @@
 		}
 	},
 
-	"STATIC_URL": "/hbmedia",
+	"STATIC_URL": "/hbmedia/",
 	"STATICFILES_DIRS": ["/hb/media"],
 	"LOG_DIR": "/config/logs/hb",
 	"ALLOWED_HOSTS": [
 		"userver",
 		"localhost"
-	]
+	],
+	"FOLDER_LINK_DIR": "/config/folder_links"
 }

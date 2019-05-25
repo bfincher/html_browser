@@ -10,7 +10,6 @@ DEBUG = True
 THUMBNAIL_DEBUG = True
 THUMBNAIL_STORAGE = 'html_browser.utils.ThumbnailStorage'
 
-FOLDER_LINK_DIR = os.path.join(BASE_DIR, 'folder_links')
 THUMBNAIL_CACHE_DIR = FOLDER_LINK_DIR
 
 MANAGERS = ADMINS

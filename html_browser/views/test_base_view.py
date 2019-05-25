@@ -336,7 +336,7 @@ class UploadViewTest(BaseViewTest):
         self.assertEquals('/content/test/images/', context['parentDirLink'])
         self.assertEquals('/image_view/test/images/folder-blue-icon-128.png/', context['prevLink'])
         self.assertEquals('/image_view/test/images/folder-blue-parent-icon.png/', context['nextLink'])
-        self.assertEquals('/__test__/test/images/folder-blue-icon.png', context['imageUrl'])
+        self.assertEquals('/download/test/images/folder-blue-icon.png/', context['imageUrl'])
         self.assertEquals('folder-blue-icon.png', context['fileName'])
         self.assertTrue(context['userCanDelete'])
         self.assertEquals('image_view.html', response.templates[0].name)
