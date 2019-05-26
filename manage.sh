@@ -1,2 +1,4 @@
 #!/bin/bash
-$WORKON_HOME/hb/bin/python3 manage.py $@
+VE=${VIRTUAL_ENV:-/usr}
+py3=$VE/bin/python3
+$py3 manage.py $@

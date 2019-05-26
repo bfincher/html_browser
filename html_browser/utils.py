@@ -1,5 +1,5 @@
 from django.core.files.storage import FileSystemStorage
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from .constants import _constants as const
 from html_browser.models import Folder

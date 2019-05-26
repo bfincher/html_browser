@@ -55,7 +55,7 @@ class Folder(models.Model):
     def userCanRead(self, user):
         if self.viewOption == VIEWABLE_BY_ANONYMOUS:
             return True
-        elif self.viewOption == VIEWABLE_BY_EVERYONE and user is not None and user.is_authenticated():
+        elif self.viewOption == VIEWABLE_BY_EVERYONE and user is not None and user.is_authenticated:
             return True
         else:
             canRead = self.__checkUserPerm__(user, CAN_READ)
