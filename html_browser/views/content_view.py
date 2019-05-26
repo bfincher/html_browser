@@ -6,7 +6,7 @@ import os
 from shutil import copy2, copytree, move
 
 from django.contrib import messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import redirect, render
 
 from .base_view import BaseContentView, isShowHidden, reverseContentUrl
