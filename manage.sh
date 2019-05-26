@@ -1,2 +1,4 @@
 #!/bin/bash
-$VIRTUAL_ENV/bin/python3 manage.py $@
+VE=${VIRTUAL_ENV:-/usr}
+py3=$VE/bin/python3
+$py3 manage.py $@
