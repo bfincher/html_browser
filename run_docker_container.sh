@@ -4,8 +4,14 @@ else
     image_name=$(basename $VIRTUAL_ENV)
 fi
 
+if [ $# -eq 1 ]; then
+    port=$1
+else
+    port=8000
+fi
+
 docker run -d \
-    -p 8000:8000 \
+    -p ${port}:8000 \
     -v /Volumes/data1/code/workspace/html_browser/config:/config \
     -v /Volumes/data1:/data1 \
     -e APP_UID=1009 \
