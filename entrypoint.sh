@@ -38,7 +38,7 @@ CRON_CMD="cd /hb/ && bash -l -c 'python manage.py thumbnail cleanup > /dev/null'
 CRON_PERIOD="0 0 * * *"
 (crontab -u $USER -l ; echo "${CRON_PERIOD}   ${CRON_CMD}") | sort - | uniq - | crontab -u $USER -
 
-su ${USER} -c 'python manage.py runserver 0.0.0.0:8000'
+su ${USER} -c 'python manage.py migrate && python manage.py runserver 0.0.0.0:8000'
 
 
 
