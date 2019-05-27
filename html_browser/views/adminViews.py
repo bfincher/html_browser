@@ -6,6 +6,7 @@ import re
 
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.views import redirect_to_login
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import render, redirect
@@ -50,6 +51,10 @@ class BaseAdminView(UserPassesTestMixin, BaseView):
             return False
 
         return True
+
+    # override parent class handling of no permission.  We don't want an exception, just a redirect
+    def handle_no_permission(self):
+        return redirect_to_login(self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name())
 
     def appendFormErrors(self, form):
         if form.errors:

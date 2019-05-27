@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.views import redirect_to_login
 from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponse
@@ -90,7 +91,7 @@ class BaseContentView(UserPassesTestMixin, BaseView):
         self.context['folderAndPath'] = self.folderAndPath
         return super().dispatch(request, *args, **kwargs)
 
-    def test_func(self):
+    def does_user_pass_test(self):
         if self.requireDelete and not self.userCanDelete:
             messages.error(self.request, "Delete permission required")
             return False
@@ -102,6 +103,13 @@ class BaseContentView(UserPassesTestMixin, BaseView):
             return False
 
         return True
+
+    def get_test_func(self):
+        return self.does_user_pass_test
+
+    # override parent class handling of no permission.  We don't want an exception, just a redirect
+    def handle_no_permission(self):
+        return redirect_to_login(self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name())
 
 
 class IndexView(BaseView):
