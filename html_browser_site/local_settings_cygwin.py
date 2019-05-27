@@ -18,8 +18,10 @@ DATABASES = {
 }
 
 STATIC_URL = '/hbmedia/'
-STATICFILES_DIRS = ('/home/n86538/tmp/html_browser_python/media',)
+STATICFILES_DIRS = ((os.path.join(BASE_DIR, 'media')),)
 
 LOG_DIR = '/var/log/hb'
 
 FOLDER_LINK_DIR = os.path.join(BASE_DIR, 'folder_links')
+
+ALLOWED_HOSTS = ['userver', 'localhost']
