@@ -51,7 +51,6 @@ class BaseViewTest(unittest.TestCase):
         self.user3Pw = 'test_pw_3'
         self.user3.set_password(self.user3Pw)
         self.user3.save()
-        self.user3.save()
 
         self.users = {self.user1.username: self.user1Pw,
                       self.user2.username: self.user2Pw,
@@ -92,6 +91,8 @@ class BaseViewTest(unittest.TestCase):
         self.folder4.localPath = 'test4'
         self.folder4.viewOption = 'A'
         self.folder4.save()
+        
+        self.folders = [self.folder1, self.folder2, self.folder3, self.folder4]
 
         groupPerm1 = GroupPermission()
         groupPerm1.folder = self.folder2
