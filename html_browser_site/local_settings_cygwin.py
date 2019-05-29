@@ -22,6 +22,6 @@ STATICFILES_DIRS = ((os.path.join(BASE_DIR, 'media')),)
 
 LOG_DIR = '/var/log/hb'
 
-FOLDER_LINK_DIR = os.path.join(BASE_DIR, 'folder_links')
+THUMBNAIL_CACHE_DIR = os.path.join(BASE_DIR, 'thumb_cache')
 
 ALLOWED_HOSTS = ['userver', 'localhost']

@@ -19,5 +19,5 @@
 		"userver",
 		"localhost"
 	],
-	"FOLDER_LINK_DIR": "/config/folder_links"
+	"THUMBNAIL_CACHE_DIR": "/config/thumb_cache"
 }

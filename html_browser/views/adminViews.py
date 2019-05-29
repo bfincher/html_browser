@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 import logging
-import os
 import re
 
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -14,7 +13,7 @@ from annoying.functions import get_object_or_None
 
 import html_browser
 from html_browser.models import Folder, CAN_READ, CAN_WRITE, CAN_DELETE
-from html_browser.utils import getReqLogger, getFolderLinkDir
+from html_browser.utils import getReqLogger
 from .adminForms import AddUserForm, EditUserForm, EditGroupForm,\
     UserPermissionFormSet, GroupPermissionFormSet, EditFolderForm, AddFolderForm
 
@@ -83,13 +82,6 @@ class FolderAdminView(BaseAdminView):
 class DeleteFolderView(BaseAdminView):
     def post(self, request, folderName, *args, **kwargs):
         folder = Folder.objects.get(name=folderName)
-        folderLinkDir = getFolderLinkDir(folder.name)
-
-        try:
-            os.remove(folderLinkDir)
-        except FileNotFoundError as e:
-            self.reqLogger.warn(e)
-
         folder.delete()
         return redirect('folderAdmin')
 
@@ -185,13 +177,6 @@ class EditFolderView(AbstractFolderView):
 
         return super().post(request, *args, **kwargs)
 
-    def postSaveAction(self, folder):
-        modifiedLocalPath = folder.localPath
-        if self.origLocalPath != modifiedLocalPath:
-            folderLinkDir = getFolderLinkDir(folder.name)
-            os.remove(folderLinkDir)
-            os.symlink(modifiedLocalPath, folderLinkDir)
-
     def initForms(self, request, *args, **kwargs):
         self.folder = Folder.objects.get(name=self.folderName)
 
@@ -216,13 +201,6 @@ class AddFolderView(AbstractFolderView):
     def post(self, request, title, *args, **kwargs):
         self.title = title
         return super().post(request, *args, **kwargs)
-
-    def postSaveAction(self, folder):
-        folderLinkDir = getFolderLinkDir(folder.name)
-        if os.path.exists(folderLinkDir):
-            os.remove(folderLinkDir)
-
-        os.symlink(folder.localPath, folderLinkDir)
 
     def initForms(self, request, *args, **kwargs):
         if request.method == "GET":

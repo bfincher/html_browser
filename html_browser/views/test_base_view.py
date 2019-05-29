@@ -91,7 +91,7 @@ class BaseViewTest(unittest.TestCase):
         self.folder4.localPath = 'test4'
         self.folder4.viewOption = 'A'
         self.folder4.save()
-        
+
         self.folders = [self.folder1, self.folder2, self.folder3, self.folder4]
 
         groupPerm1 = GroupPermission()

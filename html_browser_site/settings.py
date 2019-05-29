@@ -10,8 +10,6 @@ DEBUG = True
 THUMBNAIL_DEBUG = True
 THUMBNAIL_STORAGE = 'html_browser.utils.ThumbnailStorage'
 
-THUMBNAIL_CACHE_DIR = FOLDER_LINK_DIR
-
 MANAGERS = ADMINS
 
 # Local time zone for this installation. Choices can be found here:
@@ -139,6 +137,9 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
     'debug_toolbar.panels.profiling.ProfilingPanel',
 ]
+
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
