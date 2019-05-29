@@ -10,9 +10,11 @@ import tempfile
 import unittest
 import zipfile
 from zipfile import ZipFile
+from tempfile import mkdtemp
 
 from html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_DELETE
 from html_browser.views.base_view import reverseContentUrl, FolderAndPath, getIndexIntoCurrentDir
+from html_browser.utils import joinPaths
 
 
 def contextCheck(testCase, context, user=None, folder=None):
@@ -202,7 +204,11 @@ class DownloadZipViewTest(BaseViewTest):
 
         attachmentRegex = re.compile(r'attachment; filename="(download_\w+\.zip)"')
         zipFileName = None
-        extractPath = "/tmp/extract"
+        tmpDir = tempfile.gettempdir()
+        
+        extractPath = joinPaths(tmpDir, 'extract')
+        if not os.path.exists(extractPath):
+            os.makedirs(extractPath)
 
         try:
             for item in list(response.items()):
@@ -213,16 +219,16 @@ class DownloadZipViewTest(BaseViewTest):
 
             self.assertIsNotNone(zipFileName)
 
-            zipFile = ZipFile(os.path.join('/tmp', zipFileName), mode='r')
+            zipFile = ZipFile(joinPaths(tmpDir, zipFileName), mode='r')
             entries = zipFile.infolist()
 
-            os.mkdir(extractPath)
+            os.makedirs(extractPath, exist_ok=True)
             for entry in entries:
                 zipFile.extract(entry, extractPath)
 
-            extractedFileA = os.path.join(extractPath, 'add_user.js')
-            extractedFileB = os.path.join(extractPath, 'base.js')
-            extractedTestFile = os.path.join(extractPath, 'images/Add-Folder-icon.png')
+            extractedFileA = joinPaths(extractPath, 'add_user.js')
+            extractedFileB = joinPaths(extractPath, 'base.js')
+            extractedTestFile = joinPaths(extractPath, 'images/Add-Folder-icon.png')
 
             self.assertTrue(os.path.exists(extractedFileA))
             self.assertTrue(os.path.exists(extractedFileB))

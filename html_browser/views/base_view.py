@@ -12,7 +12,8 @@ from html_browser.models import Folder, FilesToDelete
 from html_browser.utils import getCurrentDirEntries, handleDelete,\
     getReqLogger,\
     getCheckedEntries, replaceEscapedUrl,\
-    FolderAndPath, ArgumentException
+    FolderAndPath, ArgumentException,\
+    joinPaths
 from html_browser_site import settings
 
 import json
@@ -157,18 +158,18 @@ class LogoutView(BaseView):
 class DownloadView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
         return sendfile(request,
-                        os.path.join(self.folderAndPath.absPath, fileName),
+                        joinPaths(self.folderAndPath.absPath, fileName),
                         attachment=True)
 
 
 class DownloadImageView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
-        return sendfile(request, os.path.join(self.folderAndPath.absPath, fileName), attachment=False)
+        return sendfile(request, joinPaths(self.folderAndPath.absPath, fileName), attachment=False)
 
 
 class ThumbView(BaseView):
     def get(self, request, path, *args, **kwargs):
-        file = os.path.join(settings.THUMBNAIL_CACHE_DIR, path)
+        file = joinPaths(settings.THUMBNAIL_CACHE_DIR, path)
         return sendfile(request, file, attachment=False)
 
 
@@ -179,7 +180,7 @@ class DownloadZipView(BaseContentView):
         self.zipFile = ZipFile(fileName, mode='w', compression=compression)
 
         for entry in getCheckedEntries(request.GET):
-            path = os.path.join(self.folderAndPath.absPath, replaceEscapedUrl(entry))
+            path = joinPaths(self.folderAndPath.absPath, replaceEscapedUrl(entry))
             if os.path.isfile(path):
                 self.__addFileToZip__(path)
             else:
@@ -225,7 +226,7 @@ class UploadView(BaseContentView):
         return redirect(reverseContentUrl(self.folderAndPath))
 
     def _handleFileUpload(self, f):
-        fileName = os.path.join(self.folderAndPath.absPath, f.name)
+        fileName = joinPaths(self.folderAndPath.absPath, f.name)
         dest = open(fileName, 'wb')
 
         for chunk in f.chunks():

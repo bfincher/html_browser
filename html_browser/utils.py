@@ -18,6 +18,7 @@ import re
 from shutil import rmtree
 from sorl.thumbnail import get_thumbnail
 from urllib.parse import quote_plus, unquote_plus
+from django.urls.conf import path
 
 logger = logging.getLogger('html_browser.utils')
 reqLogger = None
@@ -29,6 +30,15 @@ GIGABYTE = MEGABYTE * KILOBYTE
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
 folderAndPathRegex = re.compile(r'^(\w+)(/(.*))?$')
 imageRegex = re.compile(r'.+\.(?i)((jpg)|(png)|(gif)|(bmp))')
+
+def joinPaths(path, *paths):
+    toReturn = path
+    for p in paths:
+        if toReturn.endswith('/') or p.endswith('/'):
+            toReturn += p
+        else:
+            toReturn += "/%s" % p
+    return toReturn
 
 
 class ThumbnailStorage(FileSystemStorage):
@@ -62,7 +72,7 @@ class FolderAndPath:
             folderName = match.groups()[0]
             self.folder = Folder.objects.get(name=folderName)
             self.relativePath = unquote_plus(match.groups()[2] or '')
-            self.absPath = os.path.join(self.folder.localPath, self.relativePath)
+            self.absPath = joinPaths(self.folder.localPath, self.relativePath)
             self.url = kwargs['url']
         elif 'path' in kwargs and len(kwargs) == 2:
             if 'folderName' in kwargs:
@@ -75,7 +85,7 @@ class FolderAndPath:
             # just in case the path argument already has the folder localpath appended, try to replace the folder.localpath prefix
             self.relativePath = re.sub(r'^%s' % self.folder.localPath, '', kwargs['path'])
 
-            self.absPath = os.path.join(self.folder.localPath, self.relativePath)
+            self.absPath = joinPaths(self.folder.localPath, self.relativePath)
             self.url = "%s/%s" % (self.folder.name, self.relativePath)
         else:
             raise FolderAndPathArgumentException(**kwargs)
@@ -133,7 +143,7 @@ class DirEntry():
 
         if not self.isDir and viewType == const.thumbnailsViewType and imageRegex.match(self.name):
             self.hasThumbnail = True
-            imageLinkPath = os.path.join(folderAndPath.folder.localPath, folderAndPath.relativePath, self.name)
+            imageLinkPath = joinPaths(folderAndPath.folder.localPath, folderAndPath.relativePath, self.name)
             im = get_thumbnail(imageLinkPath, '150x150')
             self.thumbnailUrl = reverse('thumb', args=[im.name])
         else:
@@ -242,7 +252,7 @@ def replaceEscapedUrl(url):
 
 def handleDelete(folderAndPath, entries):
     for entry in entries:
-        entryPath = os.path.join(folderAndPath.absPath, replaceEscapedUrl(entry)).encode("utf-8")
+        entryPath = joinPaths(folderAndPath.absPath, replaceEscapedUrl(entry)).encode("utf-8")
 
         if os.path.isdir(entryPath):
             rmtree(entryPath)

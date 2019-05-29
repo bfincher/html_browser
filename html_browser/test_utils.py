@@ -14,7 +14,7 @@ from shutil import rmtree
 class FolderAndPathTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.testDirAbsPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_dir/')
+        cls.testDirAbsPath = joinPaths(os.path.dirname(settings.BASE_DIR_REALPATH), 'test_dir/')
         cls.folder = Folder()
         cls.folder.name = 'test'
         cls.folder.localPath = cls.testDirAbsPath
@@ -31,8 +31,8 @@ class FolderAndPathTest(unittest.TestCase):
         cls.folder.delete()
 
     def __testConstruct(self, folder, path):
-        expectedAbsPath = os.path.join(folder.localPath, path)
-        expectedUrl = os.path.join(folder.name, path)
+        expectedAbsPath = joinPaths(folder.localPath, path)
+        expectedUrl = joinPaths(folder.name, path)
 
         objs = [FolderAndPath(folder=folder, path=path),
                 FolderAndPath(folderName=folder.name, path=path),
@@ -49,9 +49,9 @@ class FolderAndPathTest(unittest.TestCase):
         self.__testConstruct(FolderAndPathTest.folder, 'test_path')
 
         # test special case
-        folderAndPath = FolderAndPath(folder=FolderAndPathTest.folder, path=os.path.join(FolderAndPathTest.testDirAbsPath, 'test_path'))
+        folderAndPath = FolderAndPath(folder=FolderAndPathTest.folder, path=joinPaths(FolderAndPathTest.testDirAbsPath, 'test_path'))
         self.assertEquals(FolderAndPathTest.folder.name, folderAndPath.folder.name)
-        self.assertEquals(os.path.join(FolderAndPathTest.testDirAbsPath, 'test_path'), folderAndPath.absPath)
+        self.assertEquals(joinPaths(FolderAndPathTest.testDirAbsPath, 'test_path'), folderAndPath.absPath)
         self.assertEquals('test_path', folderAndPath.relativePath)
 
         try:
@@ -193,10 +193,10 @@ class UtilsTest(unittest.TestCase):
         folder.save()
 
         try:
-            mediaDir = os.path.join(settings.BASE_DIR, 'media')
-            testFiles = [FileEntry(os.path.join(mediaDir, 'bootstrap'), '&nbsp'),
-                         FileEntry(os.path.join(mediaDir, 'images'), '&nbsp'),
-                         FileEntry(os.path.join(mediaDir, 'add_user.js'), '1.89 KB'),
+            mediaDir = joinPaths(settings.BASE_DIR, 'media')
+            testFiles = [FileEntry(joinPaths(mediaDir, 'bootstrap'), '&nbsp'),
+                         FileEntry(joinPaths(mediaDir, 'images'), '&nbsp'),
+                         FileEntry(joinPaths(mediaDir, 'add_user.js'), '1.89 KB'),
                          ]
 
             try:
@@ -252,10 +252,10 @@ class UtilsTest(unittest.TestCase):
 
     def testHandleDelete(self):
         testDir = 'html_browser/test_dir2'
-        childDir = os.path.join(testDir, 'child_dir')
-        testFile1 = os.path.join(childDir, 'test_file1.txt')
-        testFile2 = os.path.join(childDir, 'test_file2.txt')
-        testFile3 = os.path.join(childDir, 'test_file3.txt')
+        childDir = joinPaths(testDir, 'child_dir')
+        testFile1 = joinPaths(childDir, 'test_file1.txt')
+        testFile2 = joinPaths(childDir, 'test_file2.txt')
+        testFile3 = joinPaths(childDir, 'test_file3.txt')
 
         folder = Folder()
         folder.name = 'test'

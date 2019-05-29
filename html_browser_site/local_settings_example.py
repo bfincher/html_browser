@@ -1,5 +1,8 @@
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../', __file__))))
+BASE_DIR = BASE_DIR.replace(os.sep, '/')
+
+BASE_DIR_REALPATH = os.path.realpath(BASE_DIR).replace(os.sep, '/')
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
