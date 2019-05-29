@@ -77,6 +77,40 @@ class AdminViewTest(BaseAdminTest):
         
     def testEditFolder(self):
         self.login(self.user4)
-        response = self.client.post(reverse('editFolder', args=[self.folder1.name]), {'localPath': 'newLOcalPath'})
+        data = {
+            'user_perm-TOTAL_FORMS': '0',
+            'user_perm-INITIAL_FORMS': '0',
+            'user_perm-MAX_NUM_FORMS': '1000',
+            'group_perm-TOTAL_FORMS': '0',
+            'group_perm-INITIAL_FORMS': '0',
+            'group_perm-MAX_NUM_FORMS': '1000',
+            }
+        response = self.client.get(reverse('editFolder', args=[self.folder1.name]), data)
         self.assertEquals(200, response.status_code)
+        context = response.context[0]
+        contextCheck(self, context)
+        self.assertEquals(self.user4.username, context['user'].username)
+        self.assertEquals(self.folder1.name, context['folder'].name)
+        self.assertEqual("admin/add_edit_folder.html", response.templates[0].name)
+        
+        
+        # make sure the folder link dir exists for the folder so that we can ensure it changed
+        folderLinkDir = getFolderLinkDir(self.folder1.name)
+        if not os.path.exists(folderLinkDir):
+            os.symlink(self.folder1.localPath, folderLinkDir)
+            
+        data['name'] = self.folder1.name
+        data['localPath'] = '/data/newPath'
+        data['viewOption'] = 'E'
+        response = self.client.post(reverse('editFolder', args=[self.folder1.name]), data)
+        self.assertEquals(302, response.status_code)
+        self.assertEqual('/folderAdmin/', response.url)
+        
+        newFolder1 = Folder.objects.get(pk=self.folder1.pk)
+        self.assertEqual(self.folder1.name, newFolder1.name)
+        self.assertEqual('/data/newPath', newFolder1.localPath)
+        self.assertTrue(os.path.exists(getFolderLinkDir(self.folder1.name)))
+        self.assertEqual("/data/newPath", os.path.realpath(folderLinkDir))
+        
+        
         
