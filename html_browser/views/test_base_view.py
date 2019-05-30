@@ -35,16 +35,16 @@ class BaseViewTest(unittest.TestCase):
         self.user1.set_password(self.user1Pw)
         self.user1.save()
 
-        group1 = Group()
-        group1.name = 'test group1'
-        group1.save()
+        self.group1 = Group()
+        self.group1.name = 'test group1'
+        self.group1.save()
 
         self.user2 = User()
         self.user2.username = 'user2'
         self.user2Pw = 'test_pw_2'
         self.user2.set_password(self.user2Pw)
         self.user2.save()
-        self.user2.groups.add(group1)
+        self.user2.groups.add(self.group1)
         self.user2.save()
 
         self.user3 = User()
@@ -98,7 +98,7 @@ class BaseViewTest(unittest.TestCase):
         groupPerm1 = GroupPermission()
         groupPerm1.folder = self.folder2
         groupPerm1.permission = CAN_DELETE
-        groupPerm1.group = group1
+        groupPerm1.group = self.group1
         groupPerm1.save()
 
         self.client = Client()

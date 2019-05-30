@@ -35,7 +35,9 @@ class AdminViewTest(BaseAdminTest):
         self.login(self.user1)
         response = self.client.get(reverse('admin'))
         self.assertEquals(302, response.status_code)
-
+        
+        
+class FolderTest(BaseAdminTest):
     def testFolderAdminView(self):
         self.login(self.user4)
         response = self.client.get(reverse('folderAdmin'))
@@ -98,3 +100,52 @@ class AdminViewTest(BaseAdminTest):
         newFolder1 = Folder.objects.get(pk=self.folder1.pk)
         self.assertEqual(self.folder1.name, newFolder1.name)
         self.assertEqual('/data/newPath', newFolder1.localPath)
+        
+    def testAddFolder(self):
+        self.login(self.user4)
+        data = {
+            'user_perm-TOTAL_FORMS': '0',
+            'user_perm-INITIAL_FORMS': '0',
+            'user_perm-MAX_NUM_FORMS': '1000',
+            'group_perm-TOTAL_FORMS': '0',
+            'group_perm-INITIAL_FORMS': '0',
+            'group_perm-MAX_NUM_FORMS': '1000',
+        }
+        response = self.client.get(reverse('addFolder'), data)
+        self.assertEquals(200, response.status_code)
+        context = response.context[0]
+        contextCheck(self, context)
+        self.assertEquals(self.user4.username, context['user'].username)
+        self.assertEquals('', context['folder'].name)
+        self.assertEqual("admin/add_edit_folder.html", response.templates[0].name)
+
+        newFolderName = 'testNewFolder'
+        data['name'] = newFolderName
+        data['localPath'] = '/data/newPath'
+        data['viewOption'] = 'E'
+        response = self.client.post(reverse('addFolder'), data)
+        self.assertEquals(302, response.status_code)
+        self.assertEqual('/folderAdmin/', response.url)
+        self.assertEqual('/folderAdmin/', response.url)
+
+        newFolder = Folder.objects.get(name=newFolderName)
+        self.assertEqual(newFolder.name, newFolderName)
+        self.assertEqual('/data/newPath', newFolder.localPath)
+        
+        
+class GroupTest(BaseAdminTest):        
+    def testGroupAdminView(self):
+        self.login(self.user4)
+        response = self.client.get(reverse('groupAdmin'))
+        self.assertEquals(200, response.status_code)
+        context = response.context[0]
+        contextCheck(self, context)
+        self.assertEquals('admin/group_admin.html', response.templates[0].name)
+
+        self.assertEquals(1, len(context['group']))
+        self.assertEquals(self.group1, context['group'][0])
+
+        self.logout()
+        self.login(self.user1)
+        response = self.client.get(reverse('groupAdmin'))
+        self.assertEquals(302, response.status_code)
