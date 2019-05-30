@@ -5,10 +5,14 @@ from html_browser.utils import *
 from html_browser.constants import _constants as const
 from html_browser import utils
 from html_browser_site import settings
+from html_browser._os import joinPaths
 
 from datetime import datetime, timedelta
 import os
 from shutil import rmtree
+import re
+
+thumbUrlRegex = re.compile(r'^/thumb/(cache/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg)$')
 
 
 class FolderAndPathTest(unittest.TestCase):
@@ -232,7 +236,9 @@ class UtilsTest(unittest.TestCase):
             self.assertEquals(entry.name, entry.nameUrl)
             self.assertEquals('1.96 KB', entry.size)
             self.assertTrue(entry.hasThumbnail)
-            self.assertRegexpMatches(entry.thumbnailUrl, r'^/thumb/cache/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg$')
+            match = thumbUrlRegex.match(entry.thumbnailUrl)
+            self.assertTrue(match)
+            self.assertTrue(os.path.exists(joinPaths(settings.THUMBNAIL_CACHE_DIR, match.group(1))))
 
             entry = entries[3]
             self.assertFalse(entry.isDir)
@@ -242,7 +248,9 @@ class UtilsTest(unittest.TestCase):
             self.assertEquals(1844, entry.sizeNumeric)
             # self.assertEquals(img_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
             self.assertTrue(entry.hasThumbnail)
-            self.assertRegexpMatches(entry.thumbnailUrl, r'^/thumb/cache/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg$')
+            match = thumbUrlRegex.match(entry.thumbnailUrl)
+            self.assertTrue(match)
+            self.assertTrue(os.path.exists(joinPaths(settings.THUMBNAIL_CACHE_DIR, match.group(1))))
 
         finally:
             folder.delete()
