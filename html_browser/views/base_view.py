@@ -12,8 +12,8 @@ from html_browser.models import Folder, FilesToDelete
 from html_browser.utils import getCurrentDirEntries, handleDelete,\
     getReqLogger,\
     getCheckedEntries, replaceEscapedUrl,\
-    FolderAndPath, ArgumentException,\
-    joinPaths
+    FolderAndPath, ArgumentException
+from html_browser._os import joinPaths
 from html_browser_site import settings
 
 import json

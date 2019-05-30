@@ -10,11 +10,10 @@ import tempfile
 import unittest
 import zipfile
 from zipfile import ZipFile
-from tempfile import mkdtemp
 
 from html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_DELETE
 from html_browser.views.base_view import reverseContentUrl, FolderAndPath, getIndexIntoCurrentDir
-from html_browser.utils import joinPaths
+from html_browser._os import joinPaths
 
 
 def contextCheck(testCase, context, user=None, folder=None):
@@ -205,7 +204,7 @@ class DownloadZipViewTest(BaseViewTest):
         attachmentRegex = re.compile(r'attachment; filename="(download_\w+\.zip)"')
         zipFileName = None
         tmpDir = tempfile.gettempdir()
-        
+
         extractPath = joinPaths(tmpDir, 'extract')
         if not os.path.exists(extractPath):
             os.makedirs(extractPath)

@@ -18,7 +18,7 @@ import re
 from shutil import rmtree
 from sorl.thumbnail import get_thumbnail
 from urllib.parse import quote_plus, unquote_plus
-from django.urls.conf import path
+from html_browser._os import joinPaths
 
 logger = logging.getLogger('html_browser.utils')
 reqLogger = None
@@ -29,23 +29,21 @@ GIGABYTE = MEGABYTE * KILOBYTE
 
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
 folderAndPathRegex = re.compile(r'^(\w+)(/(.*))?$')
-imageRegex = re.compile(r'.+\.(?i)((jpg)|(png)|(gif)|(bmp))')
-
-def joinPaths(path, *paths):
-    toReturn = path
-    for p in paths:
-        if toReturn.endswith('/') or p.endswith('/'):
-            toReturn += p
-        else:
-            toReturn += "/%s" % p
-    return toReturn
+imageRegexStr = r'.+\.(?i)((jpg)|(png)|(gif)|(bmp))'
+imageRegex = re.compile(imageRegexStr)
+imageRegexWithCach = re.compile(r'cache/%s' % imageRegexStr)
 
 
 class ThumbnailStorage(FileSystemStorage):
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         if not os.path.exists(settings.THUMBNAIL_CACHE_DIR):
             os.makedirs(settings.THUMBNAIL_CACHE_DIR)
         super().__init__(location=settings.THUMBNAIL_CACHE_DIR)
+
+    def path(self, name):
+        if imageRegexWithCach.match(name):
+            return joinPaths(self.base_location, name)
+        return name
 
 
 class NoParentException(Exception):

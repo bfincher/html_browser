@@ -14,7 +14,8 @@ from html_browser.models import FilesToDelete
 from html_browser.constants import _constants as const
 from html_browser.utils import getCurrentDirEntries,\
     formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete,\
-    getCheckedEntries, FolderAndPath, joinPaths
+    getCheckedEntries, FolderAndPath
+from html_browser._os import joinPaths
 
 logger = logging.getLogger('html_browser.content_view')
 
