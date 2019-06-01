@@ -36,7 +36,7 @@ class BaseViewTest(unittest.TestCase):
         self.user1.save()
 
         self.group1 = Group()
-        self.group1.name = 'test group1'
+        self.group1.name = 'test_group1'
         self.group1.save()
 
         self.user2 = User()
