@@ -29,7 +29,7 @@ GIGABYTE = MEGABYTE * KILOBYTE
 
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
 folderAndPathRegex = re.compile(r'^(\w+)(/(.*))?$')
-imageRegexStr = r'.+\.(?i)((jpg)|(png)|(gif)|(bmp))'
+imageRegexStr = r'.+\.(?i)((jpg)|(png)|(bmp))'
 imageRegex = re.compile(imageRegexStr)
 imageRegexWithCach = re.compile(r'cache/%s' % imageRegexStr)
 

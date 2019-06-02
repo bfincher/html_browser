@@ -37,7 +37,7 @@ lastImage = false;
 <script src="{{ MEDIA_URL }}image_view.js" ></script>
 
 <script>
-	setCsrf("{% csrf_token %}");
+	setCsrf('{% csrf_token %}');
 	setUserCanRead("{{ userCanRead }}");
 	setUserCanWrite("{{ userCanWrite }}");
 	setUserCanDelete("{{ userCanDelete }}");
