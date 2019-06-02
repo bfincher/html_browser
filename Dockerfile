@@ -9,6 +9,9 @@ copy html_browser/ /hb/html_browser/
 copy html_browser_site/ /hb/html_browser_site/
 copy html_browser_site/local_settings_docker.py /hb/html_browser_site/local_settings.py
 copy html_browser_site/local_settings_docker.json /hb/html_browser_site/local_settings.json
+
+ENV APP_CONFIG="/config"
+
 copy media/ /hb/media/
 
 copy manage.py /hb
@@ -33,7 +36,6 @@ run apk add --no-cache py3-pillow shadow bash && \
     )" \
     && apk add --virtual .rundeps $runDeps 
 
-ENV APP_CONFIG="/config"
 copy entrypoint.sh /
 
 EXPOSE 8000
