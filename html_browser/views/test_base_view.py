@@ -114,7 +114,7 @@ class BaseViewTest(unittest.TestCase):
 
     def logout(self):
         return self.client.get(reverse('logout'))
-    
+
     def assert_message_count(self, response, expect_num):
         """
         Asserts that exactly the given number of messages have been sent.
@@ -148,7 +148,7 @@ class BaseViewTest(unittest.TestCase):
                       (text, messages_str))
         else:
             self.fail('Multiple messages contained text "%s": %s' %
-                        (text, ", ".join(('"%s"' % m) for m in matches)))
+                      (text, ", ".join(('"%s"' % m) for m in matches)))
 
     def assert_message_not_contains(self, response, text):
         """ Assert that no message contains the given text. """
@@ -204,8 +204,8 @@ class IndexViewTest(BaseViewTest):
         self.assertEquals(self.folder3, context['folders'][1])
         self.assertEquals(self.folder4, context['folders'][2])
         self.assertEquals('index.html', response.templates[0].name)
-        
-    
+
+
 class LoginViewTest(BaseViewTest):
     def testLogin(self):
         response = self.client.post(reverse('login'), data={'userName': self.user1.username, 'password': self.user1Pw})

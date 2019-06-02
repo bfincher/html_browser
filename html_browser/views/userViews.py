@@ -13,6 +13,7 @@ from .adminViews import BaseAdminView
 
 logger = logging.getLogger('html_browser.userViews')
 
+
 class DeleteUserView(BaseAdminView):
     def post(self, request, username, *args, **kwargs):
         redirectUrl = "userAdmin"
@@ -82,12 +83,12 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
 class EditUserView(AbstractUserView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
     def get(self, request, title, username, *args, **kwargs):
         self.username = username
         self.title = title
         return super().get(request, *args, **kwargs)
-    
+
     def post(self, request, title, username, *args, **kwargs):
         self.username = username
         self.title = title
@@ -105,11 +106,11 @@ class EditUserView(AbstractUserView):
 class AddUserView(AbstractUserView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
     def post(self, request, title, *args, **kwargs):
         self.title = title
         return super().post(request, *args, **kwargs)
-        
+
     def get(self, request, title, *args, **kwargs):
         self.title = title
         return super().get(request, *args, **kwargs)

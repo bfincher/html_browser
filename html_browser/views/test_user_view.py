@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from html_browser.models import Group
 
+
 class UserTest(BaseAdminTest):
     def testUserAdminView(self):
         self.login(self.user4)
@@ -15,7 +16,7 @@ class UserTest(BaseAdminTest):
         self.assertEquals('admin/user_admin.html', response.templates[0].name)
 
         self.assertEquals(len(self.users), len(context['users']))
-        
+
         contextUsernames = [user.username for user in context['users']]
         for user in self.users:
             self.assertTrue(user in contextUsernames)
@@ -27,12 +28,12 @@ class UserTest(BaseAdminTest):
         self.assertEquals('/?next=/userAdmin/', response.url)
 
     def testEditUser(self):
-        #test unauthorized user
+        # test unauthorized user
         self.login(self.user1)
         response = self.client.get(reverse('editUser', args=[self.user1.username]))
         self.assertEquals(302, response.status_code)
         self.assertEquals('/?next=/editUser/user1/', response.url)
-        
+
         self.login(self.user4)
         response = self.client.get(reverse('editUser', args=[self.user1.username]))
         self.assertEquals(200, response.status_code)
@@ -40,20 +41,20 @@ class UserTest(BaseAdminTest):
         contextCheck(self, context)
         self.assertEquals(self.user4.username, context['user'].username)
         self.assertEqual("admin/add_edit_user.html", response.templates[0].name)
-        
+
         data = {'username': self.user1.username,
-                'first_name': 'firstname', 
-                'last_name': 'lastname', 
+                'first_name': 'firstname',
+                'last_name': 'lastname',
                 'email': 'nobody@whocares.com',
                 'userPk': self.user1.pk,
-                'is_superuser': True, 
+                'is_superuser': True,
                 'is_active': False
-        }
+                }
 
         response = self.client.post(reverse('editUser', args=[self.user1.username]), data)
         self.assertEquals(302, response.status_code)
         self.assertEqual('/userAdmin/', response.url)
-        newUser1 = User.objects.get(username = self.user1.username)
+        newUser1 = User.objects.get(username=self.user1.username)
         self.assertEqual('firstname', newUser1.first_name)
         self.assertEqual('lastname', newUser1.last_name)
         self.assertEqual('nobody@whocares.com', newUser1.email)
@@ -71,10 +72,10 @@ class UserTest(BaseAdminTest):
 
         data = {'username': self.user1.username,
                 'userPk': self.user1.pk,
-                'password': 'newPassword', 
+                'password': 'newPassword',
                 'verifyPassword': 'newPassword',
                 'is_active': True
-            }
+                }
 
         response = self.client.post(reverse('editUser', args=[self.user1.username]), data, follow=True)
         self.assertEquals(200, response.status_code)
@@ -84,7 +85,7 @@ class UserTest(BaseAdminTest):
         self.logout()
         response = self.login(self.user1, 'newPassword', follow=True)
         self.assert_message_count(response, 0)
-        
+
     def testSetGroup(self):
         self.login(self.user4)
         response = self.client.get(reverse('editUser', args=[self.user1.username]))
@@ -93,23 +94,23 @@ class UserTest(BaseAdminTest):
         contextCheck(self, context)
         self.assertEquals(self.user4.username, context['user'].username)
         self.assertEqual("admin/add_edit_user.html", response.templates[0].name)
-        
+
         groupPk = str(Group.objects.get(name=self.group1.name).pk)
-        
+
         data = {'username': self.user1.username,
-                'first_name': 'firstname', 
-                'last_name': 'lastname', 
+                'first_name': 'firstname',
+                'last_name': 'lastname',
                 'email': 'nobody@whocares.com',
                 'userPk': self.user1.pk,
-                'is_superuser': True, 
+                'is_superuser': True,
                 'is_active': False,
                 'groups': groupPk
-        }
+                }
 
         response = self.client.post(reverse('editUser', args=[self.user1.username]), data)
         self.assertEquals(302, response.status_code)
         self.assertEqual('/userAdmin/', response.url)
-        newUser1 = User.objects.get(username = self.user1.username)
+        newUser1 = User.objects.get(username=self.user1.username)
         self.assertEqual('firstname', newUser1.first_name)
         self.assertEqual('lastname', newUser1.last_name)
         self.assertEqual('nobody@whocares.com', newUser1.email)

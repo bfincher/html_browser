@@ -4,6 +4,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Button, Layout
 from html_browser.models import User
 
+
 class AddUserForm(forms.ModelForm):
     verifyPassword = forms.CharField(label='Verify Password', widget=forms.PasswordInput())
 
