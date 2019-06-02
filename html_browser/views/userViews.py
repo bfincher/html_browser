@@ -75,7 +75,7 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
             else:
                 reqLogger = getReqLogger()
                 reqLogger.error('form.errors = %s', self.form.errors)
-                return self.get(request, username=self.username, title=self.title, *args, **kwargs)
+                return self.get(request, username=request.POST['username'], title=self.title, *args, **kwargs)
 
         return redirect("userAdmin")
 
