@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.views import redirect_to_login
 from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponse
@@ -12,6 +13,7 @@ from html_browser.utils import getCurrentDirEntries, handleDelete,\
     getReqLogger,\
     getCheckedEntries, replaceEscapedUrl,\
     FolderAndPath, ArgumentException
+from html_browser._os import joinPaths
 from html_browser_site import settings
 
 import json
@@ -90,7 +92,7 @@ class BaseContentView(UserPassesTestMixin, BaseView):
         self.context['folderAndPath'] = self.folderAndPath
         return super().dispatch(request, *args, **kwargs)
 
-    def test_func(self):
+    def does_user_pass_test(self):
         if self.requireDelete and not self.userCanDelete:
             messages.error(self.request, "Delete permission required")
             return False
@@ -102,6 +104,13 @@ class BaseContentView(UserPassesTestMixin, BaseView):
             return False
 
         return True
+
+    def get_test_func(self):
+        return self.does_user_pass_test
+
+    # override parent class handling of no permission.  We don't want an exception, just a redirect
+    def handle_no_permission(self):
+        return redirect_to_login(self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name())
 
 
 class IndexView(BaseView):
@@ -149,18 +158,18 @@ class LogoutView(BaseView):
 class DownloadView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
         return sendfile(request,
-                        os.path.join(self.folderAndPath.absPath, fileName),
+                        joinPaths(self.folderAndPath.absPath, fileName),
                         attachment=True)
 
 
 class DownloadImageView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
-        return sendfile(request, os.path.join(self.folderAndPath.absPath, fileName), attachment=False)
+        return sendfile(request, joinPaths(self.folderAndPath.absPath, fileName), attachment=False)
 
 
 class ThumbView(BaseView):
     def get(self, request, path, *args, **kwargs):
-        file = os.path.join(settings.THUMBNAIL_CACHE_DIR, path)
+        file = joinPaths(settings.THUMBNAIL_CACHE_DIR, path)
         return sendfile(request, file, attachment=False)
 
 
@@ -171,7 +180,7 @@ class DownloadZipView(BaseContentView):
         self.zipFile = ZipFile(fileName, mode='w', compression=compression)
 
         for entry in getCheckedEntries(request.GET):
-            path = os.path.join(self.folderAndPath.absPath, replaceEscapedUrl(entry))
+            path = joinPaths(self.folderAndPath.absPath, replaceEscapedUrl(entry))
             if os.path.isfile(path):
                 self.__addFileToZip__(path)
             else:
@@ -217,7 +226,7 @@ class UploadView(BaseContentView):
         return redirect(reverseContentUrl(self.folderAndPath))
 
     def _handleFileUpload(self, f):
-        fileName = os.path.join(self.folderAndPath.absPath, f.name)
+        fileName = joinPaths(self.folderAndPath.absPath, f.name)
         dest = open(fileName, 'wb')
 
         for chunk in f.chunks():

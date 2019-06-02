@@ -13,6 +13,7 @@ from zipfile import ZipFile
 
 from html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_DELETE
 from html_browser.views.base_view import reverseContentUrl, FolderAndPath, getIndexIntoCurrentDir
+from html_browser._os import joinPaths
 
 
 def contextCheck(testCase, context, user=None, folder=None):
@@ -34,23 +35,22 @@ class BaseViewTest(unittest.TestCase):
         self.user1.set_password(self.user1Pw)
         self.user1.save()
 
-        group1 = Group()
-        group1.name = 'test group1'
-        group1.save()
+        self.group1 = Group()
+        self.group1.name = 'test_group1'
+        self.group1.save()
 
         self.user2 = User()
         self.user2.username = 'user2'
         self.user2Pw = 'test_pw_2'
         self.user2.set_password(self.user2Pw)
         self.user2.save()
-        self.user2.groups.add(group1)
+        self.user2.groups.add(self.group1)
         self.user2.save()
 
         self.user3 = User()
         self.user3.username = 'user3'
         self.user3Pw = 'test_pw_3'
         self.user3.set_password(self.user3Pw)
-        self.user3.save()
         self.user3.save()
 
         self.users = {self.user1.username: self.user1Pw,
@@ -93,10 +93,12 @@ class BaseViewTest(unittest.TestCase):
         self.folder4.viewOption = 'A'
         self.folder4.save()
 
+        self.folders = [self.folder1, self.folder2, self.folder3, self.folder4]
+
         groupPerm1 = GroupPermission()
         groupPerm1.folder = self.folder2
         groupPerm1.permission = CAN_DELETE
-        groupPerm1.group = group1
+        groupPerm1.group = self.group1
         groupPerm1.save()
 
         self.client = Client()
@@ -106,11 +108,58 @@ class BaseViewTest(unittest.TestCase):
         Group.objects.all().delete()
         Folder.objects.all().delete()
 
-    def login(self, user):
-        return self.client.post(reverse('login'), data={'userName': user.username, 'password': self.users[user.username]})
+    def login(self, user, password=None, follow=False):
+        password = password or self.users[user.username]
+        return self.client.post(reverse('login'), data={'userName': user.username, 'password': password}, follow=follow)
 
     def logout(self):
         return self.client.get(reverse('logout'))
+
+    def assert_message_count(self, response, expect_num):
+        """
+        Asserts that exactly the given number of messages have been sent.
+        """
+
+        actual_num = len(response.context['messages'])
+        if actual_num != expect_num:
+            self.fail('Message count was %d, expected %d' %
+                      (actual_num, expect_num))
+
+    def assert_message_contains(self, response, text, level=None):
+        """
+        Asserts that there is exactly one message containing the given text.
+        """
+
+        messages = response.context['messages']
+
+        matches = [m for m in messages if text in m.message]
+
+        if len(matches) == 1:
+            msg = matches[0]
+            if level is not None and msg.level != level:
+                self.fail('There was one matching message but with different'
+                          'level: %s != %s' % (msg.level, level))
+
+                return
+
+        elif len(matches) == 0:
+            messages_str = ", ".join('"%s"' % m for m in messages)
+            self.fail('No message contained text "%s", messages were: %s' %
+                      (text, messages_str))
+        else:
+            self.fail('Multiple messages contained text "%s": %s' %
+                      (text, ", ".join(('"%s"' % m) for m in matches)))
+
+    def assert_message_not_contains(self, response, text):
+        """ Assert that no message contains the given text. """
+
+        messages = response.context['messages']
+
+        matches = [m for m in messages if text in m.message]
+
+        if len(matches) > 0:
+            self.fail('Message(s) contained text "%s": %s' %
+                      (text, ", ".join(('"%s"' % m) for m in matches)))
 
 
 class IndexViewTest(BaseViewTest):
@@ -201,7 +250,11 @@ class DownloadZipViewTest(BaseViewTest):
 
         attachmentRegex = re.compile(r'attachment; filename="(download_\w+\.zip)"')
         zipFileName = None
-        extractPath = "/tmp/extract"
+        tmpDir = tempfile.gettempdir()
+
+        extractPath = joinPaths(tmpDir, 'extract')
+        if not os.path.exists(extractPath):
+            os.makedirs(extractPath)
 
         try:
             for item in list(response.items()):
@@ -212,16 +265,16 @@ class DownloadZipViewTest(BaseViewTest):
 
             self.assertIsNotNone(zipFileName)
 
-            zipFile = ZipFile(os.path.join('/tmp', zipFileName), mode='r')
+            zipFile = ZipFile(joinPaths(tmpDir, zipFileName), mode='r')
             entries = zipFile.infolist()
 
-            os.mkdir(extractPath)
+            os.makedirs(extractPath, exist_ok=True)
             for entry in entries:
                 zipFile.extract(entry, extractPath)
 
-            extractedFileA = os.path.join(extractPath, 'add_user.js')
-            extractedFileB = os.path.join(extractPath, 'base.js')
-            extractedTestFile = os.path.join(extractPath, 'images/Add-Folder-icon.png')
+            extractedFileA = joinPaths(extractPath, 'add_user.js')
+            extractedFileB = joinPaths(extractPath, 'base.js')
+            extractedTestFile = joinPaths(extractPath, 'images/Add-Folder-icon.png')
 
             self.assertTrue(os.path.exists(extractedFileA))
             self.assertTrue(os.path.exists(extractedFileB))

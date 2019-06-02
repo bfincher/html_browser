@@ -1,5 +1,9 @@
 import os
+from html_browser._os import joinPaths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../', __file__))))
+BASE_DIR = BASE_DIR.replace(os.sep, '/')
+
+BASE_DIR_REALPATH = os.path.realpath(BASE_DIR).replace(os.sep, '/')
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -24,4 +28,4 @@ STATICFILES_DIRS = ()
 
 LOG_DIR = '/var/log/hb'
 
-FOLDER_LINK_DIR = os.path.join(BASE_DIR, 'folder_links')
+THUMBNAIL_CACHE_DIR = joinPaths(BASE_DIR, 'thumb_cache')

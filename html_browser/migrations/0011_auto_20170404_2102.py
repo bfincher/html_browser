@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('html_browser', '0010_folder_links'),
+        ('html_browser', '0009_merge_20161110_0128'),
     ]
 
     operations = [

@@ -13,7 +13,7 @@
 		
 		{% for user in users %}
 		<tr>
-			<td> <a href="{% url 'editUser' %}?userName={{ user.username }}">{{ user.username }}</a> </td>
+			<td> <a href="{% url 'editUser' user.username%}">{{ user.username }}</a> </td>
 			<td>
 				<ul>
 				{% for group in user.groups.all %}
