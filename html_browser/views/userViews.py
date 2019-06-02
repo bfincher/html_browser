@@ -98,13 +98,21 @@ class EditUserView(AbstractUserView):
             user = User.objects.get(username=self.username)
             self.form = EditUserForm(instance=user)
         else:
-            user = User.objects.get(pk=request.POST['userPk'])
+            user = User.objects.get(username=request.POST['username'])
             self.form = EditUserForm(request.POST, instance=user)
 
 
 class AddUserView(AbstractUserView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+    def post(self, request, title, *args, **kwargs):
+        self.title = title
+        return super().post(request, *args, **kwargs)
+        
+    def get(self, request, title, *args, **kwargs):
+        self.title = title
+        return super().get(request, *args, **kwargs)
 
     def initForm(self, request):
         if request.method == "GET":

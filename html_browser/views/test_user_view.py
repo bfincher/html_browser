@@ -3,6 +3,7 @@ from .test_base_view import contextCheck
 from django.urls import reverse
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from html_browser.models import Group
 
 class UserTest(BaseAdminTest):
     def testUserAdminView(self):
@@ -93,6 +94,8 @@ class UserTest(BaseAdminTest):
         self.assertEquals(self.user4.username, context['user'].username)
         self.assertEqual("admin/add_edit_user.html", response.templates[0].name)
         
+        groupPk = str(Group.objects.get(name=self.group1.name).pk)
+        
         data = {'username': self.user1.username,
                 'first_name': 'firstname', 
                 'last_name': 'lastname', 
@@ -100,7 +103,7 @@ class UserTest(BaseAdminTest):
                 'userPk': self.user1.pk,
                 'is_superuser': True, 
                 'is_active': False,
-                'groups': '1'
+                'groups': groupPk
         }
 
         response = self.client.post(reverse('editUser', args=[self.user1.username]), data)
@@ -112,3 +115,5 @@ class UserTest(BaseAdminTest):
         self.assertEqual('nobody@whocares.com', newUser1.email)
         self.assertTrue(newUser1.is_superuser)
         self.assertFalse(newUser1.is_active)
+        self.assertEqual(1, newUser1.groups.count())
+        self.assertTrue(self.group1 in newUser1.groups.all())
