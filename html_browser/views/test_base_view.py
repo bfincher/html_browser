@@ -108,11 +108,58 @@ class BaseViewTest(unittest.TestCase):
         Group.objects.all().delete()
         Folder.objects.all().delete()
 
-    def login(self, user):
-        return self.client.post(reverse('login'), data={'userName': user.username, 'password': self.users[user.username]})
+    def login(self, user, password=None, follow=False):
+        password = password or self.users[user.username]
+        return self.client.post(reverse('login'), data={'userName': user.username, 'password': password}, follow=follow)
 
     def logout(self):
         return self.client.get(reverse('logout'))
+    
+    def assert_message_count(self, response, expect_num):
+        """
+        Asserts that exactly the given number of messages have been sent.
+        """
+
+        actual_num = len(response.context['messages'])
+        if actual_num != expect_num:
+            self.fail('Message count was %d, expected %d' %
+                      (actual_num, expect_num))
+
+    def assert_message_contains(self, response, text, level=None):
+        """
+        Asserts that there is exactly one message containing the given text.
+        """
+
+        messages = response.context['messages']
+
+        matches = [m for m in messages if text in m.message]
+
+        if len(matches) == 1:
+            msg = matches[0]
+            if level is not None and msg.level != level:
+                self.fail('There was one matching message but with different'
+                          'level: %s != %s' % (msg.level, level))
+
+                return
+
+        elif len(matches) == 0:
+            messages_str = ", ".join('"%s"' % m for m in messages)
+            self.fail('No message contained text "%s", messages were: %s' %
+                      (text, messages_str))
+        else:
+            self.fail('Multiple messages contained text "%s": %s' %
+                        (text, ", ".join(('"%s"' % m) for m in matches)))
+
+    def assert_message_not_contains(self, response, text):
+        """ Assert that no message contains the given text. """
+
+        messages = response.context['messages']
+
+        matches = [m for m in messages if text in m.message]
+
+        if len(matches) > 0:
+            self.fail('Message(s) contained text "%s": %s' %
+                      (text, ", ".join(('"%s"' % m) for m in matches)))
 
 
 class IndexViewTest(BaseViewTest):
@@ -157,8 +204,8 @@ class IndexViewTest(BaseViewTest):
         self.assertEquals(self.folder3, context['folders'][1])
         self.assertEquals(self.folder4, context['folders'][2])
         self.assertEquals('index.html', response.templates[0].name)
-
-
+        
+    
 class LoginViewTest(BaseViewTest):
     def testLogin(self):
         response = self.client.post(reverse('login'), data={'userName': self.user1.username, 'password': self.user1Pw})

@@ -153,14 +153,8 @@ class GroupTest(BaseAdminTest):
         self.assertEquals(302, response.status_code)
         self.assertEquals('/?next=/groupAdmin/', response.url)
         
-    def deleteMe(self):
-        self.login(self.user4)
-        data = {'groupName': 'new Group Name'}
-        response = self.client.post(reverse('addGroup'), data=data)
-        return response
-        
     def testAddGroup(self):
-        self.login(self.user4)
+        self.login(self.user4)        
         data = {'groupName': 'newGroupName'}
         response = self.client.post(reverse('addGroup'), data=data)
         self.assertEquals(302, response.status_code)
@@ -170,17 +164,17 @@ class GroupTest(BaseAdminTest):
         # test add invalid group name
         data = {'groupName': 'new Group Name'}
         response = self.client.post(reverse('addGroup'), data=data, follow=True)
-        messages = response.context['messages']
         self.assertEquals(200, response.status_code)
-        self.assertTrue("Invalid group name.  Must only contain letters, numbers, and underscores" in messages)
+        self.assert_message_contains(response, "Invalid group name.  Must only contain letters, numbers, and underscores")
         self.assertEquals('admin/group_admin.html', response.templates[0].name)
         self.assertFalse(get_object_or_None(Group, name='new Group Name'))
         
         self.logout()
         self.login(self.user1)
         data = {'groupName': 'newGroupName2'}
-        self.assertEquals(302, response.status_code)
-        self.assertEquals('/groupAdmin/', response.url)
+        response = self.client.post(reverse('addGroup'), data=data, follow=True)
+        self.assertEquals(200, response.status_code)
+        self.assertEquals('index.html', response.templates[0].name)
         self.assertFalse(get_object_or_None(Group, name='newGroupName2'))
         
     def testDeleteGroup(self):
