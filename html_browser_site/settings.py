@@ -1,6 +1,7 @@
 # Django settings for html_browser_site project.
 import os
 from .local_settings import *
+from html_browser._os import joinPaths
 
 URL_PREFIX = r''
 LOGIN_URL = '/'
@@ -9,8 +10,6 @@ DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 DEBUG = True
 THUMBNAIL_DEBUG = True
 THUMBNAIL_STORAGE = 'html_browser.utils.ThumbnailStorage'
-
-THUMBNAIL_CACHE_DIR = FOLDER_LINK_DIR
 
 MANAGERS = ADMINS
 
@@ -86,8 +85,8 @@ JS_REVERSE_JS_MINIFY = True
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'html_browser/templates'),
-                 os.path.join(BASE_DIR, 'html_browser_site/templates'),
+        'DIRS': [joinPaths(BASE_DIR, 'html_browser/templates'),
+                 joinPaths(BASE_DIR, 'html_browser_site/templates'),
                  ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -140,6 +139,9 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.profiling.ProfilingPanel',
 ]
 
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
@@ -157,7 +159,7 @@ LOGGING = {
         'default': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(LOG_DIR, 'hb.log'),
+            'filename': joinPaths(LOG_DIR, 'hb.log'),
             'maxBytes': 1024 * 1024 * 10,  # 10 MB
             'backupCount': 5,
             'formatter': 'standard',
@@ -165,7 +167,7 @@ LOGGING = {
         'request_handler': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(LOG_DIR, 'request.log'),
+            'filename': joinPaths(LOG_DIR, 'request.log'),
             'maxBytes': 1024 * 1024 * 10,  # 10 MB
             'backupCount': 5,
             'formatter': 'standard',

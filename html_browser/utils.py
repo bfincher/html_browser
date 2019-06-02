@@ -18,6 +18,7 @@ import re
 from shutil import rmtree
 from sorl.thumbnail import get_thumbnail
 from urllib.parse import quote_plus, unquote_plus
+from html_browser._os import joinPaths
 
 logger = logging.getLogger('html_browser.utils')
 reqLogger = None
@@ -28,12 +29,21 @@ GIGABYTE = MEGABYTE * KILOBYTE
 
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
 folderAndPathRegex = re.compile(r'^(\w+)(/(.*))?$')
-imageRegex = re.compile(r'.+\.(?i)((jpg)|(png)|(gif)|(bmp))')
+imageRegexStr = r'.+\.(?i)((jpg)|(png)|(gif)|(bmp))'
+imageRegex = re.compile(imageRegexStr)
+imageRegexWithCach = re.compile(r'cache/%s' % imageRegexStr)
 
 
 class ThumbnailStorage(FileSystemStorage):
-    def __init__(self, **kwargs):
-        super().__init__(location=settings.FOLDER_LINK_DIR)
+    def __init__(self, *args, **kwargs):
+        if not os.path.exists(settings.THUMBNAIL_CACHE_DIR):
+            os.makedirs(settings.THUMBNAIL_CACHE_DIR)
+        super().__init__(location=settings.THUMBNAIL_CACHE_DIR)
+
+    def path(self, name):
+        if imageRegexWithCach.match(name):
+            return joinPaths(self.base_location, name)
+        return name
 
 
 class NoParentException(Exception):
@@ -60,7 +70,7 @@ class FolderAndPath:
             folderName = match.groups()[0]
             self.folder = Folder.objects.get(name=folderName)
             self.relativePath = unquote_plus(match.groups()[2] or '')
-            self.absPath = os.path.join(self.folder.localPath, self.relativePath)
+            self.absPath = joinPaths(self.folder.localPath, self.relativePath)
             self.url = kwargs['url']
         elif 'path' in kwargs and len(kwargs) == 2:
             if 'folderName' in kwargs:
@@ -73,7 +83,7 @@ class FolderAndPath:
             # just in case the path argument already has the folder localpath appended, try to replace the folder.localpath prefix
             self.relativePath = re.sub(r'^%s' % self.folder.localPath, '', kwargs['path'])
 
-            self.absPath = os.path.join(self.folder.localPath, self.relativePath)
+            self.absPath = joinPaths(self.folder.localPath, self.relativePath)
             self.url = "%s/%s" % (self.folder.name, self.relativePath)
         else:
             raise FolderAndPathArgumentException(**kwargs)
@@ -111,12 +121,6 @@ def getCheckedEntries(requestDict):
     return entries
 
 
-def getFolderLinkDir(folderName):
-    if not os.path.exists(settings.FOLDER_LINK_DIR):
-        os.makedirs(settings.FOLDER_LINK_DIR)
-    return os.path.join(settings.FOLDER_LINK_DIR, folderName)
-
-
 class DirEntry():
     def __init__(self, path, folderAndPath, viewType):
         self.isDir = path.is_dir()
@@ -137,7 +141,7 @@ class DirEntry():
 
         if not self.isDir and viewType == const.thumbnailsViewType and imageRegex.match(self.name):
             self.hasThumbnail = True
-            imageLinkPath = os.path.join(getFolderLinkDir(folderAndPath.folder.name), folderAndPath.relativePath, self.name)
+            imageLinkPath = joinPaths(folderAndPath.folder.localPath, folderAndPath.relativePath, self.name)
             im = get_thumbnail(imageLinkPath, '150x150')
             self.thumbnailUrl = reverse('thumb', args=[im.name])
         else:
@@ -246,7 +250,7 @@ def replaceEscapedUrl(url):
 
 def handleDelete(folderAndPath, entries):
     for entry in entries:
-        entryPath = os.path.join(folderAndPath.absPath, replaceEscapedUrl(entry)).encode("utf-8")
+        entryPath = joinPaths(folderAndPath.absPath, replaceEscapedUrl(entry)).encode("utf-8")
 
         if os.path.isdir(entryPath):
             rmtree(entryPath)

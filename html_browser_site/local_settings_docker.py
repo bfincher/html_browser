@@ -2,6 +2,9 @@ import os
 import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../', __file__))))
+BASE_DIR = BASE_DIR.replace(os.sep, '/')
+
+BASE_DIR_REALPATH = os.path.realpath(BASE_DIR).replace(os.sep, '/')
 
 with open('/config/local_settings.json') as f:
     configs = json.loads(f.read())
@@ -17,4 +20,4 @@ LOG_DIR = configs['LOG_DIR']
 
 ALLOWED_HOSTS = configs['ALLOWED_HOSTS']
 
-FOLDER_LINK_DIR = configs['FOLDER_LINK_DIR']
+THUMBNAIL_CACHE_DIR = configs['THUMBNAIL_CACHE_DIR']

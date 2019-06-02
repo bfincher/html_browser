@@ -15,6 +15,7 @@ from html_browser.constants import _constants as const
 from html_browser.utils import getCurrentDirEntries,\
     formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete,\
     getCheckedEntries, FolderAndPath
+from html_browser._os import joinPaths
 
 logger = logging.getLogger('html_browser.content_view')
 
@@ -55,7 +56,7 @@ class ContentView(BaseContentView):
             request.session['viewType'] = viewType
         elif action == 'mkDir':
             dirName = request.POST['dir']
-            os.makedirs(os.path.join(self.folderAndPath.absPath, dirName))
+            os.makedirs(joinPaths(self.folderAndPath.absPath, dirName))
         elif action == 'rename':
             self.handleRename(request.POST['file'], request.POST['newName'])
         elif action == 'changeSettings':
@@ -67,20 +68,20 @@ class ContentView(BaseContentView):
         return redirect(reverseContentUrl(self.folderAndPath))
 
     def handleRename(self, fileName, newName):
-        source = os.path.join(self.folderAndPath.absPath, replaceEscapedUrl(fileName))
-        dest = os.path.join(self.folderAndPath.absPath, replaceEscapedUrl(newName))
+        source = joinPaths(self.folderAndPath.absPath, replaceEscapedUrl(fileName))
+        dest = joinPaths(self.folderAndPath.absPath, replaceEscapedUrl(newName))
         move(source, dest)
 
     def __handlePaste(self, clipboard):
         dest = self.folderAndPath.absPath
 
         for entry in clipboard.entries:
-            if os.path.exists(os.path.join(dest, entry)):
+            if os.path.exists(joinPaths(dest, entry)):
                 messages.error("One or more of the items already exists in the destination")
                 return
 
         for entry in clipboard.entries:
-            source = os.path.join(clipboard.folderAndPath.absPath, replaceEscapedUrl(entry))
+            source = joinPaths(clipboard.folderAndPath.absPath, replaceEscapedUrl(entry))
             if clipboard.clipboardType == 'COPY':
                 if os.path.isdir(source):
                     copytree(source, dest + entry)
