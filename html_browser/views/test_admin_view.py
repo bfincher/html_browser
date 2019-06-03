@@ -192,3 +192,22 @@ class GroupTest(BaseAdminTest):
         self.assertEquals(302, response.status_code)
         self.assertEquals('/groupAdmin/', response.url)
         self.assertFalse(get_object_or_None(Group, name=self.group1.name))
+
+    def testEditGroup(self):
+        self.login(self.user4)
+        response = self.client.get(reverse('editGroup', args=[self.group1.name]))
+        context = response.context[0]
+        contextCheck(self, context)
+        self.assertEquals(self.group1.name, context['groupName'])
+        self.assertEqual("admin/edit_group.html", response.templates[0].name)
+
+        userPk = str(User.objects.get(username=self.user3.username).pk)
+        data = {'name': 'newGroupName',
+                'users': userPk
+                }
+        self.assertFalse(User.objects.get(username=self.user3.username).groups.filter(name__in=['newGroupName']).exists())
+        response = self.client.post(reverse('editGroup', args=[self.group1.name]), data)
+        self.assertEquals(302, response.status_code)
+        self.assertEquals('/groupAdmin/', response.url)
+        self.assertEquals('newGroupName', Group.objects.get(pk=self.group1.pk).name)
+        self.assertTrue(User.objects.get(username=self.user3.username).groups.filter(name__in=['newGroupName']).exists())
