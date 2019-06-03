@@ -2,10 +2,11 @@ from django import forms
 from django.urls import reverse
 from django.forms import inlineformset_factory, BaseInlineFormSet
 from django.template.loader import render_to_string
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Button, Layout, LayoutObject, TEMPLATE_PACK, HTML
 
-from html_browser.models import Folder, UserPermission, GroupPermission, User
+from html_browser.models import Folder, UserPermission, GroupPermission, User, Group
 
 
 class Formset(LayoutObject):
@@ -159,39 +160,40 @@ GroupPermissionFormSet = inlineformset_factory(Folder,
                                                can_delete=True)
 
 
-class EditGroupForm(forms.Form):
-    groupName = forms.CharField(required=False, widget=forms.HiddenInput())
+class EditGroupForm(forms.ModelForm):
+    users = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple(
+            verbose_name=('Users'),
+            is_stacked=False
+        )
+    )
 
-    users = None
-
-    def createUsers():
-        users = []
-        for user in User.objects.all():
-            users.append((user.username, user.username))
-
-        users = forms.MultipleChoiceField(choices=users,
-                                          required=False,
-                                          widget=forms.CheckboxSelectMultiple)
-        return users
+    class Meta:
+        model = Group
+        fields = ('name', 'users')
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
+        self.helper.form_show_errors = True
         self.helper.form_id = 'form'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Save'))
         self.helper.add_input(Button('cancel', 'Cancel', css_class='btn-default', onclick="window.history.back()"))
         self.helper.add_input(Button('deleteGroup', 'Delete Group', css_class='btn'))
-        self.users = EditGroupForm.createUsers()
 
-        instance = kwargs.pop('instance', None)
+        instance = kwargs.get('instance', None)
+        initial = kwargs.get('initial', {})
+        initial['users'] = instance.user_set.all()
+        kwargs['initial'] = initial
         super().__init__(*args, **kwargs)
 
-        if instance:
-            self.helper.form_action = reverse('editGroup', args=[instance.name])
-            activeUsers = []
+        self.helper.form_action = reverse('editGroup', args=[instance.name])
 
-            for user in User.objects.filter(groups__id=instance.id):
-                activeUsers.append(user.username)
+    def save(self, commit=True):
+        group = super().save(False)
+        if commit:
+            group.save()
 
-            self.users.initial = activeUsers
-            self.fields['groupName'].initial = instance.name
+        return group

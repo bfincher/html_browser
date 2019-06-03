@@ -240,29 +240,40 @@ class DeleteGroupView(BaseAdminView):
 
 
 class EditGroupView(BaseAdminView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form = None
+
     def get(self, request, groupName, *args, **kwargs):
         group = Group.objects.get(name=groupName)
 
-        form = EditGroupForm(instance=group)
+        if not self.form:
+            self.form = EditGroupForm(instance=group)
 
         self.context['groupName'] = groupName
-        self.context['form'] = form
+        self.context['form'] = self.form
         return render(request, 'admin/edit_group.html', self.context)
 
     def post(self, request, groupName, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        form = EditGroupForm(request.POST)
-        if form.is_valid():
-            group = Group.objects.get(name=groupName)
-            group.user_set.clear()
+        group = Group.objects.get(name=groupName)
+        self.form = EditGroupForm(request.POST, instance=group)
 
-            for userName in form.cleaned_data['users']:
-                user = User.objects.get(username=userName)
-                group.user_set.add(user)
-            group.save()
-        else:
-            reqLogger = getReqLogger()
-            reqLogger.error('form.errors = %s', form.errors)
+        with transaction.atomic():
+            if self.form.is_valid():
+                group = self.form.save()
+
+                group.user_set.clear()
+
+                for userName in self.form.cleaned_data['users']:
+                    user = User.objects.get(username=userName)
+                    group.user_set.add(user)
+
+                group.save()
+            else:
+                reqLogger = getReqLogger()
+                reqLogger.error('form.errors = %s', self.form.errors)
+                return self.get(request, groupName=groupName, *args, **kwargs)
 
         return redirect('groupAdmin')
 
