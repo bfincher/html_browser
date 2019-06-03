@@ -42,7 +42,7 @@
 			</td>
 			<td>
 				<form ENCTYPE="multipart/form-data" method="POST" 
-					action="/hb/upload/"> {% csrf_token %}			
+					action="{% url 'upload' folderAndPath.url %}"> {% csrf_token %}			
 				<input type="hidden" name="action" value="uploadZip"/>
 				<table align="center">
 					<caption>Zip Upload</caption>
