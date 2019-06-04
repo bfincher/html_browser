@@ -8,7 +8,7 @@ import re
 from shutil import rmtree
 import tempfile
 import unittest
-import zipfile
+# import zipfile
 from zipfile import ZipFile
 
 from html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_DELETE
@@ -309,7 +309,7 @@ class UploadViewTest(BaseViewTest):
 
         self.assertEquals(302, response.status_code)
         self.assertEquals('/?next=/upload/test/', response.url)
-
+    '''
     def testUpload(self):
         self.login(self.user1)
 
@@ -377,6 +377,7 @@ class UploadViewTest(BaseViewTest):
             for destFile in destFiles:
                 if os.path.exists(destFile):
                     os.remove(destFile)
+    '''
 
     def testImageView(self):
         self.login(self.user1)

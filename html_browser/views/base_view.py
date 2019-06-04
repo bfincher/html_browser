@@ -215,37 +215,30 @@ class UploadView(BaseContentView):
         return render(request, 'upload.html', self.context)
 
     def post(self, request, folderAndPathUrl, *args, **kwargs):
-        action = request.POST['action']
-        if action == 'uploadFile':
-            self._handleFileUpload(request.FILES['upload1'])
-            messages.success(request, 'File uploaded')
-        elif action == 'uploadZip':
-            self._handleZipUpload(request.FILES['zipupload1'])
-            messages.success(request, 'File uploaded and extracted')
+        for key in request.FILES:
+            fileName = joinPaths(self.folderAndPath.absPath, request.FILES[key].name)
+            with open(fileName, 'wb') as dest:
+                for chunk in request.FILES[key].chunks():
+                    dest.write(chunk)
 
-        return redirect(reverseContentUrl(self.folderAndPath))
+        data = {'error': '',
+                'initialPreview': [],
+                'initialPreviewConfig': [],
+                'initialPreviewThumbTags': [],
+                'append': True}
+        return HttpResponse(json.dumps(data), content_type='application/json')
 
-    def _handleFileUpload(self, f):
-        fileName = joinPaths(self.folderAndPath.absPath, f.name)
-        dest = open(fileName, 'wb')
-
-        for chunk in f.chunks():
-            dest.write(chunk)
-
-        dest.close()
-        return fileName
-
-    def _handleZipUpload(self, f):
-        fileName = self._handleFileUpload(f)
-        zipFile = ZipFile(fileName, mode='r')
-        entries = zipFile.infolist()
-
-        for entry in entries:
-            zipFile.extract(entry, self.folderAndPath.absPath)
-
-        zipFile.close()
-
-        os.remove(fileName)
+#     def _handleZipUpload(self, f):
+#         fileName = self._handleFileUpload(f)
+#         zipFile = ZipFile(fileName, mode='r')
+#         entries = zipFile.infolist()
+#
+#         for entry in entries:
+#             zipFile.extract(entry, self.folderAndPath.absPath)
+#
+#         zipFile.close()
+#
+#         os.remove(fileName)
 
 
 def getIndexIntoCurrentDir(request, folderAndPath, fileName):

@@ -200,6 +200,7 @@ class UtilsTest(unittest.TestCase):
             mediaDir = joinPaths(settings.BASE_DIR, 'media')
             testFiles = [FileEntry(joinPaths(mediaDir, 'bootstrap'), '&nbsp'),
                          FileEntry(joinPaths(mediaDir, 'images'), '&nbsp'),
+                         FileEntry(joinPaths(mediaDir, 'krajee'), '&nbsp'),
                          FileEntry(joinPaths(mediaDir, 'add_user.js'), '1.89 KB'),
                          ]
 
@@ -210,7 +211,7 @@ class UtilsTest(unittest.TestCase):
                     nextTime = nextTime + timedelta(seconds=1)
 
                 entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), False, const.thumbnailsViewType)
-                self.assertEquals(15, len(entries))
+                self.assertEquals(16, len(entries))
 
                 for i in range(0, len(testFiles)):
                     entry = entries[i]

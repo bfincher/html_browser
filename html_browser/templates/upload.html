@@ -1,63 +1,51 @@
 {% extends "page.html" %}
 
 {% block additional_header %}
-	<script language="javascript" type="text/javascript">
+	<script language="javascript" type="text/javascript">	
 	
-	function verifyZip(fieldName) {		
-		var field = document.getElementById(fieldName);
-		if (field.value != "") {
-			if (field.value.lastIndexOf(".zip") != field.value.length - 4) {
-				alert("Only zip files are accepted in this field");
-				field.value = "";
-			}
-		}
-	}		
+	$(document).on('ready', function() {
+		$("#input-folder").fileinput({
+			uploadUrl: "{% url 'upload' folderAndPath.url %}",
+			hideThumbnailContent: true,
+			uploadExtraData: {"csrfmiddlewaretoken": "{{ csrf_token }}"}		                   
+		});
+	});
+	
+	function goBack() {
+		window.history.back();
+	}
 
 	</script>
+	
+	<link href="{{ MEDIA_URL }}krajee/css/fileinput.css" media="all" rel="stylesheet" type="text/css">
+    <script src="{{ MEDIA_URL }}krajee/js/plugins/piexif.js" type="text/javascript"></script>
+    <script src="{{ MEDIA_URL }}krajee/js/plugins/sortable.js" type="text/javascript"></script>
+    <script src="{{ MEDIA_URL }}krajee/js/fileinput.js" type="text/javascript"></script>
+    <!--
+    <script src="{{ MEDIA_URL }}krajee/js/locales/es.js" type="text/javascript"></script>    
+    <script src="{{ MEDIA_URL }}krajee/themes/fas/theme.js" type="text/javascript"></script>
+    <script src="{{ MEDIA_URL }}krajee/themes/explorer-fas/theme.js" type="text/javascript"></script>
+    -->
+
 {% endblock %}
 
 {% block body %}
 	
 	<center>
 	<h3>Upload file to {{ folderAndPath.url }} </h3>
-		
-	<table class="UploadOuterTable">
-		<tr>
-			<td>
-				<form ENCTYPE="multipart/form-data" method="POST" 
-					action="{% url 'upload' folderAndPath.url %}"> {% csrf_token %}
-				<input type="hidden" name="action" value="uploadFile"/>
-				<table align="center">				
-					<caption>File upload</caption>					
-					<tr><td align="center"><input type="file" size="30" name="upload1"></td></tr>
-					<!-- 
-					<tr><td align="center"><input type="file" size="30" name="upload2"></td></tr>
-					<tr><td align="center"><input type="file" size="30" name="upload3"></td></tr>
-					<tr><td align="center"><input type="file" size="30" name="upload4"></td></tr>
-					<tr><td align="center"><input type="file" size="30" name="upload5"></td></tr>
-					-->
-					<tr><td align="center"><input type="submit" value="Upload" name="submit" /></td></tr>					 
-				</table>
-				</form>
-			</td>
-			<td>
-				<form ENCTYPE="multipart/form-data" method="POST" 
-					action="{% url 'upload' folderAndPath.url %}"> {% csrf_token %}			
-				<input type="hidden" name="action" value="uploadZip"/>
-				<table align="center">
-					<caption>Zip Upload</caption>
-					<tr><td align="center"><input type="file" size="30" name="zipupload1" id="zipupload1" onchange="verifyZip('zipupload1')"></td></tr>
-					<!--  
-					<tr><td align="center"><input type="file" size="30" id="zipupload2" onchange="verifyZip('zipupload2')"></td></tr>
-					<tr><td align="center"><input type="file" size="30" id="zipupload3" onchange="verifyZip('zipupload3')"></td></tr>
-					<tr><td align="center"><input type="file" size="30" id="zipupload4" onchange="verifyZip('zipupload4')"></td></tr>
-					<tr><td align="center"><input type="file" size="30" id="zipupload5" onchange="verifyZip('zipupload5')"></td></tr>
-					-->
-					<tr><td align="center"><input type="submit" value="Upload" name="submit" /></td></tr>
-				</table>
-				</form>
-			</td>
-		</tr>
-	</table>	
+				
 	</center>
+	
+	<div>
+		<label for "input-folder">Select files/folders</label>
+		<div class="file-loading">
+			<input id="input-folder" name="input-folder[]" type="file" multiple>
+		</div>
+	</div>
+	
+	<center>
+		<buton type="button" class="btn btn-success" onclick="window.location.href = '{% url 'content' folderAndPath.url|safe %}';" >Back</button>
+	</center>
+	
+	
 {% endblock %}
