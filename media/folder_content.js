@@ -187,7 +187,7 @@ function checkAll() {
 }
 
 $(document).ready(function() {
-    $("#checkAll").click(function() {
+    $("#checkAll").on("click", function() {
         checkAll();
     });
 });

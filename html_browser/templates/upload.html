@@ -3,7 +3,7 @@
 {% block additional_header %}
 	<script language="javascript" type="text/javascript">	
 	
-	$(document).on('ready', function() {
+	$(document).ready(function() {
 		$("#input-folder").fileinput({
 			uploadUrl: "{% url 'upload' folderAndPath.url %}",
 			hideThumbnailContent: true,

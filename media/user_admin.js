@@ -40,7 +40,7 @@
             validatePassword('form');
         });
 
-        $("#button-id-deleteuser").click(function() {
+        $("#button-id-deleteuser").on("click", function() {
             deleteUser();
         });
     });

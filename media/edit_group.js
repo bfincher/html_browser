@@ -6,7 +6,7 @@ function deleteGroup() {
 }
 
 $(document).ready(function() {
-    $("#button-id-deletegroup").click(function() {
+    $("#button-id-deletegroup").on("click", function() {
         deleteGroup();
     });
 });
