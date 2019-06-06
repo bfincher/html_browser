@@ -5,10 +5,11 @@ env PYTHONBUFFERED 1
 RUN mkdir /hb
 workdir /hb
 
+run apk add --no-cache py3-pillow shadow bash
+
 copy requirements.txt /hb/requirements.txt
 
-run apk add --no-cache py3-pillow shadow bash && \
-    ln -s /usr/bin/python3.6 /usr/bin/python && \
+run ln -s /usr/bin/python3.6 /usr/bin/python && \
     ln -s /usr/bin/pip3 /usr/bin/pip && \
     grep -v mysql requirements.txt | grep -v Pillow > requirements_minus_mysql.txt && \ 
     pip install --no-cache -r requirements_minus_mysql.txt && \

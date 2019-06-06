@@ -1,5 +1,5 @@
 if [ -z $VIRTUAL_ENV ]; then
-    image_name=html_browser_web
+    image_name=html_browser
 else
     image_name=$(basename $VIRTUAL_ENV)
 fi
