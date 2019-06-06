@@ -26,6 +26,7 @@ reqLogger = None
 KILOBYTE = 1024.0
 MEGABYTE = KILOBYTE * KILOBYTE
 GIGABYTE = MEGABYTE * KILOBYTE
+thumbnailGeometry = '150x150'
 
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
 folderAndPathRegex = re.compile(r'^(\w+)(/(.*))?$')
@@ -142,7 +143,7 @@ class DirEntry():
         if not self.isDir and viewType == const.thumbnailsViewType and imageRegex.match(self.name):
             self.hasThumbnail = True
             imageLinkPath = joinPaths(folderAndPath.folder.localPath, folderAndPath.relativePath, self.name)
-            im = get_thumbnail(imageLinkPath, '150x150')
+            im = get_thumbnail(imageLinkPath, thumbnailGeometry)
             self.thumbnailUrl = reverse('thumb', args=[im.name])
         else:
             self.hasThumbnail = False
