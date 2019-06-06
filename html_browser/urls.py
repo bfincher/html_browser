@@ -26,7 +26,6 @@ urlpatterns = [
     url(r'getNextImage/%s(?P<fileName>%s+)/$' % (folderAndPathRegex, fileNameChars), base_view.GetNextImageView.as_view(), name='getNextImage'),
     url(r'hbAdmin/.*', admin_views.AdminView.as_view(), name='admin'),
     url(r'hbChangePassword/.*', user_views.ChangePasswordView.as_view(), name='changePassword'),
-    url(r'hbChangePasswordResult/.*', user_views.ChangePasswordResultView.as_view(), name='changePasswordResult'),
     url(r'hbLogin/.*', base_view.LoginView.as_view(), name='login'),
     url(r'hbLogout/.*', base_view.LogoutView.as_view(), name='logout'),
     url(r'image_view/%s(?P<fileName>%s+)/$' % (folderAndPathRegex, fileNameChars), base_view.ImageView.as_view(), name='imageView'),
