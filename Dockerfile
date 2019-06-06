@@ -5,16 +5,6 @@ env PYTHONBUFFERED 1
 RUN mkdir /hb
 workdir /hb
 
-copy html_browser/ /hb/html_browser/
-copy html_browser_site/ /hb/html_browser_site/
-copy html_browser_site/local_settings_docker.py /hb/html_browser_site/local_settings.py
-copy html_browser_site/local_settings_docker.json /hb/html_browser_site/local_settings.json
-
-ENV APP_CONFIG="/config"
-
-copy media/ /hb/media/
-
-copy manage.py /hb
 copy requirements.txt /hb/requirements.txt
 
 run apk add --no-cache py3-pillow shadow bash && \
@@ -36,6 +26,16 @@ run apk add --no-cache py3-pillow shadow bash && \
     )" \
     && apk add --virtual .rundeps $runDeps 
 
+copy html_browser/ /hb/html_browser/
+copy html_browser_site/ /hb/html_browser_site/
+copy html_browser_site/local_settings_docker.py /hb/html_browser_site/local_settings.py
+copy html_browser_site/local_settings_docker.json /hb/html_browser_site/local_settings.json
+
+ENV APP_CONFIG="/config"
+
+copy media/ /hb/media/
+
+copy manage.py /hb
 copy entrypoint.sh /
 
 EXPOSE 8000
