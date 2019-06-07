@@ -1,5 +1,5 @@
 import unittest
-from html_browser_site import settings
+from html_browser import settings
 from html_browser.utils import joinPaths
 from html_browser.models import Folder
 from sorl.thumbnail.models import KVStore
