@@ -1,37 +1,54 @@
 import os
-from html_browser._os import joinPaths
+import json
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-print("file = %s" % __file__)
-print("BASE_DIR=%s" % BASE_DIR)
 BASE_DIR = BASE_DIR.replace(os.sep, '/')
-print("BASE_DIR=%s" % BASE_DIR)
 
 BASE_DIR_REALPATH = os.path.realpath(BASE_DIR).replace(os.sep, '/')
 
-ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-)
+with open('/config/local_settings.json') as f:
+    configs = json.loads(f.read())
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/config/hb.db',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    }
-}
+_stringsToReplace = {"${BASE_DIR}": BASE_DIR}
 
-STATIC_URL = '/hbmedia/'
-STATICFILES_DIRS = ((joinPaths(BASE_DIR, 'media')),)
-STATIC_ROOT = joinPaths(BASE_DIR, 'staticfiles')
-print('STATIC_ROOT = %s' % STATIC_ROOT)
-print("STATICFILES_DIRS=%s" % STATICFILES_DIRS)
 
-LOG_DIR = '/config/log'
+def _replaceList(values):
+    for i in range(0, len(values)):
+        value = values[i]
+        if type(value) is list:
+            _replaceList(value)
+        elif type(value) is dict:
+            _replaceDict(value)
+        else:
+            for key in _stringsToReplace:
+                values[i] = value.replace(key, _stringsToReplace[key])
 
-THUMBNAIL_CACHE_DIR = '/config/thumb_cache'
 
-ALLOWED_HOSTS = ['userver', 'localhost']
+def _replaceDict(_dict):
+    for key in _dict:
+        value = _dict[key]
+        if type(value) is list:
+            _replaceList(value)
+        elif type(value) is dict:
+            _replaceDict(value)
+        else:
+            for key in _stringsToReplace:
+                _dict[key] = value.replace(key, _stringsToReplace[key])
+
+
+_replaceDict(configs)
+
+print("configs = %s" % configs)
+
+ADMINS = (configs['ADMIN_NAME'], configs['ADMIN_EMAIL'])
+
+DATABASES = configs['DATABASES']
+
+STATIC_URL = configs['STATIC_URL']
+STATICFILES_DIRS = tuple(configs['STATICFILES_DIRS'])
+
+LOG_DIR = configs['LOG_DIR']
+
+ALLOWED_HOSTS = configs['ALLOWED_HOSTS']
+
+THUMBNAIL_CACHE_DIR = configs['THUMBNAIL_CACHE_DIR']
