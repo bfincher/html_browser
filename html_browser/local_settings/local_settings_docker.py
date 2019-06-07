@@ -1,23 +1,37 @@
 import os
-import json
+from html_browser._os import joinPaths
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(os.path.join('../../', __file__))))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+print("file = %s" % __file__)
+print("BASE_DIR=%s" % BASE_DIR)
 BASE_DIR = BASE_DIR.replace(os.sep, '/')
+print("BASE_DIR=%s" % BASE_DIR)
 
 BASE_DIR_REALPATH = os.path.realpath(BASE_DIR).replace(os.sep, '/')
 
-with open('/config/local_settings.json') as f:
-    configs = json.loads(f.read())
+ADMINS = (
+    # ('Your Name', 'your_email@example.com'),
+)
 
-ADMINS = (configs['ADMIN_NAME'], configs['ADMIN_EMAIL'])
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '/config/hb.db',                      # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }
+}
 
-DATABASES = configs['DATABASES']
+STATIC_URL = '/hbmedia/'
+STATICFILES_DIRS = ((joinPaths(BASE_DIR, 'media')),)
+STATIC_ROOT = joinPaths(BASE_DIR, 'staticfiles')
+print('STATIC_ROOT = %s' % STATIC_ROOT)
+print("STATICFILES_DIRS=%s" % STATICFILES_DIRS)
 
-STATIC_URL = configs['STATIC_URL']
-STATICFILES_DIRS = tuple(configs['STATICFILES_DIRS'])
+LOG_DIR = '/config/log'
 
-LOG_DIR = configs['LOG_DIR']
+THUMBNAIL_CACHE_DIR = '/config/thumb_cache'
 
-ALLOWED_HOSTS = configs['ALLOWED_HOSTS']
-
-THUMBNAIL_CACHE_DIR = configs['THUMBNAIL_CACHE_DIR']
+ALLOWED_HOSTS = ['userver', 'localhost']

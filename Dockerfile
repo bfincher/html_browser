@@ -5,7 +5,7 @@ env PYTHONBUFFERED 1
 RUN mkdir /hb
 workdir /hb
 
-run apk add --no-cache py3-pillow shadow bash
+run apk add --no-cache py3-pillow shadow bash nginx
 
 copy requirements.txt /hb/requirements.txt
 
@@ -14,6 +14,8 @@ run ln -s /usr/bin/python3.6 /usr/bin/python && \
     grep -v mysql requirements.txt | grep -v Pillow > requirements_minus_mysql.txt && \ 
     pip install --no-cache -r requirements_minus_mysql.txt && \
     rm requirements.txt requirements_minus_mysql.txt && \
+    pip install --no-cache gunicorn==19.9.0 && \
+    rm /etc/nginx/conf.d/default.conf && \
     find /usr/local \
         \( -type d -a -name test -o -name tests \) \
         -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
@@ -27,10 +29,10 @@ run ln -s /usr/bin/python3.6 /usr/bin/python && \
     )" \
     && apk add --virtual .rundeps $runDeps 
 
+copy nginx.conf /etc/nginx/conf.d
 copy html_browser/ /hb/html_browser/
 copy html_browser_site/ /hb/html_browser_site/
 copy html_browser_site/local_settings_docker.py /hb/html_browser_site/local_settings.py
-copy html_browser_site/local_settings_docker.json /hb/html_browser_site/local_settings.json
 
 ENV APP_CONFIG="/config"
 
