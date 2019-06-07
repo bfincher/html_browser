@@ -2,6 +2,7 @@ from django.conf.urls import url
 from html_browser.views import base_view, content_view
 from html_browser.views import adminViews as admin_views
 from html_browser.views import userViews as user_views
+from django_js_reverse.views import urls_js
 
 fileNameChars = r'[\w \-~!@#$%^&*\(\)\+,\.\'\[\]]'
 folderAndPathRegex = r'(?P<folderAndPathUrl>\w+(/%s+?)*)/' % fileNameChars
@@ -33,4 +34,5 @@ urlpatterns = [
     url(r'upload/%s$' % folderAndPathRegex, base_view.UploadView.as_view(), name='upload'),
     url(r'userAdmin/.*', user_views.UserAdminView.as_view(), name='userAdmin'),
     url(r'thumb/(?P<path>.*)', base_view.ThumbView.as_view(), name='thumb'),
+    url(r'jsreverse/$', urls_js, name='js_reverse'),
 ]

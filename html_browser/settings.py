@@ -1,6 +1,6 @@
-# Django settings for html_browser_site project.
+# Django settings for html_browser project.
 import os
-from .local_settings import *
+from html_browser.local_settings.local_settings import *
 from html_browser._os import joinPaths
 
 URL_PREFIX = r''
@@ -75,10 +75,10 @@ MIDDLEWARE = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'html_browser_site.urls'
+ROOT_URLCONF = 'html_browser.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'html_browser_site.wsgi.application'
+WSGI_APPLICATION = 'html_browser.wsgi.application'
 
 JS_REVERSE_JS_MINIFY = True
 
@@ -86,7 +86,6 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [joinPaths(BASE_DIR, 'html_browser/templates'),
-                 joinPaths(BASE_DIR, 'html_browser_site/templates'),
                  ],
         'APP_DIRS': True,
         'OPTIONS': {

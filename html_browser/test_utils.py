@@ -4,7 +4,7 @@ from html_browser.models import Folder
 from html_browser.utils import *
 from html_browser.constants import _constants as const
 from html_browser import utils
-from html_browser_site import settings
+from html_browser import settings
 from html_browser._os import joinPaths
 
 from datetime import datetime, timedelta

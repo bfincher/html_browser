@@ -14,7 +14,7 @@ from html_browser.utils import getCurrentDirEntries, handleDelete,\
     getCheckedEntries, replaceEscapedUrl,\
     FolderAndPath, ArgumentException
 from html_browser._os import joinPaths
-from html_browser_site import settings
+from html_browser import settings
 
 import json
 import logging

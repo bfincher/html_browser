@@ -3,7 +3,7 @@ from django.urls import reverse
 
 from .constants import _constants as const
 from html_browser.models import Folder
-from html_browser_site import settings
+from html_browser import settings
 
 import collections
 from datetime import datetime
