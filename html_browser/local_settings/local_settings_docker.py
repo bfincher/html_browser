@@ -32,8 +32,8 @@ def _replaceDict(_dict):
         elif type(value) is dict:
             _replaceDict(value)
         else:
-            for key in _stringsToReplace:
-                _dict[key] = value.replace(key, _stringsToReplace[key])
+            for strToReplace in _stringsToReplace:
+                _dict[key] = value.replace(strToReplace, _stringsToReplace[strToReplace])
 
 
 _replaceDict(configs)
