@@ -8,7 +8,7 @@ services:
 sudo: required
 
 before_install :
-  - docker build -t html_browser --pull bfincher/html_browser/docker
+  - docker build -t html_browser --pull docker
   - sudo mkdir /config
   - sudo chown $USER /config
   - docker run -d -p 8000:8000 -v /config:/config -v /:/data1 -e APP_UID=1000 -e APP_GID=1000 --name html_browser html_browser
