@@ -21,7 +21,6 @@ DATABASES = {
     }
 }
 
-STATIC_URL = '/hbmedia/'
 STATICFILES_DIRS = ((joinPaths(BASE_DIR, 'media')),)
 
 LOG_DIR = joinPaths(BASE_DIR, 'log')

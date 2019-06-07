@@ -31,8 +31,7 @@ run ln -s /usr/bin/python3.6 /usr/bin/python && \
 
 copy nginx.conf /etc/nginx/conf.d
 copy html_browser/ /hb/html_browser/
-copy html_browser_site/ /hb/html_browser_site/
-copy html_browser_site/local_settings_docker.py /hb/html_browser_site/local_settings.py
+copy html_browser/local_settings/local_settings_docker.py /hb/html_browser/local_settings/local_settings.py
 
 ENV APP_CONFIG="/config"
 
