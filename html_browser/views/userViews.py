@@ -11,6 +11,7 @@ from django.shortcuts import render, redirect
 from html_browser.utils import getReqLogger
 from .userForms import AddUserForm, EditUserForm
 from .adminViews import BaseAdminView
+from .base_view import BaseView
 from django.contrib.auth import update_session_auth_hash
 
 logger = logging.getLogger('html_browser.userViews')
@@ -124,7 +125,7 @@ class AddUserView(AbstractUserView):
             self.form = AddUserForm(request.POST)
 
 
-class ChangePasswordView(BaseAdminView):
+class ChangePasswordView(BaseView):
     def get(self, request, *args, **kwargs):
         self.context['form'] = PasswordChangeForm(request.user)
         return render(request, 'admin/change_password.html', self.context)
