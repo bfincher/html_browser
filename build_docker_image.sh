@@ -1,7 +1,6 @@
-version=$(cat version.txt)
 if [ -z $VIRTUAL_ENV ]; then
-    image_name=html_browser_web:$version
+    image_name=html_browser
 else
-    image_name=$(basename $VIRTUAL_ENV):$version
+    image_name=$(basename $VIRTUAL_ENV)
 fi
-docker build -t $image_name .
+docker build -t $image_name --pull .

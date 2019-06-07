@@ -8,7 +8,7 @@ LOGIN_URL = '/'
 DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
 DEBUG = True
-THUMBNAIL_DEBUG = True
+THUMBNAIL_DEBUG = False
 THUMBNAIL_STORAGE = 'html_browser.utils.ThumbnailStorage'
 
 MANAGERS = ADMINS
