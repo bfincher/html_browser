@@ -3,6 +3,7 @@ from datetime import datetime
 import logging
 
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import render, redirect
@@ -10,6 +11,8 @@ from django.shortcuts import render, redirect
 from html_browser.utils import getReqLogger
 from .userForms import AddUserForm, EditUserForm
 from .adminViews import BaseAdminView
+from .base_view import BaseView
+from django.contrib.auth import update_session_auth_hash
 
 logger = logging.getLogger('html_browser.userViews')
 
@@ -122,30 +125,19 @@ class AddUserView(AbstractUserView):
             self.form = AddUserForm(request.POST)
 
 
-class ChangePasswordView(BaseAdminView):
+class ChangePasswordView(BaseView):
     def get(self, request, *args, **kwargs):
+        self.context['form'] = PasswordChangeForm(request.user)
         return render(request, 'admin/change_password.html', self.context)
 
-
-class ChangePasswordResultView(BaseAdminView):
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        errorMessage = None
-        if user.check_password(request.POST['password']):
-            newPw = request.POST['newPassword']
-            confirmPw = request.POST['newPassword2']
-
-            if newPw == confirmPw:
-                user.set_password(newPw)
-                user.save()
-            else:
-                errorMessage = "Passwords don't match"
+    def post(self, request):
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Your password has been changed')
+            return redirect('index')
         else:
-            errorMessage = "Incorrect current password"
-
-        if errorMessage:
-            messages.error(request, errorMessage)
-            self.reqLogger.warn(errorMessage)
-            return render(request, 'admin/change_password_fail.html', self.context)
-        else:
-            return render(request, 'admin/change_password_success.html', self.context)
+            messages.error(request, 'Please correct the error below')
+            self.context['form'] = form
+            return render(request, 'admin/change_password.html', self.context)

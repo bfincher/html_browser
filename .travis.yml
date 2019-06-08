@@ -11,8 +11,8 @@ install:
   - sudo mkdir -p /config/logs/hb
   - sudo chown $USER /config/logs/hb
   - sudo chown $USER /config
-  - cp html_browser_site/local_settings_docker.py html_browser_site/local_settings.py
-  - cp html_browser_site/local_settings_docker.json /config/local_settings.json
+  - cp html_browser/local_settings/local_settings_docker.py html_browser/local_settings/local_settings.py
+  - cp html_browser/local_settings/local_settings_docker.json /config/local_settings.json
 
 before_script:
   - "flake8 ."
