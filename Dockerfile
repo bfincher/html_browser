@@ -28,9 +28,8 @@ run ln -s /usr/bin/python3.6 /usr/bin/python && \
     && apk add --virtual .rundeps $runDeps 
 
 copy html_browser/ /hb/html_browser/
-copy html_browser_site/ /hb/html_browser_site/
-copy html_browser_site/local_settings_docker.py /hb/html_browser_site/local_settings.py
-copy html_browser_site/local_settings_docker.json /hb/html_browser_site/local_settings.json
+copy html_browser/local_settings/local_settings_docker.py /hb/html_browser/local_settings/local_settings.py
+copy html_browser/local_settings/local_settings_docker.json /hb/html_browser/local_settings/local_settings.json
 
 ENV APP_CONFIG="/config"
 
