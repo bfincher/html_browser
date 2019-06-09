@@ -9,6 +9,7 @@ DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
 DEBUG = True
 THUMBNAIL_DEBUG = False
+THUMBNAIL_FAST_URL = True
 THUMBNAIL_STORAGE = 'html_browser.utils.ThumbnailStorage'
 
 MANAGERS = ADMINS
@@ -49,7 +50,9 @@ MEDIA_URL = None
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
+STATIC_URL = "/hbmedia/"
 STATIC_ROOT = ''
+# STATIC_ROOT = joinPaths(BASE_DIR, 'media')
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -186,7 +189,7 @@ LOGGING = {
         },
         'sorl.thumbnail': {
             'handlers': ['default'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
     }

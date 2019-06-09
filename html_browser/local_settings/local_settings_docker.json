@@ -11,9 +11,8 @@
 			"PORT": ""
 		}
 	},
-
-	"STATIC_URL": "/hbmedia/",
-	"STATICFILES_DIRS": ["/hb/media"],
+	
+	"STATICFILES_DIRS": ["${BASE_DIR}/media"],
 	"LOG_DIR": "/config/logs/hb",
 	"ALLOWED_HOSTS": [
 		"userver",
