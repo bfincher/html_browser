@@ -123,7 +123,7 @@ def getCheckedEntries(requestDict):
 
 
 class DirEntry():
-    def __init__(self, path, folderAndPath, viewType):
+    def __init__(self, path, folderAndPath, viewType, skipThumbnail=False):
         self.isDir = path.is_dir()
         self.name = path.name
         self.nameUrl = self.name.replace('&', '&amp;')
@@ -140,7 +140,7 @@ class DirEntry():
         lastModifyTime = datetime.fromtimestamp(stat.st_mtime)
         self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')
 
-        if not self.isDir and viewType == const.thumbnailsViewType and imageRegex.match(self.name):
+        if not skipThumbnail and not self.isDir and viewType == const.thumbnailsViewType and imageRegex.match(self.name):
             self.hasThumbnail = True
             imageLinkPath = joinPaths(folderAndPath.folder.localPath, folderAndPath.relativePath, self.name)
             im = get_thumbnail(imageLinkPath, thumbnailGeometry)
@@ -211,6 +211,9 @@ def getCurrentDirEntries(folderAndPath, showHidden, viewType, contentFilter=None
     dirEntries = []
     fileEntries = []
 
+    skipThumbnail = False
+    startTime = datetime.now()
+
     if _dir.endswith('lost+found'):
         return []
 
@@ -230,8 +233,10 @@ def getCurrentDirEntries(folderAndPath, showHidden, viewType, contentFilter=None
                 else:
                     include = True
 
+                delta = datetime.now() - startTime
+                skipThumbnail = skipThumbnail or delta.total_seconds() > 45
                 if include:
-                    fileEntries.append(DirEntry(f, folderAndPath, viewType))
+                    fileEntries.append(DirEntry(f, folderAndPath, viewType, skipThumbnail))
         except OSError as ose:
             logger.exception(ose)
 
