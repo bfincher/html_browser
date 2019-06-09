@@ -211,6 +211,9 @@ def getCurrentDirEntries(folderAndPath, showHidden, viewType, contentFilter=None
     dirEntries = []
     fileEntries = []
 
+    if _dir.endswith('lost+found'):
+        return []
+
     for f in Path(_dir).iterdir():
         if not showHidden and f.name.startswith('.'):
             continue
