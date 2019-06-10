@@ -1,21 +1,21 @@
-from abc import ABCMeta, abstractmethod
 import logging
 import re
+from abc import ABCMeta, abstractmethod
 
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth.models import User, Group
-from django.contrib.auth.views import redirect_to_login
-from django.contrib import messages
-from django.db import transaction
-from django.shortcuts import render, redirect
 from annoying.functions import get_object_or_None
+from django.contrib import messages
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.models import Group, User
+from django.contrib.auth.views import redirect_to_login
+from django.db import transaction
+from django.shortcuts import redirect, render
 
 import html_browser
-from html_browser.models import Folder, CAN_READ, CAN_WRITE, CAN_DELETE
+from html_browser.models import CAN_DELETE, CAN_READ, CAN_WRITE, Folder
 from html_browser.utils import getReqLogger
-from .adminForms import EditGroupForm,\
-    UserPermissionFormSet, GroupPermissionFormSet, EditFolderForm, AddFolderForm
 
+from .adminForms import (AddFolderForm, EditFolderForm, EditGroupForm,
+                         GroupPermissionFormSet, UserPermissionFormSet)
 from .base_view import BaseView
 
 groupNameRegex = re.compile(r'^\w+$')

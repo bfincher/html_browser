@@ -1,9 +1,11 @@
-from html_browser.views.test_base_view import contextCheck, BaseViewTest
-from html_browser.models import Folder, Group
+import logging
+
 from annoying.functions import get_object_or_None
 from django.contrib.auth.models import User
 from django.urls import reverse
-import logging
+
+from html_browser.models import Folder, Group
+from html_browser.views.test_base_view import BaseViewTest, contextCheck
 
 logger = logging.getLogger('html_browser.testAdminViews')
 

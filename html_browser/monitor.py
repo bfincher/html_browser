@@ -1,9 +1,9 @@
-import os
-import sys
-import signal
-import threading
 import atexit
+import os
 import queue
+import signal
+import sys
+import threading
 
 _interval = 1.0
 _times = {}

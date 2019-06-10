@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 BASE_DIR = BASE_DIR.replace(os.sep, '/')

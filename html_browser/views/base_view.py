@@ -1,31 +1,32 @@
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth.views import redirect_to_login
-from django.contrib import messages
-from django.urls import reverse
-from django.http import HttpResponse
-from django.shortcuts import redirect, render
-from django.views import View
-
-from html_browser.constants import _constants as const
-from html_browser.models import Folder, FilesToDelete
-from html_browser.utils import getCurrentDirEntries, handleDelete,\
-    getReqLogger,\
-    getCheckedEntries, replaceEscapedUrl,\
-    FolderAndPath, ArgumentException
-from html_browser._os import joinPaths
-from html_browser import settings
-
 import json
 import logging
-from logging import DEBUG
 import os
-from pathlib import Path
 import re
-from django_downloadview import sendfile
 import tempfile
 import zipfile
+from logging import DEBUG
+from pathlib import Path
 from zipfile import ZipFile
+
+from django.contrib import messages
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.views import redirect_to_login
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.views import View
+from django_downloadview import sendfile
+
+from html_browser import settings
+from html_browser._os import joinPaths
+from html_browser.constants import _constants as const
+from html_browser.models import FilesToDelete, Folder
+from html_browser.utils import (ArgumentException, FolderAndPath,
+                                getCheckedEntries, getCurrentDirEntries,
+                                getReqLogger, handleDelete, replaceEscapedUrl)
 
 logger = logging.getLogger('html_browser.base_view')
 imageRegex = re.compile(r"^.*?\.(jpg|png|gif|bmp|avi)$", re.IGNORECASE)

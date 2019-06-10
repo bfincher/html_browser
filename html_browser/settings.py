@@ -1,7 +1,8 @@
 # Django settings for html_browser project.
 import os
-from html_browser.local_settings.local_settings import *
+
 from html_browser._os import joinPaths
+from html_browser.local_settings.local_settings import *
 
 URL_PREFIX = r''
 LOGIN_URL = '/'

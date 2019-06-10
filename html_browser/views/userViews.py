@@ -1,18 +1,19 @@
+import logging
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
-import logging
 
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.models import User
 from django.db import transaction
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 
 from html_browser.utils import getReqLogger
-from .userForms import AddUserForm, EditUserForm
+
 from .adminViews import BaseAdminView
 from .base_view import BaseView
-from django.contrib.auth import update_session_auth_hash
+from .userForms import AddUserForm, EditUserForm
 
 logger = logging.getLogger('html_browser.userViews')
 

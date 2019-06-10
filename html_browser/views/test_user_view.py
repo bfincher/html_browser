@@ -1,9 +1,11 @@
-from .test_admin_view import BaseAdminTest
-from .test_base_view import contextCheck
-from django.urls import reverse
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.urls import reverse
+
 from html_browser.models import Group
+
+from .test_admin_view import BaseAdminTest
+from .test_base_view import contextCheck
 
 
 class UserTest(BaseAdminTest):

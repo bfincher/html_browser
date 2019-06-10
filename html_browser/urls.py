@@ -1,9 +1,10 @@
-from django.conf.urls import url, include
-from html_browser.views import base_view, content_view
-from html_browser.views import adminViews as admin_views
-from html_browser.views import userViews as user_views
-from html_browser import settings
+from django.conf.urls import include, url
 from django_js_reverse.views import urls_js
+
+from html_browser import settings
+from html_browser.views import adminViews as admin_views
+from html_browser.views import base_view, content_view
+from html_browser.views import userViews as user_views
 
 fileNameChars = r'[\w \-~!@#$%^&*\(\)\+,\.\'\[\]]'
 folderAndPathRegex = r'(?P<folderAndPathUrl>\w+(/%s+?)*)/' % fileNameChars

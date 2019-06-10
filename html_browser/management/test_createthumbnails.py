@@ -1,13 +1,15 @@
-import unittest
-from html_browser import settings
-from html_browser.utils import joinPaths
-from html_browser.models import Folder
-from sorl.thumbnail.models import KVStore
-from django.core.management import call_command
-from io import StringIO
 import os
 import re
 import shutil
+import unittest
+from io import StringIO
+
+from django.core.management import call_command
+from sorl.thumbnail.models import KVStore
+
+from html_browser import settings
+from html_browser.models import Folder
+from html_browser.utils import joinPaths
 
 testDir = joinPaths(settings.BASE_DIR, 'test_image_dir')
 srcImgDir = joinPaths(settings.BASE_DIR, 'media', 'images')

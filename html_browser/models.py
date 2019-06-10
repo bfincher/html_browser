@@ -1,6 +1,7 @@
-from django.db import models
-from django.contrib.auth.models import User, Group
 from urllib.parse import quote_plus
+
+from django.contrib.auth.models import Group, User
+from django.db import models
 
 CAN_READ = 1
 CAN_WRITE = 2

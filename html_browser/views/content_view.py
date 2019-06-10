@@ -1,22 +1,23 @@
 import collections
-from datetime import datetime, timedelta
 import json
 import logging
 import os
+from datetime import datetime, timedelta
 from shutil import copy2, copytree, move
-from django.core.paginator import Paginator
 
 from django.contrib import messages
-from django.urls import reverse
+from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
+from django.urls import reverse
+
+from html_browser._os import joinPaths
+from html_browser.constants import _constants as const
+from html_browser.models import FilesToDelete
+from html_browser.utils import (FolderAndPath, formatBytes, getBytesUnit,
+                                getCheckedEntries, getCurrentDirEntries,
+                                handleDelete, replaceEscapedUrl)
 
 from .base_view import BaseContentView, isShowHidden, reverseContentUrl
-from html_browser.models import FilesToDelete
-from html_browser.constants import _constants as const
-from html_browser.utils import getCurrentDirEntries,\
-    formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete,\
-    getCheckedEntries, FolderAndPath
-from html_browser._os import joinPaths
 
 logger = logging.getLogger('html_browser.content_view')
 

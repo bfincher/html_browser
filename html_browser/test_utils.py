@@ -1,16 +1,14 @@
+import os
+import re
 import unittest
+from datetime import datetime, timedelta
+from shutil import rmtree
 
+from html_browser import settings, utils
+from html_browser._os import joinPaths
+from html_browser.constants import _constants as const
 from html_browser.models import Folder
 from html_browser.utils import *
-from html_browser.constants import _constants as const
-from html_browser import utils
-from html_browser import settings
-from html_browser._os import joinPaths
-
-from datetime import datetime, timedelta
-import os
-from shutil import rmtree
-import re
 
 thumbUrlRegex = re.compile(r'^/thumb/(cache/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg)$')
 

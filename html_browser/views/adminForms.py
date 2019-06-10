@@ -1,12 +1,14 @@
-from django import forms
-from django.urls import reverse
-from django.forms import inlineformset_factory, BaseInlineFormSet
-from django.template.loader import render_to_string
-from django.contrib.admin.widgets import FilteredSelectMultiple
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Button, Layout, LayoutObject, TEMPLATE_PACK, HTML
+from crispy_forms.layout import (HTML, TEMPLATE_PACK, Button, Layout,
+                                 LayoutObject, Submit)
+from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.forms import BaseInlineFormSet, inlineformset_factory
+from django.template.loader import render_to_string
+from django.urls import reverse
 
-from html_browser.models import Folder, UserPermission, GroupPermission, User, Group
+from html_browser.models import (Folder, Group, GroupPermission, User,
+                                 UserPermission)
 
 
 class Formset(LayoutObject):
