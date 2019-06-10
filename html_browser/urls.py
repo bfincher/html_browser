@@ -1,7 +1,8 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 from html_browser.views import base_view, content_view
 from html_browser.views import adminViews as admin_views
 from html_browser.views import userViews as user_views
+from html_browser import settings
 from django_js_reverse.views import urls_js
 
 fileNameChars = r'[\w \-~!@#$%^&*\(\)\+,\.\'\[\]]'
@@ -36,3 +37,9 @@ urlpatterns = [
     url(r'thumb/(?P<path>.*)', base_view.ThumbView.as_view(), name='thumb'),
     url(r'jsreverse/$', urls_js, name='js_reverse'),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        url(r'__debug__/', include(debug_toolbar.urls))
+    ] + urlpatterns
