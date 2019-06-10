@@ -6,6 +6,8 @@ BASE_DIR = BASE_DIR.replace(os.sep, '/')
 
 BASE_DIR_REALPATH = os.path.realpath(BASE_DIR).replace(os.sep, '/')
 
+DEBUG = True
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )

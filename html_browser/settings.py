@@ -7,7 +7,6 @@ URL_PREFIX = r''
 LOGIN_URL = '/'
 DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
-DEBUG = True
 THUMBNAIL_DEBUG = False
 THUMBNAIL_FAST_URL = True
 THUMBNAIL_STORAGE = 'html_browser.utils.ThumbnailStorage'
@@ -194,3 +193,5 @@ LOGGING = {
         },
     }
 }
+
+INTERNAL_IPS = ('127.0.0.1')
