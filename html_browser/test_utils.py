@@ -223,7 +223,7 @@ class UtilsTest(unittest.TestCase):
                     self.assertEquals(testFile.expectedSize, entry.size)
                     self.assertEquals(testFiles[i].timeSetTo.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
                     self.assertFalse(entry.hasThumbnail)
-                    self.assertIsNone(entry.thumbnailUrl)
+                    self.assertIsNone(entry.getThumbnailUrl())
             finally:
                 # set time back to orig
                 for entry in testFiles:
@@ -237,7 +237,7 @@ class UtilsTest(unittest.TestCase):
             self.assertEquals(entry.name, entry.nameUrl)
             self.assertEquals('1.96 KB', entry.size)
             self.assertTrue(entry.hasThumbnail)
-            match = thumbUrlRegex.match(entry.thumbnailUrl)
+            match = thumbUrlRegex.match(entry.getThumbnailUrl())
             self.assertTrue(match)
             self.assertTrue(os.path.exists(joinPaths(settings.THUMBNAIL_CACHE_DIR, match.group(1))))
 
@@ -249,7 +249,7 @@ class UtilsTest(unittest.TestCase):
             self.assertEquals(1844, entry.sizeNumeric)
             # self.assertEquals(img_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
             self.assertTrue(entry.hasThumbnail)
-            match = thumbUrlRegex.match(entry.thumbnailUrl)
+            match = thumbUrlRegex.match(entry.getThumbnailUrl())
             self.assertTrue(match)
             self.assertTrue(os.path.exists(joinPaths(settings.THUMBNAIL_CACHE_DIR, match.group(1))))
 

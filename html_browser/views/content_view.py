@@ -4,6 +4,7 @@ import json
 import logging
 import os
 from shutil import copy2, copytree, move
+from django.core.paginator import Paginator
 
 from django.contrib import messages
 from django.urls import reverse
@@ -24,6 +25,8 @@ _viewTypeToTemplateMap = {
     const.listViewType: 'content_list.html',
     const.thumbnailsViewType: 'content_thumbnail.html',
 }
+
+numItemsPerPage = 48
 
 
 class ContentView(BaseContentView):
@@ -136,6 +139,13 @@ class ContentView(BaseContentView):
         viewType = request.session.get('viewType', const.viewTypes[0])
         currentDirEntries = getCurrentDirEntries(self.folderAndPath, isShowHidden(request), viewType, contentFilter)
 
+        if len(currentDirEntries) > numItemsPerPage and viewType == const.thumbnailsViewType:
+            self.context['paginate'] = True
+            paginator = Paginator(currentDirEntries, numItemsPerPage)
+            page = request.GET.get('page', 1)
+            currentDirEntries = paginator.get_page(page)
+        else:
+            self.context['paginate'] = False
         diskFreePct = getDiskPercentFree(self.folderAndPath.absPath)
         diskUsage = getDiskUsageFormatted(self.folderAndPath.absPath)
 

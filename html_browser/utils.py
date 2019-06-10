@@ -124,6 +124,7 @@ def getCheckedEntries(requestDict):
 
 class DirEntry():
     def __init__(self, path, folderAndPath, viewType, skipThumbnail=False):
+        self.thumbnailUrl = None
         self.isDir = path.is_dir()
         self.name = path.name
         self.nameUrl = self.name.replace('&', '&amp;')
@@ -142,12 +143,9 @@ class DirEntry():
 
         if not skipThumbnail and not self.isDir and viewType == const.thumbnailsViewType and imageRegex.match(self.name):
             self.hasThumbnail = True
-            imageLinkPath = joinPaths(folderAndPath.folder.localPath, folderAndPath.relativePath, self.name)
-            im = get_thumbnail(imageLinkPath, thumbnailGeometry)
-            self.thumbnailUrl = reverse('thumb', args=[im.name])
+            self.imageLinkPath = joinPaths(folderAndPath.folder.localPath, folderAndPath.relativePath, self.name)
         else:
             self.hasThumbnail = False
-            self.thumbnailUrl = None
 
     def __str__(self):
         _str = """DirEntry:  isDir = {} name = {} nameUrl = {}
@@ -158,11 +156,19 @@ class DirEntry():
                                               self.size,
                                               self.lastModifyTime,
                                               self.hasThumbnail,
-                                              self.thumbnailUrl)
+                                              self.getThumbnailUrl())
         return _str
 
     def __repr__(self):
         return self.__str__()
+
+    def getThumbnailUrl(self):
+        if self.hasThumbnail:
+            if not self.thumbnailUrl:
+                im = get_thumbnail(self.imageLinkPath, thumbnailGeometry)
+                self.thumbnailUrl = reverse('thumb', args=[im.name])
+            return self.thumbnailUrl
+        return None
 
 
 #    return dirPath.encode('utf8')
