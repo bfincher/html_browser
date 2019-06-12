@@ -11,8 +11,6 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
-DEBUG = False
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
