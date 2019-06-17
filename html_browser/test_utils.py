@@ -170,6 +170,9 @@ class UtilsTest(unittest.TestCase):
         folder.save()
 
         try:
+            testFile = '.testFile.txt'
+            with open(testFile, 'a'):
+                pass
             entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), False, const.thumbnailsViewType)
             for entry in entries:
                 self.assertFalse(entry.name.startswith('.'))
@@ -186,6 +189,7 @@ class UtilsTest(unittest.TestCase):
 
         finally:
             folder.delete()
+            os.remove(testFile)
 
     def testGetCurrentDirEntries(self):
         folder = Folder()

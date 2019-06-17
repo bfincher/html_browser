@@ -71,5 +71,3 @@ CRON_PERIOD="0 0 * * *"
 /usr/sbin/nginx
 su ${USER} -c 'gunicorn html_browser.wsgi:application --bind 0.0.0.0:8000 --timeout 300'
 
-
-
