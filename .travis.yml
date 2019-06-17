@@ -11,8 +11,6 @@ before_install :
   - docker build -t html_browser --pull .
   - sudo mkdir /config
   - sudo chown $USER /config
-  - UID=$(getent passwd $USER | awk -F':' '{ print $3 }')
-  - GID=$(getent passwd $USER | awk -F':' '{ print $4 }')
   - docker run -d -p 8000:80 -v /config:/config -v /:/data1 -e APP_UID=$UID -e APP_GID=$GID --name html_browser html_browser
   - docker ps -a
   - docker exec -it html_browser /bin/bash -c "cd /hb; python manage.py test"
