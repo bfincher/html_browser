@@ -31,7 +31,7 @@ numItemsPerPage = 48
 
 
 class ContentView(BaseContentView):
-    def post(self, request, folderAndPathUrl, *args, **kwargs):
+    def post(self, request, folderAndPathUrl):
         action = request.POST['action']
         if action == 'copyToClipboard':
             entries = getCheckedEntries(request.POST)
@@ -98,7 +98,7 @@ class ContentView(BaseContentView):
 
         messages.success(self.request, 'Items pasted')
 
-    def get(self, request, folderAndPathUrl, *args, **kwargs):
+    def get(self, request, folderAndPathUrl):
         ContentView.deleteOldFiles()
 
         self.breadcrumbs = None

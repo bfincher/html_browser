@@ -36,7 +36,7 @@ imageRegexWithCach = re.compile(r'cache/%s' % imageRegexStr)
 
 
 class ThumbnailStorage(FileSystemStorage):
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         if not os.path.exists(settings.THUMBNAIL_CACHE_DIR):
             os.makedirs(settings.THUMBNAIL_CACHE_DIR)
         super().__init__(location=settings.THUMBNAIL_CACHE_DIR)
@@ -299,47 +299,6 @@ def formatBytes(numBytes, forceUnit=None, includeUnitSuffix=True):
         return "%s %s" % (returnValue, unit)
     else:
         return returnValue
-
-
-def getDiskUsageFormatted(path):
-    du = getDiskUsage(path)
-
-    _ntuple_diskusage_formatted = collections.namedtuple('usage', 'total totalformatted used usedformatted free freeformatted unit')
-
-    unit = getBytesUnit(du.total)
-    total = formatBytes(du.total, unit, False)
-    used = formatBytes(du.used, unit, False)
-    free = formatBytes(du.free, unit, False)
-
-    return _ntuple_diskusage_formatted(du.total, total, du.used, used, du.free, free, unit)
-
-
-def getDiskUsage(path):
-    _ntuple_diskusage = collections.namedtuple('usage', 'total used free')
-
-    if hasattr(os, 'statvfs'):  # POSIX
-        st = os.statvfs(path)
-        free = st.f_bavail * st.f_frsize
-        total = st.f_blocks * st.f_frsize
-        used = (st.f_blocks - st.f_bfree) * st.f_frsize
-        return _ntuple_diskusage(total, used, free)
-
-    elif os.name == 'nt':       # Windows
-        import ctypes
-        import sys
-
-        _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), ctypes.c_ulonglong()
-        if sys.version_info >= (3,) or isinstance(path, str):
-            fun = ctypes.windll.kernel32.GetDiskFreeSpaceExW
-        else:
-            fun = ctypes.windll.kernel32.GetDiskFreeSpaceExA
-        ret = fun(path, ctypes.byref(_), ctypes.byref(total), ctypes.byref(free))
-        if ret == 0:
-            raise ctypes.WinError()
-        used = total.value - free.value
-        return _ntuple_diskusage(total.value, used, free.value)
-    else:
-        raise NotImplementedError("platform not supported")
 
 
 def getBytesUnit(numBytes):

@@ -29,7 +29,7 @@ from html_browser.utils import (ArgumentException, FolderAndPath,
                                 getReqLogger, handleDelete, replaceEscapedUrl)
 
 logger = logging.getLogger('html_browser.base_view')
-imageRegex = re.compile(r"^.*?\.(jpg|png|gif|bmp|avi)$", re.IGNORECASE)
+imageRegex = re.compile(r"^.*?\.(jpg|png|gif|bmp|avi)$", re.RegexFlag.IGNORECASE)
 
 
 def isShowHidden(request):
@@ -115,7 +115,7 @@ class BaseContentView(UserPassesTestMixin, BaseView):
 
 
 class IndexView(BaseView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         allFolders = Folder.objects.all()
         folders = []
         for folder in allFolders:
@@ -130,7 +130,7 @@ class IndexView(BaseView):
 
 
 class LoginView(BaseView):
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         userName = request.POST['userName']
         password = request.POST['password']
         user = authenticate(username=userName, password=password)
@@ -151,31 +151,31 @@ class LoginView(BaseView):
 
 
 class LogoutView(BaseView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         auth_logout(request)
         return redirect('index')
 
 
 class DownloadView(BaseContentView):
-    def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
+    def get(self, request, folderAndPathUrl, fileName):
         return sendfile(request,
                         joinPaths(self.folderAndPath.absPath, fileName),
                         attachment=True)
 
 
 class DownloadImageView(BaseContentView):
-    def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
+    def get(self, request, folderAndPathUrl, fileName):
         return sendfile(request, joinPaths(self.folderAndPath.absPath, fileName), attachment=False)
 
 
 class ThumbView(BaseView):
-    def get(self, request, path, *args, **kwargs):
+    def get(self, request, path):
         file = joinPaths(settings.THUMBNAIL_CACHE_DIR, path)
         return sendfile(request, file, attachment=False)
 
 
 class DownloadZipView(BaseContentView):
-    def get(self, request, folderAndPathUrl, *args, **kwargs):
+    def get(self, request, folderAndPathUrl):
         compression = zipfile.ZIP_DEFLATED
         fileName = tempfile.mktemp(prefix="download_", suffix=".zip")
         self.zipFile = ZipFile(fileName, mode='w', compression=compression)
@@ -210,7 +210,7 @@ class UploadView(BaseContentView):
     def __init__(self):
         super().__init__(requireWrite=True)
 
-    def get(self, request, folderAndPathUrl, *args, **kwargs):
+    def get(self, request, folderAndPathUrl):
         self.context['viewTypes'] = const.viewTypes
 
         return render(request, 'upload.html', self.context)
@@ -254,7 +254,7 @@ def getIndexIntoCurrentDir(request, folderAndPath, fileName):
 
 
 class ImageView(BaseContentView):
-    def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
+    def get(self, request, folderAndPathUrl, fileName):
         entries = getIndexIntoCurrentDir(request, self.folderAndPath, fileName)
         index = entries['index']
         currentDirEntries = entries['currentDirEntries']
@@ -287,7 +287,7 @@ class DeleteImageView(BaseContentView):
     def __init__(self):
         super().__init__(requireDelete=True)
 
-    def post(self, request, folderAndPathUrl, *args, **kwargs):
+    def post(self, request, folderAndPathUrl):
         fileName = request.POST['fileName']
 
         handleDelete(self.folderAndPath, [fileName])
@@ -297,7 +297,7 @@ class DeleteImageView(BaseContentView):
 
 
 class GetNextImageView(BaseContentView):
-    def get(self, request, folderAndPathUrl, fileName, *args, **kwargs):
+    def get(self, request, folderAndPathUrl, fileName):
         result = {}
         entries = getIndexIntoCurrentDir(request, self.folderAndPath, fileName)
         if entries:
