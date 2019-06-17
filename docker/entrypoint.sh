@@ -24,14 +24,19 @@ if [ ! -d ${APP_CONFIG}/logs/hb ]; then
 fi
 
 if [ ! -f ${APP_CONFIG}/local_settings.json ]; then
-    su ${USER} -c "cp /hb/html_browser/local_settings/local_settings_docker.json ${APP_CONFIG}/local_settings.json"
+    su ${USER} -c "cp /hb/html_browser/local_settings/local_settings.json ${APP_CONFIG}/local_settings.json"
 fi
 
 if [ $(stat -c "%u:%g" ${APP_CONFIG}) != "${APP_CONFIG_UIDGID}" ]; then
     chown -R ${APP_CONFIG_UIDGID} "$APP_CONFIG"
 fi
 
-/create_mysql.sh
+/init_db.sh
+
+su ${USER} -c "python manage.py migrate"
+
+echo "from django.contrib.auth.models import User; User.objects.get(is_superuser=True)" | python manage.py shell > /dev/null || \
+echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'pass')" | python manage.py shell
 
 CRON_CMD="cd /hb/ && bash -l -c 'python manage.py thumbnail cleanup > /dev/null'"
 

@@ -21,9 +21,3 @@ echo "FLUSH_PRIVILEGES;" >> /tmp/sql
 echo "CREATE DATABASE IF NOT EXISTS hb_db; >> /tmp/sql
 cat /tmp/sql | msyql -u root --password="${DB_ROOT_PASS}"
 rm /tmp/sql
-
-su ${USER} -c "python manage.py migrate"
-
-echo "from django.contrib.auth.models import User; User.objects.get(is_superuser=True)" | python manage.py shell > /dev/null || \
-echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'pass')" | python manage.py shell
-
