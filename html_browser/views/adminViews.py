@@ -1,21 +1,21 @@
-from abc import ABCMeta, abstractmethod
 import logging
 import re
+from abc import ABCMeta, abstractmethod
 
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth.models import User, Group
-from django.contrib.auth.views import redirect_to_login
-from django.contrib import messages
-from django.db import transaction
-from django.shortcuts import render, redirect
 from annoying.functions import get_object_or_None
+from django.contrib import messages
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.models import Group, User
+from django.contrib.auth.views import redirect_to_login
+from django.db import transaction
+from django.shortcuts import redirect, render
 
 import html_browser
-from html_browser.models import Folder, CAN_READ, CAN_WRITE, CAN_DELETE
+from html_browser.models import CAN_DELETE, CAN_READ, CAN_WRITE, Folder
 from html_browser.utils import getReqLogger
-from .adminForms import EditGroupForm,\
-    UserPermissionFormSet, GroupPermissionFormSet, EditFolderForm, AddFolderForm
 
+from .adminForms import (AddFolderForm, EditFolderForm, EditGroupForm,
+                         GroupPermissionFormSet, UserPermissionFormSet)
 from .base_view import BaseView
 
 groupNameRegex = re.compile(r'^\w+$')
@@ -68,18 +68,18 @@ class BaseAdminView(UserPassesTestMixin, BaseView):
 
 
 class AdminView(BaseAdminView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         return render(request, 'admin/admin.html', self.context)
 
 
 class FolderAdminView(BaseAdminView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         self.context['folders'] = Folder.objects.all()
         return render(request, 'admin/folder_admin.html', self.context)
 
 
 class DeleteFolderView(BaseAdminView):
-    def post(self, request, folderName, *args, **kwargs):
+    def post(self, _, folderName):
         folder = Folder.objects.get(name=folderName)
         folder.delete()
         return redirect('folderAdmin')
@@ -176,7 +176,7 @@ class EditFolderView(AbstractFolderView):
 
         return super().post(request, *args, **kwargs)
 
-    def initForms(self, request, *args, **kwargs):
+    def initForms(self, request):
         self.folder = Folder.objects.get(name=self.folderName)
 
         if request.method == "GET":
@@ -201,7 +201,7 @@ class AddFolderView(AbstractFolderView):
         self.title = title
         return super().post(request, *args, **kwargs)
 
-    def initForms(self, request, *args, **kwargs):
+    def initForms(self, request):
         if request.method == "GET":
             self.folder = Folder()
             self.folderForm = AddFolderForm(instance=self.folder)
@@ -214,7 +214,7 @@ class AddFolderView(AbstractFolderView):
 
 
 class AddGroupView(BaseAdminView):
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         groupName = request.POST['groupName']
         if groupNameRegex.match(groupName):
             group = get_object_or_None(Group, name=groupName)
@@ -231,7 +231,7 @@ class AddGroupView(BaseAdminView):
 
 
 class DeleteGroupView(BaseAdminView):
-    def post(self, request, groupName, *args, **kwargs):
+    def post(self, _, groupName, *args, **kwargs):
         super().__init__(*args, **kwargs)
         group = Group.objects.get(name=groupName)
         group.delete()
@@ -244,7 +244,7 @@ class EditGroupView(BaseAdminView):
         super().__init__(*args, **kwargs)
         self.form = None
 
-    def get(self, request, groupName, *args, **kwargs):
+    def get(self, request, groupName):
         group = Group.objects.get(name=groupName)
 
         if not self.form:
@@ -255,7 +255,6 @@ class EditGroupView(BaseAdminView):
         return render(request, 'admin/edit_group.html', self.context)
 
     def post(self, request, groupName, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         group = Group.objects.get(name=groupName)
         self.form = EditGroupForm(request.POST, instance=group)
 
@@ -279,7 +278,7 @@ class EditGroupView(BaseAdminView):
 
 
 class GroupAdminView(BaseAdminView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         groups = []
         for group in Group.objects.all():
             groups.append(group.name)

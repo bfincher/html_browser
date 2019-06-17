@@ -1,24 +1,24 @@
-from django.core.files.storage import FileSystemStorage
-from django.urls import reverse
-
-from .constants import _constants as const
-from html_browser.models import Folder
-from html_browser import settings
-
 import collections
-from datetime import datetime
-from operator import attrgetter
 import html.parser
-from pathlib import Path
-
 import json
 import logging
 import os
 import re
+from datetime import datetime
+from operator import attrgetter
+from pathlib import Path
 from shutil import rmtree
-from sorl.thumbnail import get_thumbnail
 from urllib.parse import quote_plus, unquote_plus
+
+from django.core.files.storage import FileSystemStorage
+from django.urls import reverse
+from sorl.thumbnail import get_thumbnail
+
+from html_browser import settings
 from html_browser._os import joinPaths
+from html_browser.models import Folder
+
+from .constants import _constants as const
 
 logger = logging.getLogger('html_browser.utils')
 reqLogger = None
@@ -36,7 +36,7 @@ imageRegexWithCach = re.compile(r'cache/%s' % imageRegexStr)
 
 
 class ThumbnailStorage(FileSystemStorage):
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         if not os.path.exists(settings.THUMBNAIL_CACHE_DIR):
             os.makedirs(settings.THUMBNAIL_CACHE_DIR)
         super().__init__(location=settings.THUMBNAIL_CACHE_DIR)
@@ -123,7 +123,8 @@ def getCheckedEntries(requestDict):
 
 
 class DirEntry():
-    def __init__(self, path, folderAndPath, viewType):
+    def __init__(self, path, folderAndPath, viewType, skipThumbnail=False):
+        self.thumbnailUrl = None
         self.isDir = path.is_dir()
         self.name = path.name
         self.nameUrl = self.name.replace('&', '&amp;')
@@ -140,14 +141,11 @@ class DirEntry():
         lastModifyTime = datetime.fromtimestamp(stat.st_mtime)
         self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')
 
-        if not self.isDir and viewType == const.thumbnailsViewType and imageRegex.match(self.name):
+        if not skipThumbnail and not self.isDir and viewType == const.thumbnailsViewType and imageRegex.match(self.name):
             self.hasThumbnail = True
-            imageLinkPath = joinPaths(folderAndPath.folder.localPath, folderAndPath.relativePath, self.name)
-            im = get_thumbnail(imageLinkPath, thumbnailGeometry)
-            self.thumbnailUrl = reverse('thumb', args=[im.name])
+            self.imageLinkPath = joinPaths(folderAndPath.folder.localPath, folderAndPath.relativePath, self.name)
         else:
             self.hasThumbnail = False
-            self.thumbnailUrl = None
 
     def __str__(self):
         _str = """DirEntry:  isDir = {} name = {} nameUrl = {}
@@ -158,11 +156,19 @@ class DirEntry():
                                               self.size,
                                               self.lastModifyTime,
                                               self.hasThumbnail,
-                                              self.thumbnailUrl)
+                                              self.getThumbnailUrl())
         return _str
 
     def __repr__(self):
         return self.__str__()
+
+    def getThumbnailUrl(self):
+        if self.hasThumbnail:
+            if not self.thumbnailUrl:
+                im = get_thumbnail(self.imageLinkPath, thumbnailGeometry)
+                self.thumbnailUrl = reverse('thumb', args=[im.name])
+            return self.thumbnailUrl
+        return None
 
 
 #    return dirPath.encode('utf8')
@@ -211,6 +217,12 @@ def getCurrentDirEntries(folderAndPath, showHidden, viewType, contentFilter=None
     dirEntries = []
     fileEntries = []
 
+    skipThumbnail = False
+    startTime = datetime.now()
+
+    if _dir.endswith('lost+found'):
+        return []
+
     for f in Path(_dir).iterdir():
         if not showHidden and f.name.startswith('.'):
             continue
@@ -227,8 +239,10 @@ def getCurrentDirEntries(folderAndPath, showHidden, viewType, contentFilter=None
                 else:
                     include = True
 
+                delta = datetime.now() - startTime
+                skipThumbnail = skipThumbnail or delta.total_seconds() > 45
                 if include:
-                    fileEntries.append(DirEntry(f, folderAndPath, viewType))
+                    fileEntries.append(DirEntry(f, folderAndPath, viewType, skipThumbnail))
         except OSError as ose:
             logger.exception(ose)
 
@@ -285,47 +299,6 @@ def formatBytes(numBytes, forceUnit=None, includeUnitSuffix=True):
         return "%s %s" % (returnValue, unit)
     else:
         return returnValue
-
-
-def getDiskUsageFormatted(path):
-    du = getDiskUsage(path)
-
-    _ntuple_diskusage_formatted = collections.namedtuple('usage', 'total totalformatted used usedformatted free freeformatted unit')
-
-    unit = getBytesUnit(du.total)
-    total = formatBytes(du.total, unit, False)
-    used = formatBytes(du.used, unit, False)
-    free = formatBytes(du.free, unit, False)
-
-    return _ntuple_diskusage_formatted(du.total, total, du.used, used, du.free, free, unit)
-
-
-def getDiskUsage(path):
-    _ntuple_diskusage = collections.namedtuple('usage', 'total used free')
-
-    if hasattr(os, 'statvfs'):  # POSIX
-        st = os.statvfs(path)
-        free = st.f_bavail * st.f_frsize
-        total = st.f_blocks * st.f_frsize
-        used = (st.f_blocks - st.f_bfree) * st.f_frsize
-        return _ntuple_diskusage(total, used, free)
-
-    elif os.name == 'nt':       # Windows
-        import ctypes
-        import sys
-
-        _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), ctypes.c_ulonglong()
-        if sys.version_info >= (3,) or isinstance(path, str):
-            fun = ctypes.windll.kernel32.GetDiskFreeSpaceExW
-        else:
-            fun = ctypes.windll.kernel32.GetDiskFreeSpaceExA
-        ret = fun(path, ctypes.byref(_), ctypes.byref(total), ctypes.byref(free))
-        if ret == 0:
-            raise ctypes.WinError()
-        used = total.value - free.value
-        return _ntuple_diskusage(total.value, used, free.value)
-    else:
-        raise NotImplementedError("platform not supported")
 
 
 def getBytesUnit(numBytes):

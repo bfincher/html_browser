@@ -1,7 +1,8 @@
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Button, Layout, Submit
 from django import forms
 from django.urls import reverse
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Button, Layout
+
 from html_browser.models import User
 
 

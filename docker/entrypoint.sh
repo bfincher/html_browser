@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+#while true; do date; sleep 1; done
+
 USER=hb
 
 getent passwd $USER || useradd $USER -m -d /hb
@@ -22,7 +24,7 @@ if [ ! -d ${APP_CONFIG}/logs/hb ]; then
 fi
 
 if [ ! -f ${APP_CONFIG}/local_settings.json ]; then
-    su ${USER} -c "cp /hb/html_browser_site/local_settings_docker.json ${APP_CONFIG}/local_settings.json"
+    su ${USER} -c "cp /hb/html_browser/local_settings/local_settings_docker.json ${APP_CONFIG}/local_settings.json"
 fi
 
 if [ -f ${APP_CONFIG}/hb.db.bak8 ]; then
@@ -51,7 +53,7 @@ if [ -f ${APP_CONFIG}/hb.db.bak1 ]; then
 fi
 
 if [ -f ${APP_CONFIG}/hb.db ]; then
-    su ${USER} -c "cp ${APP_CONFIG}/hb/db ${APP_CONFIG}/hb/db.bak1"
+    su ${USER} -c "cp ${APP_CONFIG}/hb.db ${APP_CONFIG}/hb.db.bak1"
 else
     su ${USER} -c "python manage.py migrate"
     echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'pass')" | python manage.py shell
@@ -66,7 +68,6 @@ CRON_CMD="cd /hb/ && bash -l -c 'python manage.py thumbnail cleanup > /dev/null'
 CRON_PERIOD="0 0 * * *"
 (crontab -u $USER -l ; echo "${CRON_PERIOD}   ${CRON_CMD}") | sort - | uniq - | crontab -u $USER -
 
-su ${USER} -c 'gunicorn html_browser.wsgi:application --bind 0.0.0.0:8000'
-
-
+/usr/sbin/nginx
+su ${USER} -c 'gunicorn html_browser.wsgi:application --bind 0.0.0.0:8000 --timeout 300'
 

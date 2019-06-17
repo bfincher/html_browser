@@ -1,7 +1,9 @@
 
+from django.contrib.auth.models import Group, User
 from django.test import TestCase
-from django.contrib.auth.models import User, Group
-from html_browser.models import UserPermission, Folder, GroupPermission, CAN_READ, CAN_WRITE, CAN_DELETE
+
+from html_browser.models import (CAN_DELETE, CAN_READ, CAN_WRITE, Folder,
+                                 GroupPermission, UserPermission)
 
 
 class UserPermissionTest(TestCase):

@@ -1,19 +1,22 @@
-from django.contrib.auth.models import User, Group
-from django.urls import reverse
-from django.test import Client
-
 import filecmp
 import os
 import re
-from shutil import rmtree
 import tempfile
 import unittest
+from shutil import rmtree
 # import zipfile
 from zipfile import ZipFile
 
-from html_browser.models import Folder, UserPermission, GroupPermission, CAN_READ, CAN_DELETE
-from html_browser.views.base_view import reverseContentUrl, FolderAndPath, getIndexIntoCurrentDir
+from django.contrib.auth.models import Group, User
+from django.test import Client
+from django.urls import reverse
+
 from html_browser._os import joinPaths
+from html_browser.models import (CAN_DELETE, CAN_READ, Folder, GroupPermission,
+                                 UserPermission)
+from html_browser.views.base_view import (FolderAndPath,
+                                          getIndexIntoCurrentDir,
+                                          reverseContentUrl)
 
 
 def contextCheck(testCase, context, user=None, folder=None):

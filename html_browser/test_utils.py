@@ -1,16 +1,14 @@
+import os
+import re
 import unittest
+from datetime import datetime, timedelta
+from shutil import rmtree
 
+from html_browser import settings, utils
+from html_browser._os import joinPaths
+from html_browser.constants import _constants as const
 from html_browser.models import Folder
 from html_browser.utils import *
-from html_browser.constants import _constants as const
-from html_browser import utils
-from html_browser import settings
-from html_browser._os import joinPaths
-
-from datetime import datetime, timedelta
-import os
-from shutil import rmtree
-import re
 
 thumbUrlRegex = re.compile(r'^/thumb/(cache/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg)$')
 
@@ -223,7 +221,7 @@ class UtilsTest(unittest.TestCase):
                     self.assertEquals(testFile.expectedSize, entry.size)
                     self.assertEquals(testFiles[i].timeSetTo.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
                     self.assertFalse(entry.hasThumbnail)
-                    self.assertIsNone(entry.thumbnailUrl)
+                    self.assertIsNone(entry.getThumbnailUrl())
             finally:
                 # set time back to orig
                 for entry in testFiles:
@@ -237,7 +235,7 @@ class UtilsTest(unittest.TestCase):
             self.assertEquals(entry.name, entry.nameUrl)
             self.assertEquals('1.96 KB', entry.size)
             self.assertTrue(entry.hasThumbnail)
-            match = thumbUrlRegex.match(entry.thumbnailUrl)
+            match = thumbUrlRegex.match(entry.getThumbnailUrl())
             self.assertTrue(match)
             self.assertTrue(os.path.exists(joinPaths(settings.THUMBNAIL_CACHE_DIR, match.group(1))))
 
@@ -249,7 +247,7 @@ class UtilsTest(unittest.TestCase):
             self.assertEquals(1844, entry.sizeNumeric)
             # self.assertEquals(img_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
             self.assertTrue(entry.hasThumbnail)
-            match = thumbUrlRegex.match(entry.thumbnailUrl)
+            match = thumbUrlRegex.match(entry.getThumbnailUrl())
             self.assertTrue(match)
             self.assertTrue(os.path.exists(joinPaths(settings.THUMBNAIL_CACHE_DIR, match.group(1))))
 

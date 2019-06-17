@@ -1,7 +1,8 @@
 # Django settings for html_browser project.
 import os
-from html_browser.local_settings.local_settings import *
+
 from html_browser._os import joinPaths
+from html_browser.local_settings.local_settings import *
 
 URL_PREFIX = r''
 LOGIN_URL = '/'
@@ -9,6 +10,7 @@ DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
 DEBUG = True
 THUMBNAIL_DEBUG = False
+THUMBNAIL_FAST_URL = True
 THUMBNAIL_STORAGE = 'html_browser.utils.ThumbnailStorage'
 
 MANAGERS = ADMINS
@@ -50,7 +52,8 @@ MEDIA_URL = None
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_URL = "/hbmedia/"
-STATIC_ROOT = joinPaths(BASE_DIR, 'staticfiles')
+STATIC_ROOT = ''
+# STATIC_ROOT = joinPaths(BASE_DIR, 'media')
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -187,7 +190,7 @@ LOGGING = {
         },
         'sorl.thumbnail': {
             'handlers': ['default'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
     }

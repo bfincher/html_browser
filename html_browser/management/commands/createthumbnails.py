@@ -1,11 +1,12 @@
 from django.core.management.base import BaseCommand, CommandError
+from sorl.thumbnail import default
+from sorl.thumbnail.images import ImageFile
+
+from html_browser import utils
+from html_browser._os import joinPaths
+from html_browser.constants import _constants as constants
 from html_browser.models import Folder
 from html_browser.utils import FolderAndPath, getCurrentDirEntries
-from html_browser.constants import _constants as constants
-from html_browser._os import joinPaths
-from html_browser import utils
-from sorl.thumbnail.images import ImageFile
-from sorl.thumbnail import default
 
 
 class Command(BaseCommand):

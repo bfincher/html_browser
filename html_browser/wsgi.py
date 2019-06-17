@@ -11,6 +11,10 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
+import html_browser.monitor
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "html_browser.settings")
 
 application = get_wsgi_application()
+
+html_browser.monitor.start(interval=1.0)

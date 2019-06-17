@@ -1,21 +1,23 @@
 import collections
-from datetime import datetime, timedelta
 import json
 import logging
 import os
+from datetime import datetime, timedelta
 from shutil import copy2, copytree, move
 
 from django.contrib import messages
-from django.urls import reverse
+from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
+from django.urls import reverse
+
+from html_browser._os import joinPaths
+from html_browser.constants import _constants as const
+from html_browser.models import FilesToDelete
+from html_browser.utils import (FolderAndPath, formatBytes, getBytesUnit,
+                                getCheckedEntries, getCurrentDirEntries,
+                                handleDelete, replaceEscapedUrl)
 
 from .base_view import BaseContentView, isShowHidden, reverseContentUrl
-from html_browser.models import FilesToDelete
-from html_browser.constants import _constants as const
-from html_browser.utils import getCurrentDirEntries,\
-    formatBytes, getBytesUnit, replaceEscapedUrl, handleDelete,\
-    getCheckedEntries, FolderAndPath
-from html_browser._os import joinPaths
 
 logger = logging.getLogger('html_browser.content_view')
 
@@ -25,9 +27,11 @@ _viewTypeToTemplateMap = {
     const.thumbnailsViewType: 'content_thumbnail.html',
 }
 
+numItemsPerPage = 48
+
 
 class ContentView(BaseContentView):
-    def post(self, request, folderAndPathUrl, *args, **kwargs):
+    def post(self, request, folderAndPathUrl):
         action = request.POST['action']
         if action == 'copyToClipboard':
             entries = getCheckedEntries(request.POST)
@@ -94,7 +98,7 @@ class ContentView(BaseContentView):
 
         messages.success(self.request, 'Items pasted')
 
-    def get(self, request, folderAndPathUrl, *args, **kwargs):
+    def get(self, request, folderAndPathUrl):
         ContentView.deleteOldFiles()
 
         self.breadcrumbs = None
@@ -136,6 +140,13 @@ class ContentView(BaseContentView):
         viewType = request.session.get('viewType', const.viewTypes[0])
         currentDirEntries = getCurrentDirEntries(self.folderAndPath, isShowHidden(request), viewType, contentFilter)
 
+        if len(currentDirEntries) > numItemsPerPage and viewType == const.thumbnailsViewType:
+            self.context['paginate'] = True
+            paginator = Paginator(currentDirEntries, numItemsPerPage)
+            page = request.GET.get('page', 1)
+            currentDirEntries = paginator.get_page(page)
+        else:
+            self.context['paginate'] = False
         diskFreePct = getDiskPercentFree(self.folderAndPath.absPath)
         diskUsage = getDiskUsageFormatted(self.folderAndPath.absPath)
 

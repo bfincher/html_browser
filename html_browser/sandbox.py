@@ -1,8 +1,10 @@
 import os
 import sys
+
+from django.contrib.auth.models import Group, User  # noqa: E402
+
 sys.path.insert(0, '/srv/www/hb')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'html_browser.settings'
-from django.contrib.auth.models import User, Group  # noqa: E402
 
 
 user = User.objects.all()[1]
