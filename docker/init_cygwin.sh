@@ -24,3 +24,6 @@ fi
 if [ -f ${APP_CONFIG}/hb.db.bak1 ]; then
     su ${USER} -c "cp ${APP_CONFIG}/hb.db.bak1 ${APP_CONFIG}/hb.db.bak2"
 fi
+if [ -f ${APP_CONFIG}/hb.db ]; then
+    su ${USER} -c "cp ${APP_CONFIG}/hb.db ${APP_CONFIG}/hb.db.bak1"
+fi
