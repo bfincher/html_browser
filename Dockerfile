@@ -11,7 +11,7 @@ copy requirements.txt /hb/requirements.txt
 
 run ln -s /usr/bin/python3.6 /usr/bin/python && \
     ln -s /usr/bin/pip3 /usr/bin/pip && \
-    apk add --no-cache --virtual .builddeps mariadb-dev gcc && \
+    apk add --no-cache --virtual .builddeps mariadb-dev gcc musl-dev && \
     pip install --no-cache -r requirements.txt && \
     pip install --no-cache gunicorn==19.9.0 && \
     apk del .builddeps && \
