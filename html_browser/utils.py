@@ -1,4 +1,3 @@
-import collections
 import html.parser
 import json
 import logging
