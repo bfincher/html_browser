@@ -11,8 +11,10 @@ copy requirements.txt /hb/requirements.txt
 
 run ln -s /usr/bin/python3.6 /usr/bin/python && \
     ln -s /usr/bin/pip3 /usr/bin/pip && \
+    apk add --virtual .builddeps mariadb-dev
     pip install --no-cache -r requirements.txt && \
     pip install --no-cache gunicorn==19.9.0 && \
+    apk del .builddeps
     rm /etc/nginx/conf.d/default.conf && \
     mkdir -p /run/nginx && \
     find /usr/local \
