@@ -5,15 +5,13 @@ env PYTHONBUFFERED 1
 RUN mkdir /hb
 workdir /hb
 
-run apk add --no-cache py3-pillow shadow bash nginx
+run apk add --no-cache py3-pillow shadow bash nginx mariadb mariadb-client
 
 copy requirements.txt /hb/requirements.txt
 
 run ln -s /usr/bin/python3.6 /usr/bin/python && \
     ln -s /usr/bin/pip3 /usr/bin/pip && \
-    grep -v mysql requirements.txt | grep -v Pillow > requirements_minus_mysql.txt && \ 
-    pip install --no-cache -r requirements_minus_mysql.txt && \
-    rm requirements.txt requirements_minus_mysql.txt && \
+    pip install --no-cache -r requirements.txt && \
     pip install --no-cache gunicorn==19.9.0 && \
     rm /etc/nginx/conf.d/default.conf && \
     mkdir -p /run/nginx && \
