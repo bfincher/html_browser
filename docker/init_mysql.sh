@@ -18,6 +18,6 @@ echo "GRANT ALL ON *.* TO ${DB_USER}@'::1' IDENTIFIED BY '${DB_PASS}' WITH GRANT
 echo "DELETE FROM mysql.user WHERE User='';" >> /tmp/sql
 echo "DROP DATABASE test;" >> /tmp/sql
 echo "FLUSH_PRIVILEGES;" >> /tmp/sql
-echo "CREATE DATABASE IF NOT EXISTS hb_db; >> /tmp/sql
+echo "CREATE DATABASE IF NOT EXISTS ${DB_NAME};" >> /tmp/sql
 cat /tmp/sql | msyql -u root --password="${DB_ROOT_PASS}"
 rm /tmp/sql
