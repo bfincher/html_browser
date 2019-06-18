@@ -41,10 +41,10 @@ class FolderAndPathTest(unittest.TestCase):
                 FolderAndPath(url=expectedUrl)]
 
         for folderAndPath in objs:
-            self.assertEquals(folder.name, folderAndPath.folder.name)
-            self.assertEquals(expectedAbsPath, folderAndPath.absPath)
-            self.assertEquals(path, folderAndPath.relativePath)
-            self.assertEquals(expectedUrl, folderAndPath.url)
+            self.assertEqual(folder.name, folderAndPath.folder.name)
+            self.assertEqual(expectedAbsPath, folderAndPath.absPath)
+            self.assertEqual(path, folderAndPath.relativePath)
+            self.assertEqual(expectedUrl, folderAndPath.url)
 
     def testConstruct(self):
         self.__testConstruct(FolderAndPathTest.folder, '')
@@ -52,9 +52,9 @@ class FolderAndPathTest(unittest.TestCase):
 
         # test special case
         folderAndPath = FolderAndPath(folder=FolderAndPathTest.folder, path=joinPaths(FolderAndPathTest.testDirAbsPath, 'test_path'))
-        self.assertEquals(FolderAndPathTest.folder.name, folderAndPath.folder.name)
-        self.assertEquals(joinPaths(FolderAndPathTest.testDirAbsPath, 'test_path'), folderAndPath.absPath)
-        self.assertEquals('test_path', folderAndPath.relativePath)
+        self.assertEqual(FolderAndPathTest.folder.name, folderAndPath.folder.name)
+        self.assertEqual(joinPaths(FolderAndPathTest.testDirAbsPath, 'test_path'), folderAndPath.absPath)
+        self.assertEqual('test_path', folderAndPath.relativePath)
 
         try:
             FolderAndPath(unknownArg='')
@@ -96,7 +96,7 @@ class FolderAndPathTest(unittest.TestCase):
         fp = FolderAndPath(folder=FolderAndPathTest.folder, path='test_path1/test_path2')
         jsonStr = fp.toJson()
         fromJson = FolderAndPath.fromJson(jsonStr)
-        self.assertEquals(fp, fromJson)
+        self.assertEqual(fp, fromJson)
 
     def testStr(self):
         fp = FolderAndPath(folder=FolderAndPathTest.folder, path='test_path1/test_path2')
@@ -104,17 +104,17 @@ class FolderAndPathTest(unittest.TestCase):
 
         expectedStr = "folder_name = %s, relativePath = %s, absPath = %s, url = %s" % (fp.folder.name, fp.relativePath, fp.absPath, fp.url)
 
-        self.assertEquals(expectedStr, _str)
+        self.assertEqual(expectedStr, _str)
 
     def testGetParent(self):
         fp = FolderAndPath(folder=FolderAndPathTest.folder, path='test_path1/test_path2')
         expectedParent = FolderAndPath(folder=FolderAndPathTest.folder, path='test_path1')
         parent = fp.getParent()
-        self.assertEquals(expectedParent, parent)
+        self.assertEqual(expectedParent, parent)
 
         expectedParent = FolderAndPath(folder=FolderAndPathTest.folder, path='')
         parent = parent.getParent()
-        self.assertEquals(expectedParent, parent)
+        self.assertEqual(expectedParent, parent)
 
         try:
             parent.getParent()
@@ -145,7 +145,7 @@ class UtilsTest(unittest.TestCase):
                'cb-checkbox_3': 'on'}
 
         checkedEntries = getCheckedEntries(dic)
-        self.assertEquals(2, len(checkedEntries))
+        self.assertEqual(2, len(checkedEntries))
 
     def testGetCurrentDirEntriesContentFilter(self):
         folder = Folder()
@@ -213,17 +213,17 @@ class UtilsTest(unittest.TestCase):
                     nextTime = nextTime + timedelta(seconds=1)
 
                 entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), False, const.thumbnailsViewType)
-                self.assertEquals(16, len(entries))
+                self.assertEqual(16, len(entries))
 
                 for i in range(0, len(testFiles)):
                     entry = entries[i]
                     testFile = testFiles[i]
                     # print("Testing entry %s: %s" % (i, testFile.path))
-                    self.assertEquals(testFile.path.is_dir(), entry.isDir)
-                    self.assertEquals(testFile.path.name, entry.name)
-                    self.assertEquals(entry.name, entry.nameUrl)
-                    self.assertEquals(testFile.expectedSize, entry.size)
-                    self.assertEquals(testFiles[i].timeSetTo.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
+                    self.assertEqual(testFile.path.is_dir(), entry.isDir)
+                    self.assertEqual(testFile.path.name, entry.name)
+                    self.assertEqual(entry.name, entry.nameUrl)
+                    self.assertEqual(testFile.expectedSize, entry.size)
+                    self.assertEqual(testFiles[i].timeSetTo.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
                     self.assertFalse(entry.hasThumbnail)
                     self.assertIsNone(entry.getThumbnailUrl())
             finally:
@@ -232,12 +232,12 @@ class UtilsTest(unittest.TestCase):
                     entry.restoreMTime()
 
             entries = getCurrentDirEntries(FolderAndPath(folder=folder, path='images'), False, const.thumbnailsViewType)
-            self.assertEquals(20, len(entries))
+            self.assertEqual(20, len(entries))
             entry = entries[0]
             self.assertFalse(entry.isDir)
-            self.assertEquals('Add-Folder-icon.png', entry.name)
-            self.assertEquals(entry.name, entry.nameUrl)
-            self.assertEquals('1.96 KB', entry.size)
+            self.assertEqual('Add-Folder-icon.png', entry.name)
+            self.assertEqual(entry.name, entry.nameUrl)
+            self.assertEqual('1.96 KB', entry.size)
             self.assertTrue(entry.hasThumbnail)
             match = thumbUrlRegex.match(entry.getThumbnailUrl())
             self.assertTrue(match)
@@ -245,11 +245,11 @@ class UtilsTest(unittest.TestCase):
 
             entry = entries[3]
             self.assertFalse(entry.isDir)
-            self.assertEquals('Paste-icon.png', entry.name)
-            self.assertEquals(entry.name, entry.nameUrl)
-            self.assertEquals('1.80 KB', entry.size)
-            self.assertEquals(1844, entry.sizeNumeric)
-            # self.assertEquals(img_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
+            self.assertEqual('Paste-icon.png', entry.name)
+            self.assertEqual(entry.name, entry.nameUrl)
+            self.assertEqual('1.80 KB', entry.size)
+            self.assertEqual(1844, entry.sizeNumeric)
+            # self.assertEqual(img_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
             self.assertTrue(entry.hasThumbnail)
             match = thumbUrlRegex.match(entry.getThumbnailUrl())
             self.assertTrue(match)
@@ -259,7 +259,7 @@ class UtilsTest(unittest.TestCase):
             folder.delete()
 
     def testReplaceEscapedUrl(self):
-        self.assertEquals("part1,part2&", utils.replaceEscapedUrl("part1(comma)part2(ampersand)"))
+        self.assertEqual("part1,part2&", utils.replaceEscapedUrl("part1(comma)part2(ampersand)"))
 
     def testHandleDelete(self):
         testDir = 'html_browser/test_dir2'
@@ -307,13 +307,13 @@ class UtilsTest(unittest.TestCase):
                 rmtree(testDir)
 
     def testFormatBytes(self):
-        self.assertEquals("1.15 GB", formatBytes(1234567890))
-        self.assertEquals("117.74 MB", formatBytes(123456789))
-        self.assertEquals("120.56 KB", formatBytes(123456))
-        self.assertEquals("123", formatBytes(123))
+        self.assertEqual("1.15 GB", formatBytes(1234567890))
+        self.assertEqual("117.74 MB", formatBytes(123456789))
+        self.assertEqual("120.56 KB", formatBytes(123456))
+        self.assertEqual("123", formatBytes(123))
 
-        self.assertEquals("1205632.71 KB", formatBytes(1234567890, forceUnit='KB'))
-        self.assertEquals("1205632.71", formatBytes(1234567890, forceUnit='KB', includeUnitSuffix=False))
+        self.assertEqual("1205632.71 KB", formatBytes(1234567890, forceUnit='KB'))
+        self.assertEqual("1205632.71", formatBytes(1234567890, forceUnit='KB', includeUnitSuffix=False))
 
 
 def main():

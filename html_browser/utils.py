@@ -1,4 +1,4 @@
-import html.parser
+import html
 import json
 import logging
 import os
@@ -29,9 +29,9 @@ thumbnailGeometry = '150x150'
 
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
 folderAndPathRegex = re.compile(r'^(\w+)(/(.*))?$')
-imageRegexStr = r'.+\.(?i)((jpg)|(png)|(bmp))'
-imageRegex = re.compile(imageRegexStr)
-imageRegexWithCach = re.compile(r'cache/%s' % imageRegexStr)
+imageRegexStr = r'.+\.((jpg)|(png)|(bmp))'
+imageRegex = re.compile(r'(?i)%s' % imageRegexStr)
+imageRegexWithCach = re.compile(r'(?i)cache/%s' % imageRegexStr)
 
 
 class ThumbnailStorage(FileSystemStorage):
@@ -257,8 +257,7 @@ def getCurrentDirEntries(folderAndPath, showHidden, viewType, contentFilter=None
 
 
 def replaceEscapedUrl(url):
-    h = html.parser.HTMLParser()
-    url = h.unescape(url)
+    url = html.unescape(url)
     return url.replace("(comma)", ",").replace("(ampersand)", "&")
 
 
