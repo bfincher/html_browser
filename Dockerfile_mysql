@@ -1,4 +1,4 @@
-from html_browser_cygwin
+from hb_mysql:latest
 
 env PYTHONBUFFERED 1
 
@@ -21,9 +21,9 @@ run apk add --no-cache mariadb mariadb-client && \
     )" \
     && apk add --virtual .rundeps $runDeps 
 
-copy ../html_browser/local_settings/local_settings_docker_mysql.py /hb/html_browser/local_settings/local_settings.py
-copy ../html_browser/local_settings/local_settings_docker_mysql.json /hb/html_browser/local_settings/local_settings.json
+copy html_browser/local_settings/local_settings_docker_mysql.py /hb/html_browser/local_settings/local_settings.py
+copy html_browser/local_settings/local_settings_docker_mysql.json /hb/html_browser/local_settings/local_settings.json
 
-copy init_mysql.sh /init_db.sh
+copy docker/init_mysql.sh /init_db.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
