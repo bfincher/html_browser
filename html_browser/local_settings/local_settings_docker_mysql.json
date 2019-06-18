@@ -1,0 +1,12 @@
+{
+	"ADMIN_NAME": "Your Name",
+	"ADMIN_EMAIL": "your_email@example.com",
+	
+	"STATICFILES_DIRS": ["${BASE_DIR}/media"],
+	"LOG_DIR": "/config/logs/hb",
+	"ALLOWED_HOSTS": [
+		"userver",
+		"localhost"
+	],
+	"THUMBNAIL_CACHE_DIR": "/config/thumb_cache"
+}
