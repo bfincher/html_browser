@@ -1,4 +1,4 @@
-from hb_mysql:latest
+from html_browser:latest
 
 env PYTHONBUFFERED 1
 
