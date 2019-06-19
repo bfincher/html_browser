@@ -25,6 +25,7 @@ copy html_browser/local_settings/local_settings_docker_mysql.py /hb/html_browser
 copy html_browser/local_settings/local_settings_docker_mysql.json /hb/html_browser/local_settings/local_settings.json
 
 copy docker/init_mysql.sh /init_db.sh
+copy docker/entrypoint.sh /
 
 ENV DB_USER="db_user"
 ENV DB_PASS="db_pass"

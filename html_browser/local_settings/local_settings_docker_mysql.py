@@ -40,13 +40,12 @@ _replaceDict(configs)
 
 ADMINS = (configs['ADMIN_NAME'], configs['ADMIN_EMAIL'])
 
-DATABASES = configs['DATABASES']
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": os.environ["DB_NAME"],
         "USER": os.environ["DB_USER"],
-        "PASSWORD": os.environ["DB_PASSWORD"],
+        "PASSWORD": os.environ["DB_PASS"],
         "HOST": "localhost",
         "PORT": "",
     }
