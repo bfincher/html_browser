@@ -4,7 +4,7 @@ env PYTHONBUFFERED 1
 
 workdir /hb
 
-run apk add --no-cache mariadb mariadb-client openrc && \
+run apk add --no-cache mariadb mariadb-client && \
     apk add --no-cache --virtual .builddeps mariadb-dev gcc musl-dev python3-dev && \
     pip install --no-cache mysqlclient==1.4.2 && \
     apk del .builddeps && \

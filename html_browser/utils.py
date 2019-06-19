@@ -36,8 +36,9 @@ imageRegexWithCach = re.compile(r'(?i)cache/%s' % imageRegexStr)
 
 class ThumbnailStorage(FileSystemStorage):
     def __init__(self):
-        if not os.path.exists(settings.THUMBNAIL_CACHE_DIR):
-            os.makedirs(settings.THUMBNAIL_CACHE_DIR)
+        p = Path(settings.THUMBNAIL_CACHE_DIR)
+        if not p.exists():
+            p.mkdir(parents=True)
         super().__init__(location=settings.THUMBNAIL_CACHE_DIR)
 
     def path(self, name):

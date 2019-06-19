@@ -1,4 +1,4 @@
-from alpine:3.9.4
+from dockage/alpine:3.9-openrc
 
 env PYTHONBUFFERED 1
 
