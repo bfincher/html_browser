@@ -1,11 +1,11 @@
-from alpine:3.9.4
+from ubuntu:xenial
 
 env PYTHONBUFFERED 1
 
 RUN mkdir /hb
 workdir /hb
 
-run apk add --no-cache py3-pillow shadow bash nginx
+run apt update && apt install -y python3 python3-pillow shadow bash nginx net-tools python3-pip
 
 copy requirements.txt /hb/requirements.txt
 
@@ -15,18 +15,12 @@ run ln -s /usr/bin/python3.6 /usr/bin/python && \
     pip install --no-cache gunicorn==19.9.0 && \
     rm /etc/nginx/conf.d/default.conf && \
     mkdir -p /run/nginx && \
+    apt uninstall -y python3-pip && \
+    apt auto-remove -y && \
     find /usr/local \
         \( -type d -a -name test -o -name tests \) \
         -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
-        -exec rm -rf '{}' + \
-    && runDeps="$( \
-        scanelf --needed --nobanner --recursive /usr/local \
-                | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
-                | sort -u \
-                | xargs -r apk info --installed \
-                | sort -u \
-    )" \
-    && apk add --virtual .rundeps $runDeps 
+        -exec rm -rf '{}' + 
 
 copy docker/nginx.conf /etc/nginx/conf.d
 copy html_browser/ /hb/html_browser/

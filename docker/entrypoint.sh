@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-#while true; do date; sleep 1; done
+while true; do date; sleep 1; done
 
 export USER=hb
 
