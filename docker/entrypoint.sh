@@ -35,7 +35,7 @@ fi
 
 su ${USER} -c "python manage.py migrate"
 
-echo "from django.contrib.auth.models import User; User.objects.get(is_superuser=True)" | python manage.py shell > /dev/null || \
+echo "from django.contrib.auth.models import User; User.objects.get(is_superuser=True)" | python manage.py shell &> /dev/null || \
 echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'pass')" | python manage.py shell
 
 CRON_CMD="cd /hb/ && bash -l -c 'python manage.py thumbnail cleanup > /dev/null'"

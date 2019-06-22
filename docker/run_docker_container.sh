@@ -6,7 +6,7 @@ USERNAME=$(getent passwd $UID | gawk -F':' '{ print $1}')
 GROUPNAME=$(getent group $GID | gawk -F':' '{ print $1}')
 
 if [ -z $VIRTUAL_ENV ]; then
-    image_name=html_browser_web
+    image_name=html_browser
     CONFIG=${THIS_DIR}/config
 else
     image_name=$(basename $VIRTUAL_ENV)
