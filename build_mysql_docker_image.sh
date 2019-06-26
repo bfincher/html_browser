@@ -1,6 +1,6 @@
 if [ -z $VIRTUAL_ENV ]; then
-    image_name=html_browser_mysql
+    image_name=html_browser
 else
-    image_name=$(basename $VIRTUAL_ENV)_mysql
+    image_name=$(basename $VIRTUAL_ENV)
 fi
-docker build -t $image_name -f Dockerfile_mysql . 
+docker build -t $image_name:bionic-mysql -f Dockerfile_mysql . 

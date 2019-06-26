@@ -1,7 +1,6 @@
 #!/bin/sh
-set -e
 
-while true; do date; sleep 1; done
+#while true; do date; sleep 1; done
 
 export USER=hb
 
@@ -33,16 +32,20 @@ fi
 
 /init_db.sh
 
+sleep 2
+
 su ${USER} -c "python manage.py migrate"
 
-echo "from django.contrib.auth.models import User; User.objects.get(is_superuser=True)" | python manage.py shell &> /dev/null || \
-echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'pass')" | python manage.py shell
+sleep 2
+
+python manage.py create_superuser_with_password --user admin --password pass --noinput --email 'admin@example.com' --if-no-superuser
 
 CRON_CMD="cd /hb/ && bash -l -c 'python manage.py thumbnail cleanup > /dev/null'"
 
 CRON_PERIOD="0 0 * * *"
 (crontab -u $USER -l ; echo "${CRON_PERIOD}   ${CRON_CMD}") | sort - | uniq - | crontab -u $USER -
 
-/usr/sbin/nginx
+/etc/init.d/nginx start
+
 su ${USER} -c 'gunicorn html_browser.wsgi:application --bind 0.0.0.0:8000 --timeout 300'
 

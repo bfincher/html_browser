@@ -34,4 +34,4 @@ docker run -d \
     -e APP_GID=$GID \
     --name=$image_name \
     --restart unless-stopped \
-    $image_name
+    $image_name:bionic-sqlite

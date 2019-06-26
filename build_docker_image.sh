@@ -3,4 +3,4 @@ if [ -z $VIRTUAL_ENV ]; then
 else
     image_name=$(basename $VIRTUAL_ENV)
 fi
-docker build -t $image_name --pull .
+docker build -t $image_name:bionic-sqlite --pull .

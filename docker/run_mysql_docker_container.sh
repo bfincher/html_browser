@@ -6,15 +6,20 @@ USERNAME=$(getent passwd $UID | gawk -F':' '{ print $1}')
 GROUPNAME=$(getent group $GID | gawk -F':' '{ print $1}')
 
 if [ -z $VIRTUAL_ENV ]; then
-    image_name=html_browser_mysql
+    image_name=html_browser
     CONFIG=${THIS_DIR}/config
 else
-    image_name=$(basename $VIRTUAL_ENV)_mysql
+    image_name=$(basename $VIRTUAL_ENV)
     CONFIG=${THIS_DIR}/config_$image_name
 fi
 
 if [ ! -d $CONFIG ]; then
     mkdir $CONFIG
+fi
+
+DB_DIR=$CONFIG/mysql
+if [ ! -d $DB_DIR ]; then
+    mkdir $DB_DIR
 fi
 
 chown -R ${USERNAME}:${GROUPNAME} $CONFIG
@@ -32,6 +37,6 @@ docker run -d \
     -v /Volumes/data1:/data1 \
     -e APP_UID=$UID \
     -e APP_GID=$GID \
-    --name=$image_name \
+    --name=${image_name}_mysql \
     --restart unless-stopped \
-    $image_name
+    $image_name:bionic-mysql

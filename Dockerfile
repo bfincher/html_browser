@@ -6,7 +6,7 @@ env PYTHONBUFFERED 1
 RUN mkdir /hb
 workdir /hb
 
-run apt-get update && apt-get install -y python3 python3-pillow bash nginx python3-setuptools curl vim cron && \
+run apt-get update && apt-get install -y python3 python3-pillow bash nginx python3-setuptools curl cron && \
     curl -sS https://bootstrap.pypa.io/get-pip.py > setup.py && \
     python3 setup.py && \
     apt-get remove curl -y && \
