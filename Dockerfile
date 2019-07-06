@@ -1,19 +1,13 @@
-from alpine:3.9.4
+from bfincher/alpine-python3:3.10
 
 env PYTHONBUFFERED 1
 
 RUN mkdir /hb
 workdir /hb
-
-run apk add --no-cache py3-pillow shadow bash nginx
-
 copy requirements.txt /hb/requirements.txt
 
-run ln -s /usr/bin/python3.6 /usr/bin/python && \
-    ln -s /usr/bin/pip3 /usr/bin/pip && \
-    grep -v mysql requirements.txt | grep -v Pillow > requirements_minus_mysql.txt && \ 
-    pip install --no-cache -r requirements_minus_mysql.txt && \
-    rm requirements.txt requirements_minus_mysql.txt && \
+run apk add --no-cache py3-pillow nginx && \
+    grep -v Pillow requirements.txt | pip install --no-cache -r /dev/stdin && \
     pip install --no-cache gunicorn==19.9.0 && \
     rm /etc/nginx/conf.d/default.conf && \
     mkdir -p /run/nginx && \
