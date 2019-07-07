@@ -1,21 +1,13 @@
-#from debian:stretch
-from ubuntu:bionic
+from bfincher/ubuntu-python3:bionic
 
 env PYTHONBUFFERED 1
 
 RUN mkdir /hb
 workdir /hb
 
-run apt-get update && apt-get install -y python3 python3-pillow bash nginx python3-setuptools curl cron && \
-    curl -sS https://bootstrap.pypa.io/get-pip.py > setup.py && \
-    python3 setup.py && \
-    apt-get remove curl -y && \
-    apt-get auto-remove -y
-
 copy requirements.txt /hb/requirements.txt
 
-run ln -s /usr/bin/python3.6 /usr/bin/python && \
-    ln -s /usr/bin/pip3 /usr/bin/pip && \
+run apt-get install -y python3-pillow nginx cron && \
     pip install --no-cache -r requirements.txt && \
     pip install --no-cache gunicorn==19.9.0 && \
     find /usr/local \
