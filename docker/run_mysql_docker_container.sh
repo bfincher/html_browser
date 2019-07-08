@@ -38,5 +38,6 @@ docker run -d \
     -e APP_UID=$UID \
     -e APP_GID=$GID \
     --name=${image_name}_mysql \
+    --network=hb_net \
     --restart unless-stopped \
     $image_name:bionic-mysql

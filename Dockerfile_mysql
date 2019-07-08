@@ -1,19 +1,15 @@
-from html_browser:bionic-sqlite
+from bfincher/html_browser:bionic-sqlite
 
 ENV PYTHONBUFFERED 1
 ENV DB_DIR=$APP_CONFIG/mysql
 
 workdir /hb
 
-run apt-get install -y mariadb-server mariadb-client libmariadbclient-dev gcc python3-dev libmariadbclient18 && \
+run apt-get install -y mariadb-client libmariadbclient-dev gcc python3-dev libmariadbclient18 && \
     pip install --no-cache mysqlclient==1.4.2 && \
     apt-get remove -y libmariadbclient-dev gcc python3-dev && \
     apt-get auto-remove -y && \
     apt-get clean && \
-    /etc/init.d/mysql stop && \
-    sed -i "s:/var/lib/mysql:${DB_DIR}:g" /etc/mysql/mariadb.conf.d/* && \
-    rsync -av /var/lib/mysql $DB_DIR && \
-    mv /var/lib/mysql /var/lib/mysql.bak && \
     find /usr/local \
         \( -type d -a -name test -o -name tests \) \
         -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
@@ -25,14 +21,13 @@ run apt-get install -y vim net-tools
 copy html_browser/local_settings/local_settings_docker_mysql.py /hb/html_browser/local_settings/local_settings.py
 copy html_browser/local_settings/local_settings_docker_mysql.json /hb/html_browser/local_settings/local_settings.json
 
-copy docker/init_mysql.sh /init_db.sh
+copy docker/empty.sh /init_db.sh
 copy docker/entrypoint.sh /
 
 ENV DB_USER="db_user"
 ENV DB_PASS="db_pass"
 ENV DB_ROOT_PASS="db_root_pass"
 ENV DB_NAME="hb_db"
-
-VOLUME /var/lib/mysql
+env DB_HOST="mysql"
 
 ENTRYPOINT ["/entrypoint.sh"]
