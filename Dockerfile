@@ -26,15 +26,16 @@ run apk add --no-cache py3-pillow nginx && \
 
 copy docker/nginx.conf /etc/nginx/conf.d
 copy html_browser/ /hb/html_browser/
-copy html_browser/local_settings/local_settings_docker.py /hb/html_browser/local_settings/local_settings.py
-copy html_browser/local_settings/local_settings_docker.json /hb/html_browser/local_settings/local_settings.json
+copy html_browser/local_settings/local_settings_docker_sqlite.py /hb/html_browser/local_settings/local_settings.py
+copy html_browser/local_settings/local_settings_docker_sqlite.json /hb/html_browser/local_settings/local_settings.json
 
 ENV APP_CONFIG="/config"
 
 copy media/ /hb/media/
 
 copy manage.py /hb
-copy docker/entrypoint.sh /
+copy docker/entrypoint.sh /entrypoint.sh
+copy docker/init_sqlite.sh /init_db.sh
 
 EXPOSE 80
 VOLUME /config /data1 /data2

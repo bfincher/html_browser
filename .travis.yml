@@ -14,6 +14,10 @@ before_install :
   - docker run -d -p 8000:80 -v /config:/config -v /:/data1 -e APP_UID=$UID -e APP_GID=$GID --name html_browser html_browser
   - docker ps -a
   - docker exec -it html_browser /bin/bash -c "cd /hb; python manage.py test"
+  - docker build -t html_browser_mysql -f Dockerfile_mysql .
+  - docker ps -a
+  - docker run -d -p 8001:80 -v /config:/config -v /:/data1 -e APP_UID=$UID -e APP_GID=$GID --name html_browser_mysql html_browser_mysql
+  - docker exec -it html_browser_mysql /bin/bash -c "cd /hb; python manage.py test"
 # command to install dependencies
 install: 
   - "pip install flake8"
@@ -21,8 +25,8 @@ install:
   - sudo mkdir /var/log/hb
   - sudo mkdir -p /config/logs/hb
   - sudo chown $USER /config/logs/hb
-  - cp html_browser/local_settings/local_settings_docker.py html_browser/local_settings/local_settings.py
-  - cp html_browser/local_settings/local_settings_docker.json /config/local_settings.json
+  - cp html_browser/local_settings/local_settings_docker_sqlite.py html_browser/local_settings/local_settings.py
+  - cp html_browser/local_settings/local_settings_docker_sqlite.json /config/local_settings.json
 
 before_script:
   - "flake8 ."

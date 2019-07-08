@@ -6,12 +6,12 @@ USERNAME=$(getent passwd $UID | gawk -F':' '{ print $1}')
 GROUPNAME=$(getent group $GID | gawk -F':' '{ print $1}')
 
 if [ -z $VIRTUAL_ENV ]; then
-    image_name=bfincher/html_browser:alpine-sqlite
-    container_name=html_browser_alpine_sqlite
+    image_name=bfincher/html_browser:alpine-mysql
+    container_name=html_browser_alpine_mysql
     CONFIG=${THIS_DIR}/config
 else
-    image_name=bfincher/$(basename $VIRTUAL_ENV):alpine-sqlite
-    container_name=$(basename $VIRTUAL_ENV)_alpine_sqlite
+    image_name=bfincher/$(basename $VIRTUAL_ENV):alpine-mysql
+    container_name=$(basename $VIRTUAL_ENV)_alpine_mysql
     CONFIG=${THIS_DIR}/${container_name}_config
 fi
 
@@ -35,5 +35,6 @@ docker run -d \
     -e APP_UID=$UID \
     -e APP_GID=$GID \
     --name=$container_name \
+    --network=hb_net \
     --restart unless-stopped \
     $image_name
