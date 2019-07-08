@@ -18,15 +18,15 @@ class Command(createsuperuser.Command):
         ),
 
         parser.add_argument(
-            '--if-no-superuser', '--if-no-superuser', action='store_false', dest='if_no_superuser',
-            help=('Will only create the specified user if there is a super user does not currently exist'))
+            '--if-no-superuser', action='store_true', dest='if_no_superuser',
+            help='Will only create the specified user if there is a super user does not currently exist')
 
     def handle(self, *args, **options):
         password = options.get('password')
         username = options.get('username')
         database = options.get('database')
 
-        if options['if_no_superuser'] and get_object_or_None(User, is_superuser=True):
+        if options.get('if_no_superuser') and self.UserModel._default_manager.db_manager(database).filter(is_superuser=True).exists():
             self.stdout.write('Not creating super user since one already exists')
             return
         if password and not username:

@@ -12,7 +12,7 @@ if [ -z $VIRTUAL_ENV ]; then
 else
     image_name=bfincher/$(basename $VIRTUAL_ENV):alpine-sqlite
     container_name=$(basename $VIRTUAL_ENV)_alpine_sqlite
-    CONFIG=${THIS_DIR}/config_$image_name
+    CONFIG=${THIS_DIR}/${container_name}_config
 fi
 
 if [ ! -d $CONFIG ]; then
