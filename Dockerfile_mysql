@@ -4,8 +4,7 @@ env PYTHONBUFFERED 1
 
 workdir /hb
 
-run apk add --no-cache mariadb mariadb-client && \
-    apk add --no-cache --virtual .builddeps mariadb-dev gcc musl-dev python3-dev && \
+run apk add --no-cache --virtual .builddeps mariadb-dev gcc musl-dev python3-dev && \
     pip install --no-cache mysqlclient==1.4.2 && \
     apk del .builddeps && \
     find /usr/local \
@@ -24,11 +23,12 @@ run apk add --no-cache mariadb mariadb-client && \
 copy html_browser/local_settings/local_settings_docker_mysql.py /hb/html_browser/local_settings/local_settings.py
 copy html_browser/local_settings/local_settings_docker_mysql.json /hb/html_browser/local_settings/local_settings.json
 
-copy docker/init_mysql.sh /init_db.sh
+copy docker/empty.sh /init_db.sh
 
 ENV DB_USER="db_user"
 ENV DB_PASS="db_pass"
 ENV DB_ROOT_PASS="db_root_pass"
 env DB_NAME="hb_db"
+env DB_HOST="mysql"
 
 ENTRYPOINT ["/entrypoint.sh"]

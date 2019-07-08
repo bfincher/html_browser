@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-#while true; do date; sleep 1; done
+while true; do date; sleep 1; done
 
 export USER=hb
 
@@ -34,9 +34,7 @@ fi
 /init_db.sh
 
 su ${USER} -c "python manage.py migrate"
-
-echo "from django.contrib.auth.models import User; User.objects.get(is_superuser=True)" | python manage.py shell > /dev/null || \
-echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'pass')" | python manage.py shell
+python manage.py create_superuser_with_password --user admin --password pass --noinput --email 'admin@example.com' --if-no-superuser
 
 CRON_CMD="cd /hb/ && bash -l -c 'python manage.py thumbnail cleanup > /dev/null'"
 
