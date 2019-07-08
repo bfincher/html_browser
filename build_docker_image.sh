@@ -1,6 +1,6 @@
 if [ -z $VIRTUAL_ENV ]; then
-    image_name=html_browser
+    image_name=bfincher/html_browser
 else
-    image_name=$(basename $VIRTUAL_ENV)
+    image_name=bfincher/$(basename $VIRTUAL_ENV)
 fi
-docker build -t $image_name --pull .
+docker build -t $image_name .
