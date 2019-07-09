@@ -4,3 +4,6 @@
 cache
 folder_links
 .coverage
+docker/*config
+html_browser/local_settings/local_settings.json
+html_browser/local_settings/local_settings.py
