@@ -22,7 +22,9 @@ run apk add --no-cache py3-pillow nginx && \
                 | xargs -r apk info --installed \
                 | sort -u \
     )" \
-    && apk add --virtual .rundeps $runDeps 
+    && apk add --virtual .rundeps $runDeps && \
+    mkdir -p /etc/services.d/nginx && \
+    mkdir -p /etc/services.d/gunicorn
 
 copy docker/nginx.conf /etc/nginx/conf.d
 copy html_browser/ /hb/html_browser/
@@ -34,11 +36,11 @@ ENV APP_CONFIG="/config"
 copy media/ /hb/media/
 
 copy manage.py /hb
-copy docker/entrypoint.sh /entrypoint.sh
 copy docker/init_sqlite.sh /init_db.sh
+copy docker/10-init_hb /etc/cont-init.d/
+
+copy docker/run_nginx /etc/services.d/nginx/run
+copy docker/run_gunicorn /etc/services.d/gunicorn/run
 
 EXPOSE 80
 VOLUME /config /data1 /data2
-
-#ENTRYPOINT ["/bin/bash"]
-ENTRYPOINT ["/entrypoint.sh"]

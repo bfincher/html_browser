@@ -32,8 +32,11 @@ docker run -d \
     -p $port:80 \
     -v ${CONFIG}:/config \
     -v /Volumes/data1:/data1 \
-    -e APP_UID=$UID \
-    -e APP_GID=$GID \
+    -e UID=$UID \
+    -e GID=$GID \
+    -e USERNAME=$USERNAME \
+    -e GROUPNAME=$GROUPNAME \
+    -e HOMEDIR=/hb \
     --name=$container_name \
     --network=hb_net \
     --restart unless-stopped \

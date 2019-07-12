@@ -31,5 +31,3 @@ ENV DB_PASS="db_pass"
 ENV DB_ROOT_PASS="db_root_pass"
 env DB_NAME="hb_db"
 env DB_HOST="mysql"
-
-ENTRYPOINT ["/entrypoint.sh"]

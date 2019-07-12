@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv sh
+
+cd /hb
+su ${USERNAME} -c 'gunicorn html_browser.wsgi:application --bind 0.0.0.0:8000 --timeout 300 -D'

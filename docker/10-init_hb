@@ -1,0 +1,29 @@
+#!/usr/bin/with-contenv sh
+set -e
+
+#while true; do date; sleep 1; done
+
+cd /hb
+APP_CONFIG_UIDGID="${USERID}:${GROUPID}"
+
+if [ ! -d ${APP_CONFIG}/logs/hb ]; then
+    su ${USERNAME} -c "mkdir -p ${APP_CONFIG}/logs/hb"
+fi
+
+if [ ! -f ${APP_CONFIG}/local_settings.json ]; then
+    su ${USERNAME} -c "cp /hb/html_browser/local_settings/local_settings.json ${APP_CONFIG}/local_settings.json"
+fi
+
+if [ $(stat -c "%u:%g" ${APP_CONFIG}) != "${APP_CONFIG_UIDGID}" ]; then
+    chown -R ${APP_CONFIG_UIDGID} "$APP_CONFIG"
+fi
+
+/init_db.sh
+
+su ${USERNAME} -c "python manage.py migrate"
+python manage.py create_superuser_with_password --user admin --password pass --noinput --email 'admin@example.com' --if-no-superuser
+
+CRON_CMD="cd /hb/ && bash -l -c 'python manage.py thumbnail cleanup > /dev/null'"
+
+CRON_PERIOD="0 0 * * *"
+(crontab -u $USERNAME -l ; echo "${CRON_PERIOD}   ${CRON_CMD}") | sort - | uniq - | crontab -u $USERNAME -
