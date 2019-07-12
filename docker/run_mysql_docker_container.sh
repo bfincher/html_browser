@@ -32,8 +32,8 @@ docker run -d \
     -p $port:80 \
     -v ${CONFIG}:/config \
     -v /Volumes/data1:/data1 \
-    -e UID=$UID \
-    -e GID=$GID \
+    -e USERID=$UID \
+    -e GROUPID=$GID \
     -e USERNAME=$USERNAME \
     -e GROUPNAME=$GROUPNAME \
     -e HOMEDIR=/hb \
