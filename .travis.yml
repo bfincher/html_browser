@@ -11,13 +11,9 @@ before_install :
   - docker build -t html_browser --pull .
   - sudo mkdir /config
   - sudo chown $USER /config
-  - docker run -d -p 8000:80 -v /config:/config -v /:/data1 -e APP_UID=$UID -e APP_GID=$GID --name html_browser html_browser
+  - docker run -d -p 8000:80 -v /config:/config -v /:/data1 -e USERID=1010 -e GROUPID=1010 -e USERNAME=hb_user -e GROUPNAME=hb_group -e HOMEDIR=/hb --name html_browser html_browser
   - docker ps -a
   - docker exec -it html_browser /bin/bash -c "cd /hb; python manage.py test"
-  - docker build -t html_browser_mysql -f Dockerfile_mysql .
-  - docker ps -a
-  - docker run -d -p 8001:80 -v /config:/config -v /:/data1 -e APP_UID=$UID -e APP_GID=$GID --name html_browser_mysql html_browser_mysql
-  - docker exec -it html_browser_mysql /bin/bash -c "cd /hb; python manage.py test"
 # command to install dependencies
 install: 
   - "pip install flake8"
