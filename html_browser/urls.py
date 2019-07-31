@@ -6,7 +6,7 @@ from html_browser.views import adminViews as admin_views
 from html_browser.views import base_view, content_view
 from html_browser.views import userViews as user_views
 
-fileNameChars = r'[\w \-~!@#$%^&*\(\)\+,\.\'\[\]]'
+fileNameChars = r'[\w \-~!@#$%^&*\(\)\+,\.\'’‘\[\]]'
 folderAndPathRegex = r'(?P<folderAndPathUrl>\w+(/%s+?)*)/' % fileNameChars
 
 urlpatterns = [
