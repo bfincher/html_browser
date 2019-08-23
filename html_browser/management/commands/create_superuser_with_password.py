@@ -1,4 +1,3 @@
-from annoying.functions import get_object_or_None
 from django.contrib.auth.management.commands import createsuperuser
 from django.core.management import CommandError
 
@@ -44,4 +43,3 @@ class Command(createsuperuser.Command):
             user = self.UserModel._default_manager.db_manager(database).get(username=username)
             user.set_password(password)
             user.save()
-
