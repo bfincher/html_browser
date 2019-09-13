@@ -1,8 +1,0 @@
-#!/usr/bin/with-contenv sh
-
-cd /hb
-sleep 10
-gunicorn html_browser.wsgi:application --user ${USERNAME} \
---access-logfile /var/log/gunicorn-access.log \
---error-logfile /var/log/gunicorn-error.log \
---bind 0.0.0.0:8000 --workers 2 --threads 2

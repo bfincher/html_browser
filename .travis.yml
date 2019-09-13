@@ -7,13 +7,6 @@ services:
 
 sudo: required
 
-before_install :
-  - docker build -t html_browser --pull .
-  - sudo mkdir /config
-  - sudo chown $USER /config
-  - docker run -d -p 8000:80 -v /config:/config -v /:/data1 -e USERID=1010 -e GROUPID=1010 -e USERNAME=hb_user -e GROUPNAME=hb_group -e HOMEDIR=/hb --name html_browser html_browser
-  - docker ps -a
-  - docker exec -it html_browser /bin/bash -c "cd /hb; python manage.py test"
 # command to install dependencies
 install: 
   - "pip install flake8"
@@ -21,8 +14,7 @@ install:
   - sudo mkdir /var/log/hb
   - sudo mkdir -p /config/logs/hb
   - sudo chown $USER /config/logs/hb
-  - cp html_browser/local_settings/local_settings_docker_sqlite.py html_browser/local_settings/local_settings.py
-  - cp html_browser/local_settings/local_settings_docker_sqlite.json /config/local_settings.json
+  - cp html_browser/local_settings/local_settings_cygwin.py html_browser/local_settings/local_settings.py
 
 before_script:
   - "flake8 ."
