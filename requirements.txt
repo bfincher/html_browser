@@ -4,5 +4,5 @@ django-debug-toolbar==1.11
 django-crispy-forms==1.7.2
 django-downloadview==1.9
 django-js-reverse==0.9.1
-Pillow==6.2.0
+Pillow==6.2.1
 sorl-thumbnail==12.4.1
