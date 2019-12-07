@@ -2,7 +2,7 @@
 	var passwordInValid = false;
 	
 	function validateUserName(userNameId, okButtonId) {
-        userName = document.getElementById(userNameId);
+        const userName = document.getElementById(userNameId);
         var valid = false;        
         
         if (userName.value.length < 6) {
@@ -23,8 +23,8 @@
     }
 	 
 	function validatePassword(passwordId, verifyPasswordId, okButtonId) {
-		password = document.getElementById(passwordId);
-		verifyPassword = document.getElementById(verifyPasswordId);
+		const password = document.getElementById(passwordId);
+		const verifyPassword = document.getElementById(verifyPasswordId);
 		
         var valid = false;
         
