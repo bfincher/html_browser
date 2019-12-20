@@ -10,6 +10,7 @@ from shutil import rmtree
 from urllib.parse import quote_plus, unquote_plus
 
 from django.core.files.storage import FileSystemStorage
+from django.shortcuts import _get_queryset
 from django.urls import reverse
 from sorl.thumbnail import get_thumbnail
 
@@ -309,3 +310,11 @@ def getBytesUnit(numBytes):
         return "KB"
     else:
         return "Bytes"
+
+
+def get_object_or_None(klass, *args, **kwargs):
+    queryset = _get_queryset(klass)
+    try:
+        return queryset.get(*args, **kwargs)
+    except queryset.model.DoesNotExist:
+        return None
