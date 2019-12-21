@@ -63,7 +63,7 @@ class UserTest(BaseAdminTest):
         self.assertEqual('nobody@whocares.com', newUser1.email)
         self.assertTrue(newUser1.is_superuser)
         self.assertFalse(newUser1.is_active)
-        
+
     def testDeleteUser(self):
         # test unauthorized user
         self.login(self.user1)
@@ -71,13 +71,13 @@ class UserTest(BaseAdminTest):
         self.assertEqual(302, response.status_code)
         self.assertEqual('/?next=/deleteUser/user2', response.url)
         self.assertEqual(self.user2, User.objects.get(username=self.user2.username))
-        
+
         self.login(self.user4)
         # test deleting current user
         response = self.client.post(reverse('deleteUser', args=[self.user4.username]))
         self.assertEqual('/userAdmin/', response.url)
         self.assertEqual(self.user4, User.objects.get(username=self.user4.username))
-        
+
         response = self.client.post(reverse('deleteUser', args=[self.user1.username]))
         self.assertEqual(302, response.status_code)
         self.assertEqual('/userAdmin/', response.url)
