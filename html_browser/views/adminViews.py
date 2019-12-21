@@ -2,7 +2,6 @@ import logging
 import re
 from abc import ABCMeta, abstractmethod
 
-from annoying.functions import get_object_or_None
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Group, User
@@ -12,7 +11,7 @@ from django.shortcuts import redirect, render
 
 import html_browser
 from html_browser.models import CAN_DELETE, CAN_READ, CAN_WRITE, Folder
-from html_browser.utils import getReqLogger
+from html_browser.utils import getReqLogger, get_object_or_None
 
 from .adminForms import (AddFolderForm, EditFolderForm, EditGroupForm,
                          GroupPermissionFormSet, UserPermissionFormSet)
