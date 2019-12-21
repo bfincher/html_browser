@@ -25,7 +25,12 @@ class UserPermissionTest(TestCase):
         self.user4.username = 'unit test user4'
         self.user4.save()
 
-        self.users = [self.user1, self.user2, self.user3, self.user4]
+        self.user5 = User()
+        self.user5.username = 'unit test user5'
+        self.user5.is_superuser = True
+        self.user5.save()
+
+        self.users = [self.user1, self.user2, self.user3, self.user4, self.user5]
 
         self.folder1 = Folder()
         self.folder1.name = 'unit test folder1'
@@ -74,6 +79,10 @@ class UserPermissionTest(TestCase):
         self.assertTrue(self.folder1.userCanRead(self.user4))
         self.assertTrue(self.folder1.userCanWrite(self.user4))
         self.assertTrue(self.folder1.userCanDelete(self.user4))
+
+        self.assertTrue(self.folder1.userCanRead(self.user5))
+        self.assertTrue(self.folder1.userCanWrite(self.user5))
+        self.assertTrue(self.folder1.userCanDelete(self.user5))
 
 
 class GroupPermissionTest(TestCase):

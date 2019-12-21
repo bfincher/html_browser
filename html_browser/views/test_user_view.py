@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 
 from html_browser.models import Group
+from html_browser.utils import get_object_or_None
 
 from .test_admin_view import BaseAdminTest
 from .test_base_view import contextCheck
@@ -62,6 +63,25 @@ class UserTest(BaseAdminTest):
         self.assertEqual('nobody@whocares.com', newUser1.email)
         self.assertTrue(newUser1.is_superuser)
         self.assertFalse(newUser1.is_active)
+
+    def testDeleteUser(self):
+        # test unauthorized user
+        self.login(self.user1)
+        response = self.client.post(reverse('deleteUser', args=[self.user2.username]))
+        self.assertEqual(302, response.status_code)
+        self.assertEqual('/?next=/deleteUser/user2', response.url)
+        self.assertEqual(self.user2, User.objects.get(username=self.user2.username))
+
+        self.login(self.user4)
+        # test deleting current user
+        response = self.client.post(reverse('deleteUser', args=[self.user4.username]))
+        self.assertEqual('/userAdmin/', response.url)
+        self.assertEqual(self.user4, User.objects.get(username=self.user4.username))
+
+        response = self.client.post(reverse('deleteUser', args=[self.user1.username]))
+        self.assertEqual(302, response.status_code)
+        self.assertEqual('/userAdmin/', response.url)
+        self.assertIsNone(get_object_or_None(User, username=self.user1.username))
 
     def testEditPassword(self):
         self.login(self.user4)
