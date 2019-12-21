@@ -218,7 +218,6 @@ class UtilsTest(unittest.TestCase):
                 for i in range(0, len(testFiles)):
                     entry = entries[i]
                     testFile = testFiles[i]
-                    print("Testing entry %s: %s" % (i, testFile.path))
                     self.assertEqual(testFile.path.is_dir(), entry.isDir)
                     self.assertEqual(testFile.path.name, entry.name)
                     self.assertEqual(entry.name, entry.nameUrl)
