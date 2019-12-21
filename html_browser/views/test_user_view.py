@@ -1,9 +1,9 @@
-from annoying.functions import get_object_or_None
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.urls import reverse
 
 from html_browser.models import Group
+from html_browser.utils import get_object_or_None
 
 from .test_admin_view import BaseAdminTest
 from .test_base_view import contextCheck
