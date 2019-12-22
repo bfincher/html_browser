@@ -1,6 +1,6 @@
 		<div class="row">
 		<div class="col-md-5">
-			<a href=" {{ parentDirLink }}" title="Parent Folder"><img src="{{ IMAGE_URL }}folder-blue-parent-icon.png" alt="Parent Folder"></a>
+			<a href=" {{ parent_dir_link }}" title="Parent Folder"><img src="{{ IMAGE_URL }}folder-blue-parent-icon.png" alt="Parent Folder"></a>
 			<a title="Delete" href="javascript:del()"> <img src="{{ IMAGE_URL }}Symbols-Delete-icon.png" alt = "delete"/></a>
 			<a title="Copy" href="javascript:copy()"><img src="{{ IMAGE_URL }}Copy-icon.png" alt="Copy"/></a>
 			<a title="Cut" href="javascript:cut()"><img src="{{ IMAGE_URL }}cut-icon.png" alt="Cut"/></a>
@@ -12,7 +12,7 @@
 
 		<div class="col-md-4">
 			<h5>
-				{{ folderAndPath.folder.name }}/{{ folderAndPath.relative_path }} &nbsp;&nbsp;&nbsp; 
+				{{ folder_and_path.folder.name }}/{{ folder_and_path.relative_path }} &nbsp;&nbsp;&nbsp; 
 				<a href="javascript:diskUsageShowPopup()">{{ diskFreePct }} free</a>
 			</h5>
 		</div>

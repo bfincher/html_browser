@@ -55,8 +55,8 @@ class AddFolderForm(forms.ModelForm):
         self.fields['local_path'].label = 'Local Path'
         self.fields['view_option'].label = 'View Option'
 
-        addUserPermHtml = HTML('''<br><a href='#' onclick="addUserPermRow();return false;">Add User Permission</a>''')
-        addGroupPermHtml = HTML('''<br><a href='#' onclick="addGroupPermRow();return false;">Add Group Permission</a><br><br>''')
+        add_user_perm_html = HTML('''<br><a href='#' onclick="addUserPermRow();return false;">Add User Permission</a>''')
+        add_group_perm_html = HTML('''<br><a href='#' onclick="addGroupPermRow();return false;">Add Group Permission</a><br><br>''')
 
         self.helper.layout = Layout('name',
                                     'local_path',
@@ -64,11 +64,11 @@ class AddFolderForm(forms.ModelForm):
                                     Formset('userPermFormset',
                                             template='admin/perm_crispy/table_inline_formset.html',
                                             formset_id='user_perm_formset'),
-                                    addUserPermHtml,
+                                    add_user_perm_html,
                                     Formset('groupPermFormset',
                                             template='admin/perm_crispy/table_inline_formset.html',
                                             formset_id='group_perm_formset'),
-                                    addGroupPermHtml)
+                                    add_group_perm_html)
 
         self.helper.form_method = 'post'
         self.helper.form_action = 'addFolder'
@@ -99,8 +99,8 @@ class UserPermissionForm(forms.ModelForm):
         self.helper.form_id = 'user_perm_form'
 
     def __iter__(self):
-        fieldOrder = [self['id'], self['folder'], self['user'], self['permission'], self['DELETE']]
-        return iter(fieldOrder)
+        field_order = [self['id'], self['folder'], self['user'], self['permission'], self['DELETE']]
+        return iter(field_order)
 
     class Meta:
         model = UserPermission
@@ -116,8 +116,8 @@ class GroupPermissionForm(forms.ModelForm):
         self.helper.form_id = 'group_perm_form'
 
     def __iter__(self):
-        fieldOrder = [self['id'], self['folder'], self['group'], self['permission'], self['DELETE']]
-        return iter(fieldOrder)
+        field_order = [self['id'], self['folder'], self['group'], self['permission'], self['DELETE']]
+        return iter(field_order)
 
     class Meta:
         model = GroupPermission

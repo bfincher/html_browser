@@ -26,7 +26,7 @@ function getNextImage() {
         $('#loading').remove();
 
         if (result['hasNextImage']) {
-            fileName = result['fileName']
+            var fileName = result['file_name']
             var table = $('#imageTable');
             table.append($('<tr><td>&nbsp</td></tr>'));
             table.append($('<tr><td>&nbsp</td></tr>'));
@@ -41,13 +41,13 @@ function getNextImage() {
 
             var row = $('<tr>');
             var cell = $('<td>');
-            cell.html('<img src="' + result['imageUrl'] + '"/>');
+            cell.html('<img src="' + result['image_url'] + '"/>');
             row.append(cell);
             table.append(row);
 
         }
         else {
-            lastImage = true;
+            var lastImage = true;
         }
     }
     });
@@ -62,7 +62,7 @@ function deleteImage(fileName) {
 
     var confirmMessage = "Are you sure you want to delete the selected entry?";
     if (confirm(confirmMessage)) {
-        post(Urls.deleteImage(folderAndPathUrl), {"fileName": fileName});
+        post(Urls.deleteImage(folderAndPathUrl), {"file_name": fileName});
     }
 }
 

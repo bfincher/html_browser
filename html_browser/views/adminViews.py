@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render
 
 import html_browser
 from html_browser.models import CAN_DELETE, CAN_READ, CAN_WRITE, Folder
-from html_browser.utils import getReqLogger, get_object_or_None
+from html_browser.utils import get_req_logger, get_object_or_none
 
 from .adminForms import (AddFolderForm, EditFolderForm, EditGroupForm,
                          GroupPermissionFormSet, UserPermissionFormSet)
@@ -103,43 +103,47 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
     def post(self, request, *args, **kwargs):
         self.initForms(request, *args, **kwargs)
 
-        reqLogger = getReqLogger()
+        req_logger = get_req_logger()
         if not self.folderForm.is_valid():
-            reqLogger.error('folderFormErrors = %s', self.folderForm.errors)
+            req_logger.error('folderFormErrors = %s', self.folderForm.errors)
             return self.render(request)
         elif not self.userPermFormset.is_valid():
-            reqLogger.error('userPermFormset.errors = %s', self.userPermFormset.errors)
+            req_logger.error('userPermFormset.errors = %s', self.userPermFormset.errors)
             return self.render(request)
         elif not self.groupPermFormset.is_valid():
-            reqLogger.error('groupPermFormset.errors = %s', self.groupPermFormset.errors)
+            req_logger.error('groupPermFormset.errors = %s', self.groupPermFormset.errors)
             return self.render(request)
 
         with transaction.atomic():
             folder = self.folderForm.save()
 
-            for form in self.userPermFormset:
-                if form.is_valid():
-                    if form.cleaned_data.get('DELETE'):
-                        if form.instance.pk:
-                            form.instance.delete()
-                    else:
-                        instance = form.save(commit=False)
-                        instance.folder = folder
-                        instance.save()
-
-            for form in self.groupPermFormset:
-                if form.is_valid():
-                    if form.cleaned_data.get('DELETE'):
-                        if form.instance.pk:
-                            form.instance.delete()
-                    else:
-                        instance = form.save(commit=False)
-                        instance.folder = folder
-                        instance.save()
-
+            self._process_user_perm_forms(folder)
+            self._process_group_perm_forms(folder)
             self.postSaveAction(folder)
 
         return redirect('folderAdmin')
+
+    def _process_user_perm_forms(self, folder):
+        for form in self.userPermFormset:
+            if form.is_valid():
+                if form.cleaned_data.get('DELETE'):
+                    if form.instance.pk:
+                        form.instance.delete()
+                else:
+                    instance = form.save(commit=False)
+                    instance.folder = folder
+                    instance.save()
+
+    def _process_group_perm_forms(self, folder):
+        for form in self.groupPermFormset:
+            if form.is_valid():
+                if form.cleaned_data.get('DELETE'):
+                    if form.instance.pk:
+                        form.instance.delete()
+                else:
+                    instance = form.save(commit=False)
+                    instance.folder = folder
+                    instance.save()
 
     def get(self, request, *args, **kwargs):
         self.initForms(request, *args, **kwargs)
@@ -214,15 +218,15 @@ class AddFolderView(AbstractFolderView):
 
 class AddGroupView(BaseAdminView):
     def post(self, request):
-        groupName = request.POST['groupName']
-        if groupNameRegex.match(groupName):
-            group = get_object_or_None(Group, name=groupName)
+        group_name = request.POST['group_name']
+        if groupNameRegex.match(group_name):
+            group = get_object_or_none(Group, name=group_name)
             if not group:
                 group = Group()
-                group.name = groupName
+                group.name = group_name
                 group.save()
             else:
-                messages.error(request, "%s already exists" % groupName)
+                messages.error(request, "%s already exists" % group_name)
         else:
             messages.error(request, "Invalid group name.  Must only contain letters, numbers, and underscores")
 
@@ -230,9 +234,9 @@ class AddGroupView(BaseAdminView):
 
 
 class DeleteGroupView(BaseAdminView):
-    def post(self, _, groupName, *args, **kwargs):
+    def post(self, _, group_name, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        group = Group.objects.get(name=groupName)
+        group = Group.objects.get(name=group_name)
         group.delete()
 
         return redirect('groupAdmin')
@@ -243,18 +247,18 @@ class EditGroupView(BaseAdminView):
         super().__init__(*args, **kwargs)
         self.form = None
 
-    def get(self, request, groupName):
-        group = Group.objects.get(name=groupName)
+    def get(self, request, group_name):
+        group = Group.objects.get(name=group_name)
 
         if not self.form:
             self.form = EditGroupForm(instance=group)
 
-        self.context['groupName'] = groupName
+        self.context['group_name'] = group_name
         self.context['form'] = self.form
         return render(request, 'admin/edit_group.html', self.context)
 
-    def post(self, request, groupName, *args, **kwargs):
-        group = Group.objects.get(name=groupName)
+    def post(self, request, group_name, *args, **kwargs):
+        group = Group.objects.get(name=group_name)
         self.form = EditGroupForm(request.POST, instance=group)
 
         with transaction.atomic():
@@ -263,15 +267,15 @@ class EditGroupView(BaseAdminView):
 
                 group.user_set.clear()
 
-                for userName in self.form.cleaned_data['users']:
-                    user = User.objects.get(username=userName)
+                for user_name in self.form.cleaned_data['users']:
+                    user = User.objects.get(username=user_name)
                     group.user_set.add(user)
 
                 group.save()
             else:
-                reqLogger = getReqLogger()
-                reqLogger.error('form.errors = %s', self.form.errors)
-                return self.get(request, groupName=groupName, *args, **kwargs)
+                req_logger = get_req_logger()
+                req_logger.error('form.errors = %s', self.form.errors)
+                return self.get(request, group_name=group_name, *args, **kwargs)
 
         return redirect('groupAdmin')
 

@@ -1,10 +1,10 @@
-userPermTableId = "user_perm_formset_table";
-userPermTotalFormId = "id_user_perm-TOTAL_FORMS";
-groupPermTableId = "group_perm_formset_table";
-groupPermTotalFormId = "id_group_perm-TOTAL_FORMS";
+var userPermTableId = "user_perm_formset_table";
+var userPermTotalFormId = "id_user_perm-TOTAL_FORMS";
+var groupPermTableId = "group_perm_formset_table";
+var groupPermTotalFormId = "id_group_perm-TOTAL_FORMS";
 
-numUserPerms = 0;
-numGroupPerms = 0;
+var numUserPerms = 0;
+var numGroupPerms = 0;
 
 function confirmDelete(folderName) {
     var r=confirm("Are you sure you want to delete " + folderName);
@@ -16,7 +16,7 @@ function confirmDelete(folderName) {
 function replaceAttr(elem, attrName, rowId) {
     var val = elem.attr(attrName);
     if (val != null) {
-        newVal = val.replace(/([a-zA-Z_-]+)(\d+)(.*)/, "$1" + rowId + "$3");
+        let newVal = val.replace(/([a-zA-Z_-]+)(\d+)(.*)/, "$1" + rowId + "$3");
         console.log('newVal = ' + newVal);
 //        newVal = val.replace(/(\w+-)(\d+|(__prefix__))(-\w+)/, "$1" + rowId + "$4" );
         elem.attr(attrName, newVal);
@@ -83,7 +83,7 @@ function addGroupPermRow() {
 }
 
 $(document).ready(function() {
-    emptyUserPerm = $('#' + userPermTableId + ' tr:last');
+    var emptyUserPerm = $('#' + userPermTableId + ' tr:last');
     var regexp = /(id_)?[a-zA-Z_]+-(\d+).*/;
 
     if (emptyUserPerm.find('select:first').val() == "") {
@@ -97,7 +97,7 @@ $(document).ready(function() {
     }
 
 
-    emptyGroupPerm = $('#' + groupPermTableId + ' tr:last');
+    var emptyGroupPerm = $('#' + groupPermTableId + ' tr:last');
 
     if (emptyGroupPerm.find('select:first').val() == "") {
         emptyGroupPerm.remove();

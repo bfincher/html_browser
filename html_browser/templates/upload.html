@@ -5,7 +5,7 @@
 	
 	$(document).ready(function() {
 		$("#input-folder").fileinput({
-			uploadUrl: "{% url 'upload' folderAndPath.url %}",
+			uploadUrl: "{% url 'upload' folder_and_path.url %}",
 			hideThumbnailContent: true,
 			uploadExtraData: {"csrfmiddlewaretoken": "{{ csrf_token }}"}		                   
 		});
@@ -27,7 +27,7 @@
 {% block body %}
 	
 	<div class="center">
-	<h3>Upload file to {{ folderAndPath.url }} </h3>
+	<h3>Upload file to {{ folder_and_path.url }} </h3>
 				
 	</div>
 	
@@ -39,7 +39,7 @@
 	</div>
 	
 	<div class="center">
-		<buton type="button" class="btn btn-success" onclick="window.location.href = '{% url 'content' folderAndPath.url|safe %}';" >Back</button>
+		<buton type="button" class="btn btn-success" onclick="window.location.href = '{% url 'content' folder_and_path.url|safe %}';" >Back</button>
 	</div>
 	
 	

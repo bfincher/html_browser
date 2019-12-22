@@ -1,16 +1,16 @@
 {% extends "page.html" %}
 {% block body %}
         <div class="center" >
-		{% if prevLink != None %}
-			<a href="{{ prevLink }}"><img src="{{ IMAGE_URL }}left_arrow.png" alt="Left Arrow"/></a>
+		{% if prev_link != None %}
+			<a href="{{ prev_link }}"><img src="{{ IMAGE_URL }}left_arrow.png" alt="Left Arrow"/></a>
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
 		{% endif %}
 		
-		<a href="{% url 'content' folderAndPath.url %}"><img src="{{ IMAGE_URL }}up_arrow.png" alt="Up Arrow"></a>
+		<a href="{% url 'content' folder_and_path.url %}"><img src="{{ IMAGE_URL }}up_arrow.png" alt="Up Arrow"></a>
 		
-		{% if nextLink != None %}
+		{% if next_link != None %}
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-			<a href="{{ nextLink }}"><img src="{{ IMAGE_URL }}right_arrow.png" alt="Right Arrow"/></a>
+			<a href="{{ next_link }}"><img src="{{ IMAGE_URL }}right_arrow.png" alt="Right Arrow"/></a>
 		{% endif %}
 		
 		<br><br>
@@ -18,8 +18,8 @@
 	</div>
 
 	<table id="imageTable">
-		<tr><td><a href='javascript:deleteImage("{{ fileName }}")'>Delete File</a></td></tr>
-		<tr><td><img src="{{ imageUrl }}" /></td></tr>
+		<tr><td><a href='javascript:deleteImage("{{ file_name }}")'>Delete File</a></td></tr>
+		<tr><td><img src="{{ image_url }}" /></td></tr>
 	</table>
 
 	<br>
@@ -28,7 +28,7 @@
 
 {% block extra_js %}
 <script>
-fileName = "{{ fileName }}";
+file_name = "{{ file_name }}";
 lastImage = false;
 </script>
 
@@ -42,6 +42,6 @@ lastImage = false;
 	setUserCanWrite("{{ user_can_write }}");
 	setUserCanDelete("{{ user_can_delete }}");
 	setImageUrl("{{ IMAGE_URL }}");
-	setFolderAndPathUrl("{{ folderAndPath.url|safe }}");
+	setFolderAndPathUrl("{{ folder_and_path.url|safe }}");
 </script>
 {% endblock %}

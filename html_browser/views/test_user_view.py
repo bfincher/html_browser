@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 
 from html_browser.models import Group
-from html_browser.utils import get_object_or_None
+from html_browser.utils import get_object_or_none
 
 from .test_admin_view import BaseAdminTest
 from .test_base_view import contextCheck
@@ -81,7 +81,7 @@ class UserTest(BaseAdminTest):
         response = self.client.post(reverse('deleteUser', args=[self.user1.username]))
         self.assertEqual(302, response.status_code)
         self.assertEqual('/userAdmin/', response.url)
-        self.assertIsNone(get_object_or_None(User, username=self.user1.username))
+        self.assertIsNone(get_object_or_none(User, username=self.user1.username))
 
     def testEditPassword(self):
         self.login(self.user4)

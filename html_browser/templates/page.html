@@ -55,7 +55,7 @@
 			 </ul>
 		   {% else %}
 			 <form class="navbar-form navbar-right" action="{% url 'login' %}" method="post" > {% csrf_token %}
-			   <input class="form-control" name="userName" type="text" placeholder="User Name">
+			   <input class="form-control" name="user_name" type="text" placeholder="User Name">
 			   <input class="form-control" name="password" type="password" placeholder="Password">
 			   <button type="submit" class="btn btn-success">Sign in</button>
 			   <input name="action" type="hidden" value="login" >

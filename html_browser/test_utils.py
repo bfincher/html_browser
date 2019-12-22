@@ -94,8 +94,8 @@ class FolderAndPathTest(unittest.TestCase):
 
     def testJson(self):
         fp = FolderAndPath(folder=FolderAndPathTest.folder, path='test_path1/test_path2')
-        json_str = fp.toJson()
-        from_json = FolderAndPath.fromJson(json_str)
+        json_str = fp.to_json()
+        from_json = FolderAndPath.from_json(json_str)
         self.assertEqual(fp, from_json)
 
     def testStr(self):
@@ -130,11 +130,11 @@ class FileEntry:
         self.orig_time = stat.st_mtime
         self.expected_size = expected_size
 
-    def setMTime(self, time):
+    def set_m_time(self, time):
         self.time_set_to = time
         os.utime(self.path.__str__(), (int(time.timestamp()), int(time.timestamp())))
 
-    def restoreMTime(self):
+    def restore_m_time(self):
         os.utime(self.path.__str__(), (int(self.orig_time), int(self.orig_time)))
 
 
@@ -144,8 +144,8 @@ class UtilsTest(unittest.TestCase):
                'cb-checkbox_2': 'off',
                'cb-checkbox_3': 'on'}
 
-        checkedEntries = getCheckedEntries(dic)
-        self.assertEqual(2, len(checkedEntries))
+        checked_entries = get_checked_entries(dic)
+        self.assertEqual(2, len(checked_entries))
 
     def testGetCurrentDirEntriesContentFilter(self):
         folder = Folder()
@@ -155,10 +155,10 @@ class UtilsTest(unittest.TestCase):
         folder.save()
 
         try:
-            entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), False, const.thumbnails_view_type, '*.py')
+            entries = get_current_dir_entries(FolderAndPath(folder=folder, path=''), False, const.thumbnails_view_type, '*.py')
             self.assertTrue(len(entries) > 0)
             for entry in entries:
-                self.assertTrue(entry.isDir or entry.name.endswith('.py'))
+                self.assertTrue(entry.is_dir or entry.name.endswith('.py'))
         finally:
             folder.delete()
 
@@ -170,14 +170,14 @@ class UtilsTest(unittest.TestCase):
         folder.save()
 
         try:
-            testFile = '.testFile.txt'
-            with open(testFile, 'a'):
+            test_file = '.testFile.txt'
+            with open(test_file, 'a'):
                 pass
-            entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), False, const.thumbnails_view_type)
+            entries = get_current_dir_entries(FolderAndPath(folder=folder, path=''), False, const.thumbnails_view_type)
             for entry in entries:
                 self.assertFalse(entry.name.startswith('.'))
 
-            entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), True, const.thumbnails_view_type)
+            entries = get_current_dir_entries(FolderAndPath(folder=folder, path=''), True, const.thumbnails_view_type)
             found_hidden_entry = False
 
             for entry in entries:
@@ -189,7 +189,7 @@ class UtilsTest(unittest.TestCase):
 
         finally:
             folder.delete()
-            os.remove(testFile)
+            os.remove(test_file)
 
     def testGetCurrentDirEntries(self):
         folder = Folder()
@@ -209,48 +209,48 @@ class UtilsTest(unittest.TestCase):
             try:
                 next_time = datetime.now()
                 for entry in test_files:
-                    entry.setMTime(next_time)
+                    entry.set_m_time(next_time)
                     next_time = next_time + timedelta(seconds=1)
 
-                entries = getCurrentDirEntries(FolderAndPath(folder=folder, path=''), False, const.thumbnails_view_type)
+                entries = get_current_dir_entries(FolderAndPath(folder=folder, path=''), False, const.thumbnails_view_type)
                 self.assertEqual(16, len(entries))
 
                 for i in range(0, len(test_files)):
                     entry = entries[i]
                     test_file = test_files[i]
-                    self.assertEqual(test_file.path.is_dir(), entry.isDir)
+                    self.assertEqual(test_file.path.is_dir(), entry.is_dir)
                     self.assertEqual(test_file.path.name, entry.name)
-                    self.assertEqual(entry.name, entry.nameUrl)
+                    self.assertEqual(entry.name, entry.name_url)
                     self.assertEqual(test_file.expected_size, entry.size)
-                    self.assertEqual(test_files[i].time_set_to.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
-                    self.assertFalse(entry.hasThumbnail)
-                    self.assertIsNone(entry.getThumbnailUrl())
+                    self.assertEqual(test_files[i].time_set_to.strftime('%Y-%m-%d %I:%M:%S %p'), entry.last_modify_time)
+                    self.assertFalse(entry.has_thumbnail)
+                    self.assertIsNone(entry.get_thumbnail_url())
             finally:
                 # set time back to orig
                 for entry in test_files:
-                    entry.restoreMTime()
+                    entry.restore_m_time()
 
-            entries = getCurrentDirEntries(FolderAndPath(folder=folder, path='images'), False, const.thumbnails_view_type)
+            entries = get_current_dir_entries(FolderAndPath(folder=folder, path='images'), False, const.thumbnails_view_type)
             self.assertEqual(20, len(entries))
             entry = entries[0]
-            self.assertFalse(entry.isDir)
+            self.assertFalse(entry.is_dir)
             self.assertEqual('Add-Folder-icon.png', entry.name)
-            self.assertEqual(entry.name, entry.nameUrl)
+            self.assertEqual(entry.name, entry.name_url)
             self.assertEqual('1.96 KB', entry.size)
-            self.assertTrue(entry.hasThumbnail)
-            match = thumbUrlRegex.match(entry.getThumbnailUrl())
+            self.assertTrue(entry.has_thumbnail)
+            match = thumbUrlRegex.match(entry.get_thumbnail_url())
             self.assertTrue(match)
             self.assertTrue(os.path.exists(join_paths(settings.THUMBNAIL_CACHE_DIR, match.group(1))))
 
             entry = entries[3]
-            self.assertFalse(entry.isDir)
+            self.assertFalse(entry.is_dir)
             self.assertEqual('Paste-icon.png', entry.name)
-            self.assertEqual(entry.name, entry.nameUrl)
+            self.assertEqual(entry.name, entry.name_url)
             self.assertEqual('1.80 KB', entry.size)
-            self.assertEqual(1844, entry.sizeNumeric)
-            # self.assertEqual(img_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.lastModifyTime)
-            self.assertTrue(entry.hasThumbnail)
-            match = thumbUrlRegex.match(entry.getThumbnailUrl())
+            self.assertEqual(1844, entry.size_numeric)
+            # self.assertEqual(img_time.strftime('%Y-%m-%d %I:%M:%S %p'), entry.last_modify_time)
+            self.assertTrue(entry.has_thumbnail)
+            match = thumbUrlRegex.match(entry.get_thumbnail_url())
             self.assertTrue(match)
             self.assertTrue(os.path.exists(join_paths(settings.THUMBNAIL_CACHE_DIR, match.group(1))))
 
@@ -258,7 +258,7 @@ class UtilsTest(unittest.TestCase):
             folder.delete()
 
     def testReplaceEscapedUrl(self):
-        self.assertEqual("part1,part2&", utils.replaceEscapedUrl("part1(comma)part2(ampersand)"))
+        self.assertEqual("part1,part2&", utils.replace_escaped_url("part1(comma)part2(ampersand)"))
 
     def testHandleDelete(self):
         test_dir = 'html_browser/test_dir2'
@@ -289,14 +289,14 @@ class UtilsTest(unittest.TestCase):
 
             entries = ['test_file2.txt', 'test_file1.txt']
 
-            utils.handleDelete(FolderAndPath(folder=folder, path='child_dir'), entries)
+            utils.handle_delete(FolderAndPath(folder=folder, path='child_dir'), entries)
 
             self.assertFalse(os.path.exists(test_file_1))
             self.assertFalse(os.path.exists(test_file_2))
             self.assertTrue(os.path.exists(test_file_3))
 
             entries = ['child_dir']
-            utils.handleDelete(FolderAndPath(folder=folder, path=''), entries)
+            utils.handle_delete(FolderAndPath(folder=folder, path=''), entries)
             self.assertFalse(os.path.exists(test_file_3))
             self.assertFalse(os.path.exists(chile_dir))
         finally:
@@ -306,13 +306,13 @@ class UtilsTest(unittest.TestCase):
                 rmtree(test_dir)
 
     def testFormatBytes(self):
-        self.assertEqual("1.15 GB", formatBytes(1234567890))
-        self.assertEqual("117.74 MB", formatBytes(123456789))
-        self.assertEqual("120.56 KB", formatBytes(123456))
-        self.assertEqual("123", formatBytes(123))
+        self.assertEqual("1.15 GB", format_bytes(1234567890))
+        self.assertEqual("117.74 MB", format_bytes(123456789))
+        self.assertEqual("120.56 KB", format_bytes(123456))
+        self.assertEqual("123", format_bytes(123))
 
-        self.assertEqual("1205632.71 KB", formatBytes(1234567890, forceUnit='KB'))
-        self.assertEqual("1205632.71", formatBytes(1234567890, forceUnit='KB', includeUnitSuffix=False))
+        self.assertEqual("1205632.71 KB", format_bytes(1234567890, force_unit='KB'))
+        self.assertEqual("1205632.71", format_bytes(1234567890, force_unit='KB', include_unit_suffix=False))
 
 
 def main():

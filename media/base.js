@@ -1,4 +1,4 @@
-csrf = null;
+var csrf = null;
 
 function setCsrf(_csrf) {
     csrf = _csrf;
