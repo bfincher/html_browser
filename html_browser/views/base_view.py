@@ -21,7 +21,7 @@ from django.views import View
 from django_downloadview import sendfile
 
 from html_browser import settings
-from html_browser._os import joinPaths
+from html_browser._os import join_paths
 from html_browser.constants import _constants as const
 from html_browser.models import FilesToDelete, Folder
 from html_browser.utils import (ArgumentException, FolderAndPath,
@@ -86,21 +86,21 @@ class BaseContentView(UserPassesTestMixin, BaseView):
         else:
             raise ArgumentException("One of folderandPathUrl or folderAndPath params must be specified")
 
-        self.userCanDelete = self.folderAndPath.folder.userCanDelete(request.user)
-        self.userCanWrite = self.userCanDelete or self.folderAndPath.folder.userCanWrite(request.user)
-        self.userCanRead = self.userCanWrite or self.folderAndPath.folder.userCanRead(request.user)
+        self.user_can_delete = self.folderAndPath.folder.user_can_delete(request.user)
+        self.user_can_write = self.user_can_delete or self.folderAndPath.folder.user_can_write(request.user)
+        self.user_can_read = self.user_can_write or self.folderAndPath.folder.user_can_read(request.user)
 
         self.context['folderAndPath'] = self.folderAndPath
         return super().dispatch(request, *args, **kwargs)
 
     def does_user_pass_test(self):
-        if self.requireDelete and not self.userCanDelete:
+        if self.requireDelete and not self.user_can_delete:
             messages.error(self.request, "Delete permission required")
             return False
-        if self.requireWrite and not self.userCanWrite:
+        if self.requireWrite and not self.user_can_write:
             messages.error(self.request, "Write permission required")
             return False
-        if not self.userCanRead:
+        if not self.user_can_read:
             messages.error(self.request, "Read permission required")
             return False
 
@@ -119,7 +119,7 @@ class IndexView(BaseView):
         allFolders = Folder.objects.all()
         folders = []
         for folder in allFolders:
-            if folder.userCanRead(request.user):
+            if folder.user_can_read(request.user):
                 folders.append(folder)
 
         if 'next' in request.GET:
@@ -159,18 +159,18 @@ class LogoutView(BaseView):
 class DownloadView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName):
         return sendfile(request,
-                        joinPaths(self.folderAndPath.absPath, fileName),
+                        join_paths(self.folderAndPath.abs_path, fileName),
                         attachment=True)
 
 
 class DownloadImageView(BaseContentView):
     def get(self, request, folderAndPathUrl, fileName):
-        return sendfile(request, joinPaths(self.folderAndPath.absPath, fileName), attachment=False)
+        return sendfile(request, join_paths(self.folderAndPath.abs_path, fileName), attachment=False)
 
 
 class ThumbView(BaseView):
     def get(self, request, path):
-        file = joinPaths(settings.THUMBNAIL_CACHE_DIR, path)
+        file = join_paths(settings.THUMBNAIL_CACHE_DIR, path)
         return sendfile(request, file, attachment=False)
 
 
@@ -181,7 +181,7 @@ class DownloadZipView(BaseContentView):
         self.zipFile = ZipFile(fileName, mode='w', compression=compression)
 
         for entry in getCheckedEntries(request.GET):
-            path = joinPaths(self.folderAndPath.absPath, replaceEscapedUrl(entry))
+            path = join_paths(self.folderAndPath.abs_path, replaceEscapedUrl(entry))
             if os.path.isfile(path):
                 self.__addFileToZip__(path)
             else:
@@ -189,18 +189,18 @@ class DownloadZipView(BaseContentView):
 
         self.zipFile.close()
 
-        FilesToDelete.objects.create(filePath=fileName)
+        FilesToDelete.objects.create(file_path=fileName)
 
         return sendfile(request, fileName, attachment=True)
 
     def __addFileToZip__(self, fileToAdd):
-        arcName = fileToAdd.replace(self.folderAndPath.absPath, '')
+        arcName = fileToAdd.replace(self.folderAndPath.abs_path, '')
         self.zipFile.write(fileToAdd, arcName, compress_type=zipfile.ZIP_DEFLATED)
 
     def __addFolderToZip__(self, folder):
         for f in folder.iterdir():
             if f.is_file():
-                arcName = f.as_posix().replace(self.folderAndPath.absPath, '')
+                arcName = f.as_posix().replace(self.folderAndPath.abs_path, '')
                 self.zipFile.write(f.as_posix(), arcName, compress_type=zipfile.ZIP_DEFLATED)
             elif f.is_dir():
                 self.__addFolderToZip__(f)
@@ -211,13 +211,13 @@ class UploadView(BaseContentView):
         super().__init__(requireWrite=True)
 
     def get(self, request, folderAndPathUrl):
-        self.context['viewTypes'] = const.viewTypes
+        self.context['view_types'] = const.view_types
 
         return render(request, 'upload.html', self.context)
 
     def post(self, request, folderAndPathUrl, *args, **kwargs):
         for key in request.FILES:
-            fileName = joinPaths(self.folderAndPath.absPath, request.FILES[key].name)
+            fileName = join_paths(self.folderAndPath.abs_path, request.FILES[key].name)
             with open(fileName, 'wb') as dest:
                 for chunk in request.FILES[key].chunks():
                     dest.write(chunk)
@@ -235,7 +235,7 @@ class UploadView(BaseContentView):
 #         entries = zipFile.infolist()
 #
 #         for entry in entries:
-#             zipFile.extract(entry, self.folderAndPath.absPath)
+#             zipFile.extract(entry, self.folderAndPath.abs_path)
 #
 #         zipFile.close()
 #
@@ -243,8 +243,8 @@ class UploadView(BaseContentView):
 
 
 def getIndexIntoCurrentDir(request, folderAndPath, fileName):
-    viewType = request.session.get('viewType', const.viewTypes[0])
-    currentDirEntries = getCurrentDirEntries(folderAndPath, isShowHidden(request), viewType)
+    view_type = request.session.get('view_type', const.view_types[0])
+    currentDirEntries = getCurrentDirEntries(folderAndPath, isShowHidden(request), view_type)
 
     for i in range(len(currentDirEntries)):
         if currentDirEntries[i].name == fileName:
@@ -272,13 +272,13 @@ class ImageView(BaseContentView):
         parentDirLink = reverseContentUrl(self.folderAndPath)
         imageUrl = reverseContentUrl(self.folderAndPath, viewName='download', extraPath=fileName)
 
-        self.context['viewTypes'] = const.viewTypes
+        self.context['view_types'] = const.view_types
         self.context['parentDirLink'] = parentDirLink
         self.context['prevLink'] = prevLink
         self.context['nextLink'] = nextLink
         self.context['imageUrl'] = imageUrl
         self.context['fileName'] = fileName
-        self.context['userCanDelete'] = self.userCanDelete
+        self.context['user_can_delete'] = self.user_can_delete
 
         return render(request, 'image_view.html', self.context)
 

@@ -164,7 +164,7 @@ function viewTypeBoxChanged(box) {
     if (selectedIndex != -1) {
         postForm($("#content-form"), Urls.content(folderAndPathUrl), 
            {"action": "setViewType",
-            "viewType": box.options[selectedIndex].text});
+            "view_type": box.options[selectedIndex].text});
     }
 }
 

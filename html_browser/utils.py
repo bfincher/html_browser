@@ -15,7 +15,7 @@ from django.urls import reverse
 from sorl.thumbnail import get_thumbnail
 
 from html_browser import settings
-from html_browser._os import joinPaths
+from html_browser._os import join_paths
 from html_browser.models import Folder
 
 from .constants import _constants as const
@@ -44,7 +44,7 @@ class ThumbnailStorage(FileSystemStorage):
 
     def path(self, name):
         if imageRegexWithCach.match(name):
-            return joinPaths(self.base_location, name)
+            return join_paths(self.base_location, name)
         return name
 
 
@@ -60,53 +60,53 @@ class ArgumentException(Exception):
 
 class FolderAndPathArgumentException(Exception):
     def __init__(self, **kwargs):
-        super().__init__("Expected kwargs are (url)|(folderName, path).  Instead found %s" % kwargs)
+        super().__init__("Expected kwargs are (url)|(folder_name, path).  Instead found %s" % kwargs)
 
 
 class FolderAndPath:
     def __init__(self, *args, **kwargs):
-        # options for kwargs are (url)|(folderName, path)
+        # options for kwargs are (url)|(folder_name, path)
 
         if 'url' in kwargs and len(kwargs) == 1:
             match = folderAndPathRegex.match(kwargs['url'])
-            folderName = match.groups()[0]
-            self.folder = Folder.objects.get(name=folderName)
-            self.relativePath = unquote_plus(match.groups()[2] or '')
-            self.absPath = joinPaths(self.folder.localPath, self.relativePath)
+            folder_name = match.groups()[0]
+            self.folder = Folder.objects.get(name=folder_name)
+            self.relative_path = unquote_plus(match.groups()[2] or '')
+            self.abs_path = join_paths(self.folder.local_path, self.relative_path)
             self.url = kwargs['url']
         elif 'path' in kwargs and len(kwargs) == 2:
-            if 'folderName' in kwargs:
-                self.folder = Folder.objects.get(name=kwargs['folderName'])
+            if 'folder_name' in kwargs:
+                self.folder = Folder.objects.get(name=kwargs['folder_name'])
             elif 'folder' in kwargs:
                 self.folder = kwargs['folder']
             else:
                 raise FolderAndPathArgumentException(**kwargs)
 
             # just in case the path argument already has the folder localpath appended, try to replace the folder.localpath prefix
-            self.relativePath = re.sub(r'^%s' % self.folder.localPath, '', kwargs['path'])
+            self.relative_path = re.sub(r'^%s' % self.folder.local_path, '', kwargs['path'])
 
-            self.absPath = joinPaths(self.folder.localPath, self.relativePath)
-            self.url = "%s/%s" % (self.folder.name, self.relativePath)
+            self.abs_path = join_paths(self.folder.local_path, self.relative_path)
+            self.url = "%s/%s" % (self.folder.name, self.relative_path)
         else:
             raise FolderAndPathArgumentException(**kwargs)
 
     def __str__(self):
-        return "folder_name = %s, relativePath = %s, absPath = %s, url = %s" % (self.folder.name, self.relativePath, self.absPath, self.url)
+        return "folder_name = %s, relative_path = %s, abs_path = %s, url = %s" % (self.folder.name, self.relative_path, self.abs_path, self.url)
 
-    def getParent(self):
-        if self.relativePath == '':
+    def get_parent(self):
+        if self.relative_path == '':
             raise NoParentException()
 
-        return FolderAndPath(folderName=self.folder.name, path=os.path.dirname(self.relativePath))
+        return FolderAndPath(folder_name=self.folder.name, path=os.path.dirname(self.relative_path))
 
     @staticmethod
     def fromJson(jsonStr):
-        dictData = json.loads(jsonStr)
-        return FolderAndPath(**dictData)
+        dict_data = json.loads(jsonStr)
+        return FolderAndPath(**dict_data)
 
     def toJson(self):
-        result = {'folderName': self.folder.name,
-                  'path': self.relativePath}
+        result = {'folder_name': self.folder.name,
+                  'path': self.relative_path}
         return json.dumps(result)
 
     def __eq__(self, other):
@@ -124,7 +124,7 @@ def getCheckedEntries(requestDict):
 
 
 class DirEntry():
-    def __init__(self, path, folderAndPath, viewType, skipThumbnail=False):
+    def __init__(self, path, folderAndPath, view_type, skipThumbnail=False):
         self.thumbnailUrl = None
         self.isDir = path.is_dir()
         self.name = path.name
@@ -142,9 +142,9 @@ class DirEntry():
         lastModifyTime = datetime.fromtimestamp(stat.st_mtime)
         self.lastModifyTime = lastModifyTime.strftime('%Y-%m-%d %I:%M:%S %p')
 
-        if not skipThumbnail and not self.isDir and viewType == const.thumbnailsViewType and imageRegex.match(self.name):
+        if not skipThumbnail and not self.isDir and view_type == const.thumbnails_view_type and imageRegex.match(self.name):
             self.hasThumbnail = True
-            self.imageLinkPath = joinPaths(folderAndPath.folder.localPath, folderAndPath.relativePath, self.name)
+            self.imageLinkPath = join_paths(folderAndPath.folder.local_path, folderAndPath.relative_path, self.name)
         else:
             self.hasThumbnail = False
 
@@ -180,7 +180,7 @@ class DirEntry():
 
 #    searchRegex = re.compile(searchRegexStr)
 #    returnList = []
-#    thisEntry = DirEntry(True, path, 0, datetime.fromtimestamp(getmtime(getPath(folder.localPath, path))), folder, path)
+#    thisEntry = DirEntry(True, path, 0, datetime.fromtimestamp(getmtime(getPath(folder.local_path, path))), folder, path)
 #    __getCurrentDirEntriesSearch(folder, path, showHidden, searchRegex, thisEntry, returnList)
 
 #    for entry in returnList:
@@ -210,8 +210,8 @@ class DirEntry():
 #    if includeThisDir:
 #        returnList.append(thisEntry)
 
-def getCurrentDirEntries(folderAndPath, showHidden, viewType, contentFilter=None):
-    _dir = folderAndPath.absPath
+def getCurrentDirEntries(folderAndPath, showHidden, view_type, contentFilter=None):
+    _dir = folderAndPath.abs_path
     if os.path.isfile(_dir):
         _dir = os.path.dirname(_dir)
 
@@ -229,7 +229,7 @@ def getCurrentDirEntries(folderAndPath, showHidden, viewType, contentFilter=None
             continue
         try:
             if f.is_dir():
-                dirEntries.append(DirEntry(f, folderAndPath, viewType))
+                dirEntries.append(DirEntry(f, folderAndPath, view_type))
             else:
                 include = False
                 if contentFilter:
@@ -243,7 +243,7 @@ def getCurrentDirEntries(folderAndPath, showHidden, viewType, contentFilter=None
                 delta = datetime.now() - startTime
                 skipThumbnail = skipThumbnail or delta.total_seconds() > 45
                 if include:
-                    fileEntries.append(DirEntry(f, folderAndPath, viewType, skipThumbnail))
+                    fileEntries.append(DirEntry(f, folderAndPath, view_type, skipThumbnail))
         except OSError as ose:
             logger.exception(ose)
 
@@ -265,7 +265,7 @@ def replaceEscapedUrl(url):
 
 def handleDelete(folderAndPath, entries):
     for entry in entries:
-        entryPath = joinPaths(folderAndPath.absPath, replaceEscapedUrl(entry)).encode("utf-8")
+        entryPath = join_paths(folderAndPath.abs_path, replaceEscapedUrl(entry)).encode("utf-8")
 
         if os.path.isdir(entryPath):
             rmtree(entryPath)

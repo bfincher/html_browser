@@ -11,7 +11,7 @@ from django.contrib.auth.models import Group, User
 from django.test import Client
 from django.urls import reverse
 
-from html_browser._os import joinPaths
+from html_browser._os import join_paths
 from html_browser.models import (CAN_DELETE, CAN_READ, Folder, GroupPermission,
                                  UserPermission)
 from html_browser.views.base_view import (FolderAndPath,
@@ -62,8 +62,8 @@ class BaseViewTest(unittest.TestCase):
 
         self.folder1 = Folder()
         self.folder1.name = 'test'
-        self.folder1.localPath = 'media'
-        self.folder1.viewOption = 'P'
+        self.folder1.local_path = 'media'
+        self.folder1.view_option = 'P'
         self.folder1.save()
 
         userPerm = UserPermission()
@@ -80,20 +80,20 @@ class BaseViewTest(unittest.TestCase):
 
         self.folder2 = Folder()
         self.folder2.name = 'test2'
-        self.folder2.localPath = 'test2'
-        self.folder2.viewOption = 'P'
+        self.folder2.local_path = 'test2'
+        self.folder2.view_option = 'P'
         self.folder2.save()
 
         self.folder3 = Folder()
         self.folder3.name = 'test3'
-        self.folder3.localPath = 'test3'
-        self.folder3.viewOption = 'E'
+        self.folder3.local_path = 'test3'
+        self.folder3.view_option = 'E'
         self.folder3.save()
 
         self.folder4 = Folder()
         self.folder4.name = 'test4'
-        self.folder4.localPath = 'test4'
-        self.folder4.viewOption = 'A'
+        self.folder4.local_path = 'test4'
+        self.folder4.view_option = 'A'
         self.folder4.save()
 
         self.folders = [self.folder1, self.folder2, self.folder3, self.folder4]
@@ -255,7 +255,7 @@ class DownloadZipViewTest(BaseViewTest):
         zipFileName = None
         tmpDir = tempfile.gettempdir()
 
-        extractPath = joinPaths(tmpDir, 'extract')
+        extractPath = join_paths(tmpDir, 'extract')
         if not os.path.exists(extractPath):
             os.makedirs(extractPath)
 
@@ -268,16 +268,16 @@ class DownloadZipViewTest(BaseViewTest):
 
             self.assertIsNotNone(zipFileName)
 
-            zipFile = ZipFile(joinPaths(tmpDir, zipFileName), mode='r')
+            zipFile = ZipFile(join_paths(tmpDir, zipFileName), mode='r')
             entries = zipFile.infolist()
 
             os.makedirs(extractPath, exist_ok=True)
             for entry in entries:
                 zipFile.extract(entry, extractPath)
 
-            extractedFileA = joinPaths(extractPath, 'add_user.js')
-            extractedFileB = joinPaths(extractPath, 'base.js')
-            extractedTestFile = joinPaths(extractPath, 'images/Add-Folder-icon.png')
+            extractedFileA = join_paths(extractPath, 'add_user.js')
+            extractedFileB = join_paths(extractPath, 'base.js')
+            extractedTestFile = join_paths(extractPath, 'images/Add-Folder-icon.png')
 
             self.assertTrue(os.path.exists(extractedFileA))
             self.assertTrue(os.path.exists(extractedFileB))
@@ -395,7 +395,7 @@ class UploadViewTest(BaseViewTest):
         self.assertEqual('/image_view/test/images/folder-blue-parent-icon.png/', context['nextLink'])
         self.assertEqual('/download/test/images/folder-blue-icon.png/', context['imageUrl'])
         self.assertEqual('folder-blue-icon.png', context['fileName'])
-        self.assertTrue(context['userCanDelete'])
+        self.assertTrue(context['user_can_delete'])
         self.assertEqual('image_view.html', response.templates[0].name)
 
         # test unauthorized user

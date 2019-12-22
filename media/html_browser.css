@@ -67,6 +67,13 @@ TH.UploadOuterTable
     text-align: center;
 }
 
+.center {
+    text-align: center;
+}
+
+.content-list-table td {
+    width: 50%;
+}
 
 body {
     padding-top: 60px;

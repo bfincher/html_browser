@@ -36,7 +36,7 @@ class FolderViewOption():
 
 folderViewOptions = []
 
-for choice in html_browser.models.viewableChoices:
+for choice in html_browser.models.viewable_choices:
     option = FolderViewOption(choice[0], choice[1])
     folderViewOptions.append(option)
 
@@ -78,8 +78,8 @@ class FolderAdminView(BaseAdminView):
 
 
 class DeleteFolderView(BaseAdminView):
-    def post(self, _, folderName):
-        folder = Folder.objects.get(name=folderName)
+    def post(self, _, folder_name):
+        folder = Folder.objects.get(name=folder_name)
         folder.delete()
         return redirect('folderAdmin')
 
@@ -163,20 +163,20 @@ class EditFolderView(AbstractFolderView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def get(self, request, title, folderName, *args, **kwargs):
+    def get(self, request, title, folder_name, *args, **kwargs):
         self.title = title
-        self.folderName = folderName
+        self.folder_name = folder_name
         return super().get(request, *args, **kwargs)
 
-    def post(self, request, title, folderName, *args, **kwargs):
+    def post(self, request, title, folder_name, *args, **kwargs):
         self.title = title
-        self.folderName = folderName
-        self.origLocalPath = Folder.objects.get(name=folderName).localPath
+        self.folder_name = folder_name
+        self.origLocalPath = Folder.objects.get(name=folder_name).local_path
 
         return super().post(request, *args, **kwargs)
 
     def initForms(self, request):
-        self.folder = Folder.objects.get(name=self.folderName)
+        self.folder = Folder.objects.get(name=self.folder_name)
 
         if request.method == "GET":
             self.folderForm = EditFolderForm(instance=self.folder)

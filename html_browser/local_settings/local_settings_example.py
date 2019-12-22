@@ -1,6 +1,6 @@
 import os
 
-from html_browser._os import joinPaths
+from html_browser._os import join_paths
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 BASE_DIR = BASE_DIR.replace(os.sep, '/')
@@ -30,4 +30,4 @@ STATICFILES_DIRS = ()
 
 LOG_DIR = '/var/log/hb'
 
-THUMBNAIL_CACHE_DIR = joinPaths(BASE_DIR, 'thumb_cache')
+THUMBNAIL_CACHE_DIR = join_paths(BASE_DIR, 'thumb_cache')

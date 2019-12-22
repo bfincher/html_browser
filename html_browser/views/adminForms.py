@@ -52,15 +52,15 @@ class AddFolderForm(forms.ModelForm):
         self.helper.form_show_errors = True
         super().__init__(*args, **kwargs)
         self.fields['name'].label = 'Folder Name'
-        self.fields['localPath'].label = 'Local Path'
-        self.fields['viewOption'].label = 'View Option'
+        self.fields['local_path'].label = 'Local Path'
+        self.fields['view_option'].label = 'View Option'
 
         addUserPermHtml = HTML('''<br><a href='#' onclick="addUserPermRow();return false;">Add User Permission</a>''')
         addGroupPermHtml = HTML('''<br><a href='#' onclick="addGroupPermRow();return false;">Add Group Permission</a><br><br>''')
 
         self.helper.layout = Layout('name',
-                                    'localPath',
-                                    'viewOption',
+                                    'local_path',
+                                    'view_option',
                                     Formset('userPermFormset',
                                             template='admin/perm_crispy/table_inline_formset.html',
                                             formset_id='user_perm_formset'),

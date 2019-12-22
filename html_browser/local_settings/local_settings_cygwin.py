@@ -1,6 +1,6 @@
 import os
 
-from html_browser._os import joinPaths
+from html_browser._os import join_paths
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 BASE_DIR = BASE_DIR.replace(os.sep, '/')
@@ -14,7 +14,7 @@ ADMINS = (
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': joinPaths(BASE_DIR, 'hb.db'),                      # Or path to database file if using sqlite3.
+        'NAME': join_paths(BASE_DIR, 'hb.db'),                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -22,10 +22,10 @@ DATABASES = {
     }
 }
 
-STATICFILES_DIRS = ((joinPaths(BASE_DIR, 'media')),)
+STATICFILES_DIRS = ((join_paths(BASE_DIR, 'media')),)
 
-LOG_DIR = joinPaths(BASE_DIR, 'log')
+LOG_DIR = join_paths(BASE_DIR, 'log')
 
-THUMBNAIL_CACHE_DIR = joinPaths(BASE_DIR, 'thumb_cache')
+THUMBNAIL_CACHE_DIR = join_paths(BASE_DIR, 'thumb_cache')
 
 ALLOWED_HOSTS = ['userver', 'localhost']

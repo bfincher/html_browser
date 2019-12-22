@@ -13,7 +13,7 @@
 		{% for folder in folders %}
 		<tr>
 			<td><a href="{% url 'editFolder' folder.name %}">{{ folder.name }}</a></td>
-			<td>{{ folder.localPath }}</td>
+			<td>{{ folder.local_path }}</td>
 		</tr>
 		{% endfor %}
 	</table>

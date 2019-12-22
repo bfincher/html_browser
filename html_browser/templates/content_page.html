@@ -4,9 +4,9 @@
 		<script type="text/javascript" src="{{ MEDIA_URL }}folder_content.js"></script>
 
 		<script>
-				setUserCanRead({{ userCanRead }})
-				setUserCanWrite({{ userCanWrite }})
-				setUserCanDelete({{ userCanDelete }})
+				setUserCanRead({{ user_can_read }})
+				setUserCanWrite({{ user_can_write }})
+				setUserCanDelete({{ user_can_delete }})
 				setFolderAndPathUrl("{{ folderAndPath.url|safe }}");
 		</script>
 

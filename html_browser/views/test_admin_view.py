@@ -96,15 +96,15 @@ class FolderTest(BaseAdminTest):
         self.assertEqual("admin/add_edit_folder.html", response.templates[0].name)
 
         data['name'] = self.folder1.name
-        data['localPath'] = '/data/newPath'
-        data['viewOption'] = 'E'
+        data['local_path'] = '/data/newPath'
+        data['view_option'] = 'E'
         response = self.client.post(reverse('editFolder', args=[self.folder1.name]), data)
         self.assertEqual(302, response.status_code)
         self.assertEqual('/folderAdmin/', response.url)
 
         newFolder1 = Folder.objects.get(pk=self.folder1.pk)
         self.assertEqual(self.folder1.name, newFolder1.name)
-        self.assertEqual('/data/newPath', newFolder1.localPath)
+        self.assertEqual('/data/newPath', newFolder1.local_path)
 
     def testAddFolder(self):
         self.login(self.user4)
@@ -126,15 +126,15 @@ class FolderTest(BaseAdminTest):
 
         newFolderName = 'testNewFolder'
         data['name'] = newFolderName
-        data['localPath'] = '/data/newPath'
-        data['viewOption'] = 'E'
+        data['local_path'] = '/data/newPath'
+        data['view_option'] = 'E'
         response = self.client.post(reverse('addFolder'), data)
         self.assertEqual(302, response.status_code)
         self.assertEqual('/folderAdmin/', response.url)
 
         newFolder = Folder.objects.get(name=newFolderName)
         self.assertEqual(newFolder.name, newFolderName)
-        self.assertEqual('/data/newPath', newFolder.localPath)
+        self.assertEqual('/data/newPath', newFolder.local_path)
 
 
 class GroupTest(BaseAdminTest):

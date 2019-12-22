@@ -1,21 +1,21 @@
 {% extends "page.html" %}
 {% block body %}
-	<center>
+        <div class="center" >
 		{% if prevLink != None %}
-			<a href="{{ prevLink }}"><img src="{{ IMAGE_URL }}left_arrow.png"/></a>
+			<a href="{{ prevLink }}"><img src="{{ IMAGE_URL }}left_arrow.png" alt="Left Arrow"/></a>
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
 		{% endif %}
 		
-		<a href="{% url 'content' folderAndPath.url %}"><img src="{{ IMAGE_URL }}up_arrow.png"></a>
+		<a href="{% url 'content' folderAndPath.url %}"><img src="{{ IMAGE_URL }}up_arrow.png" alt="Up Arrow"></a>
 		
 		{% if nextLink != None %}
 			&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-			<a href="{{ nextLink }}"><img src="{{ IMAGE_URL }}right_arrow.png"/></a>
+			<a href="{{ nextLink }}"><img src="{{ IMAGE_URL }}right_arrow.png" alt="Right Arrow"/></a>
 		{% endif %}
 		
 		<br><br>
 
-	</center>
+	</div>
 
 	<table id="imageTable">
 		<tr><td><a href='javascript:deleteImage("{{ fileName }}")'>Delete File</a></td></tr>
@@ -38,9 +38,9 @@ lastImage = false;
 
 <script>
 	setCsrf('{% csrf_token %}');
-	setUserCanRead("{{ userCanRead }}");
-	setUserCanWrite("{{ userCanWrite }}");
-	setUserCanDelete("{{ userCanDelete }}");
+	setUserCanRead("{{ user_can_read }}");
+	setUserCanWrite("{{ user_can_write }}");
+	setUserCanDelete("{{ user_can_delete }}");
 	setImageUrl("{{ IMAGE_URL }}");
 	setFolderAndPathUrl("{{ folderAndPath.url|safe }}");
 </script>

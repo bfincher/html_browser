@@ -7,3 +7,6 @@ folder_links
 docker/*config
 html_browser/local_settings/local_settings.json
 html_browser/local_settings/local_settings.py
+.scannerwork
+.tox
+log
