@@ -25,8 +25,8 @@ from html_browser._os import join_paths
 from html_browser.constants import _constants as const
 from html_browser.models import FilesToDelete, Folder
 from html_browser.utils import (ArgumentException, FolderAndPath,
-                                get_checked_entries, get_current_dir_entries,
-                                get_req_logger, handle_delete, replace_escaped_url)
+                                get_checked_entries, get_req_logger,
+                                handle_delete, replace_escaped_url)
 
 logger = logging.getLogger('html_browser.base_view')
 imageRegex = re.compile(r"^.*?\.(jpg|png|gif|bmp|avi)$", re.IGNORECASE)
@@ -244,7 +244,7 @@ class UploadView(BaseContentView):
 
 def get_index_into_current_dir(request, folder_and_path, file_name):
     view_type = request.session.get('view_type', const.view_types[0])
-    current_dir_entries = get_current_dir_entries(folder_and_path, is_show_hidden(request), view_type)
+    current_dir_entries = folder_and_path.get_dir_entries(is_show_hidden(request), view_type)
 
     for i in range(len(current_dir_entries)):
         if current_dir_entries[i].name == file_name:
@@ -309,12 +309,12 @@ class GetNextImageView(BaseContentView):
             for i in range(index + 1, len(current_dir_entries)):
                 if imageRegex.match(current_dir_entries[i].name):
                     result['hasNextImage'] = True
-                    nextFileName = current_dir_entries[i].name
+                    next_file_name = current_dir_entries[i].name
 
-                    image_url = reverse_content_url(self.folder_and_path, view_name='download', extra_path=nextFileName)
+                    image_url = reverse_content_url(self.folder_and_path, view_name='download', extra_path=next_file_name)
                     image_url = image_url.replace('//', '/')
                     result['image_url'] = image_url
-                    result['file_name'] = nextFileName
+                    result['file_name'] = next_file_name
                     break
 
         data = json.dumps(result)

@@ -20,7 +20,7 @@ logger = logging.getLogger('html_browser.userViews')
 
 class DeleteUserView(BaseAdminView):
     def post(self, request, username, *args, **kwargs):
-        redirectUrl = "userAdmin"
+        redirect_url = "userAdmin"
 
         if request.user.username == username:
             messages.error(request, "Unable to delete current user")
@@ -29,7 +29,7 @@ class DeleteUserView(BaseAdminView):
             logger.info("Deleting user %s", user)
             user.delete()
 
-        return redirect(redirectUrl)
+        return redirect(redirect_url)
 
 
 class UserAdminView(BaseAdminView):

@@ -6,7 +6,7 @@ from html_browser import utils
 from html_browser._os import join_paths
 from html_browser.constants import _constants as constants
 from html_browser.models import Folder
-from html_browser.utils import FolderAndPath, get_current_dir_entries
+from html_browser.utils import FolderAndPath
 
 
 class Command(BaseCommand):
@@ -29,7 +29,7 @@ class Command(BaseCommand):
         # first iterate through entries in details view (does not create thumbnail)
         # to determine if a thumbnail needs to be created
         log_entries = []
-        for entry in get_current_dir_entries(folder_and_path, True, constants.details_view_type):
+        for entry in folder_and_path.get_dir_entries(True, constants.details_view_type):
             if not entry.is_dir and utils.imageRegex.match(entry.name):
                 image_link_path = join_paths(folder_and_path.folder.local_path, folder_and_path.relative_path, entry.name)
                 options = {}
@@ -43,7 +43,7 @@ class Command(BaseCommand):
                 if not cached:
                     log_entries.append(entry.name)
 
-        for entry in get_current_dir_entries(folder_and_path, True, constants.thumbnails_view_type):
+        for entry in folder_and_path.get_dir_entries(True, constants.thumbnails_view_type):
             if entry.is_dir:
                 self.stdout.write("Processing dir %s" % entry.name)
                 child_folder = FolderAndPath(folder=folder_and_path.folder, path=join_paths(folder_and_path.relative_path, entry.name))

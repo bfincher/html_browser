@@ -155,7 +155,8 @@ class UtilsTest(unittest.TestCase):
         folder.save()
 
         try:
-            entries = get_current_dir_entries(FolderAndPath(folder=folder, path=''), False, const.thumbnails_view_type, '*.py')
+            folder_and_path = FolderAndPath(folder=folder, path='')
+            entries = folder_and_path.get_dir_entries(False, const.thumbnails_view_type, '*.py')
             self.assertTrue(len(entries) > 0)
             for entry in entries:
                 self.assertTrue(entry.is_dir or entry.name.endswith('.py'))
@@ -173,11 +174,13 @@ class UtilsTest(unittest.TestCase):
             test_file = '.testFile.txt'
             with open(test_file, 'a'):
                 pass
-            entries = get_current_dir_entries(FolderAndPath(folder=folder, path=''), False, const.thumbnails_view_type)
+            folder_and_path = FolderAndPath(folder=folder, path='')
+            entries = folder_and_path.get_dir_entries(False, const.thumbnails_view_type)
             for entry in entries:
                 self.assertFalse(entry.name.startswith('.'))
 
-            entries = get_current_dir_entries(FolderAndPath(folder=folder, path=''), True, const.thumbnails_view_type)
+            folder_and_path = FolderAndPath(folder=folder, path='')
+            entries = folder_and_path.get_dir_entries(True, const.thumbnails_view_type)
             found_hidden_entry = False
 
             for entry in entries:
@@ -212,7 +215,8 @@ class UtilsTest(unittest.TestCase):
                     entry.set_m_time(next_time)
                     next_time = next_time + timedelta(seconds=1)
 
-                entries = get_current_dir_entries(FolderAndPath(folder=folder, path=''), False, const.thumbnails_view_type)
+                folder_and_path = FolderAndPath(folder=folder, path='')
+                entries = folder_and_path.get_dir_entries(False, const.thumbnails_view_type)
                 self.assertEqual(16, len(entries))
 
                 for i in range(0, len(test_files)):
@@ -230,7 +234,8 @@ class UtilsTest(unittest.TestCase):
                 for entry in test_files:
                     entry.restore_m_time()
 
-            entries = get_current_dir_entries(FolderAndPath(folder=folder, path='images'), False, const.thumbnails_view_type)
+            folder_and_path = FolderAndPath(folder=folder, path='images')
+            entries = folder_and_path.get_dir_entries(False, const.thumbnails_view_type)
             self.assertEqual(20, len(entries))
             entry = entries[0]
             self.assertFalse(entry.is_dir)

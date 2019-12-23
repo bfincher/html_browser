@@ -14,7 +14,7 @@ from html_browser._os import join_paths
 from html_browser.constants import _constants as const
 from html_browser.models import FilesToDelete
 from html_browser.utils import (FolderAndPath, format_bytes, get_bytes_unit,
-                                get_checked_entries, get_current_dir_entries,
+                                get_checked_entries,
                                 handle_delete, replace_escaped_url)
 
 from .base_view import BaseContentView, is_show_hidden, reverse_content_url
@@ -31,49 +31,75 @@ numItemsPerPage = 48
 
 
 class ContentView(BaseContentView):
+
     def post(self, request, folder_and_path_url):
-        action = request.POST['action']
-        if action == 'copyToClipboard':
+
+        def copy_to_clipboard():
             entries = get_checked_entries(request.POST)
             request.session['clipboard'] = Clipboard(self.folder_and_path, entries, 'COPY').to_json()
             messages.success(request, 'Items copied to clipboard')
-        elif action == 'cutToClipboard':
+
+        def cut_to_clipboard():
             if not self.user_can_delete:
                 messages.error(request, "You don't have delete permission on this folder")
             else:
                 entries = get_checked_entries(request.POST)
                 request.session['clipboard'] = Clipboard(self.folder_and_path, entries, 'CUT').to_json()
                 messages.success(request, 'Items copied to clipboard')
-        elif action == 'pasteFromClipboard':
+
+        def paste_from_clipboard():
             if not self.user_can_write:
                 messages.error(request, "You don't have write permission on this folder")
             else:
                 self.__handlePaste(Clipboard.from_json(request.session['clipboard']))
-        elif action == 'deleteEntry':
+
+        def delete_entry():
             if not self.user_can_delete:
                 messages.error(request, "You don't have delete permission on this folder")
             else:
                 handle_delete(self.folder_and_path, get_checked_entries(request.POST))
                 messages.success(request, 'File(s) deleted')
-        elif action == 'setViewType':
+
+        def set_view_type():
             view_type = request.POST['view_type']
             request.session['view_type'] = view_type
-        elif action == 'mkDir':
-            dirName = request.POST['dir']
-            os.makedirs(join_paths(self.folder_and_path.abs_path, dirName))
-        elif action == 'rename':
+
+        def mkdir():
+            dir_name = request.POST['dir']
+            os.makedirs(join_paths(self.folder_and_path.abs_path, dir_name))
+
+        def rename():
             self.handleRename(request.POST['file'], request.POST['newName'])
-        elif action == 'changeSettings':
+
+        def change_settings():
             if request.POST['submit'] == "Save":
                 request.session['show_hidden'] = request.POST['show_hidden'] is not None
+
+        action = request.POST['action']
+        if action == 'copyToClipboard':
+            copy_to_clipboard()
+        elif action == 'cutToClipboard':
+            cut_to_clipboard()
+        elif action == 'pasteFromClipboard':
+            paste_from_clipboard()
+        elif action == 'deleteEntry':
+            delete_entry()
+        elif action == 'setViewType':
+            set_view_type()
+        elif action == 'mkDir':
+            mkdir()
+        elif action == 'rename':
+            rename()
+        elif action == 'changeSettings':
+            change_settings()
         else:
             raise RuntimeError('Unknown action %s' % action)
 
         return redirect(reverse_content_url(self.folder_and_path))
 
-    def handleRename(self, file_name, newName):
+    def handleRename(self, file_name, new_name):
         source = join_paths(self.folder_and_path.abs_path, replace_escaped_url(file_name))
-        dest = join_paths(self.folder_and_path.abs_path, replace_escaped_url(newName))
+        dest = join_paths(self.folder_and_path.abs_path, replace_escaped_url(new_name))
         move(source, dest)
 
     def __handlePaste(self, clipboard):
@@ -86,12 +112,12 @@ class ContentView(BaseContentView):
 
         for entry in clipboard.entries:
             source = join_paths(clipboard.folder_and_path.abs_path, replace_escaped_url(entry))
-            if clipboard.clipboardType == 'COPY':
+            if clipboard.type == 'COPY':
                 if os.path.isdir(source):
                     copytree(source, dest + entry)
                 else:
                     copy2(source, dest)
-            elif clipboard.clipboardType == 'CUT':
+            elif clipboard.type == 'CUT':
                 move(source, dest)
             else:
                 raise CopyPasteException()
@@ -138,7 +164,7 @@ class ContentView(BaseContentView):
 #            return self._handleSearch(request, search)
 
         view_type = request.session.get('view_type', const.view_types[0])
-        current_dir_entries = get_current_dir_entries(self.folder_and_path, is_show_hidden(request), view_type, content_filter)
+        current_dir_entries = self.folder_and_path.get_dir_entries(is_show_hidden(request), view_type, content_filter)
 
         if len(current_dir_entries) > numItemsPerPage and view_type == const.thumbnails_view_type:
             self.context['paginate'] = True
@@ -147,19 +173,19 @@ class ContentView(BaseContentView):
             current_dir_entries = paginator.get_page(page)
         else:
             self.context['paginate'] = False
-        diskFreePct = getDiskPercentFree(self.folder_and_path.abs_path)
-        diskUsage = getDiskUsageFormatted(self.folder_and_path.abs_path)
+        disk_free_pct = _get_disk_percent_free(self.folder_and_path.abs_path)
+        disk_usage = _get_disk_usage_formatted(self.folder_and_path.abs_path)
 
         parent_dir_link = getParentDirLink(self.folder_and_path)
         self.context['parent_dir_link'] = parent_dir_link
         self.context['view_type'] = const.view_types
         self.context['selectedViewType'] = view_type
         self.context['current_dir_entries'] = current_dir_entries
-        self.context['diskFreePct'] = diskFreePct
-        self.context['diskFree'] = diskUsage.freeformatted
-        self.context['diskUsed'] = diskUsage.usedformatted
-        self.context['diskTotal'] = diskUsage.totalformatted
-        self.context['diskUnit'] = diskUsage.unit
+        self.context['disk_free_pct'] = disk_free_pct
+        self.context['diskFree'] = disk_usage.freeformatted
+        self.context['diskUsed'] = disk_usage.usedformatted
+        self.context['diskTotal'] = disk_usage.totalformatted
+        self.context['diskUnit'] = disk_usage.unit
 
         template = _viewTypeToTemplateMap[view_type]
         return render(request, template, self.context)
@@ -174,18 +200,18 @@ class ContentView(BaseContentView):
     @staticmethod
     def deleteOldFiles():
         now = datetime.now()
-        for fileToDelete in FilesToDelete.objects.all().order_by('time'):
-            delta = now - fileToDelete.time
+        for file_to_delete in FilesToDelete.objects.all().order_by('time'):
+            delta = now - file_to_delete.time
             if delta > timedelta(minutes=10):
-                if os.path.isfile(fileToDelete.file_path):
-                    os.remove(fileToDelete.file_path)
-                fileToDelete.delete()
+                if os.path.isfile(file_to_delete.file_path):
+                    os.remove(file_to_delete.file_path)
+                file_to_delete.delete()
             else:
                 return
 
 
-def getDiskPercentFree(path):
-    du = getDiskUsage(path)
+def _get_disk_percent_free(path):
+    du = _get_disk_usage(path)
     free = du.free / 1.0
     total = du.free + du.used / 1.0
     pct = free / total
@@ -193,8 +219,8 @@ def getDiskPercentFree(path):
     return "%.2f" % pct + "%"
 
 
-def getDiskUsageFormatted(path):
-    du = getDiskUsage(path)
+def _get_disk_usage_formatted(path):
+    du = _get_disk_usage(path)
 
     _ntuple_diskusage_formatted = collections.namedtuple('usage', 'total totalformatted used usedformatted free freeformatted unit')
 
@@ -206,7 +232,7 @@ def getDiskUsageFormatted(path):
     return _ntuple_diskusage_formatted(du.total, total, du.used, used, du.free, free, unit)
 
 
-def getDiskUsage(path):
+def _get_disk_usage(path):
     _ntuple_diskusage = collections.namedtuple('usage', 'total used free')
 
     if hasattr(os, 'statvfs'):  # POSIX
@@ -216,7 +242,7 @@ def getDiskUsage(path):
         used = (st.f_blocks - st.f_bfree) * st.f_frsize
         return _ntuple_diskusage(total, used, free)
 
-    elif os.name == 'nt':       # Windows
+    elif os.name == 'nt':  # Windows
         import ctypes
         import sys
 
@@ -244,19 +270,20 @@ def getParentDirLink(folder_and_path):
 
 
 class Clipboard():
-    def __init__(self, folder_and_path, entries, clipboardType):
+
+    def __init__(self, folder_and_path, entries, type):
         self.folder_and_path = folder_and_path
-        self.clipboardType = clipboardType
+        self.type = type
         self.entries = entries
 
     @staticmethod
-    def from_json(jsonStr):
-        dictData = json.loads(jsonStr)
-        return Clipboard(FolderAndPath.from_json(dictData['folder_and_path']), dictData['entries'], dictData['clipboardType'])
+    def from_json(json_str):
+        dict_data = json.loads(json_str)
+        return Clipboard(FolderAndPath.from_json(dict_data['folder_and_path']), dict_data['entries'], dict_data['type'])
 
     def to_json(self):
         result = {'folder_and_path': self.folder_and_path.to_json(),
-                  'clipboardType': self.clipboardType,
+                  'type': self.type,
                   'entries': self.entries}
 
         return json.dumps(result)

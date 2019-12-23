@@ -19,11 +19,11 @@ from html_browser.views.base_view import (FolderAndPath,
                                           reverse_content_url)
 
 
-def contextCheck(testCase, context, user=None, folder=None):
-    testCase.assertTrue('csrf_token' in context)
+def context_check(test_case, context, user=None, folder=None):
+    test_case.assertTrue('csrf_token' in context)
 
     if user:
-        testCase.assertEqual(user, context['user'])
+        test_case.assertEqual(user, context['user'])
 
 
 class BaseViewTest(unittest.TestCase):
@@ -66,17 +66,17 @@ class BaseViewTest(unittest.TestCase):
         self.folder1.view_option = 'P'
         self.folder1.save()
 
-        userPerm = UserPermission()
-        userPerm.folder = self.folder1
-        userPerm.permission = CAN_DELETE
-        userPerm.user = self.user1
-        userPerm.save()
+        user_perm = UserPermission()
+        user_perm.folder = self.folder1
+        user_perm.permission = CAN_DELETE
+        user_perm.user = self.user1
+        user_perm.save()
 
-        userPerm = UserPermission()
-        userPerm.folder = self.folder1
-        userPerm.permission = CAN_READ
-        userPerm.user = self.user3
-        userPerm.save()
+        user_perm = UserPermission()
+        user_perm.folder = self.folder1
+        user_perm.permission = CAN_READ
+        user_perm.user = self.user3
+        user_perm.save()
 
         self.folder2 = Folder()
         self.folder2.name = 'test2'
@@ -98,11 +98,11 @@ class BaseViewTest(unittest.TestCase):
 
         self.folders = [self.folder1, self.folder2, self.folder3, self.folder4]
 
-        groupPerm1 = GroupPermission()
-        groupPerm1.folder = self.folder2
-        groupPerm1.permission = CAN_DELETE
-        groupPerm1.group = self.group1
-        groupPerm1.save()
+        group_perm_1 = GroupPermission()
+        group_perm_1.folder = self.folder2
+        group_perm_1.permission = CAN_DELETE
+        group_perm_1.group = self.group1
+        group_perm_1.save()
 
         self.client = Client()
 
@@ -173,7 +173,7 @@ class IndexViewTest(BaseViewTest):
         self.assertEqual(200, response.status_code)
 
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual(3, len(context['folders']))
         self.assertEqual(self.folder1, context['folders'][0])
         self.assertEqual(self.folder3, context['folders'][1])
@@ -187,7 +187,7 @@ class IndexViewTest(BaseViewTest):
         self.assertEqual(200, response.status_code)
 
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual(1, len(context['folders']))
         self.assertEqual(self.folder4, context['folders'][0])
         self.assertEqual('index.html', response.templates[0].name)
@@ -201,7 +201,7 @@ class IndexViewTest(BaseViewTest):
         self.assertEqual(200, response.status_code)
 
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual(3, len(context['folders']))
         self.assertEqual(self.folder2, context['folders'][0])
         self.assertEqual(self.folder3, context['folders'][1])
@@ -231,13 +231,13 @@ class DownloadViewTest(BaseViewTest):
                                   view_name='download')
         response = self.client.get(url)
 
-        foundAttachment = False
+        found_attachment = False
         for item in list(response.items()):
             if item[1] == 'attachment; filename="add_user.js"':
-                foundAttachment = True
+                found_attachment = True
                 break
 
-        self.assertTrue(foundAttachment)
+        self.assertTrue(found_attachment)
 
 
 class DownloadZipViewTest(BaseViewTest):
@@ -251,46 +251,46 @@ class DownloadZipViewTest(BaseViewTest):
 
         self.assertEqual(200, response.status_code)
 
-        attachmentRegex = re.compile(r'attachment; filename="(download_\w+\.zip)"')
-        zipFileName = None
-        tmpDir = tempfile.gettempdir()
+        attachment_regex = re.compile(r'attachment; filename="(download_\w+\.zip)"')
+        zip_file_name = None
+        tmp_dir = tempfile.gettempdir()
 
-        extractPath = join_paths(tmpDir, 'extract')
-        if not os.path.exists(extractPath):
-            os.makedirs(extractPath)
+        extract_path = join_paths(tmp_dir, 'extract')
+        if not os.path.exists(extract_path):
+            os.makedirs(extract_path)
 
         try:
             for item in list(response.items()):
-                match = attachmentRegex.match(item[1])
+                match = attachment_regex.match(item[1])
                 if match:
-                    zipFileName = match.group(1)
+                    zip_file_name = match.group(1)
                     break
 
-            self.assertIsNotNone(zipFileName)
+            self.assertIsNotNone(zip_file_name)
 
-            zipFile = ZipFile(join_paths(tmpDir, zipFileName), mode='r')
+            zipFile = ZipFile(join_paths(tmp_dir, zip_file_name), mode='r')
             entries = zipFile.infolist()
 
-            os.makedirs(extractPath, exist_ok=True)
+            os.makedirs(extract_path, exist_ok=True)
             for entry in entries:
-                zipFile.extract(entry, extractPath)
+                zipFile.extract(entry, extract_path)
 
-            extractedFileA = join_paths(extractPath, 'add_user.js')
-            extractedFileB = join_paths(extractPath, 'base.js')
-            extractedTestFile = join_paths(extractPath, 'images/Add-Folder-icon.png')
+            extracted_file_a = join_paths(extract_path, 'add_user.js')
+            extracted_file_b = join_paths(extract_path, 'base.js')
+            extracted_test_file = join_paths(extract_path, 'images/Add-Folder-icon.png')
 
-            self.assertTrue(os.path.exists(extractedFileA))
-            self.assertTrue(os.path.exists(extractedFileB))
-            self.assertTrue(os.path.exists(extractedTestFile))
+            self.assertTrue(os.path.exists(extracted_file_a))
+            self.assertTrue(os.path.exists(extracted_file_b))
+            self.assertTrue(os.path.exists(extracted_test_file))
 
-            self.assertTrue(filecmp.cmp('media/add_user.js', extractedFileA))
-            self.assertTrue(filecmp.cmp('media/base.js', extractedFileB))
-            self.assertTrue(filecmp.cmp('media/images/Add-Folder-icon.png', extractedTestFile))
+            self.assertTrue(filecmp.cmp('media/add_user.js', extracted_file_a))
+            self.assertTrue(filecmp.cmp('media/base.js', extracted_file_b))
+            self.assertTrue(filecmp.cmp('media/images/Add-Folder-icon.png', extracted_test_file))
         finally:
-            if os.path.exists(extractPath):
-                rmtree(extractPath)
-            if zipFileName and os.path.exists(zipFileName):
-                os.remove(zipFileName)
+            if os.path.exists(extract_path):
+                rmtree(extract_path)
+            if zip_file_name and os.path.exists(zip_file_name):
+                os.remove(zip_file_name)
 
 
 class UploadViewTest(BaseViewTest):
@@ -301,7 +301,7 @@ class UploadViewTest(BaseViewTest):
 
         self.assertEqual(200, response.status_code)
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual('upload.html', response.templates[0].name)
 
         # test unauthorized user
@@ -388,7 +388,7 @@ class UploadViewTest(BaseViewTest):
                                                        view_name='imageView', extra_path='folder-blue-icon.png'))
 
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
 
         self.assertEqual('/content/test/images/', context['parent_dir_link'])
         self.assertEqual('/image_view/test/images/folder-blue-icon-128.png/', context['prev_link'])
@@ -421,10 +421,10 @@ class TestGetIndexIntoCurrentDir(BaseViewTest):
         self.assertEqual(0, result['index'])
         self.assertEqual(20, len(result['current_dir_entries']))
 
-        expectedFiles = ['Add-Folder-icon.png', 'Copy-icon.png', 'Document-icon.png']
+        expected_files = ['Add-Folder-icon.png', 'Copy-icon.png', 'Document-icon.png']
 
-        for i in range(len(expectedFiles)):
+        for i in range(len(expected_files)):
             self.assertFalse(result['current_dir_entries'][i].is_dir)
             self.assertFalse(result['current_dir_entries'][i].has_thumbnail)
-            self.assertEqual(expectedFiles[i], result['current_dir_entries'][i].name)
-            self.assertEqual(expectedFiles[i], result['current_dir_entries'][i].name_url)
+            self.assertEqual(expected_files[i], result['current_dir_entries'][i].name)
+            self.assertEqual(expected_files[i], result['current_dir_entries'][i].name_url)

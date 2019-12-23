@@ -36,6 +36,7 @@ imageRegexWithCach = re.compile(r'(?i)cache/%s' % imageRegexStr)
 
 
 class ThumbnailStorage(FileSystemStorage):
+
     def __init__(self):
         p = Path(settings.THUMBNAIL_CACHE_DIR)
         if not p.exists():
@@ -49,21 +50,25 @@ class ThumbnailStorage(FileSystemStorage):
 
 
 class NoParentException(Exception):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 
 class ArgumentException(Exception):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 
 class FolderAndPathArgumentException(Exception):
+
     def __init__(self, **kwargs):
         super().__init__("Expected kwargs are (url)|(folder_name, path).  Instead found %s" % kwargs)
 
 
 class FolderAndPath:
+
     def __init__(self, *args, **kwargs):
         # options for kwargs are (url)|(folder_name, path)
 
@@ -112,6 +117,58 @@ class FolderAndPath:
     def __eq__(self, other):
         return self.url == other.url
 
+    def get_dir_entries(self, show_hidden, view_type, content_filter=None):
+        _dir = self.abs_path
+        if os.path.isfile(_dir):
+            _dir = os.path.dirname(_dir)
+
+        dir_entries = []
+        file_entries = []
+        self.dir_entries = dir_entries
+        self.file_entries = file_entries
+
+        self.skip_thumbnail = False
+        self.start_time = datetime.now()
+
+        if _dir.endswith('lost+found'):
+            return []
+
+        for f in Path(_dir).iterdir():
+            self._process_entry(f, show_hidden, view_type, content_filter)
+
+        dir_entries.sort(key=attrgetter('name'))
+        file_entries.sort(key=attrgetter('name'))
+
+        dir_entries.extend(file_entries)
+
+        delattr(self, "skip_thumbnail")
+        delattr(self, "start_time")
+        delattr(self, "dir_entries")
+        delattr(self, "file_entries")
+        return dir_entries
+
+    def _process_entry(self, entry, show_hidden, view_type, content_filter):
+        if not show_hidden and entry.name.startswith('.'):
+            return
+        try:
+            if entry.is_dir():
+                self.dir_entries.append(DirEntry(entry, self, view_type))
+            else:
+                include = False
+                if content_filter:
+                    temp_filter = content_filter.replace('.', r'\.')
+                    temp_filter = temp_filter.replace('*', '.*')
+                    include = re.search(temp_filter, entry.name)
+                else:
+                    include = True
+
+                delta = datetime.now() - self.start_time
+                skip_thumbnail = self.skip_thumbnail or delta.total_seconds() > 45
+                if include:
+                    self.file_entries.append(DirEntry(entry, self, view_type, skip_thumbnail))
+        except (OSError, UnicodeDecodeError) as e:
+            logger.exception(e)
+
 
 def get_checked_entries(request_dict):
     entries = []
@@ -124,6 +181,7 @@ def get_checked_entries(request_dict):
 
 
 class DirEntry():
+
     def __init__(self, path, folder_and_path, view_type, skip_thumbnail=False):
         self.thumbnail_url = None
         self.is_dir = path.is_dir()
@@ -171,7 +229,6 @@ class DirEntry():
             return self.thumbnail_url
         return None
 
-
 #    return dirPath.encode('utf8')
 
 # def getCurrentDirEntriesSearch(folder, path, show_hidden, searchRegexStr):
@@ -206,52 +263,8 @@ class DirEntry():
 #        except UnicodeDecodeError as e:
 #            logger.error('UnicodeDecodeError: %s', entry.name)
 
-
 #    if includeThisDir:
 #        returnList.append(thisEntry)
-
-def get_current_dir_entries(folder_and_path, show_hidden, view_type, content_filter=None):
-    _dir = folder_and_path.abs_path
-    if os.path.isfile(_dir):
-        _dir = os.path.dirname(_dir)
-
-    dir_entries = []
-    file_entries = []
-
-    skip_thumbnail = False
-    start_time = datetime.now()
-
-    if _dir.endswith('lost+found'):
-        return []
-
-    for f in Path(_dir).iterdir():
-        if not show_hidden and f.name.startswith('.'):
-            continue
-        try:
-            if f.is_dir():
-                dir_entries.append(DirEntry(f, folder_and_path, view_type))
-            else:
-                include = False
-                if content_filter:
-                    temp_filter = content_filter.replace('.', r'\.')
-                    temp_filter = temp_filter.replace('*', '.*')
-                    include = re.search(temp_filter, f.name)
-                else:
-                    include = True
-
-                delta = datetime.now() - start_time
-                skip_thumbnail = skip_thumbnail or delta.total_seconds() > 45
-                if include:
-                    file_entries.append(DirEntry(f, folder_and_path, view_type, skip_thumbnail))
-        except (OSError, UnicodeDecodeError) as e:
-            logger.exception(e)
-
-    dir_entries.sort(key=attrgetter('name'))
-    file_entries.sort(key=attrgetter('name'))
-
-    dir_entries.extend(file_entries)
-
-    return dir_entries
 
 
 def replace_escaped_url(url):

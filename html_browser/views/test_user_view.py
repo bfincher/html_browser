@@ -6,7 +6,7 @@ from html_browser.models import Group
 from html_browser.utils import get_object_or_none
 
 from .test_admin_view import BaseAdminTest
-from .test_base_view import contextCheck
+from .test_base_view import context_check
 
 
 class UserTest(BaseAdminTest):
@@ -15,14 +15,14 @@ class UserTest(BaseAdminTest):
         response = self.client.get(reverse('userAdmin'))
         self.assertEqual(200, response.status_code)
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual('admin/user_admin.html', response.templates[0].name)
 
         self.assertEqual(len(self.users), len(context['users']))
 
-        contextUsernames = [user.username for user in context['users']]
+        context_usernames = [user.username for user in context['users']]
         for user in self.users:
-            self.assertTrue(user in contextUsernames)
+            self.assertTrue(user in context_usernames)
 
         self.logout()
         self.login(self.user1)
@@ -41,7 +41,7 @@ class UserTest(BaseAdminTest):
         response = self.client.get(reverse('editUser', args=[self.user1.username]))
         self.assertEqual(200, response.status_code)
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual(self.user4.username, context['user'].username)
         self.assertEqual("admin/add_edit_user.html", response.templates[0].name)
 
@@ -57,12 +57,12 @@ class UserTest(BaseAdminTest):
         response = self.client.post(reverse('editUser', args=[self.user1.username]), data)
         self.assertEqual(302, response.status_code)
         self.assertEqual('/userAdmin/', response.url)
-        newUser1 = User.objects.get(username=self.user1.username)
-        self.assertEqual('firstname', newUser1.first_name)
-        self.assertEqual('lastname', newUser1.last_name)
-        self.assertEqual('nobody@whocares.com', newUser1.email)
-        self.assertTrue(newUser1.is_superuser)
-        self.assertFalse(newUser1.is_active)
+        new_user_1 = User.objects.get(username=self.user1.username)
+        self.assertEqual('firstname', new_user_1.first_name)
+        self.assertEqual('lastname', new_user_1.last_name)
+        self.assertEqual('nobody@whocares.com', new_user_1.email)
+        self.assertTrue(new_user_1.is_superuser)
+        self.assertFalse(new_user_1.is_active)
 
     def testDeleteUser(self):
         # test unauthorized user
@@ -88,7 +88,7 @@ class UserTest(BaseAdminTest):
         response = self.client.get(reverse('editUser', args=[self.user1.username]))
         self.assertEqual(200, response.status_code)
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual(self.user4.username, context['user'].username)
         self.assertEqual("admin/add_edit_user.html", response.templates[0].name)
 
@@ -113,11 +113,11 @@ class UserTest(BaseAdminTest):
         response = self.client.get(reverse('editUser', args=[self.user1.username]))
         self.assertEqual(200, response.status_code)
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual(self.user4.username, context['user'].username)
         self.assertEqual("admin/add_edit_user.html", response.templates[0].name)
 
-        groupPk = str(Group.objects.get(name=self.group1.name).pk)
+        group_pk = str(Group.objects.get(name=self.group1.name).pk)
 
         data = {'username': self.user1.username,
                 'first_name': 'firstname',
@@ -126,17 +126,17 @@ class UserTest(BaseAdminTest):
                 'userPk': self.user1.pk,
                 'is_superuser': True,
                 'is_active': False,
-                'groups': groupPk
+                'groups': group_pk
                 }
 
         response = self.client.post(reverse('editUser', args=[self.user1.username]), data)
         self.assertEqual(302, response.status_code)
         self.assertEqual('/userAdmin/', response.url)
-        newUser1 = User.objects.get(username=self.user1.username)
-        self.assertEqual('firstname', newUser1.first_name)
-        self.assertEqual('lastname', newUser1.last_name)
-        self.assertEqual('nobody@whocares.com', newUser1.email)
-        self.assertTrue(newUser1.is_superuser)
-        self.assertFalse(newUser1.is_active)
-        self.assertEqual(1, newUser1.groups.count())
-        self.assertTrue(self.group1 in newUser1.groups.all())
+        new_user_1 = User.objects.get(username=self.user1.username)
+        self.assertEqual('firstname', new_user_1.first_name)
+        self.assertEqual('lastname', new_user_1.last_name)
+        self.assertEqual('nobody@whocares.com', new_user_1.email)
+        self.assertTrue(new_user_1.is_superuser)
+        self.assertFalse(new_user_1.is_active)
+        self.assertEqual(1, new_user_1.groups.count())
+        self.assertTrue(self.group1 in new_user_1.groups.all())
