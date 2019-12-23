@@ -268,12 +268,12 @@ class DownloadZipViewTest(BaseViewTest):
 
             self.assertIsNotNone(zip_file_name)
 
-            zipFile = ZipFile(join_paths(tmp_dir, zip_file_name), mode='r')
-            entries = zipFile.infolist()
+            zip_file = ZipFile(join_paths(tmp_dir, zip_file_name), mode='r')
+            entries = zip_file.infolist()
 
             os.makedirs(extract_path, exist_ok=True)
             for entry in entries:
-                zipFile.extract(entry, extract_path)
+                zip_file.extract(entry, extract_path)
 
             extracted_file_a = join_paths(extract_path, 'add_user.js')
             extracted_file_b = join_paths(extract_path, 'base.js')

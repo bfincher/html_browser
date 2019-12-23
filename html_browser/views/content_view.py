@@ -32,66 +32,23 @@ numItemsPerPage = 48
 
 class ContentView(BaseContentView):
 
+    def __init__(self):
+        self.actionDict = {
+            'copyToClipboard' : self._copy_to_clipboard,
+            'cutToClipboard':  self.cut_to_clipboard,
+        'pasteFromClipboard': self.paste_from_clipboard,
+        'deleteEntry': self.delete_entry,
+        'setViewType': self.set_view_type,
+        'mkDir': self.mkdir,
+        'rename': self.rename,
+        'changeSettings': self.change_settings
+            }
+
     def post(self, request, folder_and_path_url):
 
-        def copy_to_clipboard():
-            entries = get_checked_entries(request.POST)
-            request.session['clipboard'] = Clipboard(self.folder_and_path, entries, 'COPY').to_json()
-            messages.success(request, 'Items copied to clipboard')
-
-        def cut_to_clipboard():
-            if not self.user_can_delete:
-                messages.error(request, "You don't have delete permission on this folder")
-            else:
-                entries = get_checked_entries(request.POST)
-                request.session['clipboard'] = Clipboard(self.folder_and_path, entries, 'CUT').to_json()
-                messages.success(request, 'Items copied to clipboard')
-
-        def paste_from_clipboard():
-            if not self.user_can_write:
-                messages.error(request, "You don't have write permission on this folder")
-            else:
-                self.__handlePaste(Clipboard.from_json(request.session['clipboard']))
-
-        def delete_entry():
-            if not self.user_can_delete:
-                messages.error(request, "You don't have delete permission on this folder")
-            else:
-                handle_delete(self.folder_and_path, get_checked_entries(request.POST))
-                messages.success(request, 'File(s) deleted')
-
-        def set_view_type():
-            view_type = request.POST['view_type']
-            request.session['view_type'] = view_type
-
-        def mkdir():
-            dir_name = request.POST['dir']
-            os.makedirs(join_paths(self.folder_and_path.abs_path, dir_name))
-
-        def rename():
-            self.handleRename(request.POST['file'], request.POST['newName'])
-
-        def change_settings():
-            if request.POST['submit'] == "Save":
-                request.session['show_hidden'] = request.POST['show_hidden'] is not None
-
         action = request.POST['action']
-        if action == 'copyToClipboard':
-            copy_to_clipboard()
-        elif action == 'cutToClipboard':
-            cut_to_clipboard()
-        elif action == 'pasteFromClipboard':
-            paste_from_clipboard()
-        elif action == 'deleteEntry':
-            delete_entry()
-        elif action == 'setViewType':
-            set_view_type()
-        elif action == 'mkDir':
-            mkdir()
-        elif action == 'rename':
-            rename()
-        elif action == 'changeSettings':
-            change_settings()
+        if action in self.actionDict:
+            self.actionDict[action](request)
         else:
             raise RuntimeError('Unknown action %s' % action)
 
@@ -176,7 +133,7 @@ class ContentView(BaseContentView):
         disk_free_pct = _get_disk_percent_free(self.folder_and_path.abs_path)
         disk_usage = _get_disk_usage_formatted(self.folder_and_path.abs_path)
 
-        parent_dir_link = getParentDirLink(self.folder_and_path)
+        parent_dir_link = get_parent_dir_link(self.folder_and_path)
         self.context['parent_dir_link'] = parent_dir_link
         self.context['view_type'] = const.view_types
         self.context['selectedViewType'] = view_type
@@ -208,6 +165,47 @@ class ContentView(BaseContentView):
                 file_to_delete.delete()
             else:
                 return
+
+    def _copy_to_clipboard(self, request):
+        entries = get_checked_entries(request.POST)
+        request.session['clipboard'] = Clipboard(self.folder_and_path, entries, 'COPY').to_json()
+        messages.success(request, 'Items copied to clipboard')
+
+    def _cut_to_clipboard(self, request):
+        if not self.user_can_delete:
+            messages.error(request, "You don't have delete permission on this folder")
+        else:
+            entries = get_checked_entries(request.POST)
+            request.session['clipboard'] = Clipboard(self.folder_and_path, entries, 'CUT').to_json()
+            messages.success(request, 'Items copied to clipboard')
+
+    def _paste_from_clipboard(self, request):
+        if not self.user_can_write:
+            messages.error(request, "You don't have write permission on this folder")
+        else:
+            self.__handlePaste(Clipboard.from_json(request.session['clipboard']))
+
+    def _delete_entry(self, request):
+        if not self.user_can_delete:
+            messages.error(request, "You don't have delete permission on this folder")
+        else:
+            handle_delete(self.folder_and_path, get_checked_entries(request.POST))
+            messages.success(request, 'File(s) deleted')
+
+    def _set_view_type(self, request):
+        view_type = request.POST['view_type']
+        request.session['view_type'] = view_type
+
+    def _mkdir(self, request):
+        dir_name = request.POST['dir']
+        os.makedirs(join_paths(self.folder_and_path.abs_path, dir_name))
+
+    def _rename(self, request):
+        self.handleRename(request.POST['file'], request.POST['newName'])
+
+    def _change_settings(self, request):
+        if request.POST['submit'] == "Save":
+            request.session['show_hidden'] = request.POST['show_hidden'] is not None
 
 
 def _get_disk_percent_free(path):
@@ -260,7 +258,7 @@ def _get_disk_usage(path):
         raise NotImplementedError("platform not supported")
 
 
-def getParentDirLink(folder_and_path):
+def get_parent_dir_link(folder_and_path):
     path = folder_and_path.relative_path
     if path:
         path = os.path.dirname(path)

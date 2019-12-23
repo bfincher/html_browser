@@ -88,11 +88,11 @@ $(document).ready(function() {
 
     if (emptyUserPerm.find('select:first').val() == "") {
         emptyUserPerm.remove();
-        var match = regexp.exec(emptyUserPerm.find('input').attr('name'))
+        let match = regexp.exec(emptyUserPerm.find('input').attr('name'))
         numUserPerms = parseInt(match[2]);
     } else {
-        var name = parseInt($('#' + userPermTableId + ' tr:last').find('input:first').attr('name'));
-        var match = regexp.exec(emptyUserPerm.find('input').attr('name'))
+        //var name = parseInt($('#' + userPermTableId + ' tr:last').find('input:first').attr('name'));
+        let match = regexp.exec(emptyUserPerm.find('input').attr('name'))
         numUserPerms = parseInt(match[2]) + 1;
     }
 
@@ -101,11 +101,11 @@ $(document).ready(function() {
 
     if (emptyGroupPerm.find('select:first').val() == "") {
         emptyGroupPerm.remove();
-        var match = regexp.exec(emptyGroupPerm.find('input').attr('name'))
+        let match = regexp.exec(emptyGroupPerm.find('input').attr('name'))
         numGroupPerms = parseInt(match[2]);
     } else {
-        var name = parseInt($('#' + groupPermTableId + ' tr:last').find('input:first').attr('name'));
-        var match = regexp.exec(emptyGroupPerm.find('input').attr('name'))
+        //var name = parseInt($('#' + groupPermTableId + ' tr:last').find('input:first').attr('name'));
+        let match = regexp.exec(emptyGroupPerm.find('input').attr('name'))
         numGroupPerms = parseInt(match[2]) + 1;
     }
 
