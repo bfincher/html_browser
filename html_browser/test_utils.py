@@ -206,7 +206,7 @@ class UtilsTest(unittest.TestCase):
             test_files = [FileEntry(join_paths(media_dir, 'bootstrap'), '&nbsp'),
                           FileEntry(join_paths(media_dir, 'images'), '&nbsp'),
                           FileEntry(join_paths(media_dir, 'krajee'), '&nbsp'),
-                          FileEntry(join_paths(media_dir, 'add_user.js'), '1.91 KB'),
+                          FileEntry(join_paths(media_dir, 'add_user.js'), '1.80 KB'),
                           ]
 
             try:
