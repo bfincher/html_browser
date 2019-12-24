@@ -31,8 +31,12 @@ function setUserCanDelete(_userCanDelete) {
     userCanDelete = _userCanDelete;
 }
 
+function getCheckedBoxes() {
+    return $(".content-checkbox:checkbox:checked");
+}
+
 function getNumCheckedBoxes() {
-    return $(".content-checkbox:checkbox:checked").length;
+    return getCheckedBoxes().length;
 }
 
 function areBoxesChecked() {
@@ -67,7 +71,8 @@ function rename() {
         return;
     }
 
-    var newName = prompt("Please enter new file name for " + checkedBoxes[0].id, "");
+    let checkedBoxes = getCheckedBoxes()
+    let newName = prompt("Please enter new file name for " + checkedBoxes[0].id, "");
 
     if (newName != null) {
         postForm($("#content-form"), Urls.content(folderAndPathUrl), 
