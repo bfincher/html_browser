@@ -29,3 +29,5 @@ LOG_DIR = join_paths(BASE_DIR, 'log')
 THUMBNAIL_CACHE_DIR = join_paths(BASE_DIR, 'thumb_cache')
 
 ALLOWED_HOSTS = ['userver', 'localhost']
+
+INTERNAL_IPS = ['192.168.1.2', '192.168.1.103']

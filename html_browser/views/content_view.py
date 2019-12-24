@@ -33,16 +33,17 @@ numItemsPerPage = 48
 class ContentView(BaseContentView):
 
     def __init__(self):
+        super().__init__()
         self.actionDict = {
-            'copyToClipboard' : self._copy_to_clipboard,
-            'cutToClipboard':  self.cut_to_clipboard,
-        'pasteFromClipboard': self.paste_from_clipboard,
-        'deleteEntry': self.delete_entry,
-        'setViewType': self.set_view_type,
-        'mkDir': self.mkdir,
-        'rename': self.rename,
-        'changeSettings': self.change_settings
-            }
+            'copyToClipboard': self._copy_to_clipboard,
+            'cutToClipboard': self._cut_to_clipboard,
+            'pasteFromClipboard': self._paste_from_clipboard,
+            'deleteEntry': self._delete_entry,
+            'setViewType': self._set_view_type,
+            'mkDir': self._mkdir,
+            'rename': self._rename,
+            'changeSettings': self._change_settings
+        }
 
     def post(self, request, folder_and_path_url):
 
@@ -135,7 +136,7 @@ class ContentView(BaseContentView):
 
         parent_dir_link = get_parent_dir_link(self.folder_and_path)
         self.context['parent_dir_link'] = parent_dir_link
-        self.context['view_type'] = const.view_types
+        self.context['view_types'] = const.view_types
         self.context['selectedViewType'] = view_type
         self.context['current_dir_entries'] = current_dir_entries
         self.context['disk_free_pct'] = disk_free_pct
