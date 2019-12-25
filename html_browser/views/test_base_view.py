@@ -391,8 +391,8 @@ class UploadViewTest(BaseViewTest):
         context_check(self, context)
 
         self.assertEqual('/content/test/images/', context['parent_dir_link'])
-        self.assertEqual('/image_view/test/images/folder-blue-icon-128.png/', context['prev_link'])
-        self.assertEqual('/image_view/test/images/folder-blue-parent-icon.png/', context['next_link'])
+        self.assertEqual('/imageView/test/images/folder-blue-icon-128.png/', context['prev_link'])
+        self.assertEqual('/imageView/test/images/folder-blue-parent-icon.png/', context['next_link'])
         self.assertEqual('/download/test/images/folder-blue-icon.png/', context['image_url'])
         self.assertEqual('folder-blue-icon.png', context['file_name'])
         self.assertTrue(context['user_can_delete'])
@@ -404,7 +404,7 @@ class UploadViewTest(BaseViewTest):
         response = self.client.get(reverse_content_url(FolderAndPath(folder=self.folder1, path='images'),
                                                        view_name='imageView', extra_path='folder-blue-icon.png'))
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/image_view/test/images/folder-blue-icon.png/', response.url)
+        self.assertEqual('/?next=/imageView/test/images/folder-blue-icon.png/', response.url)
 
 
 class TestGetIndexIntoCurrentDir(BaseViewTest):
