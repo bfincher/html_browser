@@ -1,7 +1,7 @@
 # Django settings for html_browser project.
 import os
 
-from html_browser._os import joinPaths
+from html_browser._os import join_paths
 from html_browser.local_settings.local_settings import *
 
 URL_PREFIX = r''
@@ -53,7 +53,7 @@ MEDIA_URL = None
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_URL = "/hbmedia/"
 STATIC_ROOT = ''
-# STATIC_ROOT = joinPaths(BASE_DIR, 'media')
+# STATIC_ROOT = join_paths(BASE_DIR, 'media')
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -89,7 +89,7 @@ JS_REVERSE_JS_MINIFY = True
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [joinPaths(BASE_DIR, 'html_browser/templates'),
+        'DIRS': [join_paths(BASE_DIR, 'html_browser/templates'),
                  ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -162,7 +162,7 @@ LOGGING = {
         'default': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': joinPaths(LOG_DIR, 'hb.log'),
+            'filename': join_paths(LOG_DIR, 'hb.log'),
             'maxBytes': 1024 * 1024 * 10,  # 10 MB
             'backupCount': 5,
             'formatter': 'standard',
@@ -170,7 +170,7 @@ LOGGING = {
         'request_handler': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': joinPaths(LOG_DIR, 'request.log'),
+            'filename': join_paths(LOG_DIR, 'request.log'),
             'maxBytes': 1024 * 1024 * 10,  # 10 MB
             'backupCount': 5,
             'formatter': 'standard',

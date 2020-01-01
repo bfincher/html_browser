@@ -31,8 +31,12 @@ function setUserCanDelete(_userCanDelete) {
     userCanDelete = _userCanDelete;
 }
 
+function getCheckedBoxes() {
+    return $(".content-checkbox:checkbox:checked");
+}
+
 function getNumCheckedBoxes() {
-    return $(".content-checkbox:checkbox:checked").length;
+    return getCheckedBoxes().length;
 }
 
 function areBoxesChecked() {
@@ -57,7 +61,7 @@ function rename() {
         return;
     }
 
-    var numChecked = getNumCheckedBoxes();
+    let numChecked = getNumCheckedBoxes();
 
     if (numChecked == 0) {
         alert("No entry selected");
@@ -67,7 +71,8 @@ function rename() {
         return;
     }
 
-    var newName = prompt("Please enter new file name for " + checkedBoxes[0].id, "");
+    let checkedBoxes = getCheckedBoxes()
+    let newName = prompt("Please enter new file name for " + checkedBoxes[0].id, "");
 
     if (newName != null) {
         postForm($("#content-form"), Urls.content(folderAndPathUrl), 
@@ -124,15 +129,16 @@ function del() {
         alert("You do not have permission to delete from this folder");
         return;
     }
-    var numChecked = getNumCheckedBoxes()
+    let numChecked = getNumCheckedBoxes()
 
     if (numChecked == 0) {
         alert("No entries selected");
     } else {
+        let confirmMessage = "";
         if (numChecked == 1) {
-            var confirmMessage = "Are you sure you want to delete the selected entry?";
+            confirmMessage = "Are you sure you want to delete the selected entry?";
         } else {
-            var confirmMessage = "Are you sure you want to delete the " + numChecked + " selected entries?";
+            confirmMessage = "Are you sure you want to delete the " + numChecked + " selected entries?";
         }
 
         if (confirm(confirmMessage)) {
@@ -164,7 +170,7 @@ function viewTypeBoxChanged(box) {
     if (selectedIndex != -1) {
         postForm($("#content-form"), Urls.content(folderAndPathUrl), 
            {"action": "setViewType",
-            "viewType": box.options[selectedIndex].text});
+            "view_type": box.options[selectedIndex].text});
     }
 }
 

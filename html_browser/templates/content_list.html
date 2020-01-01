@@ -1,15 +1,10 @@
 {% extends "content_page.html" %}
 {% block content %}
 
-	<table class="table table-condensed">
+	<table class="table table-condensed content-list-table">
 		<tr>
 		
-			<col width="25%" />
-			<col width="25%" />
-			<col width="25%" />
-			<col width="25%" />
-		
-		{% for entry in currentDirEntries %}
+		{% for entry in current_dir_entries %}
 			{% if forloop.counter0 > 0 and forloop.counter0|divisibleby:"4" %}
 		</tr>
 		<tr>
@@ -17,7 +12,7 @@
 			<td>
 				<input class="content-checkbox" name="cb-{{ entry.name }}" type="checkbox" />
 				{% block list_entry %}
-				{% if entry.isDir %}
+				{% if entry.is_dir %}
 					{% include "entry_dir.html" %}
 				{% else %}
 					{% include "entry_details.html" %}

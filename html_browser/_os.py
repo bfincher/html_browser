@@ -1,8 +1,8 @@
-def joinPaths(path, *paths):
-    toReturn = path
+def join_paths(path, *paths):
+    to_return = path
     for p in paths:
-        if toReturn.endswith('/') or p.endswith('/'):
-            toReturn += p
+        if to_return.endswith('/') or p.endswith('/'):
+            to_return += p
         else:
-            toReturn += "/%s" % p
-    return toReturn
+            to_return += "/%s" % p
+    return to_return

@@ -1,26 +1,26 @@
 		<div class="row">
 		<div class="col-md-5">
-			<a href=" {{ parentDirLink }}" title="Parent Folder"><img src="{{ IMAGE_URL }}folder-blue-parent-icon.png"></a>
-			<a title="Delete" href="javascript:del()"> <img src="{{ IMAGE_URL }}Symbols-Delete-icon.png"/></a>
-			<a title="Copy" href="javascript:copy()"><img src="{{ IMAGE_URL }}Copy-icon.png"/></a>
-			<a title="Cut" href="javascript:cut()"><img src="{{ IMAGE_URL }}cut-icon.png"/></a>
-			<a title="Paste" href="javascript:paste()"><img src="{{ IMAGE_URL }}Paste-icon.png"/></a>
-			<a title="New Directory" href="javascript:mkdir()"><img src="{{ IMAGE_URL }}Add-Folder-icon.png"/></a>
-			<a title="Rename" href="javascript:rename()"><img src="{{ IMAGE_URL }}Rename.png" height="32" width="32"/></a>
-			<a title="Download Zip" href="javascript:zip()"><img src="{{ IMAGE_URL }}ZIP-File-icon.png"/></a>
+			<a href=" {{ parent_dir_link }}" title="Parent Folder"><img src="{{ IMAGE_URL }}folder-blue-parent-icon.png" alt="Parent Folder"></a>
+			<a title="Delete" href="javascript:del()"> <img src="{{ IMAGE_URL }}Symbols-Delete-icon.png" alt = "delete"/></a>
+			<a title="Copy" href="javascript:copy()"><img src="{{ IMAGE_URL }}Copy-icon.png" alt="Copy"/></a>
+			<a title="Cut" href="javascript:cut()"><img src="{{ IMAGE_URL }}cut-icon.png" alt="Cut"/></a>
+			<a title="Paste" href="javascript:paste()"><img src="{{ IMAGE_URL }}Paste-icon.png" alt="Paste"/></a>
+			<a title="New Directory" href="javascript:mkdir()"><img src="{{ IMAGE_URL }}Add-Folder-icon.png" alt="Add Folder"/></a>
+			<a title="Rename" href="javascript:rename()"><img src="{{ IMAGE_URL }}Rename.png" height="32" width="32" alt="Rename"/></a>
+			<a title="Download Zip" href="javascript:zip()"><img src="{{ IMAGE_URL }}ZIP-File-icon.png" alt="Zip"/></a>
 		</div>
 
 		<div class="col-md-4">
 			<h5>
-				{{ folderAndPath.folder.name }}/{{ folderAndPath.relativePath }} &nbsp;&nbsp;&nbsp; 
-				<a href="javascript:diskUsageShowPopup()">{{ diskFreePct }} free</a>
+				{{ folder_and_path.folder.name }}/{{ folder_and_path.relative_path }} &nbsp;&nbsp;&nbsp; 
+				<a href="javascript:diskUsageShowPopup()">{{ disk_free_pct }} free</a>
 			</h5>
 		</div>
 
 		<div class="col-md-3">
 			<select id="viewTypeBox" onchange="viewTypeBoxChanged(this)">
 
-			{% for view in viewTypes %}
+			{% for view in view_types %}
 				{% if view == selectedViewType %}
 					<option selected="selected">{{ view }}</option>
 				{% else %}
@@ -29,7 +29,7 @@
 			{% endfor %}
 			</select>
 
-			<a title="Upload" href="javascript:upload()"><img src="{{ IMAGE_URL }}up-icon.png"/></a>
+			<a title="Upload" href="javascript:upload()"><img src="{{ IMAGE_URL }}up-icon.png" alt="Upload"/></a>
 		</div>
 	</div>		
 

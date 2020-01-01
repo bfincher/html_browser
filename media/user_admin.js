@@ -6,8 +6,8 @@
     }
 
     function validatePassword(formName) {
-        form = document.getElementById(formName);
-        var valid = false;
+        var form = document.getElementById(formName);
+        var valid;
 
         if (form.password.value.length == 0) {
                 valid = false;

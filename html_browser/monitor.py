@@ -55,19 +55,22 @@ def _modified(path):
     return False
 
 
+def _get_module_file(module):
+    if hasattr(module, '__file__'):
+        path = getattr(module, '__file__')
+        if os.path.splitext(path)[1] in ['.pyc', '.pyo', '.pyd']:
+            path = path[:-1]
+        return path
+    return None
+
+
 def _monitor():
     while 1:
         # Check modification times on all files in sys.modules.
 
         for module in list(sys.modules.values()):
-            if not hasattr(module, '__file__'):
-                continue
-            path = getattr(module, '__file__')
-            if not path:
-                continue
-            if os.path.splitext(path)[1] in ['.pyc', '.pyo', '.pyd']:
-                path = path[:-1]
-            if _modified(path):
+            path = _get_module_file(module)
+            if path and _modified(path):
                 return _restart(path)
 
         # Check modification times on files which have

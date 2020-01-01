@@ -4,10 +4,10 @@
 		<script type="text/javascript" src="{{ MEDIA_URL }}folder_content.js"></script>
 
 		<script>
-				setUserCanRead({{ userCanRead }})
-				setUserCanWrite({{ userCanWrite }})
-				setUserCanDelete({{ userCanDelete }})
-				setFolderAndPathUrl("{{ folderAndPath.url|safe }}");
+				setUserCanRead({{ user_can_read }})
+				setUserCanWrite({{ user_can_write }})
+				setUserCanDelete({{ user_can_delete }})
+				setFolderAndPathUrl("{{ folder_and_path.url|safe }}");
 		</script>
 
 		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -22,7 +22,7 @@
 			]);
 
 			var options = {
-			  title: 'Disk Usage for {{ folderAndPath.folder.name }} in {{ diskUnit }}'
+			  title: 'Disk Usage for {{ folder_and_path.folder.name }} in {{ diskUnit }}'
 			};
 
 			var chart = new google.visualization.PieChart(document.getElementById('disk_usage_content'));
@@ -44,24 +44,24 @@
 	{% block content %}{% endblock %}
 	</form>
 
-	{% if currentDirEntries|length > 20 %}
+	{% if current_dir_entries|length > 20 %}
 		{% include "content_bar.html" %}
 	{% endif %}
 	
 	{% if paginate %}
 		<div class="pagination">
-		{% if currentDirEntries.has_previous %}
+		{% if current_dir_entries.has_previous %}
 			<a href=?page=1">&laquo; first</a>
-			<a href=?page={{ currentDirEntries.previous_page_number }}">previous</a>
+			<a href=?page={{ current_dir_entries.previous_page_number }}">previous</a>
 		{% endif %}
 		
 		<span class="current">
-			Page {{ currentDirEntries.number }} of {{ currentDirEntries.paginator.num_pages }}
+			Page {{ current_dir_entries.number }} of {{ current_dir_entries.paginator.num_pages }}
 		</span>
 		
-		{% if currentDirEntries.has_next %}
-			<a href="?page={{ currentDirEntries.next_page_number }}">next</a>
-			<a href="?page={{ currentDirEntries.paginator.num_pages }}">last &raquo;</a>
+		{% if current_dir_entries.has_next %}
+			<a href="?page={{ current_dir_entries.next_page_number }}">next</a>
+			<a href="?page={{ current_dir_entries.paginator.num_pages }}">last &raquo;</a>
 		{% endif %}
 		</div>
 	{% endif %}

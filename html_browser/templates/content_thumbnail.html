@@ -1,9 +1,9 @@
 {% extends "content_list.html" %}
 
 {% block list_entry %}
-	{% if entry.isDir %}
+	{% if entry.is_dir %}
 		{% include "entry_dir.html" %}
-	{% elif entry.hasThumbnail %}
+	{% elif entry.has_thumbnail %}
 		{% include "entry_thumbnail.html" %}
 	{% else %}
 		{% include "entry_details.html" %}

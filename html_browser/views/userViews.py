@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.shortcuts import redirect, render
 
-from html_browser.utils import getReqLogger
+from html_browser.utils import get_req_logger
 
 from .adminViews import BaseAdminView
 from .base_view import BaseView
@@ -20,7 +20,7 @@ logger = logging.getLogger('html_browser.userViews')
 
 class DeleteUserView(BaseAdminView):
     def post(self, request, username, *args, **kwargs):
-        redirectUrl = "userAdmin"
+        redirect_url = "userAdmin"
 
         if request.user.username == username:
             messages.error(request, "Unable to delete current user")
@@ -29,7 +29,7 @@ class DeleteUserView(BaseAdminView):
             logger.info("Deleting user %s", user)
             user.delete()
 
-        return redirect(redirectUrl)
+        return redirect(redirect_url)
 
 
 class UserAdminView(BaseAdminView):
@@ -77,8 +77,8 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
                     user.last_login = datetime(year=1970, month=1, day=1)
                 user.save()
             else:
-                reqLogger = getReqLogger()
-                reqLogger.error('form.errors = %s', self.form.errors)
+                req_logger = get_req_logger()
+                req_logger.error('form.errors = %s', self.form.errors)
                 return self.get(request, username=request.POST['username'], title=self.title, *args, **kwargs)
 
         return redirect("userAdmin")

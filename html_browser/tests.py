@@ -69,20 +69,20 @@ class UserPermissionTest(TestCase):
             perm.delete()
 
     def testPermissions(self):
-        self.assertTrue(self.folder1.userCanRead(self.user1))
-        self.assertFalse(self.folder1.userCanRead(self.user2))
+        self.assertTrue(self.folder1.user_can_read(self.user1))
+        self.assertFalse(self.folder1.user_can_read(self.user2))
 
-        self.assertTrue(self.folder1.userCanRead(self.user3))
-        self.assertTrue(self.folder1.userCanWrite(self.user3))
-        self.assertFalse(self.folder1.userCanDelete(self.user3))
+        self.assertTrue(self.folder1.user_can_read(self.user3))
+        self.assertTrue(self.folder1.user_can_write(self.user3))
+        self.assertFalse(self.folder1.user_can_delete(self.user3))
 
-        self.assertTrue(self.folder1.userCanRead(self.user4))
-        self.assertTrue(self.folder1.userCanWrite(self.user4))
-        self.assertTrue(self.folder1.userCanDelete(self.user4))
+        self.assertTrue(self.folder1.user_can_read(self.user4))
+        self.assertTrue(self.folder1.user_can_write(self.user4))
+        self.assertTrue(self.folder1.user_can_delete(self.user4))
 
-        self.assertTrue(self.folder1.userCanRead(self.user5))
-        self.assertTrue(self.folder1.userCanWrite(self.user5))
-        self.assertTrue(self.folder1.userCanDelete(self.user5))
+        self.assertTrue(self.folder1.user_can_read(self.user5))
+        self.assertTrue(self.folder1.user_can_write(self.user5))
+        self.assertTrue(self.folder1.user_can_delete(self.user5))
 
 
 class GroupPermissionTest(TestCase):
@@ -166,13 +166,13 @@ class GroupPermissionTest(TestCase):
             perm.delete()
 
     def testPermissions(self):
-        self.assertTrue(self.folder1.userCanRead(self.user1))
-        self.assertFalse(self.folder1.userCanRead(self.user2))
+        self.assertTrue(self.folder1.user_can_read(self.user1))
+        self.assertFalse(self.folder1.user_can_read(self.user2))
 
-        self.assertTrue(self.folder1.userCanRead(self.user3))
-        self.assertTrue(self.folder1.userCanWrite(self.user3))
-        self.assertFalse(self.folder1.userCanDelete(self.user3))
+        self.assertTrue(self.folder1.user_can_read(self.user3))
+        self.assertTrue(self.folder1.user_can_write(self.user3))
+        self.assertFalse(self.folder1.user_can_delete(self.user3))
 
-        self.assertTrue(self.folder1.userCanRead(self.user4))
-        self.assertTrue(self.folder1.userCanWrite(self.user4))
-        self.assertTrue(self.folder1.userCanDelete(self.user4))
+        self.assertTrue(self.folder1.user_can_read(self.user4))
+        self.assertTrue(self.folder1.user_can_write(self.user4))
+        self.assertTrue(self.folder1.user_can_delete(self.user4))

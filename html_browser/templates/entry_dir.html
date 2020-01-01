@@ -1,5 +1,5 @@
 {% extends "entry_base.html" %}
 
-{% block content_url %}{% url 'content' folderAndPath.url %}{% endblock %}
-{% block extra_args %}{{ entry.nameUrl }}{%endblock %}
+{% block content_url %}{% url 'content' folder_and_path.url %}{% endblock %}
+{% block extra_args %}{{ entry.name_url }}{%endblock %}
 {% block image_url %}{{ IMAGE_URL }}folder-blue-icon.png{% endblock %}

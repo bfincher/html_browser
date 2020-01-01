@@ -11,19 +11,19 @@ from django.contrib.auth.models import Group, User
 from django.test import Client
 from django.urls import reverse
 
-from html_browser._os import joinPaths
+from html_browser._os import join_paths
 from html_browser.models import (CAN_DELETE, CAN_READ, Folder, GroupPermission,
                                  UserPermission)
 from html_browser.views.base_view import (FolderAndPath,
-                                          getIndexIntoCurrentDir,
-                                          reverseContentUrl)
+                                          get_index_into_current_dir,
+                                          reverse_content_url)
 
 
-def contextCheck(testCase, context, user=None, folder=None):
-    testCase.assertTrue('csrf_token' in context)
+def context_check(test_case, context, user=None, folder=None):
+    test_case.assertTrue('csrf_token' in context)
 
     if user:
-        testCase.assertEqual(user, context['user'])
+        test_case.assertEqual(user, context['user'])
 
 
 class BaseViewTest(unittest.TestCase):
@@ -62,47 +62,47 @@ class BaseViewTest(unittest.TestCase):
 
         self.folder1 = Folder()
         self.folder1.name = 'test'
-        self.folder1.localPath = 'media'
-        self.folder1.viewOption = 'P'
+        self.folder1.local_path = 'media'
+        self.folder1.view_option = 'P'
         self.folder1.save()
 
-        userPerm = UserPermission()
-        userPerm.folder = self.folder1
-        userPerm.permission = CAN_DELETE
-        userPerm.user = self.user1
-        userPerm.save()
+        user_perm = UserPermission()
+        user_perm.folder = self.folder1
+        user_perm.permission = CAN_DELETE
+        user_perm.user = self.user1
+        user_perm.save()
 
-        userPerm = UserPermission()
-        userPerm.folder = self.folder1
-        userPerm.permission = CAN_READ
-        userPerm.user = self.user3
-        userPerm.save()
+        user_perm = UserPermission()
+        user_perm.folder = self.folder1
+        user_perm.permission = CAN_READ
+        user_perm.user = self.user3
+        user_perm.save()
 
         self.folder2 = Folder()
         self.folder2.name = 'test2'
-        self.folder2.localPath = 'test2'
-        self.folder2.viewOption = 'P'
+        self.folder2.local_path = 'test2'
+        self.folder2.view_option = 'P'
         self.folder2.save()
 
         self.folder3 = Folder()
         self.folder3.name = 'test3'
-        self.folder3.localPath = 'test3'
-        self.folder3.viewOption = 'E'
+        self.folder3.local_path = 'test3'
+        self.folder3.view_option = 'E'
         self.folder3.save()
 
         self.folder4 = Folder()
         self.folder4.name = 'test4'
-        self.folder4.localPath = 'test4'
-        self.folder4.viewOption = 'A'
+        self.folder4.local_path = 'test4'
+        self.folder4.view_option = 'A'
         self.folder4.save()
 
         self.folders = [self.folder1, self.folder2, self.folder3, self.folder4]
 
-        groupPerm1 = GroupPermission()
-        groupPerm1.folder = self.folder2
-        groupPerm1.permission = CAN_DELETE
-        groupPerm1.group = self.group1
-        groupPerm1.save()
+        group_perm_1 = GroupPermission()
+        group_perm_1.folder = self.folder2
+        group_perm_1.permission = CAN_DELETE
+        group_perm_1.group = self.group1
+        group_perm_1.save()
 
         self.client = Client()
 
@@ -113,7 +113,7 @@ class BaseViewTest(unittest.TestCase):
 
     def login(self, user, password=None, follow=False):
         password = password or self.users[user.username]
-        return self.client.post(reverse('login'), data={'userName': user.username, 'password': password}, follow=follow)
+        return self.client.post(reverse('login'), data={'user_name': user.username, 'password': password}, follow=follow)
 
     def logout(self):
         return self.client.get(reverse('logout'))
@@ -173,7 +173,7 @@ class IndexViewTest(BaseViewTest):
         self.assertEqual(200, response.status_code)
 
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual(3, len(context['folders']))
         self.assertEqual(self.folder1, context['folders'][0])
         self.assertEqual(self.folder3, context['folders'][1])
@@ -187,7 +187,7 @@ class IndexViewTest(BaseViewTest):
         self.assertEqual(200, response.status_code)
 
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual(1, len(context['folders']))
         self.assertEqual(self.folder4, context['folders'][0])
         self.assertEqual('index.html', response.templates[0].name)
@@ -201,7 +201,7 @@ class IndexViewTest(BaseViewTest):
         self.assertEqual(200, response.status_code)
 
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual(3, len(context['folders']))
         self.assertEqual(self.folder2, context['folders'][0])
         self.assertEqual(self.folder3, context['folders'][1])
@@ -211,7 +211,7 @@ class IndexViewTest(BaseViewTest):
 
 class LoginViewTest(BaseViewTest):
     def testLogin(self):
-        response = self.client.post(reverse('login'), data={'userName': self.user1.username, 'password': self.user1Pw})
+        response = self.client.post(reverse('login'), data={'user_name': self.user1.username, 'password': self.user1Pw})
         self.assertEqual(302, response.status_code)
         self.assertEqual('/', response.url)
 
@@ -227,88 +227,88 @@ class LogoutViewTest(BaseViewTest):
 class DownloadViewTest(BaseViewTest):
     def testDownload(self):
         self.login(self.user1)
-        url = reverseContentUrl(FolderAndPath(folder=self.folder1, path=''), extraPath='add_user.js',
-                                viewName='download')
+        url = reverse_content_url(FolderAndPath(folder=self.folder1, path=''), extra_path='add_user.js',
+                                  view_name='download')
         response = self.client.get(url)
 
-        foundAttachment = False
+        found_attachment = False
         for item in list(response.items()):
             if item[1] == 'attachment; filename="add_user.js"':
-                foundAttachment = True
+                found_attachment = True
                 break
 
-        self.assertTrue(foundAttachment)
+        self.assertTrue(found_attachment)
 
 
 class DownloadZipViewTest(BaseViewTest):
     def testDownloadZip(self):
         self.login(self.user1)
-        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path=''),
-                                                     viewName='downloadZip'),
+        response = self.client.get(reverse_content_url(FolderAndPath(folder=self.folder1, path=''),
+                                                       view_name='downloadZip'),
                                    data={'cb-add_user.js': 'on',
                                          'cb-base.js': 'on',
                                          'cb-images': 'on'})
 
         self.assertEqual(200, response.status_code)
 
-        attachmentRegex = re.compile(r'attachment; filename="(download_\w+\.zip)"')
-        zipFileName = None
-        tmpDir = tempfile.gettempdir()
+        attachment_regex = re.compile(r'attachment; filename="(download_\w+\.zip)"')
+        zip_file_name = None
+        tmp_dir = tempfile.gettempdir()
 
-        extractPath = joinPaths(tmpDir, 'extract')
-        if not os.path.exists(extractPath):
-            os.makedirs(extractPath)
+        extract_path = join_paths(tmp_dir, 'extract')
+        if not os.path.exists(extract_path):
+            os.makedirs(extract_path)
 
         try:
             for item in list(response.items()):
-                match = attachmentRegex.match(item[1])
+                match = attachment_regex.match(item[1])
                 if match:
-                    zipFileName = match.group(1)
+                    zip_file_name = match.group(1)
                     break
 
-            self.assertIsNotNone(zipFileName)
+            self.assertIsNotNone(zip_file_name)
 
-            zipFile = ZipFile(joinPaths(tmpDir, zipFileName), mode='r')
-            entries = zipFile.infolist()
+            zip_file = ZipFile(join_paths(tmp_dir, zip_file_name), mode='r')
+            entries = zip_file.infolist()
 
-            os.makedirs(extractPath, exist_ok=True)
+            os.makedirs(extract_path, exist_ok=True)
             for entry in entries:
-                zipFile.extract(entry, extractPath)
+                zip_file.extract(entry, extract_path)
 
-            extractedFileA = joinPaths(extractPath, 'add_user.js')
-            extractedFileB = joinPaths(extractPath, 'base.js')
-            extractedTestFile = joinPaths(extractPath, 'images/Add-Folder-icon.png')
+            extracted_file_a = join_paths(extract_path, 'add_user.js')
+            extracted_file_b = join_paths(extract_path, 'base.js')
+            extracted_test_file = join_paths(extract_path, 'images/Add-Folder-icon.png')
 
-            self.assertTrue(os.path.exists(extractedFileA))
-            self.assertTrue(os.path.exists(extractedFileB))
-            self.assertTrue(os.path.exists(extractedTestFile))
+            self.assertTrue(os.path.exists(extracted_file_a))
+            self.assertTrue(os.path.exists(extracted_file_b))
+            self.assertTrue(os.path.exists(extracted_test_file))
 
-            self.assertTrue(filecmp.cmp('media/add_user.js', extractedFileA))
-            self.assertTrue(filecmp.cmp('media/base.js', extractedFileB))
-            self.assertTrue(filecmp.cmp('media/images/Add-Folder-icon.png', extractedTestFile))
+            self.assertTrue(filecmp.cmp('media/add_user.js', extracted_file_a))
+            self.assertTrue(filecmp.cmp('media/base.js', extracted_file_b))
+            self.assertTrue(filecmp.cmp('media/images/Add-Folder-icon.png', extracted_test_file))
         finally:
-            if os.path.exists(extractPath):
-                rmtree(extractPath)
-            if zipFileName and os.path.exists(zipFileName):
-                os.remove(zipFileName)
+            if os.path.exists(extract_path):
+                rmtree(extract_path)
+            if zip_file_name and os.path.exists(zip_file_name):
+                os.remove(zip_file_name)
 
 
 class UploadViewTest(BaseViewTest):
     def testGet(self):
         self.login(self.user1)
-        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path=''),
-                                                     viewName='upload'))
+        response = self.client.get(reverse_content_url(FolderAndPath(folder=self.folder1, path=''),
+                                                       view_name='upload'))
 
         self.assertEqual(200, response.status_code)
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual('upload.html', response.templates[0].name)
 
         # test unauthorized user
         self.logout()
         self.login(self.user3)
-        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path=''),
-                                                     viewName='upload'))
+        response = self.client.get(reverse_content_url(FolderAndPath(folder=self.folder1, path=''),
+                                                       view_name='upload'))
 
         self.assertEqual(302, response.status_code)
         self.assertEqual('/?next=/upload/test/', response.url)
@@ -318,7 +318,7 @@ class UploadViewTest(BaseViewTest):
 
         try:
             with open('media/base.js', 'r') as f:
-                response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'), viewName='upload'),
+                response = self.client.post(reverse_content_url(FolderAndPath(folder=self.folder1, path='images'), view_name='upload'),
                                             data={'action': 'uploadFile',
                                                   'upload1': f})
 
@@ -335,7 +335,7 @@ class UploadViewTest(BaseViewTest):
 
         try:
             with open('media/base.js', 'r') as f:
-                response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='dir_a'), viewName='upload'),
+                response = self.client.post(reverse_content_url(FolderAndPath(folder=self.folder1, path='dir_a'), view_name='upload'),
                                             data={'action': 'uploadFile',
                                                   'upload1': f})
 
@@ -364,8 +364,8 @@ class UploadViewTest(BaseViewTest):
             zipFile.close()
 
             with open(zipFileName, 'rb') as f:
-                response = self.client.post(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'),
-                                                              viewName='upload'),
+                response = self.client.post(reverse_content_url(FolderAndPath(folder=self.folder1, path='images'),
+                                                              view_name='upload'),
                                             data={'action': 'uploadZip',
                                                   'zipupload1': f})
 
@@ -384,47 +384,47 @@ class UploadViewTest(BaseViewTest):
 
     def testImageView(self):
         self.login(self.user1)
-        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'),
-                                                     viewName='imageView', extraPath='folder-blue-icon.png'))
+        response = self.client.get(reverse_content_url(FolderAndPath(folder=self.folder1, path='images'),
+                                                       view_name='imageView', extra_path='folder-blue-icon.png'))
 
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
 
-        self.assertEqual('/content/test/images/', context['parentDirLink'])
-        self.assertEqual('/image_view/test/images/folder-blue-icon-128.png/', context['prevLink'])
-        self.assertEqual('/image_view/test/images/folder-blue-parent-icon.png/', context['nextLink'])
-        self.assertEqual('/download/test/images/folder-blue-icon.png/', context['imageUrl'])
-        self.assertEqual('folder-blue-icon.png', context['fileName'])
-        self.assertTrue(context['userCanDelete'])
+        self.assertEqual('/content/test/images/', context['parent_dir_link'])
+        self.assertEqual('/imageView/test/images/folder-blue-icon-128.png/', context['prev_link'])
+        self.assertEqual('/imageView/test/images/folder-blue-parent-icon.png/', context['next_link'])
+        self.assertEqual('/download/test/images/folder-blue-icon.png/', context['image_url'])
+        self.assertEqual('folder-blue-icon.png', context['file_name'])
+        self.assertTrue(context['user_can_delete'])
         self.assertEqual('image_view.html', response.templates[0].name)
 
         # test unauthorized user
         self.logout()
         self.login(self.user2)
-        response = self.client.get(reverseContentUrl(FolderAndPath(folder=self.folder1, path='images'),
-                                                     viewName='imageView', extraPath='folder-blue-icon.png'))
+        response = self.client.get(reverse_content_url(FolderAndPath(folder=self.folder1, path='images'),
+                                                       view_name='imageView', extra_path='folder-blue-icon.png'))
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/image_view/test/images/folder-blue-icon.png/', response.url)
+        self.assertEqual('/?next=/imageView/test/images/folder-blue-icon.png/', response.url)
 
 
 class TestGetIndexIntoCurrentDir(BaseViewTest):
 
     class TestRequest():
         def __init__(self):
-            self.session = {'showHidden': False}
+            self.session = {'show_hidden': False}
 
     def test(self):
         request = self.TestRequest()
-        folderAndPath = FolderAndPath(folder=self.folder1, path='images')
+        folder_and_path = FolderAndPath(folder=self.folder1, path='images')
 
-        result = getIndexIntoCurrentDir(request, folderAndPath, 'Add-Folder-icon.png')
+        result = get_index_into_current_dir(request, folder_and_path, 'Add-Folder-icon.png')
         self.assertEqual(0, result['index'])
-        self.assertEqual(20, len(result['currentDirEntries']))
+        self.assertEqual(20, len(result['current_dir_entries']))
 
-        expectedFiles = ['Add-Folder-icon.png', 'Copy-icon.png', 'Document-icon.png']
+        expected_files = ['Add-Folder-icon.png', 'Copy-icon.png', 'Document-icon.png']
 
-        for i in range(len(expectedFiles)):
-            self.assertFalse(result['currentDirEntries'][i].isDir)
-            self.assertFalse(result['currentDirEntries'][i].hasThumbnail)
-            self.assertEqual(expectedFiles[i], result['currentDirEntries'][i].name)
-            self.assertEqual(expectedFiles[i], result['currentDirEntries'][i].nameUrl)
+        for i in range(len(expected_files)):
+            self.assertFalse(result['current_dir_entries'][i].is_dir)
+            self.assertFalse(result['current_dir_entries'][i].has_thumbnail)
+            self.assertEqual(expected_files[i], result['current_dir_entries'][i].name)
+            self.assertEqual(expected_files[i], result['current_dir_entries'][i].name_url)

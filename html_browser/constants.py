@@ -3,8 +3,8 @@ class _constants():
     MEDIA_URL = "/hbmedia/"
     IMAGE_URL = MEDIA_URL + 'images/'
 
-    detailsViewType = 'details'
-    listViewType = 'list'
-    thumbnailsViewType = 'thumbnails'
+    details_view_type = 'details'
+    list_view_type = 'list'
+    thumbnails_view_type = 'thumbnails'
 
-    viewTypes = [detailsViewType, listViewType, thumbnailsViewType]
+    view_types = [details_view_type, list_view_type, thumbnails_view_type]

@@ -5,8 +5,8 @@
 from django.db import migrations
 
 
-def convertPerm(permModel):
-    for perm in permModel.objects.all():
+def convert_perm(perm_model):
+    for perm in perm_model.objects.all():
         perm.p2 = int(perm.permission)
         perm.save()
 
@@ -14,11 +14,11 @@ def convertPerm(permModel):
 class Migration(migrations.Migration):
 
     def postMigrate(apps, schema_editor):
-        userPermModel = apps.get_model('html_browser', 'UserPermission')
-        convertPerm(userPermModel)
+        user_perm_model = apps.get_model('html_browser', 'UserPermission')
+        convert_perm(user_perm_model)
 
-        groupPermModel = apps.get_model('html_browser', 'GroupPermission')
-        convertPerm(groupPermModel)
+        group_perm_model = apps.get_model('html_browser', 'GroupPermission')
+        convert_perm(group_perm_model)
 
     dependencies = [
         ('html_browser', '0011_auto_20170404_2102'),

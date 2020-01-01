@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 
 from html_browser.models import Folder, Group
-from html_browser.utils import get_object_or_None
-from html_browser.views.test_base_view import BaseViewTest, contextCheck
+from html_browser.utils import get_object_or_none
+from html_browser.views.test_base_view import BaseViewTest, context_check
 
 logger = logging.getLogger('html_browser.testAdminViews')
 
@@ -30,7 +30,7 @@ class AdminViewTest(BaseAdminTest):
         response = self.client.get(reverse('admin'))
         self.assertEqual(200, response.status_code)
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual('admin/admin.html', response.templates[0].name)
 
         self.logout()
@@ -46,7 +46,7 @@ class FolderTest(BaseAdminTest):
         response = self.client.get(reverse('folderAdmin'))
         self.assertEqual(200, response.status_code)
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual('admin/folder_admin.html', response.templates[0].name)
 
         self.assertEqual(len(self.folders), len(context['folders']))
@@ -67,7 +67,7 @@ class FolderTest(BaseAdminTest):
         response = self.client.post(reverse('deleteFolder', args=args))
         self.assertEqual(302, response.status_code)
         self.assertEqual('/folderAdmin/', response.url)
-        self.assertFalse(get_object_or_None(Folder, name=self.folder2.name))
+        self.assertFalse(get_object_or_none(Folder, name=self.folder2.name))
 
         self.logout()
         self.login(self.user1)
@@ -75,7 +75,7 @@ class FolderTest(BaseAdminTest):
         response = self.client.post(reverse('deleteFolder', args=args))
         self.assertEqual(302, response.status_code)
         self.assertEqual('/?next=/deleteFolder/%s' % self.folder3.name, response.url)
-        self.assertTrue(get_object_or_None(Folder, name=self.folder3.name))
+        self.assertTrue(get_object_or_none(Folder, name=self.folder3.name))
 
     def testEditFolder(self):
         self.login(self.user4)
@@ -90,21 +90,21 @@ class FolderTest(BaseAdminTest):
         response = self.client.get(reverse('editFolder', args=[self.folder1.name]), data)
         self.assertEqual(200, response.status_code)
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual(self.user4.username, context['user'].username)
         self.assertEqual(self.folder1.name, context['folder'].name)
         self.assertEqual("admin/add_edit_folder.html", response.templates[0].name)
 
         data['name'] = self.folder1.name
-        data['localPath'] = '/data/newPath'
-        data['viewOption'] = 'E'
+        data['local_path'] = '/data/newPath'
+        data['view_option'] = 'E'
         response = self.client.post(reverse('editFolder', args=[self.folder1.name]), data)
         self.assertEqual(302, response.status_code)
         self.assertEqual('/folderAdmin/', response.url)
 
-        newFolder1 = Folder.objects.get(pk=self.folder1.pk)
-        self.assertEqual(self.folder1.name, newFolder1.name)
-        self.assertEqual('/data/newPath', newFolder1.localPath)
+        new_folder_1 = Folder.objects.get(pk=self.folder1.pk)
+        self.assertEqual(self.folder1.name, new_folder_1.name)
+        self.assertEqual('/data/newPath', new_folder_1.local_path)
 
     def testAddFolder(self):
         self.login(self.user4)
@@ -119,22 +119,22 @@ class FolderTest(BaseAdminTest):
         response = self.client.get(reverse('addFolder'), data)
         self.assertEqual(200, response.status_code)
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual(self.user4.username, context['user'].username)
         self.assertEqual('', context['folder'].name)
         self.assertEqual("admin/add_edit_folder.html", response.templates[0].name)
 
-        newFolderName = 'testNewFolder'
-        data['name'] = newFolderName
-        data['localPath'] = '/data/newPath'
-        data['viewOption'] = 'E'
+        new_folder_name = 'testNewFolder'
+        data['name'] = new_folder_name
+        data['local_path'] = '/data/newPath'
+        data['view_option'] = 'E'
         response = self.client.post(reverse('addFolder'), data)
         self.assertEqual(302, response.status_code)
         self.assertEqual('/folderAdmin/', response.url)
 
-        newFolder = Folder.objects.get(name=newFolderName)
-        self.assertEqual(newFolder.name, newFolderName)
-        self.assertEqual('/data/newPath', newFolder.localPath)
+        new_folder = Folder.objects.get(name=new_folder_name)
+        self.assertEqual(new_folder.name, new_folder_name)
+        self.assertEqual('/data/newPath', new_folder.local_path)
 
 
 class GroupTest(BaseAdminTest):
@@ -143,7 +143,7 @@ class GroupTest(BaseAdminTest):
         response = self.client.get(reverse('groupAdmin'))
         self.assertEqual(200, response.status_code)
         context = response.context[0]
-        contextCheck(self, context)
+        context_check(self, context)
         self.assertEqual('admin/group_admin.html', response.templates[0].name)
 
         self.assertEqual(1, len(context['groups']))
@@ -157,27 +157,27 @@ class GroupTest(BaseAdminTest):
 
     def testAddGroup(self):
         self.login(self.user4)
-        data = {'groupName': 'newGroupName'}
+        data = {'group_name': 'newGroupName'}
         response = self.client.post(reverse('addGroup'), data=data)
         self.assertEqual(302, response.status_code)
         self.assertEqual('/groupAdmin/', response.url)
         self.assertTrue(Group.objects.get(name='newGroupName'))
 
         # test add invalid group name
-        data = {'groupName': 'new Group Name'}
+        data = {'group_name': 'new Group Name'}
         response = self.client.post(reverse('addGroup'), data=data, follow=True)
         self.assertEqual(200, response.status_code)
         self.assert_message_contains(response, "Invalid group name.  Must only contain letters, numbers, and underscores")
         self.assertEqual('admin/group_admin.html', response.templates[0].name)
-        self.assertFalse(get_object_or_None(Group, name='new Group Name'))
+        self.assertFalse(get_object_or_none(Group, name='new Group Name'))
 
         self.logout()
         self.login(self.user1)
-        data = {'groupName': 'newGroupName2'}
+        data = {'group_name': 'newGroupName2'}
         response = self.client.post(reverse('addGroup'), data=data, follow=True)
         self.assertEqual(200, response.status_code)
         self.assertEqual('index.html', response.templates[0].name)
-        self.assertFalse(get_object_or_None(Group, name='newGroupName2'))
+        self.assertFalse(get_object_or_none(Group, name='newGroupName2'))
 
     def testDeleteGroup(self):
         self.login(self.user1)
@@ -185,7 +185,7 @@ class GroupTest(BaseAdminTest):
         response = self.client.post(reverse('deleteGroup', args=args))
         self.assertEqual(302, response.status_code)
         self.assertEqual('/?next=/deleteGroup/%s' % self.group1.name, response.url)
-        self.assertTrue(get_object_or_None(Group, name=self.group1.name))
+        self.assertTrue(get_object_or_none(Group, name=self.group1.name))
 
         self.logout()
         self.login(self.user4)
@@ -193,19 +193,19 @@ class GroupTest(BaseAdminTest):
         response = self.client.post(reverse('deleteGroup', args=args))
         self.assertEqual(302, response.status_code)
         self.assertEqual('/groupAdmin/', response.url)
-        self.assertFalse(get_object_or_None(Group, name=self.group1.name))
+        self.assertFalse(get_object_or_none(Group, name=self.group1.name))
 
     def testEditGroup(self):
         self.login(self.user4)
         response = self.client.get(reverse('editGroup', args=[self.group1.name]))
         context = response.context[0]
-        contextCheck(self, context)
-        self.assertEqual(self.group1.name, context['groupName'])
+        context_check(self, context)
+        self.assertEqual(self.group1.name, context['group_name'])
         self.assertEqual("admin/edit_group.html", response.templates[0].name)
 
-        userPk = str(User.objects.get(username=self.user3.username).pk)
+        user_pk = str(User.objects.get(username=self.user3.username).pk)
         data = {'name': 'newGroupName',
-                'users': userPk
+                'users': user_pk
                 }
         self.assertFalse(User.objects.get(username=self.user3.username).groups.filter(name__in=['newGroupName']).exists())
         response = self.client.post(reverse('editGroup', args=[self.group1.name]), data)

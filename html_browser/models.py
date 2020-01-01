@@ -16,7 +16,7 @@ VIEWABLE_BY_EVERYONE = 'E'
 VIEWABLE_BY_ANONYMOUS = 'A'
 VIEWABLE_BY_PERMISSION = 'P'
 
-viewableChoices = [
+viewable_choices = [
     (VIEWABLE_BY_PERMISSION, 'View authorization set by user and group permissions'),
     (VIEWABLE_BY_EVERYONE, 'Viewable by any registered user'),
     (VIEWABLE_BY_ANONYMOUS, 'Viewable by anonymous users'),
@@ -25,51 +25,50 @@ viewableChoices = [
 
 class Folder(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    localPath = models.CharField(max_length=100, unique=True)
-    viewOption = models.CharField(max_length=1,
-                                  choices=viewableChoices,
-                                  default=VIEWABLE_BY_PERMISSION)
+    local_path = models.CharField(max_length=100, unique=True)
+    view_option = models.CharField(max_length=1,
+                                   choices=viewable_choices,
+                                   default=VIEWABLE_BY_PERMISSION)
 
     def __unicode__(self):
         return self.name
 
-    def getNameAsHtml(self):
+    def get_name_as_html(self):
         return quote_plus(self.name)
 
-    def __checkUserPerm__(self, user, desiredPerm):
+    def _check_user_perm(self, user, desired_perm):
         if user.is_superuser:
             return True
         else:
             perms = self.userpermission_set.filter(user__username=user.username)
             for perm in perms:
-                if perm.permission >= desiredPerm:
+                if perm.permission >= desired_perm:
                     return True
             return False
 
-    def __checkGroupPerm__(self, user, desiredPerm):
+    def _check_group_perm(self, user, desired_perm):
         for perm in self.grouppermission_set.all():
-            if perm.group in user.groups.all():
-                if perm.permission >= desiredPerm:
-                    return True
+            if perm.group in user.groups.all() and perm.permission >= desired_perm:
+                return True
         return False
 
-    def userCanRead(self, user):
-        if self.viewOption == VIEWABLE_BY_ANONYMOUS:
+    def user_can_read(self, user):
+        if self.view_option == VIEWABLE_BY_ANONYMOUS:
             return True
-        elif self.viewOption == VIEWABLE_BY_EVERYONE and user is not None and user.is_authenticated:
+        elif self.view_option == VIEWABLE_BY_EVERYONE and user is not None and user.is_authenticated:
             return True
         else:
-            canRead = self.__checkUserPerm__(user, CAN_READ)
-            if not canRead:
-                canRead = self.__checkGroupPerm__(user, CAN_READ)
+            can_read = self._check_user_perm(user, CAN_READ)
+            if not can_read:
+                can_read = self._check_group_perm(user, CAN_READ)
 
-            return canRead
+            return can_read
 
-    def userCanWrite(self, user):
-        return self.__checkUserPerm__(user, CAN_WRITE) or self.__checkGroupPerm__(user, CAN_WRITE)
+    def user_can_write(self, user):
+        return self._check_user_perm(user, CAN_WRITE) or self._check_group_perm(user, CAN_WRITE)
 
-    def userCanDelete(self, user):
-        return self.__checkUserPerm__(user, CAN_DELETE) or self.__checkGroupPerm__(user, CAN_DELETE)
+    def user_can_delete(self, user):
+        return self._check_user_perm(user, CAN_DELETE) or self._check_group_perm(user, CAN_DELETE)
 
 
 class Permission(models.Model):
@@ -108,5 +107,5 @@ class GroupPermission(Permission):
 
 
 class FilesToDelete(models.Model):
-    filePath = models.CharField(max_length=250)
+    file_path = models.CharField(max_length=250)
     time = models.DateTimeField(auto_now=True)

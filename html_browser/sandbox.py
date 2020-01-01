@@ -9,4 +9,3 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'html_browser.settings'
 
 user = User.objects.all()[1]
 group = Group.objects.all()[1]
-# val = group in user.groups

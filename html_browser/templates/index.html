@@ -1,6 +1,6 @@
 {% extends "page.html" %}
 {% block body %}
-	<center>
+	<div class="center">
 
 	<div class="row">
 	<div class="col-md-4"></div> 
@@ -10,12 +10,12 @@
 		{% if forloop.counter0|divisibleby:2 %}
 			<tr>
 				{% if forloop.last %}
-					<td colspan=2><a href="{% url 'content' folder.getNameAsHtml %}"/> {{ folder.name }} </a></td>
+					<td colspan=2><a href="{% url 'content' folder.get_name_as_html %}"/> {{ folder.name }} </a></td>
 				{% else %}
-					<td> <a href="{% url 'content' folder.getNameAsHtml %}"/> {{ folder.name }} </a></td>
+					<td> <a href="{% url 'content' folder.get_name_as_html %}"/> {{ folder.name }} </a></td>
 				{% endif %}
 		{% else %}
-			<td> <a href="{% url 'content' folder.getNameAsHtml %}"/> {{ folder.name }} </a></td>
+			<td> <a href="{% url 'content' folder.get_name_as_html %}"/> {{ folder.name }} </a></td>
 			</tr>
 		{% endif %}
 	{% endfor %}
@@ -23,5 +23,5 @@
 	</div>
 	<div class="col-md-4"></div>
 	</div>
-	</center>
+	</div>
 {% endblock %}

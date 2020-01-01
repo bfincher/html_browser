@@ -9,13 +9,12 @@
 
 	<script src="{% url 'js_reverse' %}" type="text/javascript"></script>
 	<script	src="https://code.jquery.com/jquery-3.3.1.min.js"   integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-	<!-- <script src="http:///code.jquery.com/jquery-migrate-3.0.1.js" /> -->
 	<script src="{{ MEDIA_URL }}bootstrap/js/bootstrap.min.js"></script>
 
 	<script src="{{ MEDIA_URL }}base.js"></script>
 	{% block extra_js %} {% endblock %}
 
-	<link rel="stylesheet" href="{{ MEDIA_URL }}html_browser.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="{{ MEDIA_URL }}html_browser.css" type="text/css" media="screen" title="no title">
 
 	<link rel="stylesheet" href="{{ MEDIA_URL }}bootstrap/css/bootstrap.min.css">
 
@@ -56,7 +55,7 @@
 			 </ul>
 		   {% else %}
 			 <form class="navbar-form navbar-right" action="{% url 'login' %}" method="post" > {% csrf_token %}
-			   <input class="form-control" name="userName" type="text" placeholder="User Name">
+			   <input class="form-control" name="user_name" type="text" placeholder="User Name">
 			   <input class="form-control" name="password" type="password" placeholder="Password">
 			   <button type="submit" class="btn btn-success">Sign in</button>
 			   <input name="action" type="hidden" value="login" >

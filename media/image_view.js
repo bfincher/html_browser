@@ -1,15 +1,16 @@
 var scrollEnabled = true;
 var imageUrl = null;
+var lastImage = false;
 
 function setImageUrl(_imageUrl) {
     imageUrl = _imageUrl;
 }
 
 function isScrolledToBottom() {
-    var old = $('body').scrollTop();
+    let old = $('body').scrollTop();
     $('body').scrollTop(old + 1);
 
-    var result = $('body').scrollTop() == old;
+    let result = $('body').scrollTop() == old;
     console.log("scrolledToBottom = " + result);
     return result;
 }
@@ -17,21 +18,21 @@ function isScrolledToBottom() {
 function getNextImage() {
     //scrollEnabled = false;
 
-    var body = $('body');
+    let body = $('body');
     body.scrollTop(body.scrollTop() - 2);
-    var url = Urls.getNextImage(folderAndPathUrl, fileName);
+    let url = Urls.getNextImage(folderAndPathUrl, fileName);
     $("<img id='loading' src='" + imageUrl + "loading.gif' height='42' width='42' />").appendTo('#loadingDiv');
     $.ajax({url:url, 
     success:function(result) {
         $('#loading').remove();
 
         if (result['hasNextImage']) {
-            fileName = result['fileName']
-            var table = $('#imageTable');
+            let fileName = result['file_name']
+            let table = $('#imageTable');
             table.append($('<tr><td>&nbsp</td></tr>'));
             table.append($('<tr><td>&nbsp</td></tr>'));
-            var row = $('<tr>');
-            var cell = $('<td>');
+            let row = $('<tr>');
+            let cell = $('<td>');
             $("<a />", {
                 "href" : "javascript:deleteImage('" + fileName + "');",
                 "text" : "Delete File"
@@ -39,9 +40,9 @@ function getNextImage() {
             row.append(cell);
             table.append(row);
 
-            var row = $('<tr>');
-            var cell = $('<td>');
-            cell.html('<img src="' + result['imageUrl'] + '"/>');
+            row = $('<tr>');
+            cell = $('<td>');
+            cell.html('<img src="' + result['image_url'] + '"/>');
             row.append(cell);
             table.append(row);
 
@@ -60,14 +61,14 @@ function deleteImage(fileName) {
         return;
     }
 
-    var confirmMessage = "Are you sure you want to delete the selected entry?";
+    let confirmMessage = "Are you sure you want to delete the selected entry?";
     if (confirm(confirmMessage)) {
-        post(Urls.deleteImage(folderAndPathUrl), {"fileName": fileName});
+        post(Urls.deleteImage(folderAndPathUrl), {"file_name": fileName});
     }
 }
 
 $(document).ready(function() {
-    var debounced = $.debounce(250, function() {
+    let debounced = $.debounce(250, function() {
         if (!scrollEnabled) {
             return;
        }

@@ -9,63 +9,63 @@ from sorl.thumbnail.models import KVStore
 
 from html_browser import settings
 from html_browser.models import Folder
-from html_browser.utils import joinPaths
+from html_browser.utils import join_paths
 
-testDir = joinPaths(settings.BASE_DIR, 'test_image_dir')
-srcImgDir = joinPaths(settings.BASE_DIR, 'media', 'images')
+test_dir = join_paths(settings.BASE_DIR, 'test_image_dir')
+src_img_dir = join_paths(settings.BASE_DIR, 'media', 'images')
 
 
 class ExpectedImage(object):
-    def __init__(self, fileName, destDir):
-        self.fileName = fileName
-        self.srcPath = joinPaths(srcImgDir, fileName)
-        self.destPath = joinPaths(testDir, destDir, fileName)
+    def __init__(self, file_name, dest_dir):
+        self.file_name = file_name
+        self.src_path = join_paths(src_img_dir, file_name)
+        self.dest_path = join_paths(test_dir, dest_dir, file_name)
 
 
 class TestCreateThumbnails(unittest.TestCase):
 
-    testThumbnailsDir = joinPaths(settings.BASE_DIR, 'test_thumbnails')
-    origThumbnailsDir = settings.THUMBNAIL_CACHE_DIR
-    expectedImages = []
+    test_thumbnails_dir = join_paths(settings.BASE_DIR, 'test_thumbnails')
+    orig_thumbnails_dir = settings.THUMBNAIL_CACHE_DIR
+    expected_images = []
 
     @classmethod
     def setUpClass(cls):
-        settings.THUMBNAIL_CACHE_DIR = cls.testThumbnailsDir
+        settings.THUMBNAIL_CACHE_DIR = cls.test_thumbnails_dir
 
-        if os.path.exists(testDir):
-            shutil.rmtree(testDir)
-        if os.path.exists(cls.testThumbnailsDir):
-            shutil.rmtree(cls.testThumbnailsDir)
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir)
+        if os.path.exists(cls.test_thumbnails_dir):
+            shutil.rmtree(cls.test_thumbnails_dir)
 
-        os.makedirs(joinPaths(testDir, 'a', 'aa'))
-        os.makedirs(joinPaths(testDir, 'b'))
-        os.makedirs(joinPaths(testDir, 'c'))
+        os.makedirs(join_paths(test_dir, 'a', 'aa'))
+        os.makedirs(join_paths(test_dir, 'b'))
+        os.makedirs(join_paths(test_dir, 'c'))
 
-        cls.expectedImages = [ExpectedImage('Add-Folder-icon.png', 'a'),
-                              ExpectedImage('ai-genericfile-icon.png', 'a'),
-                              ExpectedImage('Copy-icon.png', 'a/aa'),
-                              ExpectedImage('cut-icon.png', 'b'),
-                              ExpectedImage('Document-icon.png', 'c')]
+        cls.expected_images = [ExpectedImage('Add-Folder-icon.png', 'a'),
+                               ExpectedImage('ai-genericfile-icon.png', 'a'),
+                               ExpectedImage('Copy-icon.png', 'a/aa'),
+                               ExpectedImage('cut-icon.png', 'b'),
+                               ExpectedImage('Document-icon.png', 'c')]
 
-        for expectedImage in cls.expectedImages:
-            shutil.copy(expectedImage.srcPath, expectedImage.destPath)
+        for expected_image in cls.expected_images:
+            shutil.copy(expected_image.src_path, expected_image.dest_path)
 
         # copy a file that should be ignored by thumbnail
-        shutil.copy(joinPaths(srcImgDir, 'addgroupbackground.gif'), joinPaths(testDir, 'c'))
+        shutil.copy(join_paths(src_img_dir, 'addgroupbackground.gif'), join_paths(test_dir, 'c'))
 
     @classmethod
     def tearDownClass(cls):
-        settings.THUMBNAIL_CACHE_DIR = cls.origThumbnailsDir
-        shutil.rmtree(testDir)
-        if os.path.exists(cls.testThumbnailsDir):
-            shutil.rmtree(cls.testThumbnailsDir)
+        settings.THUMBNAIL_CACHE_DIR = cls.orig_thumbnails_dir
+        shutil.rmtree(test_dir)
+        if os.path.exists(cls.test_thumbnails_dir):
+            shutil.rmtree(cls.test_thumbnails_dir)
 
     def setUp(self):
         Folder.objects.all().delete()
         KVStore.objects.all().delete()
         folder = Folder()
         folder.name = 'test_folder'
-        folder.localPath = joinPaths(testDir)
+        folder.local_path = join_paths(test_dir)
         folder.save()
 
     def tearDown(self):
@@ -76,19 +76,19 @@ class TestCreateThumbnails(unittest.TestCase):
         self.assertEqual(0, KVStore.objects.count())
         out = StringIO()
         call_command('createthumbnails', 'test_folder', stdout=out)
-        for expectedImg in TestCreateThumbnails.expectedImages:
-            self.assertIn("Creating thumbnail for %s" % expectedImg.destPath, out.getvalue())
+        for expected_image in TestCreateThumbnails.expected_images:
+            self.assertIn("Creating thumbnail for %s" % expected_image.dest_path, out.getvalue())
 
-        thumbnailKeyRegex = re.compile(r'sorl-thumbnail\|\|thumbnails\|\|(\w+)')
-        thumbnailKeysFound = 0
+        thumbnail_key_regex = re.compile(r'sorl-thumbnail\|\|thumbnails\|\|(\w+)')
+        thumbnail_keys_found = 0
         for key in KVStore.objects.all():
-            match = thumbnailKeyRegex.match(str(key))
+            match = thumbnail_key_regex.match(str(key))
             if match:
-                thumbnailKeysFound += 1
-        self.assertEqual(len(TestCreateThumbnails.expectedImages), thumbnailKeysFound)
+                thumbnail_keys_found += 1
+        self.assertEqual(len(TestCreateThumbnails.expected_images), thumbnail_keys_found)
 
-        thumbnailFilesFound = 0
-        for _, _, fileList in os.walk(TestCreateThumbnails.testThumbnailsDir):
-            thumbnailFilesFound += len(fileList)
+        thumbnail_files_found = 0
+        for _, _, file_list in os.walk(TestCreateThumbnails.test_thumbnails_dir):
+            thumbnail_files_found += len(file_list)
 
-        self.assertEqual(len(TestCreateThumbnails.expectedImages), thumbnailFilesFound)
+        self.assertEqual(len(TestCreateThumbnails.expected_images), thumbnail_files_found)
