@@ -10,3 +10,4 @@ html_browser/local_settings/local_settings.py
 .scannerwork
 .tox
 log
+html_browser/.env

@@ -3,9 +3,8 @@ import environ
 import os
 
 from html_browser._os import join_paths
-from html_browser.local_settings.local_settings import *
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 BASE_DIR = BASE_DIR.replace(os.sep, '/')
 BASE_DIR_REALPATH = os.path.realpath(BASE_DIR).replace(os.sep, '/')
 
@@ -18,15 +17,24 @@ env = environ.Env(
     LOGIN_URL=(str, '/'),
     TIME_ZONE=(str, 'America/Chicago'),
     LOG_DIR=(str, join_paths(BASE_DIR, 'log')),
-    ALLOWED_HOSTS=(list, [localhost]),
-    INTERNAL_IPS=(list, [127.0.0.1]),
+    ALLOWED_HOSTS=(list, ['localhost']),
+    INTERNAL_IPS=(list, ['127.0.0.1']),
+    THUMBNAIL_CACHE_DIR=(str, join_paths(BASE_DIR, 'thumb_cache')),
+    DB_ENGINE=(str, None),
+    DB_NAME=(str, None),
+    DB_OPTIONS=(dict, {}),
+    DB_USER=(str, ''),
+    DB_PASSWORD=(str, ''),
+    DB_HOST=(str, ''),
+    DB_PORT = (str, '')
 )
 environ.Env.read_env()
 
 DEBUG = env('DEBUG')
 THUMBNAIL_DEBUG = env('THUMBNAIL_DEBUG')
-ALLOWED_HOSTS=env('ALLOWED_HOSTS')
-INTERNAL_IPS=env('INTERNAL_IPS')
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+INTERNAL_IPS = env('INTERNAL_IPS')
+THUMBNAIL_CACHE_DIR = env('THUMBNAIL_CACHE_DIR')
 
 URL_PREFIX = env('URL_PREFIX')
 LOGIN_URL = env('LOGIN_URL')
@@ -37,11 +45,27 @@ THUMBNAIL_STORAGE = 'html_browser.utils.ThumbnailStorage'
 
 MANAGERS = env('ADMINS')
 
+dboptions = {}
+if env.str('DB_INIT_COMMAND', None):
+    dboptions['init_command'] = env('DB_INIT_COMMAND')
+
+DATABASES = {
+    'default' : {
+        'ENGINE': env('DB_ENGINE'),
+        'NAME': env('DB_NAME'),
+        'OPTIONS': dboptions,
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT')
+    }
+}
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
-TIME_ZONE = env('America/Chicago')
+TIME_ZONE = env('TIME_ZONE')
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
