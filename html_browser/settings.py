@@ -26,7 +26,7 @@ env = environ.Env(
     DB_USER=(str, ''),
     DB_PASSWORD=(str, ''),
     DB_HOST=(str, ''),
-    DB_PORT = (str, '')
+    DB_PORT=(str, '')
 )
 environ.Env.read_env()
 
@@ -50,7 +50,7 @@ if env.str('DB_INIT_COMMAND', None):
     dboptions['init_command'] = env('DB_INIT_COMMAND')
 
 DATABASES = {
-    'default' : {
+    'default': {
         'ENGINE': env('DB_ENGINE'),
         'NAME': env('DB_NAME'),
         'OPTIONS': dboptions,
@@ -184,7 +184,7 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.profiling.ProfilingPanel',
 ]
 
-LOG_DIR=env('LOG_DIR')
+LOG_DIR = env('LOG_DIR')
 if not os.path.exists(LOG_DIR):
     os.makedirs(LOG_DIR)
 
