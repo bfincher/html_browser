@@ -24,7 +24,7 @@ env = environ.Env(
     DB_NAME=(str, None),
     DB_OPTIONS=(dict, {}),
     DB_USER=(str, ''),
-    DB_PASSWORD=(str, ''),
+    DB_PASS=(str, ''),
     DB_HOST=(str, ''),
     DB_PORT=(str, '')
 )
@@ -55,7 +55,7 @@ DATABASES = {
         'NAME': env('DB_NAME'),
         'OPTIONS': dboptions,
         'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
+        'PASSWORD': env('DB_PASS'),
         'HOST': env('DB_HOST'),
         'PORT': env('DB_PORT')
     }
