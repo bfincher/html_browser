@@ -97,7 +97,8 @@ def _exiting():
         _queue.put(True)
     except:  # noqa: E722
         pass
-    _thread.join()
+    if _running:
+        _thread.join()
 
 
 atexit.register(_exiting)
