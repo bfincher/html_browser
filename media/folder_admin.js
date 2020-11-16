@@ -83,7 +83,7 @@ function addGroupPermRow() {
 }
 
 $(document).ready(function() {
-    var emptyUserPerm = $('#' + userPermTableId + ' tr:last');
+    emptyUserPerm = $('#' + userPermTableId + ' tr:last');
     var regexp = /(id_)?[a-zA-Z_]+-(\d+).*/;
 
     if (emptyUserPerm.find('select:first').val() == "") {
@@ -97,7 +97,7 @@ $(document).ready(function() {
     }
 
 
-    var emptyGroupPerm = $('#' + groupPermTableId + ' tr:last');
+    emptyGroupPerm = $('#' + groupPermTableId + ' tr:last');
 
     if (emptyGroupPerm.find('select:first').val() == "") {
         emptyGroupPerm.remove();
