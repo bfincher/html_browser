@@ -1,7 +1,7 @@
     function deleteUser() {
         var userName = $('#id_username').val();
         if (confirm('Are you sure you want to delete the user ' + userName + '?')) {
-                post(Urls.deleteUser(), {'userToDelete': userName});
+                post(Urls.deleteUser(), {'username': userName});
         }
     }
 
