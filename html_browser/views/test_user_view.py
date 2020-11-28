@@ -67,18 +67,21 @@ class UserTest(BaseAdminTest):
     def testDeleteUser(self):
         # test unauthorized user
         self.login(self.user1)
-        response = self.client.post(reverse('deleteUser', args=[self.user2.username]))
+        data = {'username': self.user1.username}
+        response = self.client.post(reverse('deleteUser'), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/deleteUser/user2', response.url)
+        self.assertEqual('/?next=/deleteUser/', response.url)
         self.assertEqual(self.user2, User.objects.get(username=self.user2.username))
 
         self.login(self.user4)
         # test deleting current user
-        response = self.client.post(reverse('deleteUser', args=[self.user4.username]))
+        data = {'username': self.user4.username}
+        response = self.client.post(reverse('deleteUser'), data)
         self.assertEqual('/userAdmin/', response.url)
         self.assertEqual(self.user4, User.objects.get(username=self.user4.username))
 
-        response = self.client.post(reverse('deleteUser', args=[self.user1.username]))
+        data = {'username': self.user1.username}
+        response = self.client.post(reverse('deleteUser'), data)
         self.assertEqual(302, response.status_code)
         self.assertEqual('/userAdmin/', response.url)
         self.assertIsNone(get_object_or_none(User, username=self.user1.username))

@@ -20,7 +20,7 @@ logger = logging.getLogger('html_browser.userViews')
 
 class DeleteUserView(BaseAdminView):
     def post(self, request):
-	    username = request.POST['username']
+        username = request.POST['username']
         redirect_url = "userAdmin"
 
         if request.user.username == username:
