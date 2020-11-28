@@ -181,16 +181,16 @@ class GroupTest(BaseAdminTest):
 
     def testDeleteGroup(self):
         self.login(self.user1)
-        args = [self.group1.name]
-        response = self.client.post(reverse('deleteGroup', args=args))
+        data = {'group_name': self.group1.name}
+        response = self.client.post(reverse('deleteGroup'), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/deleteGroup/%s' % self.group1.name, response.url)
+        self.assertEqual('/?next=/deleteGroup/', response.url)
         self.assertTrue(get_object_or_none(Group, name=self.group1.name))
 
         self.logout()
         self.login(self.user4)
-        args = [self.group1.name]
-        response = self.client.post(reverse('deleteGroup', args=args))
+        data = {'group_name': self.group1.name}
+        response = self.client.post(reverse('deleteGroup'), data)
         self.assertEqual(302, response.status_code)
         self.assertEqual('/groupAdmin/', response.url)
         self.assertFalse(get_object_or_none(Group, name=self.group1.name))

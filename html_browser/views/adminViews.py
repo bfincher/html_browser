@@ -234,9 +234,9 @@ class AddGroupView(BaseAdminView):
 
 
 class DeleteGroupView(BaseAdminView):
-    def post(self, _, group_name, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        group = Group.objects.get(name=group_name)
+    def post(self, request):
+        groupname = request.POST['group_name']
+        group = Group.objects.get(name=groupname)
         group.delete()
 
         return redirect('groupAdmin')
