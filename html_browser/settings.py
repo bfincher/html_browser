@@ -1,4 +1,4 @@
-# Django settings for html_browser project.
+#) Django settings for html_browser project.
 import environ
 import os
 
@@ -26,9 +26,22 @@ env = environ.Env(
     DB_USER=(str, ''),
     DB_PASS=(str, ''),
     DB_HOST=(str, ''),
-    DB_PORT=(str, '')
+    DB_PORT=(str, ''),
+    STATICFILES_DIRS=(list, [])
 )
 environ.Env.read_env()
+
+def buildStaticFilesDirs(env):
+    baseDirPrefix = '__BASE_DIR__'
+    tmpList = env('STATICFILES_DIRS')
+    toReturn = []
+
+    for entry in tmpList:
+        if entry.startswith(baseDirPrefix):
+            entry = join_paths(BASE_DIR, entry[len(baseDirPrefix):])
+        toReturn.append(entry)
+
+    return toReturn
 
 DEBUG = env('DEBUG')
 THUMBNAIL_DEBUG = env('THUMBNAIL_DEBUG')
@@ -39,6 +52,8 @@ THUMBNAIL_CACHE_DIR = env('THUMBNAIL_CACHE_DIR')
 URL_PREFIX = env('URL_PREFIX')
 LOGIN_URL = env('LOGIN_URL')
 DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
+
+STATICFILES_DIRS = buildStaticFilesDirs(env)
 
 THUMBNAIL_FAST_URL = True
 THUMBNAIL_STORAGE = 'html_browser.utils.ThumbnailStorage'
@@ -86,7 +101,8 @@ USE_TZ = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ''
+#MEDIA_ROOT = ''
+MEDIA_ROOT = join_paths(BASE_DIR, 'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -95,7 +111,7 @@ MEDIA_URL = None
 
 STATIC_URL = "/hbmedia/"
 STATIC_ROOT = ''
-# STATIC_ROOT = join_paths(BASE_DIR, 'media')
+#STATIC_ROOT = join_paths(BASE_DIR, 'media')
 
 # List of finder classes that know how to find static files in
 # various locations.
