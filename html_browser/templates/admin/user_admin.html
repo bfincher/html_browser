@@ -1,16 +1,18 @@
 {% extends "page.html" %}
 {% block body %}
 
-	<div style="text-align:center">
 	<h1>Users</h1>
 	
 	<table class="table">
+        <thead>
 		<tr>
-			<th> User Name </th>
-			<th> Groups </th>
-			<th> Is Administrator </th>
+			<th>User Name</th>
+			<th>Groups</th>
+			<th>Is Administrator</th>
 		</tr>
+        </thead>
 		
+        <tbody>
 		{% for user in users %}
 		<tr>
 			<td> <a href="{% url 'editUser' user.username%}">{{ user.username }}</a> </td>
@@ -21,18 +23,12 @@
 				{% endfor %}
 				</ul>
 			</td>
-			<td>
-				{% if user.is_staff %}
-				Yes
-				{% else %}
-				No
-				{% endif %}
-			</td>
+			<td>{% if user.is_staff %}Yes{% else %}No{% endif %}</td>
 		</tr>
 		{% endfor %}
+        </tbody>
 	</table>
 	
 	<a href="{% url 'addUser' %}">Add User</a>
 	
-	</div>
 {% endblock %}
