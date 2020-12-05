@@ -29,7 +29,7 @@ from html_browser.utils import (ArgumentException, FolderAndPath,
                                 handle_delete, replace_escaped_url)
 
 logger = logging.getLogger('html_browser.base_view')
-imageRegex = re.compile(r"^.*?\.(jpg|png|gif|bmp|avi)$", re.IGNORECASE)
+imageRegex = re.compile(r"^.*?\.(jpg|jpeg|png|gif|bmp|avi)$", re.IGNORECASE)
 
 
 def is_show_hidden(request):

@@ -30,7 +30,7 @@ thumbnailGeometry = '150x150'
 
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
 folder_and_path_regex = re.compile(r'^(\w+)(/(.*))?$')
-imageRegexStr = r'.+\.((jpg)|(png)|(bmp))'
+imageRegexStr = r'.+\.((jpg)|(jpeg)|(png)|(bmp))'
 imageRegex = re.compile(r'(?i)%s' % imageRegexStr)
 imageRegexWithCach = re.compile(r'(?i)cache/%s' % imageRegexStr)
 
