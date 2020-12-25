@@ -1,9 +1,38 @@
-
 from django.contrib.auth.models import Group, User
 from django.test import TestCase
 
 from html_browser.models import (CAN_DELETE, CAN_READ, CAN_WRITE, Folder,
                                  GroupPermission, UserPermission)
+from html_browser._os import join_paths
+from html_browser import settings
+
+import json
+import os
+
+
+class ExtraAllowedHostsTest(TestCase):
+    def setUp(self):
+        if not os.path.exists(settings.EXTRA_CONFIG_DIR):
+            os.path.mkdirs(settings.EXTRA_CONFIG_DIR)
+
+        localSettingsFile = join_paths(settings.EXTRA_CONFIG_DIR, 'local_settings.json')
+        self.assertFalse(os.path.exists(localSettingsFile))
+
+        data = {}
+        data['ALLOWED_HOSTS'] = ['host1', 'host2']
+        with open(localSettingsFile, 'w') as outfile:
+            json.dump(data, outfile)
+
+        settings.ALLOWED_HOSTS = settings.readExtraAllowedHosts()
+
+    def tearDown(self):
+        localSettingsFile = join_paths(settings.EXTRA_CONFIG_DIR, 'local_settings.json')
+        os.remove(localSettingsFile)
+
+    def test(self):
+        self.assertTrue(len(settings.ALLOWED_HOSTS) > 2)
+        self.assertTrue('host1' in settings.ALLOWED_HOSTS)
+        self.assertTrue('host2' in settings.ALLOWED_HOSTS)
 
 
 class UserPermissionTest(TestCase):
