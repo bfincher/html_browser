@@ -10,7 +10,7 @@ import json
 import os
 
 
-class ExtraAllowedHostsTest(TestCase):
+class ExtraSettingsTest(TestCase):
     def setUp(self):
         if not os.path.exists(settings.EXTRA_CONFIG_DIR):
             os.path.mkdirs(settings.EXTRA_CONFIG_DIR)
@@ -20,10 +20,11 @@ class ExtraAllowedHostsTest(TestCase):
 
         data = {}
         data['ALLOWED_HOSTS'] = ['host1', 'host2']
+        data['URL_PREFIX'] = 'testPrefix'
         with open(localSettingsFile, 'w') as outfile:
             json.dump(data, outfile)
 
-        settings.ALLOWED_HOSTS = settings.readExtraAllowedHosts()
+        settings.readExtraSettings()
 
     def tearDown(self):
         localSettingsFile = join_paths(settings.EXTRA_CONFIG_DIR, 'local_settings.json')
@@ -33,6 +34,7 @@ class ExtraAllowedHostsTest(TestCase):
         self.assertTrue(len(settings.ALLOWED_HOSTS) > 2)
         self.assertTrue('host1' in settings.ALLOWED_HOSTS)
         self.assertTrue('host2' in settings.ALLOWED_HOSTS)
+        self.assertEquals('testPrefix', settings.URL_PREFIX)
 
 
 class UserPermissionTest(TestCase):

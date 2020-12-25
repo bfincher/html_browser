@@ -8,6 +8,7 @@ from html_browser._os import join_paths
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 BASE_DIR = BASE_DIR.replace(os.sep, '/')
 BASE_DIR_REALPATH = os.path.realpath(BASE_DIR).replace(os.sep, '/')
+URL_PREFIX = ''
 
 
 env = environ.Env(
@@ -47,21 +48,24 @@ def buildStaticFilesDirs():
     return toReturn
 
 
-def readExtraAllowedHosts():
-    allowedHosts = env('ALLOWED_HOSTS')
+def readExtraSettings():
     extraConfigDir = env('EXTRA_CONFIG_DIR')
     configFile = join_paths(extraConfigDir, 'local_settings.json')
     if os.path.exists(configFile):
         with open(configFile) as f:
             data = json.load(f)
         if 'ALLOWED_HOSTS' in data:
-            allowedHosts.extend(data['ALLOWED_HOSTS'])
-    return allowedHosts
+            global ALLOWED_HOSTS
+            ALLOWED_HOSTS.extend(data['ALLOWED_HOSTS'])
+
+        if 'URL_PREFIX' in data:
+            global URL_PREFIX
+            URL_PREFIX = data['URL_PREFIX']
 
 
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 DEBUG = env('DEBUG')
 THUMBNAIL_DEBUG = env('THUMBNAIL_DEBUG')
-ALLOWED_HOSTS = readExtraAllowedHosts()
 INTERNAL_IPS = env('INTERNAL_IPS')
 THUMBNAIL_CACHE_DIR = env('THUMBNAIL_CACHE_DIR')
 EXTRA_CONFIG_DIR = env('EXTRA_CONFIG_DIR')
@@ -271,3 +275,5 @@ LOGGING = {
         },
     }
 }
+
+readExtraSettings()
