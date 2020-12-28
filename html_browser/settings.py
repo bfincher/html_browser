@@ -9,6 +9,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 BASE_DIR = BASE_DIR.replace(os.sep, '/')
 BASE_DIR_REALPATH = os.path.realpath(BASE_DIR).replace(os.sep, '/')
 URL_PREFIX = ''
+INTERNAL_IPS = []
 
 
 env = environ.Env(
@@ -61,6 +62,10 @@ def readExtraSettings():
         if 'URL_PREFIX' in data:
             global URL_PREFIX
             URL_PREFIX = data['URL_PREFIX']
+
+        if 'INTERNAL_IPS' in data:
+            global INTERNAL_IPS
+            INTERNAL_IPS.extend(data['INTERNAL_IPS'])
 
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS')
