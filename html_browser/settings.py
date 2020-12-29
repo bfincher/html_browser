@@ -1,5 +1,6 @@
 #  Django settings for html_browser project.
 import environ
+import json
 import os
 
 from html_browser._os import join_paths
@@ -7,6 +8,8 @@ from html_browser._os import join_paths
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 BASE_DIR = BASE_DIR.replace(os.sep, '/')
 BASE_DIR_REALPATH = os.path.realpath(BASE_DIR).replace(os.sep, '/')
+URL_PREFIX = ''
+INTERNAL_IPS = []
 
 
 env = environ.Env(
@@ -27,12 +30,13 @@ env = environ.Env(
     DB_PASS=(str, ''),
     DB_HOST=(str, ''),
     DB_PORT=(str, ''),
-    STATICFILES_DIRS=(list, [])
+    STATICFILES_DIRS=(list, []),
+    EXTRA_CONFIG_DIR=(str, BASE_DIR)
 )
 environ.Env.read_env()
 
 
-def buildStaticFilesDirs(env):
+def buildStaticFilesDirs():
     baseDirPrefix = '__BASE_DIR__'
     tmpList = env('STATICFILES_DIRS')
     toReturn = []
@@ -45,17 +49,37 @@ def buildStaticFilesDirs(env):
     return toReturn
 
 
+def readExtraSettings():
+    extraConfigDir = env('EXTRA_CONFIG_DIR')
+    configFile = join_paths(extraConfigDir, 'local_settings.json')
+    if os.path.exists(configFile):
+        with open(configFile) as f:
+            data = json.load(f)
+        if 'ALLOWED_HOSTS' in data:
+            global ALLOWED_HOSTS
+            ALLOWED_HOSTS.extend(data['ALLOWED_HOSTS'])
+
+        if 'URL_PREFIX' in data:
+            global URL_PREFIX
+            URL_PREFIX = data['URL_PREFIX']
+
+        if 'INTERNAL_IPS' in data:
+            global INTERNAL_IPS
+            INTERNAL_IPS.extend(data['INTERNAL_IPS'])
+
+
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 DEBUG = env('DEBUG')
 THUMBNAIL_DEBUG = env('THUMBNAIL_DEBUG')
-ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 INTERNAL_IPS = env('INTERNAL_IPS')
 THUMBNAIL_CACHE_DIR = env('THUMBNAIL_CACHE_DIR')
+EXTRA_CONFIG_DIR = env('EXTRA_CONFIG_DIR')
 
 URL_PREFIX = env('URL_PREFIX')
 LOGIN_URL = env('LOGIN_URL')
 DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
-STATICFILES_DIRS = buildStaticFilesDirs(env)
+STATICFILES_DIRS = buildStaticFilesDirs()
 
 THUMBNAIL_FAST_URL = True
 THUMBNAIL_STORAGE = 'html_browser.utils.ThumbnailStorage'
@@ -256,3 +280,5 @@ LOGGING = {
         },
     }
 }
+
+readExtraSettings()
