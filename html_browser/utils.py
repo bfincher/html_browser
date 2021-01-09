@@ -203,6 +203,10 @@ class DirEntry():
         if not skip_thumbnail and not self.is_dir and view_type == const.thumbnails_view_type and imageRegex.match(self.name):
             self.has_thumbnail = True
             self.image_link_path = join_paths(folder_and_path.folder.local_path, folder_and_path.relative_path, self.name)
+
+            # make call to get thumbnail url here so that the createthumbnails utility will actually cause the thumbnail to be created.
+            # Previously, this method was only called in the __str__ method
+            self.get_thumbnail_url()
         else:
             self.has_thumbnail = False
 
