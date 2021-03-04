@@ -13,7 +13,7 @@ INTERNAL_IPS = []
 
 
 env = environ.Env(
-    DEBUG=(bool, True),
+    DEBUG=(bool, False),
     THUMBNAIL_DEBUG=(bool, False),
     ADMINS=(tuple, ('Your Name', 'your_email@example.com')),
     URL_PREFIX=(str, r''),
