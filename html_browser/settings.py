@@ -11,6 +11,8 @@ BASE_DIR_REALPATH = os.path.realpath(BASE_DIR).replace(os.sep, '/')
 URL_PREFIX = ''
 INTERNAL_IPS = []
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 
 env = environ.Env(
     DEBUG=(bool, False),
