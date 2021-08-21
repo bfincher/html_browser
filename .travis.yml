@@ -3,8 +3,8 @@ language: python
 python:
   - "3.6"
   - "3.7"
-  - "3.7.5" # docker image uses 3.7.5
   - "3.8"
+  - "3.9.5"
 
 sudo: required
 
