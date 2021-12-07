@@ -11,3 +11,4 @@ html_browser/local_settings/local_settings.py
 .tox
 log
 .env
+hbmedia

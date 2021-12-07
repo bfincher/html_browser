@@ -1,35 +1,22 @@
 {% extends "content_page.html" %}
-{% block extra_js %}
-	<script src="{{ MEDIA_URL }}moment.min.js"></script> <!-- used by bootstrap-sortable -->
-	<script src="{{ MEDIA_URL }}bootstrap-sortable.js"></script>
-{% endblock %}
-
-
 				{% block additional_navbar %}
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Filter <span class="caret"></span></a>
-						<span class="dropdown-menu center">
-							<h3>Apply a filter</h3>
-							<form method="get" action="{% url 'content' folder_and_path.url %}"> 
-								<input type="text" name="filter" value="{{ filter }}" maxlength="20" size="10" />
-								<input class="btn btn-default" type="submit" value="Filter" name="Filter" />
-							</form>
-						</span>
-				</li>
-<!--
-			   <li class="dropdown" data-dropdown="dropdown">
-				 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Search <strong class="caret"></strong></a>
-				 <div class="dropdown-menu center">
-				     <h3>Search for filenames (use regular expressions)</h3>
-				     <form method="get" action="{% url 'content' folder_and_path.url %}"> 
-				         <input type="text" name="search" value="{{ search }}" maxlength="20" size="10" />
-				         <input class="btn btn-default" type="submit" value="Search" name="Search" />
-				     </form>
-				 </div>
-			   </li>
--->
-				<li class="dropdown" data-dropdown="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Settings <strong class="caret"></strong></a>
+				<li class="nav-item dropdown" data-dropdown="dropdown">
+                <a href="#" class="nav nav-link dropdown-toggle" data-toggle="dropdown">Filter <strong class="caret"></strong></a>
+                <div class="dropdown-menu">
+                   <form class="px-4 py-3" method="get" action="{% url 'content' folder_and_path.url %}">
+                      <div class="form-group">
+                         <input type="text" class="form-control" name="filter" value="{{ filter }}" placeholder="filter" maxLength=20 size="10">
+                      </div>
+                      <div class="form-group">
+                         <button class="btn btn-primary" type="submit" value="Filter" name="Filter">Apply Filter</button>
+                      </div>
+                   </form>
+                </div>
+                </li>
+
+
+				<li class="nav-item dropdown" data-dropdown="dropdown">
+					<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Settings <strong class="caret"></strong></a>
 					<div class="dropdown-menu center">
 						<h3>Settings</h3>
 						<form action="post" action="{% url 'content' folder_and_path.url %}"> {% csrf_token %}
@@ -44,19 +31,15 @@
 					</div>
 			   </li>
 			{% endblock %}
-{% block additional_header %}
-	<link rel="stylesheet" href="{{ MEDIA_URL }}bootstrap-sortable.css" type="text/css">
-	{{ block.super }}
-{% endblock %}
 
 {% block content %}
-	<table class="table table-striped table-bordered table-hover table-condensed sortable" id="content-table"> 
+	<table class="table table-striped table-bordered table-hover table-sm" id="content-table"> 
 		<thead>
 		<tr>
-			<th style="width: 1%" data-defaultsort='disabled'><input id="checkAll" type="checkbox" /> </th>
-			<th style="width: 20%">Name</th>
-			<th style="width: 5%" class="hidden-xs">Size</th>
-			<th style="width: 10%" class="hidden-xs">Last Modified</th>
+			<th scope="col" data-defaultsort='disabled'><input id="checkAll" type="checkbox" /> </th>
+			<th scope="col" > Name</th>
+			<th scope="col"  class="d-none d-sm-table-cell">Size</th>
+			<th scope="col"  class="d-none d-sm-table-cell">Last Modified</th>
 		</tr>
 		</thead>
 		
@@ -72,8 +55,8 @@
 					{% include "entry_details.html" %}
 				{% endif %}
 			</td>
-			<td class="hidden-xs" data-value="{{ entry.size_numeric }}">{{ entry.size }}</td>
-			<td class="hidden-xs">{{ entry.last_modify_time }}</td>
+			<td class="d-none d-sm-table-cell" data-value="{{ entry.size_numeric }}">{{ entry.size }}</td>
+			<td class="d-none d-sm-table-cell">{{ entry.last_modify_time }}</td>
 			{% endautoescape %}
 		</tr>			
 		{% endfor %}
