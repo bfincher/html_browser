@@ -4,11 +4,11 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatable" content="IE=edge">
-	<meta content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<title>HTML File Explorer</title>
 
 	<script src="{% url 'js_reverse' %}" type="text/javascript"></script>
-	<script	src="https://code.jquery.com/jquery-3.3.1.min.js"   integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="{{ MEDIA_URL }}jquery.min.js"></script>
 	<script src="{{ MEDIA_URL }}bootstrap/js/bootstrap.min.js"></script>
 
 	<script src="{{ MEDIA_URL }}base.js"></script>
@@ -24,49 +24,43 @@
 
 <body>		
 	{% block navbar %}
-	<div class="navbar navbar-inverse navbar-fixed-top">
-	  <div class="container">
-		<div class="navbar-header">
-		  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-			<span class="sr-only">Toggle navigation</span>
-			<span class="icon-bar"></span>
-			<span class="icon-bar"></span>
-			<span class="icon-bar"></span>
-		  </button>
-		  <a class="navbar-brand" href="{% url 'index' %}">HTML File Explorer</a>
-		</div>
-	  <div id="navbar" class="navbar-collapse collapse">
-		 <ul class="nav navbar-nav">
-		   {% if user.is_authenticated %}
-			 {% if user.is_staff %}
-			   <li class="active"><a href="{% url 'admin' %}">Administration</a></li>
-			 {% endif %}
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark justify-content-center sticky-top">
+	  <a class="navbar-brand d-flex w-50 mr-auto" href="{% url 'index' %}">HTML File Explorer</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="navbar-collapse collapse w-100" id="navbarCollapse">
+        <ul class="navbar-nav w-100 justify-content-center">
+          {% if user.is_authenticated %}
+            {% if user.is_staff %}
+              <li class="nav-item active"><a class="nav-link" href="{% url 'admin' %}">Administration</a></li>
+            {% endif %}
 
-			 {% block additional_navbar %}
-			 {% endblock %}
-		 {% endif %} <!-- if user is authenticated -->
-		   </ul>
-		 <div class="small">
-		   {% if user.is_authenticated %}
-			 <ul class="nav navbar-nav navbar-right" >
-			   <li class="active"><a href="#" > {{ user.username }} </a> </li>
-			   <li class="active"><a href="{% url 'changePassword' %}" >Change Password </a></li>
-			   <li class="active"><a href="{% url 'logout'%}" >Log Out	</a></li>
-			 </ul>
-		   {% else %}
-			 <form class="navbar-form navbar-right" action="{% url 'login' %}" method="post" > {% csrf_token %}
-			   <input class="form-control" name="user_name" type="text" placeholder="User Name">
-			   <input class="form-control" name="password" type="password" placeholder="Password">
-			   <button type="submit" class="btn btn-success">Sign in</button>
-			   <input name="action" type="hidden" value="login" >
-               {% if next %}<input name="next" type="hidden" value="{{ next }}">{% endif %}
-			</form>
-		   {% endif %}
-		 </div>
+            {% block additional_navbar %}
+            {% endblock %}
+          {% endif %} <!-- if user is authenticated -->
+        </ul>
+		{% if user.is_authenticated %}
+          <ul class="nav navbar-nav ml-auto justify-content-end w-100" >
+            <li class="nav-item px-4"><a href="#" > {{ user.username }} </a> </li>
+            <li class="nav-item px-4"><a href="{% url 'changePassword' %}" >Change Password </a></li>
+            <li class="nav-item active px-4"><a href="{% url 'logout'%}" >Log Out</a></li>
+          </ul>
+        {% else %}
+           <form class="form-inline ml-auto w-75" action="{% url 'login' %}" method="post" > {% csrf_token %}
+            <input class="form-control px-3" name="user_name" type="text" placeholder="User Name">
+            <input class="form-control px-3" name="password" type="password" placeholder="Password">
+            <button type="submit px-3" class="btn btn-success">Sign in</button>
+            <input name="action" type="hidden" value="login" >
+            {% if next %}<input name="next" type="hidden" value="{{ next }}">{% endif %}
+          </form>
+        {% endif %}
+      </div>
+    </nav>
 
-	  </div>
-	  </div>
-	</div>
+
+
+
 	{% endblock %}
 	{% block navbar2 %}
 	{% if breadcrumbs %}

@@ -204,6 +204,7 @@ class UtilsTest(unittest.TestCase):
         try:
             media_dir = join_paths(settings.BASE_DIR, 'media')
             test_files = [FileEntry(join_paths(media_dir, 'bootstrap'), '&nbsp'),
+                          FileEntry(join_paths(media_dir, 'datatables'), '&nbsp'),
                           FileEntry(join_paths(media_dir, 'images'), '&nbsp'),
                           FileEntry(join_paths(media_dir, 'krajee'), '&nbsp'),
                           FileEntry(join_paths(media_dir, 'add_user.js'), '1.80 KB'),
@@ -217,7 +218,8 @@ class UtilsTest(unittest.TestCase):
 
                 folder_and_path = FolderAndPath(folder=folder, path='')
                 entries = folder_and_path.get_dir_entries(False, const.thumbnails_view_type)
-                self.assertEqual(16, len(entries))
+
+                self.assertEqual(17, len(entries))
 
                 for i in range(0, len(test_files)):
                     entry = entries[i]

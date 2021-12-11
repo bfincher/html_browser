@@ -32,7 +32,7 @@ env = environ.Env(
     DB_PASS=(str, ''),
     DB_HOST=(str, ''),
     DB_PORT=(str, ''),
-    STATICFILES_DIRS=(list, []),
+    STATICFILES_DIRS=(tuple, ()),
     EXTRA_CONFIG_DIR=(str, BASE_DIR)
 )
 environ.Env.read_env()
@@ -48,7 +48,7 @@ def buildStaticFilesDirs():
             entry = join_paths(BASE_DIR, entry[len(baseDirPrefix):])
         toReturn.append(entry)
 
-    return toReturn
+    return tuple(toReturn)
 
 
 def readExtraSettings():
@@ -129,8 +129,7 @@ USE_TZ = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-# MEDIA_ROOT = ''
-MEDIA_ROOT = join_paths(BASE_DIR, 'media')
+MEDIA_ROOT = ''
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -138,7 +137,7 @@ MEDIA_ROOT = join_paths(BASE_DIR, 'media')
 MEDIA_URL = None
 
 STATIC_URL = "/hbmedia/"
-STATIC_ROOT = ''
+STATIC_ROOT = 'hbmedia'
 # STATIC_ROOT = join_paths(BASE_DIR, 'media')
 
 # List of finder classes that know how to find static files in
