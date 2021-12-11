@@ -1,4 +1,4 @@
-Django==3.2.6
+Django==3.2.10
 django-debug-toolbar==3.2.2
 django-crispy-forms==1.13.0
 django-downloadview==1.9
