@@ -1,4 +1,24 @@
 {% extends "content_page.html" %}
+
+{% block additional_header %}
+{{ block.super }}
+	<script type="text/javascript" src="{{ MEDIA_URL }}/datatables/datatables.min.js"></script>
+	<link rel="stylesheet" href="{{ MEDIA_URL }}/datatables/datatables.min.css">
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#content-table').DataTable( {
+				paging: false,
+				"info": false,
+				"order": [],
+				"columnDefs": [ {
+				    "targets" : 'no-sort',
+					"orderable" : false,
+				}]
+			} );
+        } );
+    </script>
+{% endblock %}
+
 				{% block additional_navbar %}
 				<li class="nav-item dropdown" data-dropdown="dropdown">
                 <a href="#" class="nav nav-link dropdown-toggle" data-toggle="dropdown">Filter <strong class="caret"></strong></a>
@@ -36,7 +56,7 @@
 	<table class="table table-striped table-bordered table-hover table-sm" id="content-table"> 
 		<thead>
 		<tr>
-			<th scope="col" data-defaultsort='disabled'><input id="checkAll" type="checkbox" /> </th>
+			<th scope="col" class="no-sort"><input id="checkAll" type="checkbox" /> </th>
 			<th scope="col" > Name</th>
 			<th scope="col"  class="d-none d-sm-table-cell">Size</th>
 			<th scope="col"  class="d-none d-sm-table-cell">Last Modified</th>
