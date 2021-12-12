@@ -20,21 +20,21 @@ function getNextImage() {
 
     let body = $('body');
     body.scrollTop(body.scrollTop() - 2);
-    let url = Urls.getNextImage(folderAndPathUrl, fileName);
+    let url = Urls.getNextImage(folderAndPathUrl, file_name);
     $("<img id='loading' src='" + imageUrl + "loading.gif' height='42' width='42' />").appendTo('#loadingDiv');
     $.ajax({url:url, 
     success:function(result) {
         $('#loading').remove();
 
         if (result['hasNextImage']) {
-            let fileName = result['file_name']
+            file_name = result['file_name']
             let table = $('#imageTable');
             table.append($('<tr><td>&nbsp</td></tr>'));
             table.append($('<tr><td>&nbsp</td></tr>'));
             let row = $('<tr>');
             let cell = $('<td>');
             $("<a />", {
-                "href" : "javascript:deleteImage('" + fileName + "');",
+                "href" : "javascript:deleteImage('" + file_name + "');",
                 "text" : "Delete File"
             }).appendTo(cell);
             row.append(cell);
@@ -54,7 +54,7 @@ function getNextImage() {
     });
 }
 
-function deleteImage(fileName) {
+function deleteImage(file_name) {
     "use strict";
     if (!userCanDelete) {
         alert("You do not have permission to delete from this folder");
@@ -63,7 +63,7 @@ function deleteImage(fileName) {
 
     let confirmMessage = "Are you sure you want to delete the selected entry?";
     if (confirm(confirmMessage)) {
-        post(Urls.deleteImage(folderAndPathUrl), {"file_name": fileName});
+        post(Urls.deleteImage(folderAndPathUrl), {"file_name": file_name});
     }
 }
 
