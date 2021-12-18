@@ -1,27 +1,10 @@
 {% extends "page.html" %}
 {% block body %}
-	<div class="center">
 
-	<div class="row">
-	<div class="col-md-4"></div> 
-	<div class="col-md-4">
-	<table class="table" >
-	{% for folder in folders %}
-		{% if forloop.counter0|divisibleby:2 %}
-			<tr>
-				{% if forloop.last %}
-					<td colspan=2><a href="{% url 'content' folder.get_name_as_html %}"/> {{ folder.name }} </a></td>
-				{% else %}
-					<td> <a href="{% url 'content' folder.get_name_as_html %}"/> {{ folder.name }} </a></td>
-				{% endif %}
-		{% else %}
-			<td> <a href="{% url 'content' folder.get_name_as_html %}"/> {{ folder.name }} </a></td>
-			</tr>
-		{% endif %}
-	{% endfor %}
-	</table>
-	</div>
-	<div class="col-md-4"></div>
-	</div>
-	</div>
+    <div class="mx-auto mt-5 mt-5" style="width: 200px;">
+    {% for folder in folders %}
+        <a class="row mt-2" href="{% url 'content' folder.get_name_as_html %}"/> {{ folder.name }} </a>
+    {% endfor %}
+    </div>
+
 {% endblock %}
