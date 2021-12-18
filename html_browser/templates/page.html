@@ -36,6 +36,11 @@
             {% if user.is_staff %}
             <li class="nav-item active px-4"><a class="nav-link" href="{% url 'admin' %}">Administration</a></li>
             {% endif %}
+        {% endif %}
+
+        {% block additional_navbar %} {% endblock %}
+
+		{% if user.is_authenticated %}
             <li class="nav-item px-4"><a class="nav-link" href="#" > {{ user.username }} </a> </li>
             <li class="nav-item px-4"><a class="nav-link" href="{% url 'changePassword' %}" >Change Password </a></li>
             <li class="nav-item active px-4"><a class="nav-link" href="{% url 'logout'%}" >Log Out</a></li>
