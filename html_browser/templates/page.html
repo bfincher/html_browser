@@ -46,10 +46,10 @@
             <li class="nav-item active px-4"><a class="nav-link" href="{% url 'logout'%}" >Log Out</a></li>
           </ul>
         {% else %}
-           <form class="form-inline ml-auto w-75" action="{% url 'login' %}" method="post" > {% csrf_token %}
-            <input class="form-control px-3" name="user_name" type="text" placeholder="User Name">
-            <input class="form-control px-3" name="password" type="password" placeholder="Password">
-            <button type="submit px-3" class="btn btn-success">Sign in</button>
+           <form class="row ms-auto w-50" action="{% url 'login' %}" method="post" > {% csrf_token %}
+            <input class="col form-control px-5" name="user_name" type="text" placeholder="User Name">
+            <input class="col form-control px-5" name="password" type="password" placeholder="Password">
+            <button type="submit px-3" class="col px-5 btn btn-success">Sign in</button>
             <input name="action" type="hidden" value="login" >
             {% if next %}<input name="next" type="hidden" value="{{ next }}">{% endif %}
           </form>

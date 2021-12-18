@@ -209,7 +209,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
-CRISPY_TEMPLATE_PACK = 'bootstrap3'
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.versions.VersionsPanel',
