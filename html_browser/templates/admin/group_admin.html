@@ -7,19 +7,13 @@
 {% block body %}
 
 	<div style="text-align:center"><h1>Groups</h1></div>
-	
-	<table class="col-md-5 center-table">
-		<tr>
-			<th>Group Name</th>
-		</tr>
-		
-		{% for group in groups %}
-		<tr>
-			<td><a href="{% url 'editGroup' group %}">{{ group }} </a></td>
-		</tr>
-		{% endfor %}
-	</table>
 
+    <div class="mx-auto mt-5 mt-5" style="width: 200px;">
+		{% for group in groups %}
+			<a class="row mt-2 justify-content-center" href="{% url 'editGroup' group %}">{{ group }} </a>
+		{% endfor %}
+    </div>
+	
 	<br/>
 	<div style="text-align:center"><a href="javascript:addGroup()">Add Group</a></div>
 	

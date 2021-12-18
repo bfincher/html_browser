@@ -32,7 +32,7 @@
         <tbody>
             {% for form in formset %}
                 {% if form_show_errors and not form.is_extra %}
-                    {% include "bootstrap3/errors.html" %}
+                    {% include "bootstrap4/errors.html" %}
                 {% endif %}
 
                 <tr>
@@ -44,6 +44,6 @@
         </tbody>
     </table>
 
-    {% include "bootstrap3/inputs.html" %}
+    {% include "bootstrap4/inputs.html" %}
 
 {% if formset_tag %}</form>{% endif %}

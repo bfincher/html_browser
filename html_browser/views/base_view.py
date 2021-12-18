@@ -306,11 +306,9 @@ class GetNextImageView(BaseContentView):
 
             result['hasNextImage'] = False
 
-
             self.req_logger.info("BKF file_name = %s", file_name)
             self.req_logger.info("BKF entries[i].name = %s", current_dir_entries[index])
-            self.req_logger.info("BKF entries[i+1].name = %s", current_dir_entries[index+1])
-            
+            self.req_logger.info("BKF entries[i+1].name = %s", current_dir_entries[index + 1])
 
             for i in range(index + 1, len(current_dir_entries)):
                 if imageRegex.match(current_dir_entries[i].name):
