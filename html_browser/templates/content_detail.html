@@ -20,26 +20,26 @@
 {% endblock %}
 
 				{% block additional_navbar %}
-				<li class="nav-item dropdown" data-dropdown="dropdown">
-                <a href="#" class="nav nav-link dropdown-toggle" data-toggle="dropdown">Filter <strong class="caret"></strong></a>
-                <div class="dropdown-menu">
-                   <form class="px-4 py-3" method="get" action="{% url 'content' folder_and_path.url %}">
-                      <div class="form-group">
+                <li class="nav-item dropdown" data-dropdown="dropdown">
+                    <a class="dropdown-toggle nav nav-link" href="#" id="preferencesLink" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        Filter
+                    </a>
+
+                   <div class="dropdown-menu">
+                       <form class="px-4 py-3 form-group" aria-labelledby="preferencesLink" method="get" action="{% url 'content' folder_and_path.url %}">
                          <input type="text" class="form-control" name="filter" value="{{ filter }}" placeholder="filter" maxLength=20 size="10">
-                      </div>
-                      <div class="form-group">
                          <button class="btn btn-primary" type="submit" value="Filter" name="Filter">Apply Filter</button>
-                      </div>
-                   </form>
-                </div>
+                       </form>
+                   </div>
                 </li>
 
 
 				<li class="nav-item dropdown" data-dropdown="dropdown">
-					<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Settings <strong class="caret"></strong></a>
-					<div class="dropdown-menu center">
-						<h3>Settings</h3>
-						<form action="post" action="{% url 'content' folder_and_path.url %}"> {% csrf_token %}
+                    <a class="dropdown-toggle nav nav-link" href="#" id="settingsLink" data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        Settings
+                    </a>
+                    <div class="dropdown-menu container">
+						<form class="px-4 py-3" aria-labelledby="settingsLink" method="post" action="{% url 'content' folder_and_path.url %}"> {% csrf_token %}
 							<input type="hidden" name="action" value="changeSettings" />
 							<input type="checkbox" name="show_hidden" 
 							{% if show_hidden %}checked="checked" {% endif %}

@@ -6,7 +6,7 @@ from html_browser.views import adminViews as admin_views
 from html_browser.views import base_view, content_view
 from html_browser.views import userViews as user_views
 
-file_name_chars = r'[\w \-~!@#$%^&*\(\)\+,\.\'’‘\[\]]'
+file_name_chars = r'[\w \-~!@#$%^&*\(\)\+,\.\'’‘\[\]\{\}]'
 folder_and_path_regex = r'(?P<folder_and_path_url>\w+(/%s+?)*)/' % file_name_chars
 prefix = settings.URL_PREFIX
 
