@@ -1,3 +1,6 @@
+import json
+import os
+
 from django.contrib.auth.models import Group, User
 from django.test import TestCase
 
@@ -6,14 +9,11 @@ from html_browser.models import (CAN_DELETE, CAN_READ, CAN_WRITE, Folder,
 from html_browser._os import join_paths
 from html_browser import settings
 
-import json
-import os
-
 
 class ExtraSettingsTest(TestCase):
     def setUp(self):
         if not os.path.exists(settings.EXTRA_CONFIG_DIR):
-            os.path.mkdirs(settings.EXTRA_CONFIG_DIR)
+            os.path.mkdirs(settings.EXTRA_CONFIG_DIR) # pylint: disable=no-member
 
         localSettingsFile = join_paths(settings.EXTRA_CONFIG_DIR, 'local_settings.json')
         self.assertFalse(os.path.exists(localSettingsFile))
@@ -21,7 +21,7 @@ class ExtraSettingsTest(TestCase):
         data = {}
         data['ALLOWED_HOSTS'] = ['host1', 'host2']
         data['URL_PREFIX'] = 'testPrefix'
-        with open(localSettingsFile, 'w') as outfile:
+        with open(localSettingsFile, 'w', encoding='utf8') as outfile:
             json.dump(data, outfile)
 
         settings.readExtraSettings()
@@ -34,10 +34,10 @@ class ExtraSettingsTest(TestCase):
         self.assertTrue(len(settings.ALLOWED_HOSTS) > 2)
         self.assertTrue('host1' in settings.ALLOWED_HOSTS)
         self.assertTrue('host2' in settings.ALLOWED_HOSTS)
-        self.assertEquals('testPrefix', settings.URL_PREFIX)
+        self.assertEqual('testPrefix', settings.URL_PREFIX)
 
 
-class UserPermissionTest(TestCase):
+class UserPermissionTest(TestCase): # pylint: disable=too-many-instance-attributes
     def setUp(self):
 
         self.user1 = User()
@@ -89,7 +89,7 @@ class UserPermissionTest(TestCase):
 
         self.userperms = [self.userPerm1, self.userPerm2, self.userPerm3]
 
-    def tearDown(self):
+    def tear_down(self):
         for user in self.users:
             user.delete()
 
@@ -99,7 +99,7 @@ class UserPermissionTest(TestCase):
         for perm in self.userperms:
             perm.delete()
 
-    def testPermissions(self):
+    def test_permissions(self):
         self.assertTrue(self.folder1.user_can_read(self.user1))
         self.assertFalse(self.folder1.user_can_read(self.user2))
 
@@ -116,7 +116,7 @@ class UserPermissionTest(TestCase):
         self.assertTrue(self.folder1.user_can_delete(self.user5))
 
 
-class GroupPermissionTest(TestCase):
+class GroupPermissionTest(TestCase): # pylint: disable=too-many-instance-attributes
     def setUp(self):
 
         self.group1 = Group()
@@ -136,7 +136,7 @@ class GroupPermissionTest(TestCase):
         self.user1 = User()
         self.user1.username = 'group test user1'
         self.user1.save()
-        self.user1.groups.add(self.group1)
+        self.user1.groups.add(self.group1) # pylint: disable=no-member
         self.user1.save()
 
         self.user2 = User()
@@ -146,13 +146,13 @@ class GroupPermissionTest(TestCase):
         self.user3 = User()
         self.user3.username = 'group test user3'
         self.user3.save()
-        self.user3.groups.add(self.group2)
+        self.user3.groups.add(self.group2) # pylint: disable=no-member
         self.user3.save()
 
         self.user4 = User()
         self.user4.username = 'group test user4'
         self.user4.save()
-        self.user4.groups.add(self.group3)
+        self.user4.groups.add(self.group3) # pylint: disable=no-member
         self.user4.save()
 
         self.users = [self.user1, self.user2, self.user3, self.user4]
@@ -183,7 +183,7 @@ class GroupPermissionTest(TestCase):
 
         self.userperms = [self.groupPerm1, self.groupPerm2, self.groupPerm3]
 
-    def tearDown(self):
+    def tear_down(self):
         for user in self.users:
             user.delete()
 
@@ -196,7 +196,7 @@ class GroupPermissionTest(TestCase):
         for perm in self.userperms:
             perm.delete()
 
-    def testPermissions(self):
+    def test_permissions(self):
         self.assertTrue(self.folder1.user_can_read(self.user1))
         self.assertFalse(self.folder1.user_can_read(self.user2))
 

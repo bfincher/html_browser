@@ -1,0 +1,4 @@
+[FORMAT]
+max-line-length=150
+disable=C0115,C0114,C0116,C0103
+generated-members=objects

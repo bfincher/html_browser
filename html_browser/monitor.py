@@ -1,3 +1,4 @@
+#pylint: skip-file
 import atexit
 import os
 import queue
@@ -116,8 +117,8 @@ def start(interval=1.0):
     global _running
     _lock.acquire()
     if not _running:
-        prefix = 'monitor (pid=%d):' % os.getpid()
-        print('%s Starting change monitor.' % prefix, file=sys.stderr)
+        prefix = f'monitor (pid={os.getpid}):'
+        print(f'{prefix} Starting change monitor.', file=sys.stderr)
         _running = True
         _thread.start()
     _lock.release()

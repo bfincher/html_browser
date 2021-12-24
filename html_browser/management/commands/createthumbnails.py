@@ -20,7 +20,7 @@ class Command(BaseCommand):
             try:
                 folder = Folder.objects.get(name=folder_name)
             except Folder.DoesNotExist:
-                raise CommandError("The folder %s does not exist" % folder_name)
+                raise CommandError(f"The folder {folder_name} does not exist") #pylint: disable=raise-missing-from
 
             folder_and_path = FolderAndPath(folder=folder, path='')
             self._process_entries(folder_and_path)
@@ -36,7 +36,7 @@ class Command(BaseCommand):
                 for key, value in default.backend.default_options.items():
                     options.setdefault(key, value)
                 source = ImageFile(image_link_path)
-                file_name = default.backend._get_thumbnail_filename(source, utils.thumbnailGeometry, options)
+                file_name = default.backend._get_thumbnail_filename(source, utils.THUMBNAIL_GEOMETRY, options) #pylint: disable=protected-access
 
                 thumbnail = ImageFile(file_name, default.storage)
                 cached = default.kvstore.get(thumbnail)
@@ -45,8 +45,8 @@ class Command(BaseCommand):
 
         for entry in folder_and_path.get_dir_entries(True, constants.thumbnails_view_type):
             if entry.is_dir:
-                self.stdout.write("Processing dir %s" % entry.name)
+                self.stdout.write(f"Processing dir {entry.name}")
                 child_folder = FolderAndPath(folder=folder_and_path.folder, path=join_paths(folder_and_path.relative_path, entry.name))
                 self._process_entries(child_folder)
             elif entry.name in log_entries:
-                self.stdout.write('Creating thumbnail for %s%s/%s' % (folder_and_path.folder.local_path, folder_and_path.relative_path, entry.name))
+                self.stdout.write('Creating thumbnail for {folder_and_path.folder.local_path}{folder_and_path.relative_path}/{entry.name}')

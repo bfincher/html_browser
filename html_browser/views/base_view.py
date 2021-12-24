@@ -48,8 +48,10 @@ def reverse_content_url(folder_and_path, view_name='content', extra_path=None):
 
 class BaseView(View):
     def __init__(self):
+        super().__init__()
         self.req_logger = get_req_logger()
         self.context = {}
+        self.request = None
 
     def dispatch(self, request, *args, **kwargs):
         self.req_logger.info(self.__class__.__name__)
@@ -71,12 +73,15 @@ class BaseView(View):
         return super().dispatch(request, *args, **kwargs)
 
 
-class BaseContentView(UserPassesTestMixin, BaseView):
+class BaseContentView(UserPassesTestMixin, BaseView): #pylint: disable=abstract-method
     def __init__(self, require_write=False, require_delete=False):
         super().__init__()
         self.folder_and_path = None
         self.require_write = require_write
         self.require_delete = require_delete
+        self.user_can_read = None
+        self.user_can_write = None
+        self.user_can_delete = None
 
     def dispatch(self, request, *args, **kwargs):
         if 'folder_and_path_url' in kwargs:
@@ -141,7 +146,7 @@ class LoginView(BaseView):
                 if self.req_logger.isEnabledFor(DEBUG):
                     self.req_logger.debug("%s authenticated", user)
             else:
-                self.req_logger.warn("%s attempted to log in to a disabled account", user)
+                self.req_logger.warning("%s attempted to log in to a disabled account", user)
                 messages.error(request, 'Account has been disabled')
         else:
             messages.error(request, 'Invalid login')
@@ -151,71 +156,70 @@ class LoginView(BaseView):
 
 
 class LogoutView(BaseView):
-    def get(self, request):
+    def get(self, request): #pylint: disable=no-self-use
         auth_logout(request)
         return redirect('index')
 
 
-class DownloadView(BaseContentView):
-    def get(self, request, folder_and_path_url, file_name):
+class DownloadView(BaseContentView): #pylint: disable=abstract-method
+    def get(self, request, file_name):
         return sendfile(request,
                         join_paths(self.folder_and_path.abs_path, file_name),
                         attachment=True)
 
 
-class DownloadImageView(BaseContentView):
-    def get(self, request, folder_and_path_url, file_name):
+class DownloadImageView(BaseContentView): #pylint: disable=abstract-method
+    def get(self, request, file_name):
         return sendfile(request, join_paths(self.folder_and_path.abs_path, file_name), attachment=False)
 
 
 class ThumbView(BaseView):
-    def get(self, request, path):
+    def get(self, request, path): #pylint: disable=no-self-use
         file = join_paths(settings.THUMBNAIL_CACHE_DIR, path)
         return sendfile(request, file, attachment=False)
 
 
-class DownloadZipView(BaseContentView):
-    def get(self, request, folder_and_path_url):
+class DownloadZipView(BaseContentView): #pylint: disable=abstract-method
+
+    def get(self, request):
         compression = zipfile.ZIP_DEFLATED
         file_name = tempfile.mktemp(prefix="download_", suffix=".zip")
-        self.zipFile = ZipFile(file_name, mode='w', compression=compression)
+        with ZipFile(file_name, mode='w', compression=compression) as zipFile:
 
-        for entry in get_checked_entries(request.GET):
-            path = join_paths(self.folder_and_path.abs_path, replace_escaped_url(entry))
-            if os.path.isfile(path):
-                self.__addFileToZip__(path)
-            else:
-                self.__addFolderToZip__(Path(path))
-
-        self.zipFile.close()
+            for entry in get_checked_entries(request.GET):
+                path = join_paths(self.folder_and_path.abs_path, replace_escaped_url(entry))
+                if os.path.isfile(path):
+                    self.__addFileToZip__(zipFile, path)
+                else:
+                    self.__addFolderToZip__(zipFile, Path(path))
 
         FilesToDelete.objects.create(file_path=file_name)
 
         return sendfile(request, file_name, attachment=True)
 
-    def __addFileToZip__(self, file_to_add):
+    def __addFileToZip__(self, zipFile, file_to_add):
         arc_name = file_to_add.replace(self.folder_and_path.abs_path, '')
-        self.zipFile.write(file_to_add, arc_name, compress_type=zipfile.ZIP_DEFLATED)
+        zipFile.write(file_to_add, arc_name, compress_type=zipfile.ZIP_DEFLATED)
 
-    def __addFolderToZip__(self, folder):
+    def __addFolderToZip__(self, zipFile, folder):
         for f in folder.iterdir():
             if f.is_file():
                 arc_name = f.as_posix().replace(self.folder_and_path.abs_path, '')
-                self.zipFile.write(f.as_posix(), arc_name, compress_type=zipfile.ZIP_DEFLATED)
+                zipFile.write(f.as_posix(), arc_name, compress_type=zipfile.ZIP_DEFLATED)
             elif f.is_dir():
-                self.__addFolderToZip__(f)
+                self.__addFolderToZip__(zipFile, f)
 
 
-class UploadView(BaseContentView):
+class UploadView(BaseContentView): #pylint: disable=abstract-method
     def __init__(self):
         super().__init__(require_write=True)
 
-    def get(self, request, folder_and_path_url):
+    def get(self, request):
         self.context['view_types'] = const.view_types
 
         return render(request, 'upload.html', self.context)
 
-    def post(self, request, folder_and_path_url, *args, **kwargs):
+    def post(self, request):
         for key in request.FILES:
             file_name = join_paths(self.folder_and_path.abs_path, request.FILES[key].name)
             with open(file_name, 'wb') as dest:
@@ -246,15 +250,16 @@ def get_index_into_current_dir(request, folder_and_path, file_name):
     view_type = request.session.get('view_type', const.view_types[0])
     current_dir_entries = folder_and_path.get_dir_entries(is_show_hidden(request), view_type)
 
-    for i in range(len(current_dir_entries)):
-        if current_dir_entries[i].name == file_name:
+    for index, entry in enumerate(current_dir_entries):
+        if entry.name == file_name:
             result = {'current_dir_entries': current_dir_entries,
-                      'index': i}
+                      'index': index}
             return result
+    return None
 
 
-class ImageView(BaseContentView):
-    def get(self, request, folder_and_path_url, file_name):
+class ImageView(BaseContentView): #pylint: disable=abstract-method
+    def get(self, request, file_name):
         entries = get_index_into_current_dir(request, self.folder_and_path, file_name)
         index = entries['index']
         current_dir_entries = entries['current_dir_entries']
@@ -283,11 +288,11 @@ class ImageView(BaseContentView):
         return render(request, 'image_view.html', self.context)
 
 
-class DeleteImageView(BaseContentView):
+class DeleteImageView(BaseContentView): #pylint: disable=abstract-method
     def __init__(self):
         super().__init__(require_delete=True)
 
-    def post(self, request, folder_and_path_url):
+    def post(self, request):
         file_name = request.POST['file_name']
 
         handle_delete(self.folder_and_path, [file_name])
@@ -296,8 +301,8 @@ class DeleteImageView(BaseContentView):
         return redirect(reverse_content_url(self.folder_and_path))
 
 
-class GetNextImageView(BaseContentView):
-    def get(self, request, folder_and_path_url, file_name):
+class GetNextImageView(BaseContentView): #pylint: disable=abstract-method
+    def get(self, request, file_name):
         result = {}
         entries = get_index_into_current_dir(request, self.folder_and_path, file_name)
         if entries:
@@ -305,10 +310,6 @@ class GetNextImageView(BaseContentView):
             current_dir_entries = entries['current_dir_entries']
 
             result['hasNextImage'] = False
-
-            self.req_logger.info("BKF file_name = %s", file_name)
-            self.req_logger.info("BKF entries[i].name = %s", current_dir_entries[index])
-            self.req_logger.info("BKF entries[i+1].name = %s", current_dir_entries[index + 1])
 
             for i in range(index + 1, len(current_dir_entries)):
                 if imageRegex.match(current_dir_entries[i].name):

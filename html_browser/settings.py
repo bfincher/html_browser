@@ -55,18 +55,15 @@ def readExtraSettings():
     extraConfigDir = env('EXTRA_CONFIG_DIR')
     configFile = join_paths(extraConfigDir, 'local_settings.json')
     if os.path.exists(configFile):
-        with open(configFile) as f:
+        with open(configFile, encoding='utf8') as f:
             data = json.load(f)
         if 'ALLOWED_HOSTS' in data:
-            global ALLOWED_HOSTS
             ALLOWED_HOSTS.extend(data['ALLOWED_HOSTS'])
 
         if 'URL_PREFIX' in data:
-            global URL_PREFIX
             URL_PREFIX = data['URL_PREFIX']
 
         if 'INTERNAL_IPS' in data:
-            global INTERNAL_IPS
             INTERNAL_IPS.extend(data['INTERNAL_IPS'])
 
 

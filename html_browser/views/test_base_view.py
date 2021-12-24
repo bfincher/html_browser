@@ -106,7 +106,7 @@ class BaseViewTest(unittest.TestCase):
 
         self.client = Client()
 
-    def tearDown(self):
+    def tear_down(self):
         User.objects.all().delete()
         Group.objects.all().delete()
         Folder.objects.all().delete()
