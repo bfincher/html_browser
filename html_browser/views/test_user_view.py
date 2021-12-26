@@ -1,4 +1,3 @@
-#pylint: skip-file
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.urls import reverse

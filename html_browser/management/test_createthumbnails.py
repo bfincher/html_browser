@@ -1,4 +1,3 @@
-#pylint: skip-file
 import os
 import re
 import shutil
@@ -16,7 +15,7 @@ test_dir = join_paths(settings.BASE_DIR, 'test_image_dir')
 src_img_dir = join_paths(settings.BASE_DIR, 'media', 'images')
 
 
-class ExpectedImage(object):
+class ExpectedImage:
     def __init__(self, file_name, dest_dir):
         self.file_name = file_name
         self.src_path = join_paths(src_img_dir, file_name)
@@ -78,7 +77,7 @@ class TestCreateThumbnails(unittest.TestCase):
         out = StringIO()
         call_command('createthumbnails', 'test_folder', stdout=out)
         for expected_image in TestCreateThumbnails.expected_images:
-            self.assertIn("Creating thumbnail for %s" % expected_image.dest_path, out.getvalue())
+            self.assertIn(f"Creating thumbnail for {expected_image.dest_path}", out.getvalue())
 
         thumbnail_key_regex = re.compile(r'sorl-thumbnail\|\|thumbnails\|\|(\w+)')
         thumbnail_keys_found = 0

@@ -30,6 +30,14 @@ class Folder(models.Model):
                                    choices=viewable_choices,
                                    default=VIEWABLE_BY_PERMISSION)
 
+    @classmethod
+    def create(cls, name, local_path, view_option):
+        folder = Folder()
+        folder.name = name
+        folder.local_path = local_path
+        folder.view_option = view_option
+        return folder
+
     def __unicode__(self):
         return self.name
 

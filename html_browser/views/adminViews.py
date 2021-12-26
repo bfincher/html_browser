@@ -78,7 +78,7 @@ class FolderAdminView(BaseAdminView):
 
 
 class DeleteFolderView(BaseAdminView):
-    def post(self, request, folder_name): #pylint: disable=no-self-use
+    def post(self, request, folder_name): #pylint: disable=no-self-use, unused-argument
         folder = Folder.objects.get(name=folder_name)
         folder.delete()
         return redirect('folderAdmin')
