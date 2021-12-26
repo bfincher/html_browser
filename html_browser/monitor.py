@@ -5,6 +5,7 @@ import signal
 import sys
 import threading
 
+
 class Monitor:
     def __init__(self, interval=1.0):
         self.interval = interval
@@ -23,7 +24,6 @@ class Monitor:
         print(f'{prefix} Change detected to \'{path}\'.', file=sys.stderr)
         print(f'{prefix} Triggering process restart.', file=sys.stderr)
         os.kill(os.getpid(), signal.SIGINT)
-
 
     def _modified(self, path):
         try:
@@ -55,7 +55,6 @@ class Monitor:
             return True
 
         return False
-
 
     def _monitor(self):
         while 1:
@@ -91,9 +90,10 @@ class Monitor:
         if path not in self._files:
             self._files.append(path)
 
-_instance = Monitor()
 
+_instance = Monitor()
 atexit.register(_instance.exiting)
+
 
 def _get_module_file(module):
     if hasattr(module, '__file__'):
@@ -103,13 +103,14 @@ def _get_module_file(module):
         return path
     return None
 
+
 def start(interval=1.0):
     if interval < _instance.interval:
         _instance.interval = interval
 
     with _instance.lock:
         if not _instance.running:
-            prefix = f'monitor (pid={os.getpid}):'
+            prefix = f'monitor (pid={os.getpid()}):'
             print(f'{prefix} Starting change monitor.', file=sys.stderr)
             _instance.running = True
             _instance.thread.start()

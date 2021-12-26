@@ -10,8 +10,10 @@ FILE_NAME_CHARS = r'[\w \-~!@#$%^&*\(\)\+,\.\'’‘\[\]\{\}]'
 FOLDER_AND_PATH_REGEX = fr'(?P<folder_and_path_url>\w+(/{FILE_NAME_CHARS}+?)*)/'
 prefix = settings.URL_PREFIX
 
+
 def _getUrlWithPath(name):
     return fr'{prefix}{name}/{FOLDER_AND_PATH_REGEX}(?P<file_name>{FILE_NAME_CHARS}+)/$'
+
 
 urlpatterns = [
     url(fr'{prefix}$', base_view.IndexView.as_view(), name='index'),

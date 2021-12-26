@@ -52,7 +52,7 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
     def initForm(self, request):
         pass
 
-    def get(self, request, title, username = None):
+    def get(self, request, title, username=None):
         self.title = title
 
         if username:
@@ -68,7 +68,7 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
         self.context['title'] = self.title
         return render(request, 'admin/add_edit_user.html', self.context)
 
-    def post(self, request, title, username = None, *args, **kwargs): #pylint: disable=keyword-arg-before-vararg
+    def post(self, request, title, username=None, *args, **kwargs): #pylint: disable=keyword-arg-before-vararg
         self.title = title
 
         if username:
@@ -114,7 +114,6 @@ class AddUserView(AbstractUserView):
     def __init__(self, *args, **kwargs):
         self.title = None
         super().__init__(*args, **kwargs)
-
 
     def initForm(self, request):
         if request.method == "GET":

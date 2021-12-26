@@ -48,6 +48,7 @@ URL_PREFIX = env('URL_PREFIX')
 LOGIN_URL = env('LOGIN_URL')
 DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
+
 def buildStaticFilesDirs():
     baseDirPrefix = '__BASE_DIR__'
     tmpList = env('STATICFILES_DIRS')
@@ -59,6 +60,7 @@ def buildStaticFilesDirs():
         toReturn.append(entry)
 
     return tuple(toReturn)
+
 
 STATICFILES_DIRS = buildStaticFilesDirs()
 
@@ -277,5 +279,6 @@ def readExtraSettings():
 
         if 'INTERNAL_IPS' in data:
             INTERNAL_IPS.extend(data['INTERNAL_IPS'])
+
 
 readExtraSettings()

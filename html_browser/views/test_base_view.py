@@ -24,6 +24,7 @@ def context_check(test_case, context, user=None):
     if user:
         test_case.assertEqual(user, context['user'])
 
+
 def createUser(username, pw, groups=None):
     user = User()
     user.username = username
@@ -55,7 +56,7 @@ class BaseViewTest(TestCase): #pylint: disable=too-many-instance-attributes
         self.user2Pw = 'test_pw_2'
 
         self.user3 = createUser('user3', 'test_pw_3')
-        self.user3Pw= 'test_pw_3'
+        self.user3Pw = 'test_pw_3'
 
         self.users = {self.user1.username: self.user1Pw,
                       self.user2.username: self.user2Pw,

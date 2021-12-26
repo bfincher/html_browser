@@ -36,7 +36,7 @@ class Command(BaseCommand):
                 for key, value in default.backend.default_options.items():
                     options.setdefault(key, value)
                 source = ImageFile(image_link_path)
-                file_name = default.backend._get_thumbnail_filename(source, utils.THUMBNAIL_GEOMETRY, options) #pylint: disable=protected-access
+                file_name = default.backend._get_thumbnail_filename(source, utils.THUMBNAIL_GEOMETRY, options)  #pylint: disable=protected-access
 
                 thumbnail = ImageFile(file_name, default.storage)
                 cached = default.kvstore.get(thumbnail)

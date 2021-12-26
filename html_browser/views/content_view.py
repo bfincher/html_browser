@@ -29,6 +29,7 @@ _viewTypeToTemplateMap = {
 
 numItemsPerPage = 48
 
+
 def _change_settings(request):
     if request.POST['submit'] == "Save":
         request.session['show_hidden'] = request.POST['show_hidden'] is not None
@@ -37,6 +38,7 @@ def _change_settings(request):
 def _set_view_type(request):
     view_type = request.POST['view_type']
     request.session['view_type'] = view_type
+
 
 class ContentView(BaseContentView): #pylint: disable=abstract-method
 
@@ -199,7 +201,6 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
         else:
             handle_delete(self.folder_and_path, get_checked_entries(request.POST))
             messages.success(request, 'File(s) deleted')
-
 
     def _mkdir(self, request):
         dir_name = request.POST['dir']
