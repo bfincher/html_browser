@@ -29,8 +29,16 @@ _viewTypeToTemplateMap = {
 
 numItemsPerPage = 48
 
+def _change_settings(request):
+    if request.POST['submit'] == "Save":
+        request.session['show_hidden'] = request.POST['show_hidden'] is not None
 
-class ContentView(BaseContentView):
+
+def _set_view_type(request):
+    view_type = request.POST['view_type']
+    request.session['view_type'] = view_type
+
+class ContentView(BaseContentView): #pylint: disable=abstract-method
 
     def __init__(self):
         super().__init__()
@@ -39,19 +47,20 @@ class ContentView(BaseContentView):
             'cutToClipboard': self._cut_to_clipboard,
             'pasteFromClipboard': self._paste_from_clipboard,
             'deleteEntry': self._delete_entry,
-            'setViewType': self._set_view_type,
+            'setViewType': _set_view_type,
             'mkDir': self._mkdir,
             'rename': self._rename,
-            'changeSettings': self._change_settings
+            'changeSettings': _change_settings
         }
+        self.breadcrumbs = None
 
-    def post(self, request, folder_and_path_url):
+    def post(self, request, folder_and_path_url): #pylint: disable=unused-argument
 
         action = request.POST['action']
         if action in self.actionDict:
             self.actionDict[action](request)
         else:
-            raise RuntimeError('Unknown action %s' % action)
+            raise RuntimeError(f'Unknown action {action}')
 
         return redirect(reverse_content_url(self.folder_and_path))
 
@@ -65,7 +74,7 @@ class ContentView(BaseContentView):
 
         for entry in clipboard.entries:
             if os.path.exists(join_paths(dest, entry)):
-                messages.error("One or more of the items already exists in the destination")
+                messages.error("One or more of the items already exists in the destination") #pylint: disable=no-value-for-parameter
                 return
 
         for entry in clipboard.entries:
@@ -82,16 +91,14 @@ class ContentView(BaseContentView):
 
         messages.success(self.request, 'Items pasted')
 
-    def get(self, request, folder_and_path_url):
+    def get(self, request): #pylint: disable=too-many-locals
         ContentView.deleteOldFiles()
 
-        self.breadcrumbs = None
         crumbs = self.folder_and_path.relative_path.split("/")
         if len(crumbs) >= 1:
-            self.breadcrumbs = "<a href=\"%s\">Home</a> " % reverse('index')
+            self.breadcrumbs = f"<a href=\"{reverse('index')}\">Home</a> "
             reverse_url = reverse_content_url(FolderAndPath(folder=self.folder_and_path.folder, path=''))
-            self.breadcrumbs += "&rsaquo; <a href=\"%s\">%s</a> " % (reverse_url,
-                                                                     self.folder_and_path.folder.name)
+            self.breadcrumbs += f"&rsaquo; <a href=\"{reverse_url}\">{self.folder_and_path.folder.name}</a> "
 
             accumulated = ""
             while len(crumbs) > 0:
@@ -101,7 +108,7 @@ class ContentView(BaseContentView):
                     self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
                     if len(crumbs) > 0:
                         url = reverse_content_url(FolderAndPath(folder=self.folder_and_path.folder, path=accumulated))
-                        self.breadcrumbs += "<a href=\"{!s}\">{!s}</a> ".format(url, crumb)
+                        self.breadcrumbs += f"<a href=\"{url!r}\">{crumb!r}</a> "
 
                     else:
                         self.breadcrumbs = self.breadcrumbs + crumb
@@ -109,7 +116,7 @@ class ContentView(BaseContentView):
         content_filter = None
         if 'filter' in request.GET:
             content_filter = request.GET['filter']
-            messages.info(request, 'Filtered on %s' % content_filter)
+            messages.info(request, f'Filtered on {content_filter}')
 
         self.context['user_can_read'] = str(self.user_can_read).lower()
         self.context['user_can_write'] = str(self.user_can_write).lower()
@@ -193,9 +200,6 @@ class ContentView(BaseContentView):
             handle_delete(self.folder_and_path, get_checked_entries(request.POST))
             messages.success(request, 'File(s) deleted')
 
-    def _set_view_type(self, request):
-        view_type = request.POST['view_type']
-        request.session['view_type'] = view_type
 
     def _mkdir(self, request):
         dir_name = request.POST['dir']
@@ -204,10 +208,6 @@ class ContentView(BaseContentView):
     def _rename(self, request):
         self.handleRename(request.POST['file'], request.POST['newName'])
 
-    def _change_settings(self, request):
-        if request.POST['submit'] == "Save":
-            request.session['show_hidden'] = request.POST['show_hidden'] is not None
-
 
 def _get_disk_percent_free(path):
     du = _get_disk_usage(path)
@@ -215,7 +215,7 @@ def _get_disk_percent_free(path):
     total = du.free + du.used / 1.0
     pct = free / total
     pct = pct * 100.0
-    return "%.2f" % pct + "%"
+    return f"{pct}:.2f%"
 
 
 def _get_disk_usage_formatted(path):
@@ -241,9 +241,9 @@ def _get_disk_usage(path):
         used = (st.f_blocks - st.f_bfree) * st.f_frsize
         return _ntuple_diskusage(total, used, free)
 
-    elif os.name == 'nt':  # Windows
-        import ctypes
-        import sys
+    if os.name == 'nt':  # Windows
+        import ctypes #pylint: disable=import-outside-toplevel
+        import sys    #pylint: disable=import-outside-toplevel
 
         _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), ctypes.c_ulonglong()
         if sys.version_info >= (3,) or isinstance(path, str):
@@ -255,8 +255,8 @@ def _get_disk_usage(path):
             raise ctypes.WinError()
         used = total.value - free.value
         return _ntuple_diskusage(total.value, used, free.value)
-    else:
-        raise NotImplementedError("platform not supported")
+
+    raise NotImplementedError("platform not supported")
 
 
 def get_parent_dir_link(folder_and_path):
@@ -270,9 +270,9 @@ def get_parent_dir_link(folder_and_path):
 
 class Clipboard():
 
-    def __init__(self, folder_and_path, entries, type):
+    def __init__(self, folder_and_path, entries, clipboardType):
         self.folder_and_path = folder_and_path
-        self.type = type
+        self.type = clipboardType
         self.entries = entries
 
     @staticmethod

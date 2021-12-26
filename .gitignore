@@ -16,3 +16,5 @@ hbmedia
 /.pytest_cache/
 .project
 .pydevproject
+.settings
+.checkstyle

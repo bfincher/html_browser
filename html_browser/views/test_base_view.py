@@ -1,14 +1,14 @@
+#pylint: skip-file
 import filecmp
 import os
 import re
 import tempfile
-import unittest
 from shutil import rmtree
 # import zipfile
 from zipfile import ZipFile
 
 from django.contrib.auth.models import Group, User
-from django.test import Client
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from html_browser._os import join_paths
@@ -26,7 +26,7 @@ def context_check(test_case, context, user=None, folder=None):
         test_case.assertEqual(user, context['user'])
 
 
-class BaseViewTest(unittest.TestCase):
+class BaseViewTest(TestCase):
     def setUp(self):
         User.objects.all().delete()
         Group.objects.all().delete()

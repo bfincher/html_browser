@@ -39,12 +39,12 @@ class Folder(models.Model):
     def _check_user_perm(self, user, desired_perm):
         if user.is_superuser:
             return True
-        else:
-            perms = self.userpermission_set.filter(user__username=user.username)
-            for perm in perms:
-                if perm.permission >= desired_perm:
-                    return True
-            return False
+
+        perms = self.userpermission_set.filter(user__username=user.username)
+        for perm in perms:
+            if perm.permission >= desired_perm:
+                return True
+        return False
 
     def _check_group_perm(self, user, desired_perm):
         for perm in self.grouppermission_set.all():
@@ -55,14 +55,14 @@ class Folder(models.Model):
     def user_can_read(self, user):
         if self.view_option == VIEWABLE_BY_ANONYMOUS:
             return True
-        elif self.view_option == VIEWABLE_BY_EVERYONE and user is not None and user.is_authenticated:
+        if self.view_option == VIEWABLE_BY_EVERYONE and user is not None and user.is_authenticated:
             return True
-        else:
-            can_read = self._check_user_perm(user, CAN_READ)
-            if not can_read:
-                can_read = self._check_group_perm(user, CAN_READ)
 
-            return can_read
+        can_read = self._check_user_perm(user, CAN_READ)
+        if not can_read:
+            can_read = self._check_group_perm(user, CAN_READ)
+
+        return can_read
 
     def user_can_write(self, user):
         return self._check_user_perm(user, CAN_WRITE) or self._check_group_perm(user, CAN_WRITE)
@@ -86,7 +86,7 @@ class UserPermission(Permission):
                              on_delete=models.CASCADE)
 
     def __str__(self):
-        return " ".join([self.folder.name, self.user.username, str(self.permission)])
+        return " ".join([self.folder.name, self.user.username, str(self.permission)]) #pylint: disable=no-member
 
     def canRead(self):
         return self.permission >= CAN_READ

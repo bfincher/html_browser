@@ -1,3 +1,4 @@
+#pylint: skip-file
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -54,6 +55,7 @@ class UserTest(BaseAdminTest):
                 'is_active': False
                 }
 
+        origPassword = self.user1.password
         response = self.client.post(reverse('editUser', args=[self.user1.username]), data)
         self.assertEqual(302, response.status_code)
         self.assertEqual('/userAdmin/', response.url)
@@ -63,6 +65,7 @@ class UserTest(BaseAdminTest):
         self.assertEqual('nobody@whocares.com', new_user_1.email)
         self.assertTrue(new_user_1.is_superuser)
         self.assertFalse(new_user_1.is_active)
+        self.assertEqual(origPassword, new_user_1.password)
 
     def testDeleteUser(self):
         # test unauthorized user

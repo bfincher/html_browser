@@ -162,14 +162,14 @@ class LogoutView(BaseView):
 
 
 class DownloadView(BaseContentView): #pylint: disable=abstract-method
-    def get(self, request, file_name):
+    def get(self, request, folder_and_path_url, file_name): #pylint: disable=unused-argument
         return sendfile(request,
                         join_paths(self.folder_and_path.abs_path, file_name),
                         attachment=True)
 
 
 class DownloadImageView(BaseContentView): #pylint: disable=abstract-method
-    def get(self, request, file_name):
+    def get(self, request, folder_and_path_url, file_name): #pylint: disable=unused-argument
         return sendfile(request, join_paths(self.folder_and_path.abs_path, file_name), attachment=False)
 
 
@@ -181,7 +181,7 @@ class ThumbView(BaseView):
 
 class DownloadZipView(BaseContentView): #pylint: disable=abstract-method
 
-    def get(self, request):
+    def get(self, request, folder_and_path_url): #pylint: disable=unused-argument
         compression = zipfile.ZIP_DEFLATED
         file_name = tempfile.mktemp(prefix="download_", suffix=".zip")
         with ZipFile(file_name, mode='w', compression=compression) as zipFile:
@@ -214,7 +214,7 @@ class UploadView(BaseContentView): #pylint: disable=abstract-method
     def __init__(self):
         super().__init__(require_write=True)
 
-    def get(self, request):
+    def get(self, request, folder_and_path_url): #pylint: disable=unused-argument
         self.context['view_types'] = const.view_types
 
         return render(request, 'upload.html', self.context)
@@ -259,7 +259,7 @@ def get_index_into_current_dir(request, folder_and_path, file_name):
 
 
 class ImageView(BaseContentView): #pylint: disable=abstract-method
-    def get(self, request, file_name):
+    def get(self, request, folder_and_path_url, file_name): #pylint: disable=unused-argument
         entries = get_index_into_current_dir(request, self.folder_and_path, file_name)
         index = entries['index']
         current_dir_entries = entries['current_dir_entries']

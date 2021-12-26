@@ -10,9 +10,9 @@ of a DjangoTemplates backend and used by RequestContext.
 from .constants import _constants as const
 
 
-def images(request):
+def images(request): #pylint: disable=unused-argument
     return {'IMAGE_URL': const.IMAGE_URL}
 
 
-def media(request):
+def media(request): #pylint: disable=unused-argument
     return {'MEDIA_URL': const.MEDIA_URL}

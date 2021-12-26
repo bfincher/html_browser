@@ -1,7 +1,7 @@
 #  Django settings for html_browser project.
-import environ
-import json
 import os
+import json
+import environ
 
 from html_browser._os import join_paths
 
@@ -37,6 +37,16 @@ env = environ.Env(
 )
 environ.Env.read_env()
 
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+DEBUG = env('DEBUG')
+THUMBNAIL_DEBUG = env('THUMBNAIL_DEBUG')
+INTERNAL_IPS = env('INTERNAL_IPS')
+THUMBNAIL_CACHE_DIR = env('THUMBNAIL_CACHE_DIR')
+EXTRA_CONFIG_DIR = env('EXTRA_CONFIG_DIR')
+
+URL_PREFIX = env('URL_PREFIX')
+LOGIN_URL = env('LOGIN_URL')
+DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
 def buildStaticFilesDirs():
     baseDirPrefix = '__BASE_DIR__'
@@ -49,34 +59,6 @@ def buildStaticFilesDirs():
         toReturn.append(entry)
 
     return tuple(toReturn)
-
-
-def readExtraSettings():
-    extraConfigDir = env('EXTRA_CONFIG_DIR')
-    configFile = join_paths(extraConfigDir, 'local_settings.json')
-    if os.path.exists(configFile):
-        with open(configFile, encoding='utf8') as f:
-            data = json.load(f)
-        if 'ALLOWED_HOSTS' in data:
-            ALLOWED_HOSTS.extend(data['ALLOWED_HOSTS'])
-
-        if 'URL_PREFIX' in data:
-            URL_PREFIX = data['URL_PREFIX']
-
-        if 'INTERNAL_IPS' in data:
-            INTERNAL_IPS.extend(data['INTERNAL_IPS'])
-
-
-ALLOWED_HOSTS = env('ALLOWED_HOSTS')
-DEBUG = env('DEBUG')
-THUMBNAIL_DEBUG = env('THUMBNAIL_DEBUG')
-INTERNAL_IPS = env('INTERNAL_IPS')
-THUMBNAIL_CACHE_DIR = env('THUMBNAIL_CACHE_DIR')
-EXTRA_CONFIG_DIR = env('EXTRA_CONFIG_DIR')
-
-URL_PREFIX = env('URL_PREFIX')
-LOGIN_URL = env('LOGIN_URL')
-DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
 STATICFILES_DIRS = buildStaticFilesDirs()
 
@@ -278,5 +260,22 @@ LOGGING = {
         },
     }
 }
+
+
+def readExtraSettings():
+    extraConfigDir = env('EXTRA_CONFIG_DIR')
+    configFile = join_paths(extraConfigDir, 'local_settings.json')
+    if os.path.exists(configFile):
+        with open(configFile, encoding='utf8') as f:
+            data = json.load(f)
+        if 'ALLOWED_HOSTS' in data:
+            ALLOWED_HOSTS.extend(data['ALLOWED_HOSTS'])
+
+        if 'URL_PREFIX' in data:
+            global URL_PREFIX #pylint: disable=global-statement
+            URL_PREFIX = data['URL_PREFIX']
+
+        if 'INTERNAL_IPS' in data:
+            INTERNAL_IPS.extend(data['INTERNAL_IPS'])
 
 readExtraSettings()

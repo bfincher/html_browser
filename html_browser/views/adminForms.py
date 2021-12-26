@@ -20,7 +20,7 @@ class Formset(LayoutObject):
     Formset("attached_files_formset")
     """
 
-    template = "%s/table_inline_formset.html" % TEMPLATE_PACK
+    template = f"{TEMPLATE_PACK}/table_inline_formset.html"
 
     def __init__(self, formset_name_in_context, template=None, formset_id=None):
         self.formset_name_in_context = formset_name_in_context
@@ -33,7 +33,7 @@ class Formset(LayoutObject):
         if template:
             self.template = template
 
-    def render(self, form, form_style, context, template_pack=TEMPLATE_PACK):
+    def render(self, form, form_style, context, template_pack=TEMPLATE_PACK): #pylint: disable=unused-argument
         formset = context[self.formset_name_in_context]
         return render_to_string(self.template,
                                 {'wrapper': self,
@@ -86,7 +86,7 @@ class EditFolderForm(AddFolderForm):
         instance = kwargs['instance']
         self.helper.form_action = reverse('editFolder', args=[instance.name])
 
-        self.helper.add_input(Button('delete', 'Delete Folder', css_class='btn', onclick="confirmDelete('%s')" % instance.name))
+        self.helper.add_input(Button('delete', 'Delete Folder', css_class='btn', onclick=f"confirmDelete('{instance.name}')"))
 
 
 class UserPermissionForm(forms.ModelForm):
@@ -131,7 +131,6 @@ class BaseUserPermissionFormSet(BaseInlineFormSet):
 
     def clean(self):
         pass
-        # TODO implement
 
 
 UserPermissionFormSet = inlineformset_factory(Folder,
@@ -150,7 +149,6 @@ class BaseGroupPermissionFormSet(BaseInlineFormSet):
 
     def clean(self):
         pass
-        # TODO implement
 
 
 GroupPermissionFormSet = inlineformset_factory(Folder,
@@ -176,6 +174,7 @@ class EditGroupForm(forms.ModelForm):
         model = Group
         fields = ('name', 'users')
 
+    #pylint: disable=duplicate-code
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_show_errors = True
