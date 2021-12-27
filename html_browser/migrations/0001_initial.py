@@ -29,7 +29,9 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100, unique=True)),
                 ('local_path', models.CharField(max_length=100, unique=True)),
-                ('view_option', models.CharField(choices=[('P', 'View authorization set by user and group permissions'), ('E', 'Viewable by any registered user'), ('A', 'Viewable by anonymous users')], default='P', max_length=1)),
+                ('view_option', models.CharField(choices=[('P', 'View authorization set by user and group permissions'),
+                                                          ('E', 'Viewable by any registered user'),
+                                                          ('A', 'Viewable by anonymous users')], default='P', max_length=1)),
             ],
         ),
         migrations.CreateModel(
