@@ -12,9 +12,7 @@ sudo: required
 install: 
   - "pip install flake8 pylint pylint-django"
   - "pip install -r requirements.txt"
-  - sudo mkdir /var/log/hb
-  - sudo mkdir -p /config/logs/hb
-  - sudo chown $USER /config/logs/hb
+  - mkdir log
   - cp cygwin.env .env
 
 before_script:
