@@ -8,7 +8,9 @@ from html_browser import settings, utils
 from html_browser._os import join_paths
 from html_browser.constants import _constants as const
 from html_browser.models import Folder
-from html_browser.utils import *
+from html_browser.utils import \
+    FolderAndPath, FolderAndPathArgumentException, NoParentException, Path, \
+    get_checked_entries, format_bytes
 
 thumbUrlRegex = re.compile(r'^/thumb/(cache/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg)$')
 
@@ -102,7 +104,7 @@ class FolderAndPathTest(unittest.TestCase):
         fp = FolderAndPath(folder=FolderAndPathTest.folder, path='test_path1/test_path2')
         _str = str(fp)
 
-        expected_str = "folder_name = %s, relative_path = %s, abs_path = %s, url = %s" % (fp.folder.name, fp.relative_path, fp.abs_path, fp.url)
+        expected_str = f"folder_name = {fp.folder.name}, relative_path = {fp.relative_path}, abs_path = {fp.abs_path}, url = {fp.url}"
 
         self.assertEqual(expected_str, _str)
 
@@ -129,6 +131,7 @@ class FileEntry:
         stat = self.path.stat()
         self.orig_time = stat.st_mtime
         self.expected_size = expected_size
+        self.time_set_to = None
 
     def set_m_time(self, time):
         self.time_set_to = time
@@ -172,7 +175,7 @@ class UtilsTest(unittest.TestCase):
 
         try:
             test_file = '.testFile.txt'
-            with open(test_file, 'a'):
+            with open(test_file, 'a', encoding='utf8'):
                 pass
             folder_and_path = FolderAndPath(folder=folder, path='')
             entries = folder_and_path.get_dir_entries(False, const.thumbnails_view_type)
@@ -195,10 +198,7 @@ class UtilsTest(unittest.TestCase):
             os.remove(test_file)
 
     def testGetCurrentDirEntries(self):
-        folder = Folder()
-        folder.name = 'test'
-        folder.local_path = 'media'
-        folder.view_option = 'E'
+        folder = Folder.create('test', 'media', 'E')
         folder.save()
 
         try:
@@ -221,9 +221,8 @@ class UtilsTest(unittest.TestCase):
 
                 self.assertEqual(17, len(entries))
 
-                for i in range(0, len(test_files)):
+                for i, test_file in enumerate(test_files):
                     entry = entries[i]
-                    test_file = test_files[i]
                     self.assertEqual(test_file.path.is_dir(), entry.is_dir)
                     self.assertEqual(test_file.path.name, entry.name)
                     self.assertEqual(entry.name, entry.name_url)
@@ -269,15 +268,12 @@ class UtilsTest(unittest.TestCase):
 
     def testHandleDelete(self):
         test_dir = 'html_browser/test_dir2'
-        chile_dir = join_paths(test_dir, 'child_dir')
-        test_file_1 = join_paths(chile_dir, 'test_file1.txt')
-        test_file_2 = join_paths(chile_dir, 'test_file2.txt')
-        test_file_3 = join_paths(chile_dir, 'test_file3.txt')
+        child_dir = join_paths(test_dir, 'child_dir')
+        test_file_1 = join_paths(child_dir, 'test_file1.txt')
+        test_file_2 = join_paths(child_dir, 'test_file2.txt')
+        test_file_3 = join_paths(child_dir, 'test_file3.txt')
 
-        folder = Folder()
-        folder.name = 'test'
-        folder.local_path = test_dir
-        folder.view_option = 'E'
+        folder = Folder.create(name='test', local_path=test_dir, view_option='E')
         folder.save()
 
         try:
@@ -285,13 +281,13 @@ class UtilsTest(unittest.TestCase):
                 rmtree(test_dir)
 
             os.mkdir(test_dir)
-            os.mkdir(chile_dir)
+            os.mkdir(child_dir)
 
-            with open(test_file_1, 'w') as f:
+            with open(test_file_1, 'w', encoding='utf8') as f:
                 f.write('Hello World')
-            with open(test_file_2, 'w') as f:
+            with open(test_file_2, 'w', encoding='utf8') as f:
                 f.write('Hello World')
-            with open(test_file_3, 'w') as f:
+            with open(test_file_3, 'w', encoding='utf8') as f:
                 f.write('Hello World')
 
             entries = ['test_file2.txt', 'test_file1.txt']
@@ -305,7 +301,7 @@ class UtilsTest(unittest.TestCase):
             entries = ['child_dir']
             utils.handle_delete(FolderAndPath(folder=folder, path=''), entries)
             self.assertFalse(os.path.exists(test_file_3))
-            self.assertFalse(os.path.exists(chile_dir))
+            self.assertFalse(os.path.exists(child_dir))
         finally:
             folder.delete()
 

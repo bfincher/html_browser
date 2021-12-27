@@ -10,15 +10,14 @@ sudo: required
 
 # command to install dependencies
 install: 
-  - "pip install flake8"
+  - "pip install flake8 pylint pylint-django"
   - "pip install -r requirements.txt"
-  - sudo mkdir /var/log/hb
-  - sudo mkdir -p /config/logs/hb
-  - sudo chown $USER /config/logs/hb
+  - mkdir log
   - cp cygwin.env .env
 
 before_script:
   - "flake8 ."
+  - "./pylint.sh ./html_browser"
 # command to run tests
 script: 
   - python manage.py test

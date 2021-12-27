@@ -2,13 +2,12 @@ import filecmp
 import os
 import re
 import tempfile
-import unittest
 from shutil import rmtree
 # import zipfile
 from zipfile import ZipFile
 
 from django.contrib.auth.models import Group, User
-from django.test import Client
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from html_browser._os import join_paths
@@ -19,42 +18,45 @@ from html_browser.views.base_view import (FolderAndPath,
                                           reverse_content_url)
 
 
-def context_check(test_case, context, user=None, folder=None):
+def context_check(test_case, context, user=None):
     test_case.assertTrue('csrf_token' in context)
 
     if user:
         test_case.assertEqual(user, context['user'])
 
 
-class BaseViewTest(unittest.TestCase):
+def createUser(username, pw, groups=None):
+    user = User()
+    user.username = username
+    user.set_password(pw)
+    user.save()
+
+    if groups:
+        for group in groups:
+            user.groups.add(group) #pylint: disable=no-member
+        user.save()
+    return user
+
+
+class BaseViewTest(TestCase): #pylint: disable=too-many-instance-attributes
+
     def setUp(self):
         User.objects.all().delete()
         Group.objects.all().delete()
         Folder.objects.all().delete()
 
-        self.user1 = User()
-        self.user1.username = 'user1'
+        self.user1 = createUser('user1', 'test_pw_1')
         self.user1Pw = 'test_pw_1'
-        self.user1.set_password(self.user1Pw)
-        self.user1.save()
 
         self.group1 = Group()
         self.group1.name = 'test_group1'
         self.group1.save()
 
-        self.user2 = User()
-        self.user2.username = 'user2'
+        self.user2 = createUser('user2', 'test_pw_2', [self.group1])
         self.user2Pw = 'test_pw_2'
-        self.user2.set_password(self.user2Pw)
-        self.user2.save()
-        self.user2.groups.add(self.group1)
-        self.user2.save()
 
-        self.user3 = User()
-        self.user3.username = 'user3'
+        self.user3 = createUser('user3', 'test_pw_3')
         self.user3Pw = 'test_pw_3'
-        self.user3.set_password(self.user3Pw)
-        self.user3.save()
 
         self.users = {self.user1.username: self.user1Pw,
                       self.user2.username: self.user2Pw,
@@ -78,22 +80,13 @@ class BaseViewTest(unittest.TestCase):
         user_perm.user = self.user3
         user_perm.save()
 
-        self.folder2 = Folder()
-        self.folder2.name = 'test2'
-        self.folder2.local_path = 'test2'
-        self.folder2.view_option = 'P'
+        self.folder2 = Folder.create('test2', 'test2', 'P')
         self.folder2.save()
 
-        self.folder3 = Folder()
-        self.folder3.name = 'test3'
-        self.folder3.local_path = 'test3'
-        self.folder3.view_option = 'E'
+        self.folder3 = Folder.create('test3', 'test3', 'E')
         self.folder3.save()
 
-        self.folder4 = Folder()
-        self.folder4.name = 'test4'
-        self.folder4.local_path = 'test4'
-        self.folder4.view_option = 'A'
+        self.folder4 = Folder.create('test4', 'test4', 'A')
         self.folder4.save()
 
         self.folders = [self.folder1, self.folder2, self.folder3, self.folder4]
@@ -125,8 +118,7 @@ class BaseViewTest(unittest.TestCase):
 
         actual_num = len(response.context['messages'])
         if actual_num != expect_num:
-            self.fail('Message count was %d, expected %d' %
-                      (actual_num, expect_num))
+            self.fail(f'Message count was {actual_num}, expected {expect_num}')
 
     def assert_message_contains(self, response, text, level=None):
         """
@@ -140,18 +132,16 @@ class BaseViewTest(unittest.TestCase):
         if len(matches) == 1:
             msg = matches[0]
             if level is not None and msg.level != level:
-                self.fail('There was one matching message but with different'
-                          'level: %s != %s' % (msg.level, level))
+                self.fail(f'There was one matching message but with different level: {msg.level} != {level}')
 
                 return
 
         elif len(matches) == 0:
-            messages_str = ", ".join('"%s"' % m for m in messages)
-            self.fail('No message contained text "%s", messages were: %s' %
-                      (text, messages_str))
+            messages_str = ", ".join(f'"{m}"' for m in messages)
+            self.fail(f'No message contained text "{text}", messages were: {messages_str}')
         else:
-            self.fail('Multiple messages contained text "%s": %s' %
-                      (text, ", ".join(('"%s"' % m) for m in matches)))
+            matchesStr = ", ".join((f'"{m}"' % m) for m in matches)
+            self.fail(f'Multiple messages contained text "{text}": {matchesStr}')
 
     def assert_message_not_contains(self, response, text):
         """ Assert that no message contains the given text. """
@@ -161,8 +151,8 @@ class BaseViewTest(unittest.TestCase):
         matches = [m for m in messages if text in m.message]
 
         if len(matches) > 0:
-            self.fail('Message(s) contained text "%s": %s' %
-                      (text, ", ".join(('"%s"' % m) for m in matches)))
+            matchesStr = ", ".join((f'"{m}"' % m) for m in matches)
+            self.fail(f'Message(s) contained text "{text}": {matchesStr}')
 
 
 class IndexViewTest(BaseViewTest):
@@ -268,12 +258,12 @@ class DownloadZipViewTest(BaseViewTest):
 
             self.assertIsNotNone(zip_file_name)
 
-            zip_file = ZipFile(join_paths(tmp_dir, zip_file_name), mode='r')
-            entries = zip_file.infolist()
+            with ZipFile(join_paths(tmp_dir, zip_file_name), mode='r') as zip_file:
+                entries = zip_file.infolist()
 
-            os.makedirs(extract_path, exist_ok=True)
-            for entry in entries:
-                zip_file.extract(entry, extract_path)
+                os.makedirs(extract_path, exist_ok=True)
+                for entry in entries:
+                    zip_file.extract(entry, extract_path)
 
             extracted_file_a = join_paths(extract_path, 'add_user.js')
             extracted_file_b = join_paths(extract_path, 'base.js')
@@ -312,75 +302,74 @@ class UploadViewTest(BaseViewTest):
 
         self.assertEqual(302, response.status_code)
         self.assertEqual('/?next=/upload/test/', response.url)
-    '''
-    def testUpload(self):
-        self.login(self.user1)
 
-        try:
-            with open('media/base.js', 'r') as f:
-                response = self.client.post(reverse_content_url(FolderAndPath(folder=self.folder1, path='images'), view_name='upload'),
-                                            data={'action': 'uploadFile',
-                                                  'upload1': f})
-
-            self.assertEqual(302, response.status_code)
-
-            self.assertTrue(os.path.exists('media/base.js'))
-            self.assertTrue(filecmp.cmp('media/base.js', 'media/images/base.js'))
-        finally:
-            if os.path.exists('media/images/base.js'):
-                os.remove('media/images/base.js')
-
-    def testUploadNoAuth(self):
-        self.login(self.user3)
-
-        try:
-            with open('media/base.js', 'r') as f:
-                response = self.client.post(reverse_content_url(FolderAndPath(folder=self.folder1, path='dir_a'), view_name='upload'),
-                                            data={'action': 'uploadFile',
-                                                  'upload1': f})
-
-            self.assertEqual(302, response.status_code)
-            self.assertEqual('/?next=/upload/test/dir_a/', response.url)
-        finally:
-            if os.path.exists('media/images/base.js'):
-                os.remove('media/images/base.js')
-
-    def testUploadZip(self):
-        self.login(self.user1)
-
-        zipFileName = tempfile.mktemp(prefix="test_zip", suffix=".zip")
-        destFiles = []
-        try:
-            zipFile = ZipFile(zipFileName, mode='w', compression=zipfile.ZIP_DEFLATED)
-            basePath = 'media'
-
-            entries = ['media/base.js',
-                       'media/add_user.js']
-
-            for entry in entries:
-                arcName = entry.replace(basePath, '')
-                zipFile.write(entry, arcName, compress_type=zipfile.ZIP_DEFLATED)
-
-            zipFile.close()
-
-            with open(zipFileName, 'rb') as f:
-                response = self.client.post(reverse_content_url(FolderAndPath(folder=self.folder1, path='images'),
-                                                              view_name='upload'),
-                                            data={'action': 'uploadZip',
-                                                  'zipupload1': f})
-
-                self.assertEqual(302, response.status_code)
-                destFiles = ['media/images/base.js',
-                             'media/images/add_user.js']
-                for destFile in destFiles:
-                    self.assertTrue(os.path.exists(destFile))
-        finally:
-            if os.path.exists(zipFileName):
-                os.remove(zipFileName)
-            for destFile in destFiles:
-                if os.path.exists(destFile):
-                    os.remove(destFile)
-    '''
+    # def testUpload(self):
+    #     self.login(self.user1)
+    #
+    #     try:
+    #         with open('media/base.js', 'r') as f:
+    #             response = self.client.post(reverse_content_url(FolderAndPath(folder=self.folder1, path='images'), view_name='upload'),
+    #                                         data={'action': 'uploadFile',
+    #                                               'upload1': f})
+    #
+    #         self.assertEqual(302, response.status_code)
+    #
+    #         self.assertTrue(os.path.exists('media/base.js'))
+    #         self.assertTrue(filecmp.cmp('media/base.js', 'media/images/base.js'))
+    #     finally:
+    #         if os.path.exists('media/images/base.js'):
+    #             os.remove('media/images/base.js')
+    #
+    # def testUploadNoAuth(self):
+    #     self.login(self.user3)
+    #
+    #     try:
+    #         with open('media/base.js', 'r') as f:
+    #             response = self.client.post(reverse_content_url(FolderAndPath(folder=self.folder1, path='dir_a'), view_name='upload'),
+    #                                         data={'action': 'uploadFile',
+    #                                               'upload1': f})
+    #
+    #         self.assertEqual(302, response.status_code)
+    #         self.assertEqual('/?next=/upload/test/dir_a/', response.url)
+    #     finally:
+    #         if os.path.exists('media/images/base.js'):
+    #             os.remove('media/images/base.js')
+    #
+    # def testUploadZip(self):
+    #     self.login(self.user1)
+    #
+    #     zipFileName = tempfile.mktemp(prefix="test_zip", suffix=".zip")
+    #     destFiles = []
+    #     try:
+    #         zipFile = ZipFile(zipFileName, mode='w', compression=zipfile.ZIP_DEFLATED)
+    #         basePath = 'media'
+    #
+    #         entries = ['media/base.js',
+    #                    'media/add_user.js']
+    #
+    #         for entry in entries:
+    #             arcName = entry.replace(basePath, '')
+    #             zipFile.write(entry, arcName, compress_type=zipfile.ZIP_DEFLATED)
+    #
+    #         zipFile.close()
+    #
+    #         with open(zipFileName, 'rb') as f:
+    #             response = self.client.post(reverse_content_url(FolderAndPath(folder=self.folder1, path='images'),
+    #                                                           view_name='upload'),
+    #                                         data={'action': 'uploadZip',
+    #                                               'zipupload1': f})
+    #
+    #             self.assertEqual(302, response.status_code)
+    #             destFiles = ['media/images/base.js',
+    #                          'media/images/add_user.js']
+    #             for destFile in destFiles:
+    #                 self.assertTrue(os.path.exists(destFile))
+    #     finally:
+    #         if os.path.exists(zipFileName):
+    #             os.remove(zipFileName)
+    #         for destFile in destFiles:
+    #             if os.path.exists(destFile):
+    #                 os.remove(destFile)
 
     def testImageView(self):
         self.login(self.user1)
@@ -423,8 +412,8 @@ class TestGetIndexIntoCurrentDir(BaseViewTest):
 
         expected_files = ['Add-Folder-icon.png', 'Copy-icon.png', 'Document-icon.png']
 
-        for i in range(len(expected_files)):
+        for i, expected_file in enumerate(expected_files):
             self.assertFalse(result['current_dir_entries'][i].is_dir)
             self.assertFalse(result['current_dir_entries'][i].has_thumbnail)
-            self.assertEqual(expected_files[i], result['current_dir_entries'][i].name)
-            self.assertEqual(expected_files[i], result['current_dir_entries'][i].name_url)
+            self.assertEqual(expected_file, result['current_dir_entries'][i].name)
+            self.assertEqual(expected_file, result['current_dir_entries'][i].name_url)

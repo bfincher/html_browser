@@ -9,6 +9,7 @@ from html_browser.models import User
 class AddUserForm(forms.ModelForm):
     verifyPassword = forms.CharField(label='Verify Password', widget=forms.PasswordInput())
 
+    #pylint: disable=duplicate-code
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_show_errors = True
@@ -32,6 +33,10 @@ class AddUserForm(forms.ModelForm):
         password = self.cleaned_data['password']
         if password:
             user.set_password(password)
+        else:
+            oldUser = User.objects.get(username=user.username)
+            user.password = oldUser.password
+
         if commit:
             user.save()
         return user

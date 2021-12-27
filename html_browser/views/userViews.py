@@ -19,7 +19,7 @@ logger = logging.getLogger('html_browser.userViews')
 
 
 class DeleteUserView(BaseAdminView):
-    def post(self, request):
+    def post(self, request): #pylint: disable=no-self-use
         username = request.POST['username']
         redirect_url = "userAdmin"
 
@@ -34,7 +34,7 @@ class DeleteUserView(BaseAdminView):
 
 
 class UserAdminView(BaseAdminView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         self.context['users'] = User.objects.all()
         return render(request, 'admin/user_admin.html', self.context)
 
@@ -42,6 +42,8 @@ class UserAdminView(BaseAdminView):
 class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
 
     def __init__(self, *args, **kwargs):
+        self.title = None
+        self.username = None
         super().__init__(*args, **kwargs)
         self.form = None
         self.user = None
@@ -50,7 +52,11 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
     def initForm(self, request):
         pass
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, title, username=None):
+        self.title = title
+
+        if username:
+            self.username = username
         if not self.form:
             self.initForm(request)
 
@@ -62,7 +68,11 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
         self.context['title'] = self.title
         return render(request, 'admin/add_edit_user.html', self.context)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, title, username=None, *args, **kwargs): #pylint: disable=keyword-arg-before-vararg
+        self.title = title
+
+        if username:
+            self.username = username
         self.initForm(request)
 
         with transaction.atomic():
@@ -88,16 +98,8 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
 class EditUserView(AbstractUserView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def get(self, request, title, username, *args, **kwargs):
-        self.username = username
-        self.title = title
-        return super().get(request, *args, **kwargs)
-
-    def post(self, request, title, username, *args, **kwargs):
-        self.username = username
-        self.title = title
-        return super().post(request, *args, **kwargs)
+        self.title = None
+        self.username = None
 
     def initForm(self, request):
         if request.method == "GET":
@@ -110,15 +112,8 @@ class EditUserView(AbstractUserView):
 
 class AddUserView(AbstractUserView):
     def __init__(self, *args, **kwargs):
+        self.title = None
         super().__init__(*args, **kwargs)
-
-    def post(self, request, title, *args, **kwargs):
-        self.title = title
-        return super().post(request, *args, **kwargs)
-
-    def get(self, request, title, *args, **kwargs):
-        self.title = title
-        return super().get(request, *args, **kwargs)
 
     def initForm(self, request):
         if request.method == "GET":
@@ -128,7 +123,7 @@ class AddUserView(AbstractUserView):
 
 
 class ChangePasswordView(BaseView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         self.context['form'] = PasswordChangeForm(request.user)
         return render(request, 'admin/change_password.html', self.context)
 
@@ -139,7 +134,7 @@ class ChangePasswordView(BaseView):
             update_session_auth_hash(request, user)
             messages.success(request, 'Your password has been changed')
             return redirect('index')
-        else:
-            messages.error(request, 'Please correct the error below')
-            self.context['form'] = form
-            return render(request, 'admin/change_password.html', self.context)
+
+        messages.error(request, 'Please correct the error below')
+        self.context['form'] = form
+        return render(request, 'admin/change_password.html', self.context)

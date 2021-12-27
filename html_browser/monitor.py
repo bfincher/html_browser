@@ -5,54 +5,94 @@ import signal
 import sys
 import threading
 
-_interval = 1.0
-_times = {}
-_files = []
 
-_running = False
-_queue = queue.Queue()
-_lock = threading.Lock()
+class Monitor:
+    def __init__(self, interval=1.0):
+        self.interval = interval
+        self._times = {}
+        self._files = []
+        self.running = False
+        self._queue = queue.Queue()
+        self.lock = threading.Lock()
 
+        self.thread = threading.Thread(target=self._monitor)
+        self.thread.setDaemon(True)
 
-def _restart(path):
-    _queue.put(True)
-    prefix = 'monitor (pid=%d):' % os.getpid()
-    print('%s Change detected to \'%s\'.' % (prefix, path), file=sys.stderr)
-    print('%s Triggering process restart.' % prefix, file=sys.stderr)
-    os.kill(os.getpid(), signal.SIGINT)
+    def _restart(self, path):
+        self._queue.put(True)
+        prefix = f'monitor (pid={os.getpid()}):'
+        print(f'{prefix} Change detected to \'{path}\'.', file=sys.stderr)
+        print(f'{prefix} Triggering process restart.', file=sys.stderr)
+        os.kill(os.getpid(), signal.SIGINT)
 
+    def _modified(self, path):
+        try:
+            # If path doesn't denote a file and were previously
+            # tracking it, then it has been removed or the file type
+            # has changed so force a restart. If not previously
+            # tracking the file then we can ignore it as probably
+            # pseudo reference such as when file extracted from a
+            # collection of modules contained in a zip file.
 
-def _modified(path):
-    try:
-        # If path doesn't denote a file and were previously
-        # tracking it, then it has been removed or the file type
-        # has changed so force a restart. If not previously
-        # tracking the file then we can ignore it as probably
-        # pseudo reference such as when file extracted from a
-        # collection of modules contained in a zip file.
+            if not os.path.isfile(path):
+                return path in self._times
 
-        if not os.path.isfile(path):
-            return path in _times
+            # Check for when file last modified.
 
-        # Check for when file last modified.
+            mtime = os.stat(path).st_mtime
+            if path not in self._times:
+                self._times[path] = mtime
 
-        mtime = os.stat(path).st_mtime
-        if path not in _times:
-            _times[path] = mtime
+            # Force restart when modification time has changed, even
+            # if time now older, as that could indicate older file
+            # has been restored.
 
-        # Force restart when modification time has changed, even
-        # if time now older, as that could indicate older file
-        # has been restored.
-
-        if mtime != _times[path]:
+            if mtime != self._times[path]:
+                return True
+        except:  # noqa: E722 #pylint: disable=bare-except
+            # If any exception occured, likely that file has been
+            # been removed just before stat(), so force a restart.
             return True
-    except:  # noqa: E722
-        # If any exception occured, likely that file has been
-        # been removed just before stat(), so force a restart.
 
-        return True
+        return False
 
-    return False
+    def _monitor(self):
+        while 1:
+            # Check modification times on all files in sys.modules.
+
+            for module in list(sys.modules.values()):
+                path = _get_module_file(module)
+                if path and self._modified(path):
+                    return self._restart(path)
+
+            # Check modification times on files which have
+            # specifically been registered for monitoring.
+
+            for path in self._files:
+                if self._modified(path):
+                    return self._restart(path)
+
+            # Go to sleep for specified interval.
+
+            try:
+                return self._queue.get(timeout=self.interval)
+            except:  # noqa: E722 #pylint: disable=bare-except
+                pass
+
+    def exiting(self):
+        try:
+            self._queue.put(True)
+        except:  # noqa: E722 #pylint: disable=bare-except
+            pass
+        self.thread.join()
+
+    def track(self, path):
+        if path not in self._files:
+            self._files.append(path)
+
+
+_instance = Monitor()
+atexit.register(_instance.exiting)
 
 
 def _get_module_file(module):
@@ -64,60 +104,13 @@ def _get_module_file(module):
     return None
 
 
-def _monitor():
-    while 1:
-        # Check modification times on all files in sys.modules.
-
-        for module in list(sys.modules.values()):
-            path = _get_module_file(module)
-            if path and _modified(path):
-                return _restart(path)
-
-        # Check modification times on files which have
-        # specifically been registered for monitoring.
-
-        for path in _files:
-            if _modified(path):
-                return _restart(path)
-
-        # Go to sleep for specified interval.
-
-        try:
-            return _queue.get(timeout=_interval)
-        except:  # noqa: E722
-            pass
-
-
-_thread = threading.Thread(target=_monitor)
-_thread.setDaemon(True)
-
-
-def _exiting():
-    try:
-        _queue.put(True)
-    except:  # noqa: E722
-        pass
-    _thread.join()
-
-
-atexit.register(_exiting)
-
-
-def track(path):
-    if path not in _files:
-        _files.append(path)
-
-
 def start(interval=1.0):
-    global _interval
-    if interval < _interval:
-        _interval = interval
+    if interval < _instance.interval:
+        _instance.interval = interval
 
-    global _running
-    _lock.acquire()
-    if not _running:
-        prefix = 'monitor (pid=%d):' % os.getpid()
-        print('%s Starting change monitor.' % prefix, file=sys.stderr)
-        _running = True
-        _thread.start()
-    _lock.release()
+    with _instance.lock:
+        if not _instance.running:
+            prefix = f'monitor (pid={os.getpid()}):'
+            print(f'{prefix} Starting change monitor.', file=sys.stderr)
+            _instance.running = True
+            _instance.thread.start()

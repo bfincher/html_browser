@@ -21,26 +21,26 @@ from html_browser.models import Folder
 from .constants import _constants as const
 
 logger = logging.getLogger('html_browser.utils')
-req_logger = None
+REQ_LOGGER = None
 
 KILOBYTE = 1024.0
 MEGABYTE = KILOBYTE * KILOBYTE
 GIGABYTE = MEGABYTE * KILOBYTE
-thumbnailGeometry = '150x150'
+THUMBNAIL_GEOMETRY = '150x150'
 
 checkBoxEntryRegex = re.compile(r'cb-(.+)')
 folder_and_path_regex = re.compile(r'^(\w+)(/(.*))?$')
-imageRegexStr = r'.+\.((jpg)|(jpeg)|(png)|(bmp))'
-imageRegex = re.compile(r'(?i)%s' % imageRegexStr)
-imageRegexWithCach = re.compile(r'(?i)cache/%s' % imageRegexStr)
+IMAGE_REGEX_STR = r'.+\.((jpg)|(jpeg)|(png)|(bmp))'
+imageRegex = re.compile(fr'(?i){IMAGE_REGEX_STR}')
+imageRegexWithCach = re.compile(fr'(?i)cache/{IMAGE_REGEX_STR}')
 
 
 class ThumbnailStorage(FileSystemStorage):
 
     def __init__(self):
-        p = Path(settings.THUMBNAIL_CACHE_DIR)
-        if not p.exists():
-            p.mkdir(parents=True)
+        path = Path(settings.THUMBNAIL_CACHE_DIR)
+        if not path.exists():
+            path.mkdir(parents=True)
         super().__init__(location=settings.THUMBNAIL_CACHE_DIR)
 
     def path(self, name):
@@ -51,25 +51,23 @@ class ThumbnailStorage(FileSystemStorage):
 
 class NoParentException(Exception):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    pass
 
 
 class ArgumentException(Exception):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    pass
 
 
 class FolderAndPathArgumentException(Exception):
 
     def __init__(self, **kwargs):
-        super().__init__("Expected kwargs are (url)|(folder_name, path).  Instead found %s" % kwargs)
+        super().__init__(f"Expected kwargs are (url)|(folder_name, path).  Instead found {kwargs}")
 
 
-class FolderAndPath:
+class FolderAndPath: # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         # options for kwargs are (url)|(folder_name, path)
 
         if 'url' in kwargs and len(kwargs) == 1:
@@ -88,15 +86,20 @@ class FolderAndPath:
                 raise FolderAndPathArgumentException(**kwargs)
 
             # just in case the path argument already has the folder localpath appended, try to replace the folder.localpath prefix
-            self.relative_path = re.sub(r'^%s' % self.folder.local_path, '', kwargs['path'])
+            self.relative_path = re.sub(fr'^{self.folder.local_path}', '', kwargs['path'])
 
             self.abs_path = join_paths(self.folder.local_path, self.relative_path)
-            self.url = "%s/%s" % (self.folder.name, self.relative_path)
+            self.url = f"{self.folder.name}/{self.relative_path}"
         else:
             raise FolderAndPathArgumentException(**kwargs)
 
+        self.dir_entries = None
+        self.file_entries = None
+        self.skip_thumbnail = None
+        self.start_time = None
+
     def __str__(self):
-        return "folder_name = %s, relative_path = %s, abs_path = %s, url = %s" % (self.folder.name, self.relative_path, self.abs_path, self.url)
+        return f"folder_name = {self.folder.name}, relative_path = {self.relative_path}, abs_path = {self.abs_path}, url = {self.url}"
 
     def get_parent(self):
         if self.relative_path == '':
@@ -133,8 +136,8 @@ class FolderAndPath:
         if _dir.endswith('lost+found'):
             return []
 
-        for f in Path(_dir).iterdir():
-            self._process_entry(f, show_hidden, view_type, content_filter)
+        for file in Path(_dir).iterdir():
+            self._process_entry(file, show_hidden, view_type, content_filter)
 
         dir_entries.sort(key=attrgetter('name'))
         file_entries.sort(key=attrgetter('name'))
@@ -166,8 +169,8 @@ class FolderAndPath:
                 skip_thumbnail = self.skip_thumbnail or delta.total_seconds() > 45
                 if include:
                     self.file_entries.append(DirEntry(entry, self, view_type, skip_thumbnail))
-        except (OSError, UnicodeDecodeError) as e:
-            logger.exception(e)
+        except (OSError, UnicodeDecodeError) as exception:
+            logger.exception(exception)
 
 
 def get_checked_entries(request_dict):
@@ -180,7 +183,7 @@ def get_checked_entries(request_dict):
     return entries
 
 
-class DirEntry():
+class DirEntry(): # pylint: disable=too-many-instance-attributes
 
     def __init__(self, path, folder_and_path, view_type, skip_thumbnail=False):
         self.thumbnail_url = None
@@ -211,15 +214,9 @@ class DirEntry():
             self.has_thumbnail = False
 
     def __str__(self):
-        _str = """DirEntry:  is_dir = {} name = {} name_url = {}
-                  size = {} last_modify_time = {} has_thumbnail = {}
-                  thumbnail_url = {}""".format(str(self.is_dir),
-                                               self.name,
-                                               self.name_url,
-                                               self.size,
-                                               self.last_modify_time,
-                                               self.has_thumbnail,
-                                               self.get_thumbnail_url())
+        _str = f"""DirEntry:  is_dir = {self.is_dir} name = {self.name} name_url = {self.name_url}
+                  size = {self.size} last_modify_time = {self.last_modify_time} has_thumbnail = {self.has_thumbnail}
+                  thumbnail_url = {self.get_thumbnail_url()}"""
         return _str
 
     def __repr__(self):
@@ -228,8 +225,8 @@ class DirEntry():
     def get_thumbnail_url(self):
         if self.has_thumbnail:
             if not self.thumbnail_url:
-                im = get_thumbnail(self.image_link_path, thumbnailGeometry)
-                self.thumbnail_url = reverse('thumb', args=[im.name])
+                image = get_thumbnail(self.image_link_path, THUMBNAIL_GEOMETRY)
+                self.thumbnail_url = reverse('thumb', args=[image.name])
             return self.thumbnail_url
         return None
 
@@ -287,10 +284,10 @@ def handle_delete(folder_and_path, entries):
 
 
 def get_req_logger():
-    global req_logger
-    if not req_logger:
-        req_logger = logging.getLogger('django.request')
-    return req_logger
+    global REQ_LOGGER # pylint: disable=global-statement
+    if not REQ_LOGGER:
+        REQ_LOGGER = logging.getLogger('django.request')
+    return REQ_LOGGER
 
 
 def format_bytes(num_bytes, force_unit=None, include_unit_suffix=True):
@@ -300,29 +297,27 @@ def format_bytes(num_bytes, force_unit=None, include_unit_suffix=True):
         unit = get_bytes_unit(num_bytes)
 
     if unit == "GB":
-        return_value = "%.2f" % (num_bytes / GIGABYTE)
+        return_value = f"{(num_bytes / GIGABYTE):.2f}"
     elif unit == "MB":
-        return_value = "%.2f" % (num_bytes / MEGABYTE)
+        return_value = f"{(num_bytes / MEGABYTE):.2f}"
     elif unit == "KB":
-        return_value = "%.2f" % (num_bytes / KILOBYTE)
+        return_value = f"{(num_bytes / KILOBYTE):.2f}"
     else:
         return_value = str(num_bytes)
 
     if include_unit_suffix and unit != "Bytes":
-        return "%s %s" % (return_value, unit)
-    else:
-        return return_value
+        return f"{return_value} {unit}"
+    return return_value
 
 
 def get_bytes_unit(num_bytes):
     if num_bytes / GIGABYTE > 1:
         return "GB"
-    elif num_bytes / MEGABYTE > 1:
+    if num_bytes / MEGABYTE > 1:
         return "MB"
-    elif num_bytes / KILOBYTE > 1:
+    if num_bytes / KILOBYTE > 1:
         return "KB"
-    else:
-        return "Bytes"
+    return "Bytes"
 
 
 def get_object_or_none(klass, *args, **kwargs):

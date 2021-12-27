@@ -4,5 +4,5 @@ def join_paths(path, *paths):
         if to_return.endswith('/') or p.endswith('/'):
             to_return += p
         else:
-            to_return += "/%s" % p
+            to_return += f"/{p}"
     return to_return

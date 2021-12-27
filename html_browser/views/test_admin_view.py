@@ -74,7 +74,7 @@ class FolderTest(BaseAdminTest):
         args = [self.folder3.name]
         response = self.client.post(reverse('deleteFolder', args=args))
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/deleteFolder/%s' % self.folder3.name, response.url)
+        self.assertEqual(f'/?next=/deleteFolder/{self.folder3.name}', response.url)
         self.assertTrue(get_object_or_none(Folder, name=self.folder3.name))
 
     def testEditFolder(self):

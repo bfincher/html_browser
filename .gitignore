@@ -12,3 +12,9 @@ html_browser/local_settings/local_settings.py
 log
 .env
 hbmedia
+.metadata
+/.pytest_cache/
+.project
+.pydevproject
+.settings
+.checkstyle
