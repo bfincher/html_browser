@@ -19,7 +19,7 @@ install:
 
 before_script:
   - "flake8 ."
-  - "pylint ./html_browser"
+  - "./pylint.sh ./html_browser"
 # command to run tests
 script: 
   - python manage.py test

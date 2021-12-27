@@ -14,7 +14,7 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.views import redirect_to_login
-from django.http import HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
@@ -231,7 +231,7 @@ class UploadView(BaseContentView): #pylint: disable=abstract-method
                 'initialPreviewConfig': [],
                 'initialPreviewThumbTags': [],
                 'append': True}
-        return HttpResponse(json.dumps(data), content_type='application/json')
+        return JsonResponse(data)
 
 #     def _handleZipUpload(self, f):
 #         file_name = self._handleFileUpload(f)
@@ -323,4 +323,4 @@ class GetNextImageView(BaseContentView): #pylint: disable=abstract-method
                     break
 
         data = json.dumps(result)
-        return HttpResponse(data, content_type='application/json')
+        return JsonResponse(data)

@@ -38,7 +38,7 @@ class Folder(models.Model):
         folder.view_option = view_option
         return folder
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_name_as_html(self):
