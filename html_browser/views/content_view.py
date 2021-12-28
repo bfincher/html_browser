@@ -56,8 +56,9 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
         }
         self.breadcrumbs = None
 
+    # folder_and_path_url is a required argument per urls.py.  This argument is consumed and processed
+    # by the parent dispatch method
     def post(self, request, folder_and_path_url): #pylint: disable=unused-argument
-
         action = request.POST['action']
         if action in self.actionDict:
             self.actionDict[action](request)
@@ -93,27 +94,11 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
 
         messages.success(self.request, 'Items pasted')
 
-    def get(self, request): #pylint: disable=too-many-locals
+    # folder_and_path_url is a required argument per urls.py.  This argument is consumed and processed
+    # by the parent dispatch method
+    def get(self, request, folder_and_path_url): #pylint: disable=unused-argument
         ContentView.deleteOldFiles()
-
-        crumbs = self.folder_and_path.relative_path.split("/")
-        if len(crumbs) >= 1:
-            self.breadcrumbs = f"<a href=\"{reverse('index')}\">Home</a> "
-            reverse_url = reverse_content_url(FolderAndPath(folder=self.folder_and_path.folder, path=''))
-            self.breadcrumbs += f"&rsaquo; <a href=\"{reverse_url}\">{self.folder_and_path.folder.name}</a> "
-
-            accumulated = ""
-            while len(crumbs) > 0:
-                crumb = crumbs.pop(0)
-                if crumb:
-                    accumulated = "/".join([accumulated, crumb])
-                    self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
-                    if len(crumbs) > 0:
-                        url = reverse_content_url(FolderAndPath(folder=self.folder_and_path.folder, path=accumulated))
-                        self.breadcrumbs += f"<a href=\"{url!r}\">{crumb!r}</a> "
-
-                    else:
-                        self.breadcrumbs = self.breadcrumbs + crumb
+        self._build_breadcrumbs()
 
         content_filter = None
         if 'filter' in request.GET:
@@ -140,15 +125,13 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
             current_dir_entries = paginator.get_page(page)
         else:
             self.context['paginate'] = False
-        disk_free_pct = _get_disk_percent_free(self.folder_and_path.abs_path)
         disk_usage = _get_disk_usage_formatted(self.folder_and_path.abs_path)
 
-        parent_dir_link = get_parent_dir_link(self.folder_and_path)
-        self.context['parent_dir_link'] = parent_dir_link
+        self.context['parent_dir_link'] = get_parent_dir_link(self.folder_and_path)
         self.context['view_types'] = const.view_types
         self.context['selectedViewType'] = view_type
         self.context['current_dir_entries'] = current_dir_entries
-        self.context['disk_free_pct'] = disk_free_pct
+        self.context['disk_free_pct'] = _get_disk_percent_free(self.folder_and_path.abs_path)
         self.context['diskFree'] = disk_usage.freeformatted
         self.context['diskUsed'] = disk_usage.usedformatted
         self.context['diskTotal'] = disk_usage.totalformatted
@@ -209,14 +192,33 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
     def _rename(self, request):
         self.handleRename(request.POST['file'], request.POST['newName'])
 
+    def _build_breadcrumbs(self):
+        crumbs = self.folder_and_path.relative_path.split("/")
+        if len(crumbs) >= 1:
+            self.breadcrumbs = f"<a href=\"{reverse('index')}\">Home</a> "
+            reverse_url = reverse_content_url(FolderAndPath(folder=self.folder_and_path.folder, path=''))
+            self.breadcrumbs += f"&rsaquo; <a href=\"{reverse_url}\">{self.folder_and_path.folder.name}</a> "
+
+            accumulated = ""
+            while len(crumbs) > 0:
+                crumb = crumbs.pop(0)
+                if crumb:
+                    accumulated = "/".join([accumulated, crumb])
+                    self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
+                    if len(crumbs) > 0:
+                        url = reverse_content_url(FolderAndPath(folder=self.folder_and_path.folder, path=accumulated))
+                        self.breadcrumbs += f"<a href=\"{url!r}\">{crumb!r}</a> "
+
+                    else:
+                        self.breadcrumbs = self.breadcrumbs + crumb
+
 
 def _get_disk_percent_free(path):
     du = _get_disk_usage(path)
     free = du.free / 1.0
     total = du.free + du.used / 1.0
     pct = free / total
-    pct = pct * 100.0
-    return f"{pct}:.2f%"
+    return f"{pct:.2%}"
 
 
 def _get_disk_usage_formatted(path):
