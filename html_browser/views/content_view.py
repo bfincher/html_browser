@@ -207,7 +207,7 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
                     self.breadcrumbs = self.breadcrumbs + "&rsaquo; "
                     if len(crumbs) > 0:
                         url = reverse_content_url(FolderAndPath(folder=self.folder_and_path.folder, path=accumulated))
-                        self.breadcrumbs += f"<a href=\"{url!r}\">{crumb!r}</a> "
+                        self.breadcrumbs += f"<a href=\"{url}\">{crumb}</a> "
 
                     else:
                         self.breadcrumbs = self.breadcrumbs + crumb

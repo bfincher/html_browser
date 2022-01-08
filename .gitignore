@@ -18,3 +18,4 @@ hbmedia
 .pydevproject
 .settings
 .checkstyle
+coverage.xml
