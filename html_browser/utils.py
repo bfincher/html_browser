@@ -1,3 +1,4 @@
+from __future__ import annotations
 import html
 import json
 import logging
@@ -8,11 +9,12 @@ from operator import attrgetter
 from pathlib import Path
 from shutil import rmtree
 from urllib.parse import quote_plus, unquote_plus
+from typing import List, Optional
 
 from django.core.files.storage import FileSystemStorage
-from django.shortcuts import _get_queryset
+from django.shortcuts import _get_queryset # type: ignore
 from django.urls import reverse
-from sorl.thumbnail import get_thumbnail
+from sorl.thumbnail import get_thumbnail # type: ignore
 
 from html_browser import settings
 from html_browser._os import join_paths
@@ -36,45 +38,46 @@ imageRegexWithCach = re.compile(fr'(?i)cache/{IMAGE_REGEX_STR}')
 
 
 class ThumbnailStorage(FileSystemStorage):
-
-    def __init__(self):
+    def __init__(self) -> None:
         path = Path(settings.THUMBNAIL_CACHE_DIR)
         if not path.exists():
             path.mkdir(parents=True)
         super().__init__(location=settings.THUMBNAIL_CACHE_DIR)
 
-    def path(self, name):
+    def path(self, name: str) -> str:
         if imageRegexWithCach.match(name):
             return join_paths(self.base_location, name)
         return name
 
 
 class NoParentException(Exception):
-
     pass
 
 
 class ArgumentException(Exception):
-
     pass
 
 
 class FolderAndPathArgumentException(Exception):
-
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(f"Expected kwargs are (url)|(folder_name, path).  Instead found {kwargs}")
 
 
 class FolderAndPath: # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         # options for kwargs are (url)|(folder_name, path)
 
+        self.relative_path = ''
         if 'url' in kwargs and len(kwargs) == 1:
             match = folder_and_path_regex.match(kwargs['url'])
-            folder_name = match.groups()[0]
+            if match:
+                folder_name = match.groups()[0]
+                relative_path_match = match.groups()[2]
+                if relative_path_match:
+                    self.relative_path = unquote_plus(relative_path_match)
+
             self.folder = Folder.objects.get(name=folder_name)
-            self.relative_path = unquote_plus(match.groups()[2] or '')
             self.abs_path = join_paths(self.folder.local_path, self.relative_path)
             self.url = kwargs['url']
         elif 'path' in kwargs and len(kwargs) == 2:
@@ -93,40 +96,42 @@ class FolderAndPath: # pylint: disable=too-many-instance-attributes
         else:
             raise FolderAndPathArgumentException(**kwargs)
 
-        self.dir_entries = None
-        self.file_entries = None
-        self.skip_thumbnail = None
-        self.start_time = None
+        self.dir_entries: List[DirEntry]
+        self.file_entries: List[DirEntry]
+        self.skip_thumbnail = False
+        self.start_time: datetime
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"folder_name = {self.folder.name}, relative_path = {self.relative_path}, abs_path = {self.abs_path}, url = {self.url}"
 
-    def get_parent(self):
+    def get_parent(self) -> FolderAndPath:
         if self.relative_path == '':
             raise NoParentException()
 
         return FolderAndPath(folder_name=self.folder.name, path=os.path.dirname(self.relative_path))
 
     @staticmethod
-    def from_json(json_str):
+    def from_json(json_str) -> FolderAndPath:
         dict_data = json.loads(json_str)
         return FolderAndPath(**dict_data)
 
-    def to_json(self):
+    def to_json(self) -> str:
         result = {'folder_name': self.folder.name,
                   'path': self.relative_path}
         return json.dumps(result)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, FolderAndPath):
+            return NotImplemented
         return self.url == other.url
 
-    def get_dir_entries(self, show_hidden, view_type, content_filter=None):
+    def get_dir_entries(self, show_hidden: bool, view_type: str, content_filter: str = None) -> List[DirEntry]:
         _dir = self.abs_path
         if os.path.isfile(_dir):
             _dir = os.path.dirname(_dir)
 
-        dir_entries = []
-        file_entries = []
+        dir_entries: List[DirEntry] = []
+        file_entries: List[DirEntry] = []
         self.dir_entries = dir_entries
         self.file_entries = file_entries
 
@@ -150,7 +155,7 @@ class FolderAndPath: # pylint: disable=too-many-instance-attributes
         delattr(self, "file_entries")
         return dir_entries
 
-    def _process_entry(self, entry, show_hidden, view_type, content_filter):
+    def _process_entry(self, entry: Path, show_hidden: bool, view_type: str, content_filter: str = None) -> None:
         if not show_hidden and entry.name.startswith('.'):
             return
         try:
@@ -161,7 +166,8 @@ class FolderAndPath: # pylint: disable=too-many-instance-attributes
                 if content_filter:
                     temp_filter = content_filter.replace('.', r'\.')
                     temp_filter = temp_filter.replace('*', '.*')
-                    include = re.search(temp_filter, entry.name)
+                    if re.search(temp_filter, entry.name):
+                        include = True
                 else:
                     include = True
 
@@ -173,7 +179,7 @@ class FolderAndPath: # pylint: disable=too-many-instance-attributes
             logger.exception(exception)
 
 
-def get_checked_entries(request_dict):
+def get_checked_entries(request_dict) -> List[str]:
     entries = []
     for key in request_dict:
         match = checkBoxEntryRegex.match(key)
@@ -185,8 +191,8 @@ def get_checked_entries(request_dict):
 
 class DirEntry(): # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, path, folder_and_path, view_type, skip_thumbnail=False):
-        self.thumbnail_url = None
+    def __init__(self, path: Path, folder_and_path: FolderAndPath, view_type: str, skip_thumbnail=False) -> None:
+        self.thumbnail_url = None # type: Optional[str]
         self.is_dir = path.is_dir()
         self.name = path.name
         self.name_url = self.name.replace('&', '&amp;')
@@ -213,16 +219,16 @@ class DirEntry(): # pylint: disable=too-many-instance-attributes
         else:
             self.has_thumbnail = False
 
-    def __str__(self):
+    def __str__(self) -> str:
         _str = f"""DirEntry:  is_dir = {self.is_dir} name = {self.name} name_url = {self.name_url}
                   size = {self.size} last_modify_time = {self.last_modify_time} has_thumbnail = {self.has_thumbnail}
                   thumbnail_url = {self.get_thumbnail_url()}"""
         return _str
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
-    def get_thumbnail_url(self):
+    def get_thumbnail_url(self) -> Optional[str]:
         if self.has_thumbnail:
             if not self.thumbnail_url:
                 image = get_thumbnail(self.image_link_path, THUMBNAIL_GEOMETRY)
@@ -268,12 +274,12 @@ class DirEntry(): # pylint: disable=too-many-instance-attributes
 #        returnList.append(thisEntry)
 
 
-def replace_escaped_url(url):
+def replace_escaped_url(url: str) -> str:
     url = html.unescape(url)
     return url.replace("(comma)", ",").replace("(ampersand)", "&")
 
 
-def handle_delete(folder_and_path, entries):
+def handle_delete(folder_and_path: FolderAndPath, entries: List[str]) -> None:
     for entry in entries:
         entry_path = join_paths(folder_and_path.abs_path, replace_escaped_url(entry)).encode("utf-8")
 
@@ -283,14 +289,14 @@ def handle_delete(folder_and_path, entries):
             os.remove(entry_path)
 
 
-def get_req_logger():
+def get_req_logger() -> logging.Logger:
     global REQ_LOGGER # pylint: disable=global-statement
     if not REQ_LOGGER:
         REQ_LOGGER = logging.getLogger('django.request')
     return REQ_LOGGER
 
 
-def format_bytes(num_bytes, force_unit=None, include_unit_suffix=True):
+def format_bytes(num_bytes: int, force_unit: str = None, include_unit_suffix=True) -> str:
     if force_unit:
         unit = force_unit
     else:
@@ -310,7 +316,7 @@ def format_bytes(num_bytes, force_unit=None, include_unit_suffix=True):
     return return_value
 
 
-def get_bytes_unit(num_bytes):
+def get_bytes_unit(num_bytes: int) -> str:
     if num_bytes / GIGABYTE > 1:
         return "GB"
     if num_bytes / MEGABYTE > 1:

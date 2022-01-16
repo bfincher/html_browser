@@ -1,12 +1,15 @@
-import collections
+from __future__ import annotations
 import json
 import logging
 import os
 from datetime import datetime, timedelta
 from shutil import copy2, copytree, move
+from typing import Callable, Dict, List, NamedTuple, Union
 
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.http.request import HttpRequest
+from django.http.response import HttpResponsePermanentRedirect, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
@@ -30,21 +33,21 @@ _viewTypeToTemplateMap = {
 numItemsPerPage = 48
 
 
-def _change_settings(request):
+def _change_settings(request: HttpRequest) -> None:
     if request.POST['submit'] == "Save":
         request.session['show_hidden'] = request.POST['show_hidden'] is not None
 
 
-def _set_view_type(request):
+def _set_view_type(request: HttpRequest) -> None:
     view_type = request.POST['view_type']
     request.session['view_type'] = view_type
 
 
 class ContentView(BaseContentView): #pylint: disable=abstract-method
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.actionDict = {
+        self.actionDict: Dict[str, Callable[[HttpRequest], None]] = {
             'copyToClipboard': self._copy_to_clipboard,
             'cutToClipboard': self._cut_to_clipboard,
             'pasteFromClipboard': self._paste_from_clipboard,
@@ -54,11 +57,14 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
             'rename': self._rename,
             'changeSettings': _change_settings
         }
-        self.breadcrumbs = None
+        self.breadcrumbs: str
 
     # folder_and_path_url is a required argument per urls.py.  This argument is consumed and processed
     # by the parent dispatch method
-    def post(self, request, folder_and_path_url): #pylint: disable=unused-argument
+    def post(self,
+             request: HttpRequest,
+             folder_and_path_url: str) -> Union[HttpResponseRedirect, HttpResponsePermanentRedirect]: #pylint: disable=unused-argument
+
         action = request.POST['action']
         if action in self.actionDict:
             self.actionDict[action](request)
@@ -67,17 +73,18 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
 
         return redirect(reverse_content_url(self.folder_and_path))
 
-    def handleRename(self, file_name, new_name):
+    def handleRename(self, file_name: str, new_name: str) -> None:
         source = join_paths(self.folder_and_path.abs_path, replace_escaped_url(file_name))
         dest = join_paths(self.folder_and_path.abs_path, replace_escaped_url(new_name))
         move(source, dest)
 
-    def __handlePaste(self, clipboard):
+    def __handlePaste(self, request: HttpRequest) -> None:
         dest = self.folder_and_path.abs_path
+        clipboard = Clipboard.from_json(request.session['clipboard'])
 
         for entry in clipboard.entries:
             if os.path.exists(join_paths(dest, entry)):
-                messages.error("One or more of the items already exists in the destination") #pylint: disable=no-value-for-parameter
+                messages.error(request, "One or more of the items already exists in the destination") #pylint: disable=no-value-for-parameter
                 return
 
         for entry in clipboard.entries:
@@ -96,7 +103,7 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
 
     # folder_and_path_url is a required argument per urls.py.  This argument is consumed and processed
     # by the parent dispatch method
-    def get(self, request, folder_and_path_url): #pylint: disable=unused-argument
+    def get(self, request: HttpRequest, folder_and_path_url: str) -> HttpResponse:  #pylint: disable=unused-argument
         ContentView.deleteOldFiles()
         self._build_breadcrumbs()
 
@@ -122,7 +129,7 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
             self.context['paginate'] = True
             paginator = Paginator(current_dir_entries, numItemsPerPage)
             page = request.GET.get('page', 1)
-            current_dir_entries = paginator.get_page(page)
+            current_dir_entries = paginator.get_page(page) #type: ignore
         else:
             self.context['paginate'] = False
         disk_usage = _get_disk_usage_formatted(self.folder_and_path.abs_path)
@@ -148,7 +155,7 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
 #        return render(request, "content_search.html", self.context)
 
     @staticmethod
-    def deleteOldFiles():
+    def deleteOldFiles() -> None:
         now = datetime.now()
         for file_to_delete in FilesToDelete.objects.all().order_by('time'):
             delta = now - file_to_delete.time
@@ -159,12 +166,12 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
             else:
                 return
 
-    def _copy_to_clipboard(self, request):
+    def _copy_to_clipboard(self, request: HttpRequest) -> None:
         entries = get_checked_entries(request.POST)
         request.session['clipboard'] = Clipboard(self.folder_and_path, entries, 'COPY').to_json()
         messages.success(request, 'Items copied to clipboard')
 
-    def _cut_to_clipboard(self, request):
+    def _cut_to_clipboard(self, request: HttpRequest) -> None:
         if not self.user_can_delete:
             messages.error(request, "You don't have delete permission on this folder")
         else:
@@ -172,27 +179,27 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
             request.session['clipboard'] = Clipboard(self.folder_and_path, entries, 'CUT').to_json()
             messages.success(request, 'Items copied to clipboard')
 
-    def _paste_from_clipboard(self, request):
+    def _paste_from_clipboard(self, request: HttpRequest) -> None:
         if not self.user_can_write:
             messages.error(request, "You don't have write permission on this folder")
         else:
-            self.__handlePaste(Clipboard.from_json(request.session['clipboard']))
+            self.__handlePaste(request)
 
-    def _delete_entry(self, request):
+    def _delete_entry(self, request: HttpRequest) -> None:
         if not self.user_can_delete:
             messages.error(request, "You don't have delete permission on this folder")
         else:
             handle_delete(self.folder_and_path, get_checked_entries(request.POST))
             messages.success(request, 'File(s) deleted')
 
-    def _mkdir(self, request):
+    def _mkdir(self, request: HttpRequest) -> None:
         dir_name = request.POST['dir']
         os.makedirs(join_paths(self.folder_and_path.abs_path, dir_name))
 
-    def _rename(self, request):
+    def _rename(self, request: HttpRequest) -> None:
         self.handleRename(request.POST['file'], request.POST['newName'])
 
-    def _build_breadcrumbs(self):
+    def _build_breadcrumbs(self) -> None:
         crumbs = self.folder_and_path.relative_path.split("/")
         if len(crumbs) >= 1:
             self.breadcrumbs = f"<a href=\"{reverse('index')}\">Home</a> "
@@ -213,7 +220,7 @@ class ContentView(BaseContentView): #pylint: disable=abstract-method
                         self.breadcrumbs = self.breadcrumbs + crumb
 
 
-def _get_disk_percent_free(path):
+def _get_disk_percent_free(path: str) -> str:
     du = _get_disk_usage(path)
     free = du.free / 1.0
     total = du.free + du.used / 1.0
@@ -221,48 +228,61 @@ def _get_disk_percent_free(path):
     return f"{pct:.2%}"
 
 
-def _get_disk_usage_formatted(path):
-    du = _get_disk_usage(path)
+class _Usage(NamedTuple):
+    total: int
+    used: int
+    free: int
 
-    _ntuple_diskusage_formatted = collections.namedtuple('usage', 'total totalformatted used usedformatted free freeformatted unit')
+
+class _UsageFormatted(NamedTuple):
+    total: int
+    used: int
+    free: int
+    totalformatted: str
+    usedformatted: str
+    freeformatted: str
+    unit: str
+
+
+def _get_disk_usage_formatted(path: str) -> _UsageFormatted:
+    du = _get_disk_usage(path)
 
     unit = get_bytes_unit(du.total)
     total = format_bytes(du.total, unit, False)
     used = format_bytes(du.used, unit, False)
     free = format_bytes(du.free, unit, False)
 
-    return _ntuple_diskusage_formatted(du.total, total, du.used, used, du.free, free, unit)
+    return _UsageFormatted(total=du.total, totalformatted=total, used=du.used, usedformatted=used, free=du.free, freeformatted=free, unit=unit)
 
 
-def _get_disk_usage(path):
-    _ntuple_diskusage = collections.namedtuple('usage', 'total used free')
+def _get_disk_usage(path: str) -> _Usage:
 
     if hasattr(os, 'statvfs'):  # POSIX
         st = os.statvfs(path)
         free = st.f_bavail * st.f_frsize
         total = st.f_blocks * st.f_frsize
         used = (st.f_blocks - st.f_bfree) * st.f_frsize
-        return _ntuple_diskusage(total, used, free)
+        return _Usage(total, used, free)
 
     if os.name == 'nt':  # Windows
         import ctypes #pylint: disable=import-outside-toplevel
         import sys    #pylint: disable=import-outside-toplevel
 
-        _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), ctypes.c_ulonglong()
+        _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), ctypes.c_ulonglong() # type: ignore
         if sys.version_info >= (3,) or isinstance(path, str):
-            fun = ctypes.windll.kernel32.GetDiskFreeSpaceExW
+            fun = ctypes.windll.kernel32.GetDiskFreeSpaceExW # type: ignore
         else:
-            fun = ctypes.windll.kernel32.GetDiskFreeSpaceExA
-        ret = fun(path, ctypes.byref(_), ctypes.byref(total), ctypes.byref(free))
+            fun = ctypes.windll.kernel32.GetDiskFreeSpaceExA # type: ignore
+        ret = fun(path, ctypes.byref(_), ctypes.byref(total), ctypes.byref(free)) # type: ignore
         if ret == 0:
-            raise ctypes.WinError()
-        used = total.value - free.value
-        return _ntuple_diskusage(total.value, used, free.value)
+            raise ctypes.WinError() # type: ignore
+        used = total.value - free.value # type: ignore
+        return _Usage(total.value, used, free.value) # type: ignore
 
     raise NotImplementedError("platform not supported")
 
 
-def get_parent_dir_link(folder_and_path):
+def get_parent_dir_link(folder_and_path: FolderAndPath) -> str:
     path = folder_and_path.relative_path
     if path:
         path = os.path.dirname(path)
@@ -273,7 +293,7 @@ def get_parent_dir_link(folder_and_path):
 
 class Clipboard():
 
-    def __init__(self, folder_and_path, entries, clipboardType):
+    def __init__(self, folder_and_path: FolderAndPath, entries: List[str], clipboardType: str) -> None:
         self.folder_and_path = folder_and_path
         self.type = clipboardType
         self.entries = entries
@@ -283,7 +303,7 @@ class Clipboard():
         dict_data = json.loads(json_str)
         return Clipboard(FolderAndPath.from_json(dict_data['folder_and_path']), dict_data['entries'], dict_data['type'])
 
-    def to_json(self):
+    def to_json(self) -> str:
         result = {'folder_and_path': self.folder_and_path.to_json(),
                   'type': self.type,
                   'entries': self.entries}

@@ -1,12 +1,16 @@
+from abc import ABCMeta, abstractmethod
 import logging
 import re
-from abc import ABCMeta, abstractmethod
+from typing import Optional
 
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.views import redirect_to_login
 from django.db import transaction
+from django.forms.models import BaseInlineFormSet
+from django.http.request import HttpRequest
+from django.http.response import HttpResponseRedirect, HttpResponse
 from django.shortcuts import redirect, render
 
 import html_browser
@@ -17,20 +21,21 @@ from .adminForms import (AddFolderForm, EditFolderForm, EditGroupForm,
                          GroupPermissionFormSet, UserPermissionFormSet)
 from .base_view import BaseView
 
+
 groupNameRegex = re.compile(r'^\w+$')
 _permMap = {'read': CAN_READ, 'write': CAN_WRITE, 'delete': CAN_DELETE}
 logger = logging.getLogger('html_browser.adminViews')
 
 
 class FolderViewOption():
-    def __init__(self, value, display):
+    def __init__(self, value: str, display: str) -> None:
         self.value = value
         self.display = display
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.display
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
 
@@ -42,7 +47,7 @@ for choice in html_browser.models.viewable_choices:
 
 
 class BaseAdminView(UserPassesTestMixin, BaseView):
-    def test_func(self):
+    def test_func(self) -> bool:
         if not self.request.user.is_staff:
             messages.error(self.request, "User is not an admin")
             return False
@@ -50,7 +55,7 @@ class BaseAdminView(UserPassesTestMixin, BaseView):
         return True
 
     # override parent class handling of no permission.  We don't want an exception, just a redirect
-    def handle_no_permission(self):
+    def handle_no_permission(self) -> HttpResponseRedirect:
         return redirect_to_login(self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name())
 
     def appendFormErrors(self, form):
@@ -59,26 +64,26 @@ class BaseAdminView(UserPassesTestMixin, BaseView):
                 messages.error(self.request, error)
 
         try:
-            if form.non_form_errors:
-                for error in form.non_form_errors():
+            if form.non_form_errors: # type: ignore
+                for error in form.non_form_errors(): # type: ignore
                     messages.error(self.request, error)
         except AttributeError:
             pass
 
 
 class AdminView(BaseAdminView):
-    def get(self, request):
+    def get(self, request: HttpRequest) -> HttpResponse:
         return render(request, 'admin/admin.html', self.context)
 
 
 class FolderAdminView(BaseAdminView):
-    def get(self, request):
+    def get(self, request: HttpRequest) -> HttpResponse:
         self.context['folders'] = Folder.objects.all()
         return render(request, 'admin/folder_admin.html', self.context)
 
 
 class DeleteFolderView(BaseAdminView):
-    def post(self, request, folder_name): #pylint: disable=no-self-use, unused-argument
+    def post(self, request: HttpRequest, folder_name: str) -> HttpResponse: #pylint: disable=no-self-use, unused-argument
         folder = Folder.objects.get(name=folder_name)
         folder.delete()
         return redirect('folderAdmin')
@@ -86,26 +91,26 @@ class DeleteFolderView(BaseAdminView):
 
 class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
 
-    def __init__(self, *args, **kwargs):
-        self.title = None
+    def __init__(self, *args, **kwargs) -> None:
+        self.title: str
         super().__init__(*args, **kwargs)
-        self.folder = None
-        self.folderForm = None
-        self.userPermFormset = None
-        self.groupPermFormset = None
+        self.folder: Folder
+        self.folderForm: AddFolderForm
+        self.userPermFormset: BaseInlineFormSet
+        self.groupPermFormset: BaseInlineFormSet
 
     @abstractmethod
-    def initForms(self, request):
+    def initForms(self, request: HttpRequest) -> None:
         pass
 
-    def postSaveAction(self, folder):
+    def postSaveAction(self, folder: Folder) -> None:
         pass
 
-    def _get(self, request):
+    def _get(self, request: HttpRequest) -> HttpResponse:
         self.initForms(request)
         return self.render(request)
 
-    def _post(self, request):
+    def _post(self, request: HttpRequest) -> HttpResponse:
         self.initForms(request)
 
         req_logger = get_req_logger()
@@ -130,7 +135,7 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
 
         return redirect('folderAdmin')
 
-    def _process_user_perm_forms(self, folder):
+    def _process_user_perm_forms(self, folder: Folder) -> None:
         for form in self.userPermFormset:
             if form.is_valid():
                 if form.cleaned_data.get('DELETE'):
@@ -141,7 +146,7 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
                     instance.folder = folder
                     instance.save()
 
-    def _process_group_perm_forms(self, folder):
+    def _process_group_perm_forms(self, folder: Folder) -> None:
         for form in self.groupPermFormset:
             if form.is_valid():
                 if form.cleaned_data.get('DELETE'):
@@ -152,7 +157,7 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
                     instance.folder = folder
                     instance.save()
 
-    def render(self, request):
+    def render(self, request: HttpRequest) -> HttpResponse:
         self.appendFormErrors(self.folderForm)
         self.appendFormErrors(self.userPermFormset)
         self.appendFormErrors(self.groupPermFormset)
@@ -167,25 +172,25 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
 
 
 class EditFolderView(AbstractFolderView):
-    def __init__(self, *args, **kwargs):
-        self.title = None
-        self.origLocalPath = None
-        self.folder_name = None
+    def __init__(self, *args, **kwargs) -> None:
+        self.title: str
+        self.origLocalPath: str
+        self.folder_name: str
         super().__init__(*args, **kwargs)
 
-    def get(self, request, title, folder_name):
+    def get(self, request: HttpRequest, title: str, folder_name: str) -> HttpResponse:
         self.title = title
         self.folder_name = folder_name
         return self._get(request)
 
-    def post(self, request, title, folder_name):
+    def post(self, request: HttpRequest, title: str, folder_name: str) -> HttpResponse:
         self.title = title
         self.folder_name = folder_name
         self.origLocalPath = Folder.objects.get(name=folder_name).local_path
 
         return self._post(request)
 
-    def initForms(self, request):
+    def initForms(self, request: HttpRequest) -> None:
         self.folder = Folder.objects.get(name=self.folder_name)
 
         if request.method == "GET":
@@ -200,15 +205,15 @@ class EditFolderView(AbstractFolderView):
 
 class AddFolderView(AbstractFolderView):
 
-    def get(self, request, title):
+    def get(self, request: HttpRequest, title: str) -> HttpResponse:
         self.title = title
         return self._get(request)
 
-    def post(self, request, title):
+    def post(self, request: HttpRequest, title: str) -> HttpResponse:
         self.title = title
         return self._post(request)
 
-    def initForms(self, request):
+    def initForms(self, request: HttpRequest) -> None:
         if request.method == "GET":
             self.folder = Folder()
             self.folderForm = AddFolderForm(instance=self.folder)
@@ -221,7 +226,7 @@ class AddFolderView(AbstractFolderView):
 
 
 class AddGroupView(BaseAdminView):
-    def post(self, request): #pylint: disable=no-self-use
+    def post(self, request: HttpRequest) -> HttpResponse: #pylint: disable=no-self-use
         group_name = request.POST['group_name']
         if groupNameRegex.match(group_name):
             group = get_object_or_none(Group, name=group_name)
@@ -238,7 +243,7 @@ class AddGroupView(BaseAdminView):
 
 
 class DeleteGroupView(BaseAdminView):
-    def post(self, request): #pylint: disable=no-self-use
+    def post(self, request: HttpRequest) -> HttpResponse: #pylint: disable=no-self-use
         groupname = request.POST['group_name']
         group = Group.objects.get(name=groupname)
         group.delete()
@@ -247,11 +252,11 @@ class DeleteGroupView(BaseAdminView):
 
 
 class EditGroupView(BaseAdminView):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.form = None
+        self.form: Optional[EditGroupForm] = None
 
-    def get(self, request, group_name):
+    def get(self, request: HttpRequest, group_name: str) -> HttpResponse:
         group = Group.objects.get(name=group_name)
 
         if not self.form:
@@ -261,7 +266,7 @@ class EditGroupView(BaseAdminView):
         self.context['form'] = self.form
         return render(request, 'admin/edit_group.html', self.context)
 
-    def post(self, request, group_name, *args, **kwargs):
+    def post(self, request: HttpRequest, group_name: str, *args, **kwargs) -> HttpResponse:
         group = Group.objects.get(name=group_name)
         self.form = EditGroupForm(request.POST, instance=group)
 
@@ -279,13 +284,13 @@ class EditGroupView(BaseAdminView):
             else:
                 req_logger = get_req_logger()
                 req_logger.error('form.errors = %s', self.form.errors)
-                return self.get(request, group_name=group_name, *args, **kwargs)
+                return self.get(request, group_name=group_name)
 
         return redirect('groupAdmin')
 
 
 class GroupAdminView(BaseAdminView):
-    def get(self, request):
+    def get(self, request: HttpRequest) -> HttpResponse:
         groups = []
         for group in Group.objects.all():
             groups.append(group.name)

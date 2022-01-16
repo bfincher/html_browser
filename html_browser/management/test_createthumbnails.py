@@ -5,7 +5,8 @@ import unittest
 from io import StringIO
 
 from django.core.management import call_command
-from sorl.thumbnail.models import KVStore
+from sorl.thumbnail.models import KVStore # type: ignore
+from typing import List
 
 from html_browser import settings
 from html_browser.models import Folder
@@ -26,7 +27,7 @@ class TestCreateThumbnails(unittest.TestCase):
 
     test_thumbnails_dir = join_paths(settings.BASE_DIR, 'test_thumbnails')
     orig_thumbnails_dir = settings.THUMBNAIL_CACHE_DIR
-    expected_images = []
+    expected_images = [] # type: List[ExpectedImage]
 
     @classmethod
     def setUpClass(cls):

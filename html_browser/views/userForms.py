@@ -1,5 +1,5 @@
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Button, Layout, Submit
+from crispy_forms.helper import FormHelper # type: ignore
+from crispy_forms.layout import Button, Layout, Submit # type: ignore
 from django import forms
 from django.urls import reverse
 

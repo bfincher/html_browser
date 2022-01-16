@@ -1,5 +1,5 @@
 from django.conf.urls import include, url
-from django_js_reverse.views import urls_js
+from django_js_reverse.views import urls_js # type: ignore
 
 from html_browser import settings
 from html_browser.views import adminViews as admin_views
@@ -46,7 +46,7 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    import debug_toolbar
+    import debug_toolbar # type: ignore
     urlpatterns = [
         url(r'__debug__/', include(debug_toolbar.urls))
     ] + urlpatterns

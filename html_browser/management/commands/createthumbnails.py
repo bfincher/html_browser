@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
-from sorl.thumbnail import default
-from sorl.thumbnail.images import ImageFile
+from sorl.thumbnail import default # type: ignore
+from sorl.thumbnail.images import ImageFile # type: ignore
 
 from html_browser import utils
 from html_browser._os import join_paths
