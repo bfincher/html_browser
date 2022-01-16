@@ -1,6 +1,7 @@
 import logging
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
+from typing import Optional
 
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
@@ -15,7 +16,6 @@ from html_browser.utils import get_req_logger
 from .adminViews import BaseAdminView
 from .base_view import BaseView
 from .userForms import AddUserForm, EditUserForm
-from typing import Optional
 
 logger = logging.getLogger('html_browser.userViews')
 

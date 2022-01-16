@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 import logging
 import re
+from typing import Optional
 
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -19,7 +20,6 @@ from html_browser.utils import get_req_logger, get_object_or_none
 from .adminForms import (AddFolderForm, EditFolderForm, EditGroupForm,
                          GroupPermissionFormSet, UserPermissionFormSet)
 from .base_view import BaseView
-from typing import Optional
 
 
 groupNameRegex = re.compile(r'^\w+$')
