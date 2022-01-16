@@ -7,19 +7,21 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
 
 from html_browser.utils import get_req_logger
-
 from .adminViews import BaseAdminView
 from .base_view import BaseView
 from .userForms import AddUserForm, EditUserForm
+from typing import Optional
 
 logger = logging.getLogger('html_browser.userViews')
 
 
 class DeleteUserView(BaseAdminView):
-    def post(self, request): #pylint: disable=no-self-use
+    def post(self, request: HttpRequest) -> HttpResponse: #pylint: disable=no-self-use
         username = request.POST['username']
         redirect_url = "userAdmin"
 
@@ -34,31 +36,31 @@ class DeleteUserView(BaseAdminView):
 
 
 class UserAdminView(BaseAdminView):
-    def get(self, request):
+    def get(self, request: HttpRequest) -> HttpResponse:
         self.context['users'] = User.objects.all()
         return render(request, 'admin/user_admin.html', self.context)
 
 
 class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
 
-    def __init__(self, *args, **kwargs):
-        self.title = None
-        self.username = None
+    def __init__(self, *args, **kwargs) -> None:
+        self.title: str
+        self.username: str
         super().__init__(*args, **kwargs)
-        self.form = None
-        self.user = None
+        self.form: Optional[AddUserForm] = None
+        self.user = User
 
     @abstractmethod
-    def initForm(self, request):
+    def initForm(self, request: HttpRequest) -> AddUserForm:
         pass
 
-    def get(self, request, title, username=None):
+    def get(self, request: HttpRequest, title: str, username: str = None) -> HttpResponse:
         self.title = title
 
         if username:
             self.username = username
         if not self.form:
-            self.initForm(request)
+            self.form = self.initForm(request)
 
         self.appendFormErrors(self.form)
 
@@ -68,12 +70,12 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
         self.context['title'] = self.title
         return render(request, 'admin/add_edit_user.html', self.context)
 
-    def post(self, request, title, username=None, *args, **kwargs): #pylint: disable=keyword-arg-before-vararg
+    def post(self, request: HttpRequest, title: str, username: str = None) -> HttpResponse: #pylint: disable=keyword-arg-before-vararg
         self.title = title
 
         if username:
             self.username = username
-        self.initForm(request)
+        self.form = self.initForm(request)
 
         with transaction.atomic():
             if self.form.is_valid():
@@ -90,18 +92,13 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
             else:
                 req_logger = get_req_logger()
                 req_logger.error('form.errors = %s', self.form.errors)
-                return self.get(request, username=request.POST['username'], title=self.title, *args, **kwargs)
+                return self.get(request, title=self.title, username=request.POST['username'])
 
         return redirect("userAdmin")
 
 
 class EditUserView(AbstractUserView):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.title = None
-        self.username = None
-
-    def initForm(self, request):
+    def initForm(self, request: HttpRequest) -> EditUserForm:
         if request.method == "GET":
             user = User.objects.get(username=self.username)
             self.form = EditUserForm(instance=user)
@@ -109,26 +106,28 @@ class EditUserView(AbstractUserView):
             user = User.objects.get(username=request.POST['username'])
             self.form = EditUserForm(request.POST, instance=user)
 
+        #returning self.form to help mypy
+        return self.form
+
 
 class AddUserView(AbstractUserView):
-    def __init__(self, *args, **kwargs):
-        self.title = None
-        super().__init__(*args, **kwargs)
-
-    def initForm(self, request):
+    def initForm(self, request: HttpRequest) -> AddUserForm:
         if request.method == "GET":
             self.form = AddUserForm()
         else:
             self.form = AddUserForm(request.POST)
 
+        #returning self.form to help mypy
+        return self.form
+
 
 class ChangePasswordView(BaseView):
-    def get(self, request):
-        self.context['form'] = PasswordChangeForm(request.user)
+    def get(self, request: HttpRequest) -> HttpResponse:
+        self.context['form'] = PasswordChangeForm(request.user) # type: ignore
         return render(request, 'admin/change_password.html', self.context)
 
-    def post(self, request):
-        form = PasswordChangeForm(request.user, request.POST)
+    def post(self, request: HttpRequest) -> HttpResponse:
+        form = PasswordChangeForm(request.user, request.POST) # type: ignore
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)

@@ -19,3 +19,4 @@ hbmedia
 .settings
 .checkstyle
 coverage.xml
+/.mypy_cache/

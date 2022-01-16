@@ -407,13 +407,13 @@ class TestGetIndexIntoCurrentDir(BaseViewTest):
         folder_and_path = FolderAndPath(folder=self.folder1, path='images')
 
         result = get_index_into_current_dir(request, folder_and_path, 'Add-Folder-icon.png')
-        self.assertEqual(0, result['index'])
-        self.assertEqual(20, len(result['current_dir_entries']))
+        self.assertEqual(0, result.index_into_current_dir)
+        self.assertEqual(20, len(result.current_dir_entries))
 
         expected_files = ['Add-Folder-icon.png', 'Copy-icon.png', 'Document-icon.png']
 
         for i, expected_file in enumerate(expected_files):
-            self.assertFalse(result['current_dir_entries'][i].is_dir)
-            self.assertFalse(result['current_dir_entries'][i].has_thumbnail)
-            self.assertEqual(expected_file, result['current_dir_entries'][i].name)
-            self.assertEqual(expected_file, result['current_dir_entries'][i].name_url)
+            self.assertFalse(result.current_dir_entries[i].is_dir)
+            self.assertFalse(result.current_dir_entries[i].has_thumbnail)
+            self.assertEqual(expected_file, result.current_dir_entries[i].name)
+            self.assertEqual(expected_file, result.current_dir_entries[i].name_url)

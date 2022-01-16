@@ -1,4 +1,4 @@
-def join_paths(path, *paths):
+def join_paths(path: str, *paths: str) -> str:
     to_return = path
     for p in paths:
         if to_return.endswith('/') or p.endswith('/'):

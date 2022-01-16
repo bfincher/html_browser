@@ -1,7 +1,7 @@
 #  Django settings for html_browser project.
 import os
 import json
-import environ
+import environ  # type: ignore
 
 from html_browser._os import join_paths
 
@@ -12,7 +12,6 @@ URL_PREFIX = ''
 INTERNAL_IPS = []
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-
 
 env = environ.Env(
     DEBUG=(bool, False),
@@ -274,7 +273,7 @@ def readExtraSettings():
             ALLOWED_HOSTS.extend(data['ALLOWED_HOSTS'])
 
         if 'URL_PREFIX' in data:
-            global URL_PREFIX #pylint: disable=global-statement
+            global URL_PREFIX  # pylint: disable=global-statement
             URL_PREFIX = data['URL_PREFIX']
 
         if 'INTERNAL_IPS' in data:

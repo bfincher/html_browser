@@ -1,6 +1,6 @@
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import (HTML, TEMPLATE_PACK, Button, Layout,
-                                 LayoutObject, Submit)
+from crispy_forms.helper import FormHelper # type: ignore
+from crispy_forms.layout import (HTML, TEMPLATE_PACK, Button, Layout, # type: ignore
+                                 LayoutObject, Submit) # type: ignore
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.forms import BaseInlineFormSet, inlineformset_factory

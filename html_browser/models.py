@@ -1,7 +1,11 @@
 from urllib.parse import quote_plus
+from typing import TypeVar, Type, Union
 
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group, User, AnonymousUser
 from django.db import models
+
+# Create a generic variable that can be 'Parent', or any subclass.
+T = TypeVar('T', bound='Folder')
 
 CAN_READ = 1
 CAN_WRITE = 2
@@ -31,20 +35,20 @@ class Folder(models.Model):
                                    default=VIEWABLE_BY_PERMISSION)
 
     @classmethod
-    def create(cls, name, local_path, view_option):
-        folder = Folder()
+    def create(cls: Type[T], name: str, local_path: str, view_option: str) -> T:
+        folder = cls()
         folder.name = name
         folder.local_path = local_path
         folder.view_option = view_option
         return folder
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def get_name_as_html(self):
+    def get_name_as_html(self) -> str:
         return quote_plus(self.name)
 
-    def _check_user_perm(self, user, desired_perm):
+    def _check_user_perm(self, user: Union[User, AnonymousUser], desired_perm: int) -> bool:
         if user.is_superuser:
             return True
 
@@ -54,13 +58,13 @@ class Folder(models.Model):
                 return True
         return False
 
-    def _check_group_perm(self, user, desired_perm):
+    def _check_group_perm(self, user: Union[User, AnonymousUser], desired_perm: int) -> bool:
         for perm in self.grouppermission_set.all():
-            if perm.group in user.groups.all() and perm.permission >= desired_perm:
+            if perm.group in user.groups.all() and perm.permission >= desired_perm: # type: ignore
                 return True
         return False
 
-    def user_can_read(self, user):
+    def user_can_read(self, user: Union[User, AnonymousUser]) -> bool:
         if self.view_option == VIEWABLE_BY_ANONYMOUS:
             return True
         if self.view_option == VIEWABLE_BY_EVERYONE and user is not None and user.is_authenticated:
@@ -72,10 +76,10 @@ class Folder(models.Model):
 
         return can_read
 
-    def user_can_write(self, user):
+    def user_can_write(self, user: Union[User, AnonymousUser]) -> bool:
         return self._check_user_perm(user, CAN_WRITE) or self._check_group_perm(user, CAN_WRITE)
 
-    def user_can_delete(self, user):
+    def user_can_delete(self, user: Union[User, AnonymousUser]) -> bool:
         return self._check_user_perm(user, CAN_DELETE) or self._check_group_perm(user, CAN_DELETE)
 
 
@@ -93,10 +97,10 @@ class UserPermission(Permission):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return " ".join([self.folder.name, self.user.username, str(self.permission)]) #pylint: disable=no-member
 
-    def canRead(self):
+    def canRead(self) -> bool:
         return self.permission >= CAN_READ
 
     class Meta:
@@ -104,10 +108,9 @@ class UserPermission(Permission):
 
 
 class GroupPermission(Permission):
-    group = models.ForeignKey(Group,
-                              on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return " ".join([self.folder.name, self.group.name, str(self.permission)])
 
     class Meta:

@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 import os
 
 from django.contrib.auth.models import Group, User
@@ -12,8 +13,9 @@ from html_browser import settings
 
 class ExtraSettingsTest(TestCase):
     def setUp(self):
-        if not os.path.exists(settings.EXTRA_CONFIG_DIR):
-            os.path.mkdirs(settings.EXTRA_CONFIG_DIR) # pylint: disable=no-member
+        extraConfigDir = Path(settings.EXTRA_CONFIG_DIR)
+        if not extraConfigDir.exists():
+            extraConfigDir.mkdir(parents=True)
 
         localSettingsFile = join_paths(settings.EXTRA_CONFIG_DIR, 'local_settings.json')
         self.assertFalse(os.path.exists(localSettingsFile))
