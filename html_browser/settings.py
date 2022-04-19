@@ -279,5 +279,9 @@ def readExtraSettings():
         if 'INTERNAL_IPS' in data:
             INTERNAL_IPS.extend(data['INTERNAL_IPS'])
 
+        if 'DEBUG' in data:
+            global DEBUG # pylint: disable=global-statement
+            DEBUG = bool(data['DEBUG'])
+
 
 readExtraSettings()

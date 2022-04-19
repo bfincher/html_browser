@@ -23,6 +23,7 @@ class ExtraSettingsTest(TestCase):
         data = {}
         data['ALLOWED_HOSTS'] = ['host1', 'host2']
         data['URL_PREFIX'] = 'testPrefix'
+        data['DEBUG'] = 'True'
         with open(localSettingsFile, 'w', encoding='utf8') as outfile:
             json.dump(data, outfile)
 
@@ -37,6 +38,7 @@ class ExtraSettingsTest(TestCase):
         self.assertTrue('host1' in settings.ALLOWED_HOSTS)
         self.assertTrue('host2' in settings.ALLOWED_HOSTS)
         self.assertEqual('testPrefix', settings.URL_PREFIX)
+        self.assertTrue(settings.DEBUG)
 
 
 class UserPermissionTest(TestCase): # pylint: disable=too-many-instance-attributes
