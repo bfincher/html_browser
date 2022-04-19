@@ -219,7 +219,7 @@ class UtilsTest(unittest.TestCase):
                 folder_and_path = FolderAndPath(folder=folder, path='')
                 entries = folder_and_path.get_dir_entries(False, const.thumbnails_view_type)
 
-                self.assertEqual(17, len(entries))
+                self.assertEqual(16, len(entries))
 
                 for i, test_file in enumerate(test_files):
                     entry = entries[i]
