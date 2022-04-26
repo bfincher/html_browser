@@ -23,7 +23,6 @@ from html_browser.models import Folder
 from .constants import _constants as const
 
 logger = logging.getLogger('html_browser.utils')
-REQ_LOGGER = None
 
 KILOBYTE = 1024.0
 MEGABYTE = KILOBYTE * KILOBYTE
@@ -287,13 +286,6 @@ def handle_delete(folder_and_path: FolderAndPath, entries: List[str]) -> None:
             rmtree(entry_path)
         else:
             os.remove(entry_path)
-
-
-def get_req_logger() -> logging.Logger:
-    global REQ_LOGGER # pylint: disable=global-statement
-    if not REQ_LOGGER:
-        REQ_LOGGER = logging.getLogger('django.request')
-    return REQ_LOGGER
 
 
 def format_bytes(num_bytes: int, force_unit: str = None, include_unit_suffix=True) -> str:
