@@ -257,6 +257,7 @@ class EditGroupView(BaseAdminView):
         self.form: Optional[EditGroupForm] = None
 
     def get(self, request: HttpRequest, group_name: str) -> HttpResponse:
+        print("BKF inside adminView/get")
         group = Group.objects.get(name=group_name)
 
         if not self.form:

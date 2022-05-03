@@ -13,18 +13,23 @@ from html_browser import settings
 
 class ExtraSettingsTest(TestCase):
     def setUp(self):
+        self.origUrlPrefix = settings.URL_PREFIX
         extraConfigDir = Path(settings.EXTRA_CONFIG_DIR)
         if not extraConfigDir.exists():
             extraConfigDir.mkdir(parents=True)
 
-        localSettingsFile = join_paths(settings.EXTRA_CONFIG_DIR, 'local_settings.json')
-        self.assertFalse(os.path.exists(localSettingsFile))
+        self.localSettingsFile: Path = extraConfigDir.joinpath("local_settings.json")
+        self.localSettingsCopy: Path = None
+        if self.localSettingsFile.exists():
+            self.localSettingsCopy = extraConfigDir.joinpath('local_settings_copy_for_test.json')
+            self.localSettingsCopy.write_bytes(self.localSettingsFile.read_bytes())
+
 
         data = {}
         data['ALLOWED_HOSTS'] = ['host1', 'host2']
         data['URL_PREFIX'] = 'testPrefix'
         data['DEBUG'] = 'True'
-        with open(localSettingsFile, 'w', encoding='utf8') as outfile:
+        with open(self.localSettingsFile, 'w', encoding='utf8') as outfile:
             json.dump(data, outfile)
 
         settings.readExtraSettings()
@@ -32,6 +37,11 @@ class ExtraSettingsTest(TestCase):
     def tearDown(self):
         localSettingsFile = join_paths(settings.EXTRA_CONFIG_DIR, 'local_settings.json')
         os.remove(localSettingsFile)
+        settings.URL_PREFIX = self.origUrlPrefix
+        
+        if (self.localSettingsCopy):
+            self.localSettingsFile.write_bytes(self.localSettingsCopy.read_bytes())
+            self.localSettingsCopy.unlink()
 
     def test(self):
         self.assertTrue(len(settings.ALLOWED_HOSTS) > 2)
