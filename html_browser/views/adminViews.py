@@ -6,21 +6,21 @@ from typing import Optional
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Group, User
-from django.contrib.auth.views import redirect_to_login
 from django.db import transaction
 from django.forms.models import BaseInlineFormSet
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseRedirect, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, resolve_url
 
 import html_browser
 from html_browser.models import CAN_DELETE, CAN_READ, CAN_WRITE, Folder
-from html_browser.utils import get_req_logger, get_object_or_none
+from html_browser.utils import get_object_or_none
 
 from .adminForms import (AddFolderForm, EditFolderForm, EditGroupForm,
                          GroupPermissionFormSet, UserPermissionFormSet)
 from .base_view import BaseView
 
+logger = logging.getLogger('html_browser.adminViews')
 
 groupNameRegex = re.compile(r'^\w+$')
 _permMap = {'read': CAN_READ, 'write': CAN_WRITE, 'delete': CAN_DELETE}
@@ -56,7 +56,7 @@ class BaseAdminView(UserPassesTestMixin, BaseView):
 
     # override parent class handling of no permission.  We don't want an exception, just a redirect
     def handle_no_permission(self) -> HttpResponseRedirect:
-        return redirect_to_login(self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name())
+        return HttpResponseRedirect(resolve_url("index"))
 
     def appendFormErrors(self, form):
         if form.errors:
@@ -113,17 +113,16 @@ class AbstractFolderView(BaseAdminView, metaclass=ABCMeta):
     def _post(self, request: HttpRequest) -> HttpResponse:
         self.initForms(request)
 
-        req_logger = get_req_logger()
         if not self.folderForm.is_valid():
-            req_logger.error('folderFormErrors = %s', self.folderForm.errors)
+            logger.error('folderFormErrors = %s', self.folderForm.errors)
             return self.render(request)
 
         if not self.userPermFormset.is_valid():
-            req_logger.error('userPermFormset.errors = %s', self.userPermFormset.errors)
+            logger.error('userPermFormset.errors = %s', self.userPermFormset.errors)
             return self.render(request)
 
         if not self.groupPermFormset.is_valid():
-            req_logger.error('groupPermFormset.errors = %s', self.groupPermFormset.errors)
+            logger.error('groupPermFormset.errors = %s', self.groupPermFormset.errors)
             return self.render(request)
 
         with transaction.atomic():
@@ -282,8 +281,7 @@ class EditGroupView(BaseAdminView):
 
                 group.save()
             else:
-                req_logger = get_req_logger()
-                req_logger.error('form.errors = %s', self.form.errors)
+                logger.error('form.errors = %s', self.form.errors)
                 return self.get(request, group_name=group_name)
 
         return redirect('groupAdmin')

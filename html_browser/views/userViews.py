@@ -12,7 +12,6 @@ from django.http.request import HttpRequest
 from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
 
-from html_browser.utils import get_req_logger
 from .adminViews import BaseAdminView
 from .base_view import BaseView
 from .userForms import AddUserForm, EditUserForm
@@ -90,8 +89,7 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
                     user.last_login = datetime(year=1970, month=1, day=1)
                 user.save()
             else:
-                req_logger = get_req_logger()
-                req_logger.error('form.errors = %s', self.form.errors)
+                logger.error('form.errors = %s', self.form.errors)
                 return self.get(request, title=self.title, username=request.POST['username'])
 
         return redirect("userAdmin")

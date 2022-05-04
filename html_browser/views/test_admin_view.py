@@ -3,6 +3,7 @@ import logging
 from django.contrib.auth.models import User
 from django.urls import reverse
 
+from html_browser import settings
 from html_browser.models import Folder, Group
 from html_browser.utils import get_object_or_none
 from html_browser.views.test_base_view import BaseViewTest, context_check
@@ -37,7 +38,7 @@ class AdminViewTest(BaseAdminTest):
         self.login(self.user1)
         response = self.client.get(reverse('admin'))
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/hbAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
 
 class FolderTest(BaseAdminTest):
@@ -59,14 +60,14 @@ class FolderTest(BaseAdminTest):
         self.login(self.user1)
         response = self.client.get(reverse('folderAdmin'))
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/folderAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
     def testDeleteFolder(self):
         self.login(self.user4)
         args = [self.folder2.name]
         response = self.client.post(reverse('deleteFolder', args=args))
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/folderAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}folderAdmin/', response.url)
         self.assertFalse(get_object_or_none(Folder, name=self.folder2.name))
 
         self.logout()
@@ -74,7 +75,7 @@ class FolderTest(BaseAdminTest):
         args = [self.folder3.name]
         response = self.client.post(reverse('deleteFolder', args=args))
         self.assertEqual(302, response.status_code)
-        self.assertEqual(f'/?next=/deleteFolder/{self.folder3.name}', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
         self.assertTrue(get_object_or_none(Folder, name=self.folder3.name))
 
     def testEditFolder(self):
@@ -100,7 +101,7 @@ class FolderTest(BaseAdminTest):
         data['view_option'] = 'E'
         response = self.client.post(reverse('editFolder', args=[self.folder1.name]), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/folderAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}folderAdmin/', response.url)
 
         new_folder_1 = Folder.objects.get(pk=self.folder1.pk)
         self.assertEqual(self.folder1.name, new_folder_1.name)
@@ -130,7 +131,7 @@ class FolderTest(BaseAdminTest):
         data['view_option'] = 'E'
         response = self.client.post(reverse('addFolder'), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/folderAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}folderAdmin/', response.url)
 
         new_folder = Folder.objects.get(name=new_folder_name)
         self.assertEqual(new_folder.name, new_folder_name)
@@ -153,14 +154,14 @@ class GroupTest(BaseAdminTest):
         self.login(self.user1)
         response = self.client.get(reverse('groupAdmin'))
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/groupAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
     def testAddGroup(self):
         self.login(self.user4)
         data = {'group_name': 'newGroupName'}
         response = self.client.post(reverse('addGroup'), data=data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/groupAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}groupAdmin/', response.url)
         self.assertTrue(Group.objects.get(name='newGroupName'))
 
         # test add invalid group name
@@ -184,7 +185,7 @@ class GroupTest(BaseAdminTest):
         data = {'group_name': self.group1.name}
         response = self.client.post(reverse('deleteGroup'), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/deleteGroup/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
         self.assertTrue(get_object_or_none(Group, name=self.group1.name))
 
         self.logout()
@@ -192,7 +193,7 @@ class GroupTest(BaseAdminTest):
         data = {'group_name': self.group1.name}
         response = self.client.post(reverse('deleteGroup'), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/groupAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}groupAdmin/', response.url)
         self.assertFalse(get_object_or_none(Group, name=self.group1.name))
 
     def testEditGroup(self):
@@ -210,6 +211,6 @@ class GroupTest(BaseAdminTest):
         self.assertFalse(User.objects.get(username=self.user3.username).groups.filter(name__in=['newGroupName']).exists())
         response = self.client.post(reverse('editGroup', args=[self.group1.name]), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/groupAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}groupAdmin/', response.url)
         self.assertEqual('newGroupName', Group.objects.get(pk=self.group1.pk).name)
         self.assertTrue(User.objects.get(username=self.user3.username).groups.filter(name__in=['newGroupName']).exists())

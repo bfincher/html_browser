@@ -15,11 +15,10 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth.views import redirect_to_login
 from django.http import JsonResponse
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse, HttpResponseBase, HttpResponseRedirect
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, resolve_url
 from django.urls import reverse
 from django.views import View
 from django_downloadview import sendfile # type: ignore
@@ -29,9 +28,8 @@ from html_browser._os import join_paths
 from html_browser.constants import _constants as const
 from html_browser.models import FilesToDelete, Folder
 from html_browser.utils import (ArgumentException, FolderAndPath,
-                                get_checked_entries, get_req_logger,
-                                handle_delete, replace_escaped_url,
-                                DirEntry)
+                                get_checked_entries, handle_delete,
+                                replace_escaped_url, DirEntry)
 
 logger = logging.getLogger('html_browser.base_view')
 imageRegex = re.compile(r"^.*?\.(jpg|jpeg|png|gif|bmp|avi)$", re.IGNORECASE)
@@ -54,14 +52,13 @@ def reverse_content_url(folder_and_path: FolderAndPath, view_name='content', ext
 class BaseView(View):
     def __init__(self) -> None:
         super().__init__()
-        self.req_logger = get_req_logger()
         self.context: Dict[str, Any] = {}
         self.request: HttpRequest
 
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseBase:
-        self.req_logger.info(self.__class__.__name__)
+        logger.info(self.__class__.__name__)
         self.request = request
-        if self.req_logger.isEnabledFor(DEBUG):
+        if logger.isEnabledFor(DEBUG):
             _dict = None
             if request.method == "GET":
                 _dict = request.GET
@@ -70,9 +67,9 @@ class BaseView(View):
 
             for key, value in sorted(_dict.items()):
                 if key in ['password', 'verifyPassword']:
-                    self.req_logger.debug("%s: ********", key)
+                    logger.debug("%s: ********", key)
                 else:
-                    self.req_logger.debug("%s: %s", key, value)
+                    logger.debug("%s: %s", key, value)
 
         self.context['user'] = request.user
         return super().dispatch(request, *args, **kwargs)
@@ -121,7 +118,7 @@ class BaseContentView(UserPassesTestMixin, BaseView): #pylint: disable=abstract-
 
     # override parent class handling of no permission.  We don't want an exception, just a redirect
     def handle_no_permission(self) -> HttpResponseRedirect:
-        return redirect_to_login(self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name())
+        return HttpResponseRedirect(resolve_url('index'))
 
 
 class IndexView(BaseView):
@@ -148,10 +145,9 @@ class LoginView(BaseView):
         if user is not None:
             if user.is_active:
                 auth_login(request, user)
-                if self.req_logger.isEnabledFor(DEBUG):
-                    self.req_logger.debug("%s authenticated", user)
+                logger.debug("%s authenticated", user)
             else:
-                self.req_logger.warning("%s attempted to log in to a disabled account", user)
+                logger.warning("%s attempted to log in to a disabled account", user)
                 messages.error(request, 'Account has been disabled')
         else:
             messages.error(request, 'Invalid login')

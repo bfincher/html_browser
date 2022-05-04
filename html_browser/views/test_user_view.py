@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.urls import reverse
 
+from html_browser import settings
 from html_browser.models import Group
 from html_browser.utils import get_object_or_none
 
@@ -28,14 +29,14 @@ class UserTest(BaseAdminTest):
         self.login(self.user1)
         response = self.client.get(reverse('userAdmin'))
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/userAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
     def testEditUser(self):
         # test unauthorized user
         self.login(self.user1)
         response = self.client.get(reverse('editUser', args=[self.user1.username]))
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/editUser/user1/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
         self.login(self.user4)
         response = self.client.get(reverse('editUser', args=[self.user1.username]))
@@ -57,7 +58,7 @@ class UserTest(BaseAdminTest):
         origPassword = self.user1.password
         response = self.client.post(reverse('editUser', args=[self.user1.username]), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/userAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}userAdmin/', response.url)
         new_user_1 = User.objects.get(username=self.user1.username)
         self.assertEqual('firstname', new_user_1.first_name)
         self.assertEqual('lastname', new_user_1.last_name)
@@ -72,20 +73,20 @@ class UserTest(BaseAdminTest):
         data = {'username': self.user1.username}
         response = self.client.post(reverse('deleteUser'), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/deleteUser/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
         self.assertEqual(self.user2, User.objects.get(username=self.user2.username))
 
         self.login(self.user4)
         # test deleting current user
         data = {'username': self.user4.username}
         response = self.client.post(reverse('deleteUser'), data)
-        self.assertEqual('/userAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}userAdmin/', response.url)
         self.assertEqual(self.user4, User.objects.get(username=self.user4.username))
 
         data = {'username': self.user1.username}
         response = self.client.post(reverse('deleteUser'), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/userAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}userAdmin/', response.url)
         self.assertIsNone(get_object_or_none(User, username=self.user1.username))
 
     def testEditPassword(self):
@@ -136,7 +137,7 @@ class UserTest(BaseAdminTest):
 
         response = self.client.post(reverse('editUser', args=[self.user1.username]), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/userAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}userAdmin/', response.url)
         new_user_1 = User.objects.get(username=self.user1.username)
         self.assertEqual('firstname', new_user_1.first_name)
         self.assertEqual('lastname', new_user_1.last_name)

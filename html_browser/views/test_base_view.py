@@ -10,6 +10,7 @@ from django.contrib.auth.models import Group, User
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from html_browser import settings
 from html_browser._os import join_paths
 from html_browser.models import (CAN_DELETE, CAN_READ, Folder, GroupPermission,
                                  UserPermission)
@@ -203,7 +204,7 @@ class LoginViewTest(BaseViewTest):
     def testLogin(self):
         response = self.client.post(reverse('login'), data={'user_name': self.user1.username, 'password': self.user1Pw})
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
 
 class LogoutViewTest(BaseViewTest):
@@ -211,7 +212,7 @@ class LogoutViewTest(BaseViewTest):
         self.login(self.user1)
         response = self.logout()
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
 
 class DownloadViewTest(BaseViewTest):
@@ -301,7 +302,7 @@ class UploadViewTest(BaseViewTest):
                                                        view_name='upload'))
 
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/upload/test/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
     # def testUpload(self):
     #     self.login(self.user1)
@@ -379,10 +380,10 @@ class UploadViewTest(BaseViewTest):
         context = response.context[0]
         context_check(self, context)
 
-        self.assertEqual('/content/test/images/', context['parent_dir_link'])
-        self.assertEqual('/imageView/test/images/folder-blue-icon-128.png/', context['prev_link'])
-        self.assertEqual('/imageView/test/images/folder-blue-parent-icon.png/', context['next_link'])
-        self.assertEqual('/download/test/images/folder-blue-icon.png/', context['image_url'])
+        self.assertEqual(f'/{settings.URL_PREFIX}content/test/images/', context['parent_dir_link'])
+        self.assertEqual(f'/{settings.URL_PREFIX}imageView/test/images/folder-blue-icon-128.png/', context['prev_link'])
+        self.assertEqual(f'/{settings.URL_PREFIX}imageView/test/images/folder-blue-parent-icon.png/', context['next_link'])
+        self.assertEqual(f'/{settings.URL_PREFIX}download/test/images/folder-blue-icon.png/', context['image_url'])
         self.assertEqual('folder-blue-icon.png', context['file_name'])
         self.assertTrue(context['user_can_delete'])
         self.assertEqual('image_view.html', response.templates[0].name)
@@ -393,7 +394,7 @@ class UploadViewTest(BaseViewTest):
         response = self.client.get(reverse_content_url(FolderAndPath(folder=self.folder1, path='images'),
                                                        view_name='imageView', extra_path='folder-blue-icon.png'))
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/imageView/test/images/folder-blue-icon.png/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
 
 class TestGetIndexIntoCurrentDir(BaseViewTest):
