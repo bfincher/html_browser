@@ -12,7 +12,7 @@ from html_browser.utils import \
     FolderAndPath, FolderAndPathArgumentException, NoParentException, Path, \
     get_checked_entries, format_bytes
 
-thumbUrlRegex = re.compile(r'^/thumb/(cache/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg)$')
+thumbUrlRegex = re.compile(rf'^/{settings.URL_PREFIX}thumb/(cache/[0-9a-f]{{2}}/[0-9a-f]{{2}}/[0-9a-f]{{32}}\.jpg)$')
 
 
 class FolderAndPathTest(unittest.TestCase):

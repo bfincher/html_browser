@@ -15,11 +15,10 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth.views import redirect_to_login
 from django.http import JsonResponse
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse, HttpResponseBase, HttpResponseRedirect
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, resolve_url
 from django.urls import reverse
 from django.views import View
 from django_downloadview import sendfile # type: ignore
@@ -119,7 +118,7 @@ class BaseContentView(UserPassesTestMixin, BaseView): #pylint: disable=abstract-
 
     # override parent class handling of no permission.  We don't want an exception, just a redirect
     def handle_no_permission(self) -> HttpResponseRedirect:
-        return redirect_to_login(self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name())
+        return HttpResponseRedirect(resolve_url('index'))
 
 
 class IndexView(BaseView):

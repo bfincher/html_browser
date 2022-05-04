@@ -14,7 +14,7 @@ Django = "==3.2.12"
 Pillow = "==9.0.1"
 
 [dev-packages]
-mypy = "*"
+mypy = "==1.9.0"
 flake8 = "*"
 pylint = "*"
 pylint-django = "*"

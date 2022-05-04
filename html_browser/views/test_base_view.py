@@ -302,7 +302,7 @@ class UploadViewTest(BaseViewTest):
                                                        view_name='upload'))
 
         self.assertEqual(302, response.status_code)
-        self.assertEqual(f'/?next=/{settings.URL_PREFIX}upload/test/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
     # def testUpload(self):
     #     self.login(self.user1)
@@ -394,7 +394,7 @@ class UploadViewTest(BaseViewTest):
         response = self.client.get(reverse_content_url(FolderAndPath(folder=self.folder1, path='images'),
                                                        view_name='imageView', extra_path='folder-blue-icon.png'))
         self.assertEqual(302, response.status_code)
-        self.assertEqual(f'/?next=/{settings.URL_PREFIX}imageView/test/images/folder-blue-icon.png/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
 
 class TestGetIndexIntoCurrentDir(BaseViewTest):

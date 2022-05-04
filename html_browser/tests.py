@@ -24,7 +24,6 @@ class ExtraSettingsTest(TestCase):
             self.localSettingsCopy = extraConfigDir.joinpath('local_settings_copy_for_test.json')
             self.localSettingsCopy.write_bytes(self.localSettingsFile.read_bytes())
 
-
         data = {}
         data['ALLOWED_HOSTS'] = ['host1', 'host2']
         data['URL_PREFIX'] = 'testPrefix'
@@ -38,8 +37,8 @@ class ExtraSettingsTest(TestCase):
         localSettingsFile = join_paths(settings.EXTRA_CONFIG_DIR, 'local_settings.json')
         os.remove(localSettingsFile)
         settings.URL_PREFIX = self.origUrlPrefix
-        
-        if (self.localSettingsCopy):
+
+        if self.localSettingsCopy:
             self.localSettingsFile.write_bytes(self.localSettingsCopy.read_bytes())
             self.localSettingsCopy.unlink()
 

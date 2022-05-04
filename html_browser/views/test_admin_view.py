@@ -38,8 +38,7 @@ class AdminViewTest(BaseAdminTest):
         self.login(self.user1)
         response = self.client.get(reverse('admin'))
         self.assertEqual(302, response.status_code)
-        print("BKF responseUrl = %s" % response.url)
-        self.assertEqual(f'/?next=/{settings.URL_PREFIX}hbAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
 
 class FolderTest(BaseAdminTest):
@@ -61,7 +60,7 @@ class FolderTest(BaseAdminTest):
         self.login(self.user1)
         response = self.client.get(reverse('folderAdmin'))
         self.assertEqual(302, response.status_code)
-        self.assertEqual(f'/?next=/{settings.URL_PREFIX}folderAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
     def testDeleteFolder(self):
         self.login(self.user4)
@@ -76,7 +75,7 @@ class FolderTest(BaseAdminTest):
         args = [self.folder3.name]
         response = self.client.post(reverse('deleteFolder', args=args))
         self.assertEqual(302, response.status_code)
-        self.assertEqual(f'/?next=/{settings.URL_PREFIX}deleteFolder/{self.folder3.name}', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
         self.assertTrue(get_object_or_none(Folder, name=self.folder3.name))
 
     def testEditFolder(self):
@@ -155,7 +154,7 @@ class GroupTest(BaseAdminTest):
         self.login(self.user1)
         response = self.client.get(reverse('groupAdmin'))
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/groupAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
 
     def testAddGroup(self):
         self.login(self.user4)
@@ -172,7 +171,7 @@ class GroupTest(BaseAdminTest):
         self.assert_message_contains(response, "Invalid group name.  Must only contain letters, numbers, and underscores")
         self.assertEqual('admin/group_admin.html', response.templates[0].name)
         self.assertFalse(get_object_or_none(Group, name='new Group Name'))
-        
+
         self.logout()
         self.login(self.user1)
         data = {'group_name': 'newGroupName2'}
@@ -186,7 +185,7 @@ class GroupTest(BaseAdminTest):
         data = {'group_name': self.group1.name}
         response = self.client.post(reverse('deleteGroup'), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/?next=/deleteGroup/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}', response.url)
         self.assertTrue(get_object_or_none(Group, name=self.group1.name))
 
         self.logout()
@@ -194,7 +193,7 @@ class GroupTest(BaseAdminTest):
         data = {'group_name': self.group1.name}
         response = self.client.post(reverse('deleteGroup'), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/groupAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}groupAdmin/', response.url)
         self.assertFalse(get_object_or_none(Group, name=self.group1.name))
 
     def testEditGroup(self):
@@ -212,6 +211,6 @@ class GroupTest(BaseAdminTest):
         self.assertFalse(User.objects.get(username=self.user3.username).groups.filter(name__in=['newGroupName']).exists())
         response = self.client.post(reverse('editGroup', args=[self.group1.name]), data)
         self.assertEqual(302, response.status_code)
-        self.assertEqual('/groupAdmin/', response.url)
+        self.assertEqual(f'/{settings.URL_PREFIX}groupAdmin/', response.url)
         self.assertEqual('newGroupName', Group.objects.get(pk=self.group1.pk).name)
         self.assertTrue(User.objects.get(username=self.user3.username).groups.filter(name__in=['newGroupName']).exists())

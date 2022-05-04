@@ -6,12 +6,11 @@ from typing import Optional
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Group, User
-from django.contrib.auth.views import redirect_to_login
 from django.db import transaction
 from django.forms.models import BaseInlineFormSet
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseRedirect, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, resolve_url
 
 import html_browser
 from html_browser.models import CAN_DELETE, CAN_READ, CAN_WRITE, Folder
@@ -57,7 +56,7 @@ class BaseAdminView(UserPassesTestMixin, BaseView):
 
     # override parent class handling of no permission.  We don't want an exception, just a redirect
     def handle_no_permission(self) -> HttpResponseRedirect:
-        return redirect_to_login(self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name())
+        return HttpResponseRedirect(resolve_url("index"))
 
     def appendFormErrors(self, form):
         if form.errors:
@@ -257,7 +256,6 @@ class EditGroupView(BaseAdminView):
         self.form: Optional[EditGroupForm] = None
 
     def get(self, request: HttpRequest, group_name: str) -> HttpResponse:
-        print("BKF inside adminView/get")
         group = Group.objects.get(name=group_name)
 
         if not self.form:

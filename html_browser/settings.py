@@ -43,8 +43,19 @@ INTERNAL_IPS = env('INTERNAL_IPS')
 THUMBNAIL_CACHE_DIR = env('THUMBNAIL_CACHE_DIR')
 EXTRA_CONFIG_DIR = env('EXTRA_CONFIG_DIR')
 
+
+def buildLoginUrl():
+    if URL_PREFIX and not LOGIN_URL.startswith("URL_PREFIX"):
+        loginUrl = URL_PREFIX + LOGIN_URL
+        loginUrl = loginUrl.replace("//", "/")
+        return loginUrl
+    return LOGIN_URL
+
+
 URL_PREFIX = env('URL_PREFIX')
 LOGIN_URL = env('LOGIN_URL')
+LOGIN_URL = buildLoginUrl()
+
 DOWNLOADVIEW_BACKEND = 'django_downloadview.apache.XSendfileMiddleware'
 
 
@@ -275,6 +286,9 @@ def readExtraSettings():
         if 'URL_PREFIX' in data:
             global URL_PREFIX  # pylint: disable=global-statement
             URL_PREFIX = data['URL_PREFIX']
+
+            global LOGIN_URL # pylint: disable=global-statement
+            LOGIN_URL = buildLoginUrl()
 
         if 'INTERNAL_IPS' in data:
             INTERNAL_IPS.extend(data['INTERNAL_IPS'])
