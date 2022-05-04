@@ -10,7 +10,7 @@ django-downloadview = "==2.3.0"
 django-js-reverse = "==0.9.1"
 sorl-thumbnail = "==12.7.0"
 django-environ-2 = "==2.3.0"
-Django = "==3.2.12"
+Django = "==3.2.13"
 Pillow = "==9.0.1"
 
 [dev-packages]
