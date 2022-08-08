@@ -16,7 +16,7 @@ class Monitor:
         self.lock = threading.Lock()
 
         self.thread = threading.Thread(target=self._monitor)
-        self.thread.setDaemon(True)
+        self.thread.setDaemon(True) #pylint: disable=deprecated-method
 
     def _restart(self, path):
         self._queue.put(True)
