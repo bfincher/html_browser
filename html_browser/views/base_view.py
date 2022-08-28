@@ -220,7 +220,7 @@ class UploadView(BaseContentView): #pylint: disable=abstract-method
 
         return render(request, 'upload.html', self.context)
 
-    def post(self, request: HttpRequest) -> HttpResponse:
+    def post(self, request: HttpRequest, folder_and_path_url: str) -> HttpResponse:
         for key in request.FILES:
             file_name = join_paths(self.folder_and_path.abs_path, request.FILES[key].name)
             with open(file_name, 'wb') as dest:
