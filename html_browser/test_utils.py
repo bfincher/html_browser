@@ -135,10 +135,10 @@ class FileEntry:
 
     def set_m_time(self, time):
         self.time_set_to = time
-        os.utime(self.path.__str__(), (int(time.timestamp()), int(time.timestamp())))
+        os.utime(str(self.path), (int(time.timestamp()), int(time.timestamp())))
 
     def restore_m_time(self):
-        os.utime(self.path.__str__(), (int(self.orig_time), int(self.orig_time)))
+        os.utime(str(self.path), (int(self.orig_time), int(self.orig_time)))
 
 
 class UtilsTest(unittest.TestCase):
@@ -227,7 +227,7 @@ class UtilsTest(unittest.TestCase):
                     self.assertEqual(test_file.path.name, entry.name)
                     self.assertEqual(entry.name, entry.name_url)
                     self.assertEqual(test_file.expected_size, entry.size)
-                    self.assertEqual(test_files[i].time_set_to.strftime('%Y-%m-%d %I:%M:%S %p'), entry.last_modify_time)
+                    self.assertEqual(test_file.time_set_to.strftime('%Y-%m-%d %I:%M:%S %p'), entry.last_modify_time)
                     self.assertFalse(entry.has_thumbnail)
                     self.assertIsNone(entry.get_thumbnail_url())
             finally:

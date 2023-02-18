@@ -20,7 +20,7 @@ logger = logging.getLogger('html_browser.userViews')
 
 
 class DeleteUserView(BaseAdminView):
-    def post(self, request: HttpRequest) -> HttpResponse: #pylint: disable=no-self-use
+    def post(self, request: HttpRequest) -> HttpResponse:
         username = request.POST['username']
         redirect_url = "userAdmin"
 
@@ -53,7 +53,7 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
     def initForm(self, request: HttpRequest) -> AddUserForm:
         pass
 
-    def get(self, request: HttpRequest, title: str, username: str = None) -> HttpResponse:
+    def get(self, request: HttpRequest, title: str, username: Optional[str] = None) -> HttpResponse:
         self.title = title
 
         if username:
@@ -69,7 +69,7 @@ class AbstractUserView(BaseAdminView, metaclass=ABCMeta):
         self.context['title'] = self.title
         return render(request, 'admin/add_edit_user.html', self.context)
 
-    def post(self, request: HttpRequest, title: str, username: str = None) -> HttpResponse: #pylint: disable=keyword-arg-before-vararg
+    def post(self, request: HttpRequest, title: str, username: Optional[str] = None) -> HttpResponse: #pylint: disable=keyword-arg-before-vararg
         self.title = title
 
         if username:
