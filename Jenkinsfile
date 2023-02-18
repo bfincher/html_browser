@@ -6,8 +6,8 @@ pipeline {
       steps {
         script {
           sh "git config --global user.email 'brian@fincherhome.com' && git config --global user.name 'Brian Fincher'"
-          sh "pip3.10 install flake8 pylint==2.12.0 pylint-django django-stubs==1.9.0 mypy"
           sh "pip3.10 install -r requirements.txt"
+          sh "pip3.10 install -r quality-requirements.txt"
           sh 'mkdir log'
           sh 'cp cygwin.env .env'
         }
