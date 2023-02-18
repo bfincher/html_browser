@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 import os
+from typing import Dict, List, Optional, Union
 
 from django.contrib.auth.models import Group, User
 from django.test import TestCase
@@ -12,19 +13,19 @@ from html_browser import settings
 
 
 class ExtraSettingsTest(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.origUrlPrefix = settings.URL_PREFIX
         extraConfigDir = Path(settings.EXTRA_CONFIG_DIR)
         if not extraConfigDir.exists():
             extraConfigDir.mkdir(parents=True)
 
         self.localSettingsFile: Path = extraConfigDir.joinpath("local_settings.json")
-        self.localSettingsCopy: Path = None
+        self.localSettingsCopy: Optional[Path] = None
         if self.localSettingsFile.exists():
             self.localSettingsCopy = extraConfigDir.joinpath('local_settings_copy_for_test.json')
             self.localSettingsCopy.write_bytes(self.localSettingsFile.read_bytes())
 
-        data = {}
+        data: Dict[str, Union[str, List[str]]] = {}
         data['ALLOWED_HOSTS'] = ['host1', 'host2']
         data['URL_PREFIX'] = 'testPrefix'
         data['DEBUG'] = 'True'
