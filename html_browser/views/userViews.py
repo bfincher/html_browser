@@ -20,7 +20,7 @@ logger = logging.getLogger('html_browser.userViews')
 
 
 class DeleteUserView(BaseAdminView):
-    def post(self, request: HttpRequest) -> HttpResponse: #pylint: disable=no-self-use
+    def post(self, request: HttpRequest) -> HttpResponse:
         username = request.POST['username']
         redirect_url = "userAdmin"
 

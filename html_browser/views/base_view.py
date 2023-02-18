@@ -157,7 +157,7 @@ class LoginView(BaseView):
 
 
 class LogoutView(BaseView):
-    def get(self, request: HttpRequest) -> HttpResponse: #pylint: disable=no-self-use
+    def get(self, request: HttpRequest) -> HttpResponse:
         auth_logout(request)
         return redirect('index')
 
@@ -175,7 +175,7 @@ class DownloadImageView(BaseContentView): #pylint: disable=abstract-method
 
 
 class ThumbView(BaseView):
-    def get(self, request: HttpRequest, path: str) -> HttpResponse: #pylint: disable=no-self-use
+    def get(self, request: HttpRequest, path: str) -> HttpResponse:
         file = join_paths(settings.THUMBNAIL_CACHE_DIR, path)
         return sendfile(request, file, attachment=False)
 
