@@ -32,7 +32,9 @@ env = environ.Env(
     DB_HOST=(str, ''),
     DB_PORT=(str, ''),
     STATICFILES_DIRS=(tuple, ()),
-    EXTRA_CONFIG_DIR=(str, BASE_DIR)
+    EXTRA_CONFIG_DIR=(str, BASE_DIR),
+    NGINX_DOWNLOADS=(bool, False)
+    NGINX_CONFIG_FILE=(str, '')
 )
 environ.Env.read_env()
 
@@ -42,6 +44,8 @@ THUMBNAIL_DEBUG = env('THUMBNAIL_DEBUG')
 INTERNAL_IPS = env('INTERNAL_IPS')
 THUMBNAIL_CACHE_DIR = env('THUMBNAIL_CACHE_DIR')
 EXTRA_CONFIG_DIR = env('EXTRA_CONFIG_DIR')
+NGINX_DOWNLOADS = env('NGINX_DOWNLOADS')
+NGINX_CONFIG_FILE = env('NGINX_CONFIG_FILE')
 
 
 def buildLoginUrl():
