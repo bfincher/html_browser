@@ -36,7 +36,7 @@ env = environ.Env(
     NGINX_DOWNLOADS=(bool, False)
     NGINX_CONFIG_FILE=(str, '')
 )
-environ.Env.read_env()
+environ.Env.read_env(join_paths(BASE_DIR, '.env'))
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 DEBUG = env('DEBUG')
