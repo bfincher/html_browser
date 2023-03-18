@@ -6,7 +6,7 @@ from io import StringIO
 
 from django.core.management import call_command
 from sorl.thumbnail.models import KVStore # type: ignore
-from typing import List
+from typing import List # noqa
 
 from html_browser import settings
 from html_browser.models import Folder

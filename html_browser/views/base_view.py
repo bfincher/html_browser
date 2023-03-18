@@ -8,7 +8,7 @@ from logging import DEBUG
 from pathlib import Path
 from zipfile import ZipFile
 
-from typing import Any, Callable, Dict, List, NamedTuple, Union
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, Union
 
 from django.contrib import messages
 from django.contrib.auth import authenticate
@@ -39,7 +39,7 @@ def is_show_hidden(request: HttpRequest) -> bool:
     return request.session.get('show_hidden', False)
 
 
-def reverse_content_url(folder_and_path: FolderAndPath, view_name='content', extra_path: str = None) -> str:
+def reverse_content_url(folder_and_path: FolderAndPath, view_name='content', extra_path: Optional[str] = None) -> str:
     folder_and_path_url = folder_and_path.url.replace('//', '/')
     if folder_and_path_url.endswith('/'):
         folder_and_path_url = folder_and_path_url[:-1]
@@ -157,7 +157,7 @@ class LoginView(BaseView):
 
 
 class LogoutView(BaseView):
-    def get(self, request: HttpRequest) -> HttpResponse: #pylint: disable=no-self-use
+    def get(self, request: HttpRequest) -> HttpResponse:
         auth_logout(request)
         return redirect('index')
 
@@ -175,7 +175,7 @@ class DownloadImageView(BaseContentView): #pylint: disable=abstract-method
 
 
 class ThumbView(BaseView):
-    def get(self, request: HttpRequest, path: str) -> HttpResponse: #pylint: disable=no-self-use
+    def get(self, request: HttpRequest, path: str) -> HttpResponse:
         file = join_paths(settings.THUMBNAIL_CACHE_DIR, path)
         return sendfile(request, file, attachment=False)
 

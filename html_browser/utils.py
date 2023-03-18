@@ -124,7 +124,7 @@ class FolderAndPath: # pylint: disable=too-many-instance-attributes
             return NotImplemented
         return self.url == other.url
 
-    def get_dir_entries(self, show_hidden: bool, view_type: str, content_filter: str = None) -> List[DirEntry]:
+    def get_dir_entries(self, show_hidden: bool, view_type: str, content_filter: Optional[str] = None) -> List[DirEntry]:
         _dir = self.abs_path
         if os.path.isfile(_dir):
             _dir = os.path.dirname(_dir)
@@ -154,7 +154,7 @@ class FolderAndPath: # pylint: disable=too-many-instance-attributes
         delattr(self, "file_entries")
         return dir_entries
 
-    def _process_entry(self, entry: Path, show_hidden: bool, view_type: str, content_filter: str = None) -> None:
+    def _process_entry(self, entry: Path, show_hidden: bool, view_type: str, content_filter: Optional[str] = None) -> None:
         if not show_hidden and entry.name.startswith('.'):
             return
         try:
@@ -288,7 +288,7 @@ def handle_delete(folder_and_path: FolderAndPath, entries: List[str]) -> None:
             os.remove(entry_path)
 
 
-def format_bytes(num_bytes: int, force_unit: str = None, include_unit_suffix=True) -> str:
+def format_bytes(num_bytes: int, force_unit: Optional[str] = None, include_unit_suffix=True) -> str:
     if force_unit:
         unit = force_unit
     else:

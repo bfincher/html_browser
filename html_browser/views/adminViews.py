@@ -83,7 +83,7 @@ class FolderAdminView(BaseAdminView):
 
 
 class DeleteFolderView(BaseAdminView):
-    def post(self, request: HttpRequest, folder_name: str) -> HttpResponse: #pylint: disable=no-self-use, unused-argument
+    def post(self, request: HttpRequest, folder_name: str) -> HttpResponse: #pylint: disable=unused-argument
         folder = Folder.objects.get(name=folder_name)
         folder.delete()
         return redirect('folderAdmin')
@@ -225,7 +225,7 @@ class AddFolderView(AbstractFolderView):
 
 
 class AddGroupView(BaseAdminView):
-    def post(self, request: HttpRequest) -> HttpResponse: #pylint: disable=no-self-use
+    def post(self, request: HttpRequest) -> HttpResponse:
         group_name = request.POST['group_name']
         if groupNameRegex.match(group_name):
             group = get_object_or_none(Group, name=group_name)
@@ -242,7 +242,7 @@ class AddGroupView(BaseAdminView):
 
 
 class DeleteGroupView(BaseAdminView):
-    def post(self, request: HttpRequest) -> HttpResponse: #pylint: disable=no-self-use
+    def post(self, request: HttpRequest) -> HttpResponse:
         groupname = request.POST['group_name']
         group = Group.objects.get(name=groupname)
         group.delete()
