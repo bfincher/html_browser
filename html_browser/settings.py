@@ -34,7 +34,7 @@ env = environ.Env(
     STATICFILES_DIRS=(tuple, ()),
     EXTRA_CONFIG_DIR=(str, BASE_DIR)
 )
-environ.Env.read_env()
+environ.Env.read_env(join_paths(BASE_DIR, '.env'))
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 DEBUG = env('DEBUG')
