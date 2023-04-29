@@ -33,7 +33,7 @@ env = environ.Env(
     DB_PORT=(str, ''),
     STATICFILES_DIRS=(tuple, ()),
     EXTRA_CONFIG_DIR=(str, BASE_DIR),
-    NGINX_DOWNLOADS=(bool, False)
+    NGINX_DOWNLOADS=(bool, False),
     NGINX_CONFIG_FILE=(str, '')
 )
 environ.Env.read_env(join_paths(BASE_DIR, '.env'))
