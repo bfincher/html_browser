@@ -4,6 +4,8 @@ from typing import TypeVar, Type, Union
 from django.contrib.auth.models import Group, User, AnonymousUser
 from django.db import models
 
+from html_browser import settings
+
 # Create a generic variable that can be 'Parent', or any subclass.
 T = TypeVar('T', bound='Folder')
 
@@ -26,6 +28,10 @@ viewable_choices = [
     (VIEWABLE_BY_ANONYMOUS, 'Viewable by anonymous users'),
 ]
 
+# This file being present indicates that the NGINX download config has been written.
+# It is assumed that this file is being written to a non-persistant location on a container.
+NGINX_CONFIG_WRITTEN_FILE='/nginx_config_written.txt'
+
 
 class Folder(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -41,6 +47,61 @@ class Folder(models.Model):
         folder.local_path = local_path
         folder.view_option = view_option
         return folder
+
+    @classmethod
+    def createNginxConfig(cls: Type[T]):
+        with open(settings.NGINX_CONFIG_FILE, 'r', encoding='utf8') as f:
+            lines = f.readlines()
+
+        with open(settings.NGINX_CONFIG_FILE, 'w', encoding='utf8') as f:
+            skipLine = False
+            for line in lines:
+                if not skipLine:
+                    f.write(line)
+
+                if line.startswith('#BEGIN_DYNAMIC_CONFIG'):
+                    skipLine = True
+                    for folder in Folder.objects.all():
+                        name = folder.name
+                        if not name.endswith('/'):
+                            name = name + "/"
+                        location = folder.local_path
+                        if not location .endswith('/'):
+                            location = location + "/"
+
+                        f.write(f'    location /download_{name} {{\n')
+                        f.write('        #Only allow internal redirects\n')
+                        f.write('        internal;\n')
+                        f.write(f'        alias {location};\n')
+                        f.write('    }\n\n')
+                elif line.startswith('#END_DYNAMIC_CONFIG'):
+                    f.write(line)
+                    skipLine = False
+
+        if not os.path.exists(NGINX_CONFIG_WRITTEN):
+            with open(NGINX_CONFIG_WRITTEN, 'w', encoding='utf8') as f:
+                f.write('config_written')
+
+    def save(self, *args, **kwargs):
+        nginxReconfigNeeded = False
+
+        if settings.NGINX_DOWNLOADS:
+            try:
+                prev = Folder.objects.get(name=self.name)
+                nginxReconfigNeeded = self.name != prev.name or self.local_path != prev.local_path
+            except Folder.DoesNotExist:
+                pass
+
+        super().save(*args, **kwargs)
+
+        if nginxReconfigNeeded:
+            Folder.createNginxConfig()
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+
+        if settings.NGINX_DOWNLOADS:
+            Folder.createNginxConfig()
 
     def __str__(self) -> str:
         return self.name

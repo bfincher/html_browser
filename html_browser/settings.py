@@ -34,7 +34,7 @@ env = environ.Env(
     STATICFILES_DIRS=(tuple, ()),
     EXTRA_CONFIG_DIR=(str, BASE_DIR),
     NGINX_DOWNLOADS=(bool, False),
-    NGINX_CONFIG_FILE=(str, '')
+    NGINX_CONFIG_FILE=(str, '/nginx_config/default.conf')
 )
 environ.Env.read_env(join_paths(BASE_DIR, '.env'))
 
