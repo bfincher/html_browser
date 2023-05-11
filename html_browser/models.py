@@ -1,3 +1,4 @@
+import os
 from urllib.parse import quote_plus
 from typing import TypeVar, Type, Union
 
@@ -30,7 +31,7 @@ viewable_choices = [
 
 # This file being present indicates that the NGINX download config has been written.
 # It is assumed that this file is being written to a non-persistant location on a container.
-NGINX_CONFIG_WRITTEN_FILE='/nginx_config_written.txt'
+NGINX_CONFIG_WRITTEN_FILE = '/nginx_config_written.txt'
 
 
 class Folder(models.Model):
@@ -78,8 +79,8 @@ class Folder(models.Model):
                     f.write(line)
                     skipLine = False
 
-        if not os.path.exists(NGINX_CONFIG_WRITTEN):
-            with open(NGINX_CONFIG_WRITTEN, 'w', encoding='utf8') as f:
+        if not os.path.exists(NGINX_CONFIG_WRITTEN_FILE):
+            with open(NGINX_CONFIG_WRITTEN_FILE, 'w', encoding='utf8') as f:
                 f.write('config_written')
 
     def save(self, *args, **kwargs):

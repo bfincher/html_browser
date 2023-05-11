@@ -6,13 +6,12 @@ from html_browser.views import adminViews as admin_views
 from html_browser.views import base_view, content_view
 from html_browser.views import userViews as user_views
 
-FILE_NAME_CHARS = r'[\w \-~!@#$%^&*\(\)\+,\.\'’‘\[\]\{\}]'
-FOLDER_AND_PATH_REGEX = fr'(?P<folder_and_path_url>\w+(/{FILE_NAME_CHARS}+?)*)/'
+FOLDER_AND_PATH_REGEX = fr'(?P<folder_and_path_url>\w+(/{base_view.FILE_NAME_CHARS}+?)*)/'
 prefix = settings.URL_PREFIX
 
 
 def _getUrlWithPath(name):
-    return fr'{prefix}{name}/{FOLDER_AND_PATH_REGEX}(?P<file_name>{FILE_NAME_CHARS}+)/$'
+    return fr'{prefix}{name}/{FOLDER_AND_PATH_REGEX}(?P<file_name>{base_view.FILE_NAME_CHARS}+)/$'
 
 
 urlpatterns = [

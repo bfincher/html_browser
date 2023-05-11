@@ -26,15 +26,17 @@ from django_downloadview import sendfile # type: ignore
 from html_browser import settings
 from html_browser._os import join_paths
 from html_browser.constants import _constants as const
+from html_browser import models
 from html_browser.models import FilesToDelete, Folder
 from html_browser.utils import (ArgumentException, FolderAndPath,
                                 get_checked_entries, handle_delete,
                                 replace_escaped_url, DirEntry)
-from html_browser.urls import FOLDER_AND_PATH_REGEX
+
+FILE_NAME_CHARS = r'[\w \-~!@#$%^&*\(\)\+,\.\'’‘\[\]\{\}]'
 
 logger = logging.getLogger('html_browser.base_view')
 imageRegex = re.compile(r"^.*?\.(jpg|jpeg|png|gif|bmp|avi)$", re.IGNORECASE)
-downloadRegex = re.compile(FOLDER_AND_PATH_REGEX)
+downloadRegex = re.compile(fr'(?P<folder>\w+)(?P<path>(/{FILE_NAME_CHARS})+)')
 
 
 def is_show_hidden(request: HttpRequest) -> bool:
@@ -167,14 +169,20 @@ class LogoutView(BaseView):
 class DownloadView(BaseContentView): #pylint: disable=abstract-method
     def get(self, request: HttpRequest, folder_and_path_url: str, file_name: str) -> HttpResponse: #pylint: disable=unused-argument
         if settings.NGINX_DOWNLOADS:
-            if not os.path.exists(models.NGINX_CONFIG_WRITTEN_FILE)
+            if not os.path.exists(models.NGINX_CONFIG_WRITTEN_FILE):
                 Folder.createNginxConfig()
 
-            bookmark
-            response = HttpResponse()
-            response['Content-Disposition'] = 'attachment; filename=
+            match = downloadRegex.match(self.folder_and_path.abs_path)
+            if match:
+                folderName = match.groups('folder')
+                path = match.groups('path')
 
-            match = downloadRegex.match(
+                response = HttpResponse()
+                response['Content-Disposition'] = f'attachment; filename={file_name}'
+                response['X-Accel-Redirect'] = f'/download_{folderName}/{path}/{file_name}'
+                return response
+
+            raise RuntimeError()
 
         return sendfile(request,
                         join_paths(self.folder_and_path.abs_path, file_name),
