@@ -216,11 +216,15 @@ class LogoutViewTest(BaseViewTest):
 
 
 class DownloadViewTest(BaseViewTest):
-    def testDownload(self):
+    def setUp(self):
+        super().setUp()
         self.login(self.user1)
-        url = reverse_content_url(FolderAndPath(folder=self.folder1, path=''), extra_path='add_user.js',
+        self.url = reverse_content_url(FolderAndPath(folder=self.folder1, path=''), extra_path='add_user.js',
                                   view_name='download')
-        response = self.client.get(url)
+
+    def testDownload(self):
+        settings.NGINX_DOWNLOADS = False
+        response = self.client.get(self.url)
 
         found_attachment = False
         for item in list(response.items()):
@@ -230,6 +234,18 @@ class DownloadViewTest(BaseViewTest):
 
         self.assertTrue(found_attachment)
 
+    def testNginxDownload(self):
+        settings.NGINX_DOWNLOADS = True
+        settings.NGINX_CONFIG_FILE = bookmark 
+        response = self.client.get(self.url)
+
+        found_attachment = False
+        for item in list(response.items()):
+            if item[1] == 'attachment; filename="add_user.js"':
+                found_attachment = True
+                break
+
+        self.assertTrue(found_attachment)
 
 class DownloadZipViewTest(BaseViewTest):
     def testDownloadZip(self):
