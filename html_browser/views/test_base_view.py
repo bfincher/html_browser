@@ -235,17 +235,24 @@ class DownloadViewTest(BaseViewTest):
         self.assertTrue(found_attachment)
 
     def testNginxDownload(self):
+        origNginxDownloads  settings.NGINX_DOWNLOADS
+        origNginxConfigFile = settings.NGINX_CONFIG_FILE
+
         settings.NGINX_DOWNLOADS = True
         settings.NGINX_CONFIG_FILE = bookmark 
-        response = self.client.get(self.url)
+        try:
+            response = self.client.get(self.url)
 
-        found_attachment = False
-        for item in list(response.items()):
-            if item[1] == 'attachment; filename="add_user.js"':
-                found_attachment = True
-                break
+            found_attachment = False
+            for item in list(response.items()):
+                if item[1] == 'attachment; filename="add_user.js"':
+                    found_attachment = True
+                    break
 
-        self.assertTrue(found_attachment)
+            self.assertTrue(found_attachment)
+        finally:
+            settings.NGINX_DOWNLOADS = origNginxDownloads
+            settings.NGINX_CONFIG_FILE = origNginxConfigFile
 
 class DownloadZipViewTest(BaseViewTest):
     def testDownloadZip(self):
