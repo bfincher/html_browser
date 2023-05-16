@@ -235,7 +235,7 @@ class DownloadViewTest(BaseViewTest):
         self.assertTrue(found_attachment)
 
     def testNginxDownload(self):
-        origNginxDownloads  settings.NGINX_DOWNLOADS
+        origNginxDownloads = settings.NGINX_DOWNLOADS
         origNginxConfigFile = settings.NGINX_CONFIG_FILE
 
         settings.NGINX_DOWNLOADS = True

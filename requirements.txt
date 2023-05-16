@@ -6,3 +6,4 @@ django-js-reverse==0.9.1
 Pillow==9.3.0
 sorl-thumbnail==12.7.0
 django-environ==0.10.0
+django-constance==2.9.1

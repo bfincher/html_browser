@@ -193,6 +193,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'constance',
     'html_browser',
     'django.contrib.admin',
     'crispy_forms',
@@ -221,6 +222,12 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
     'debug_toolbar.panels.profiling.ProfilingPanel',
 ]
+
+CONSTANCE_CONFIG = {
+        'NGINX_DOWNLOADS': (False, =(bool, False),
+    NGINX_CONFIG_FILE=(str, '/nginx_config/default.conf')
+    bookmark
+}
 
 LOG_DIR = env('LOG_DIR')
 if not os.path.exists(LOG_DIR):
