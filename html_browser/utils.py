@@ -285,6 +285,7 @@ def handle_delete(folder_and_path: FolderAndPath, entries: List[str]) -> None:
         if os.path.isdir(entry_path):
             rmtree(entry_path)
         else:
+            logger.info("handleDelete: login = %s", os.getlogin())
             os.remove(entry_path)
 
 
